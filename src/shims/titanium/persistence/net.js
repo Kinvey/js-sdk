@@ -44,7 +44,52 @@ var TiHttp = {
     var deferred = Kinvey.Defer.deferred();
 
     // Create the request.
-    var request = options.xhr = Titanium.Network.createHTTPClient();
+    var request = Titanium.Network.createHTTPClient();
+
+    // Listen for request completion.
+    request.onerror = request.onload = function(event) {
+      // Debug.
+      if(KINVEY_DEBUG) {
+        log('The network request completed.', this);
+      }
+
+      // Titanium does not provide a clear error code on timeout. Patch here.
+      event = event || {};
+      if(isString(event.error) && -1 !== event.error.toLowerCase().indexOf('timed out')) {
+        event.type = 'timeout';
+      }
+
+      // Success implicates 2xx (Successful), or 304 (Not Modified).
+      var status = 'timeout' === event.type ? 0 : this.status;
+      if(2 === parseInt(status / 100, 10) || 304 === status) {
+        // Parse the response.
+        var response = !isMobileWeb && options.file ? this.responseData : this.responseText;
+
+        // Get binary response data on Titanium mobileweb.
+        if(isMobileWeb && options.file && null != response && null != root.ArrayBuffer) {
+          var buffer  = new root.ArrayBuffer(response.length);
+          var bufView = new root.Uint8Array(buffer);
+          for(var i = 0, length = response.length; i < length; i += 1) {
+            bufView[i] = response.charCodeAt(i);
+          }
+
+          // Cast the response to a new Titanium.Blob object.
+          // NOTE The `toString` method remains broken. Use `FileReader` if you want to obtain the Data URL.
+          response = new Titanium.Blob({
+            data     : bufView,
+            length   : bufView.length,
+            mimeType : options.file
+          });
+        }
+
+        // Return the response.
+        deferred.resolve(response || null);
+      }
+      else {// Failure.
+        deferred.reject(this.responseText || event.type || null);
+      }
+    };
+
     request.open(method, url);
 
     // Set the TLS version (iOS only).
@@ -81,50 +126,6 @@ var TiHttp = {
         return abort.apply(request, arguments);
       };
     }
-
-    // Listen for request completion.
-    request.onerror = request.onload = function(event) {
-      // Debug.
-      if(KINVEY_DEBUG) {
-        log('The network request completed.', request);
-      }
-
-      // Titanium does not provide a clear error code on timeout. Patch here.
-      event = event || {};
-      if(isString(event.error) && -1 !== event.error.toLowerCase().indexOf('timed out')) {
-        event.type = 'timeout';
-      }
-
-      // Success implicates 2xx (Successful), or 304 (Not Modified).
-      var status = 'timeout' === event.type ? 0 : request.status;
-      if(2 === parseInt(status / 100, 10) || 304 === status) {
-        // Parse the response.
-        var response = !isMobileWeb && options.file ? request.responseData : request.responseText;
-
-        // Get binary response data on Titanium mobileweb.
-        if(isMobileWeb && options.file && null != response && null != root.ArrayBuffer) {
-          var buffer  = new root.ArrayBuffer(response.length);
-          var bufView = new root.Uint8Array(buffer);
-          for(var i = 0, length = response.length; i < length; i += 1) {
-            bufView[i] = response.charCodeAt(i);
-          }
-
-          // Cast the response to a new Titanium.Blob object.
-// NOTE The `toString` method remains broken. Use `FileReader` if you want to obtain the Data URL.
-          response = new Titanium.Blob({
-            data     : bufView,
-            length   : bufView.length,
-            mimeType : options.file
-          });
-        }
-
-        // Return the response.
-        deferred.resolve(response || null);
-      }
-      else {// Failure.
-        deferred.reject(request.responseText || event.type || null);
-      }
-    };
 
     // Debug.
     if(KINVEY_DEBUG) {
