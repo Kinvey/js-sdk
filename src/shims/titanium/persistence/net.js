@@ -36,7 +36,7 @@ var TiHttp = {
    */
   request: function(method, url, body, headers, options) {
     // Cast arguments.
-    body    = body    || null;
+    body    = body    || (function(){})();
     headers = headers || {};
     options = options || {};
 
@@ -63,6 +63,15 @@ var TiHttp = {
         request.setRequestHeader(name, headers[name]);
       }
     }
+
+    // GCS uses Content-Type header to validate signature.
+    // Prevent Titanium from defaulting Content-Type when not provided.
+    if(method.toUpperCase() === 'GET'
+      && !request._contentTypeSet
+      && url.match(/^https?:\/\/[^\/]+googleapis.com/)) { // jshint ignore:line
+        request.setRequestHeader('Content-Type', '');
+    }
+
 
     // For mobile web, setting an explicit mime type is required to obtain
     // binary data.
@@ -133,16 +142,6 @@ var TiHttp = {
 
     // Patch Titanium mobileweb.
     if(isMobileWeb) {
-      // Prevent Titanium from appending an incorrect Content-Type header.
-      // Also, GCS does not CORS allow the X-Titanium-Id header.
-      var setHeader = request._xhr.setRequestHeader;
-      request._xhr.setRequestHeader = function(name) {
-        if('Content-Type' === name || 'X-Titanium-Id' === name) {
-          return null;
-        }
-        return setHeader.apply(request._xhr, arguments);
-      };
-
       // Prevent Titanium from URL encoding blobs.
       if(body instanceof Titanium.Blob) {
         var send = request._xhr.send;
