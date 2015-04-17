@@ -24,7 +24,7 @@ var MemoryStorage = {
    *
    * @type {String}
    */
-  filename: './kinvey-memory.txt',
+  filename: './kinvey-data.txt',
 
   /**
    * The Node.js fs module.
@@ -48,13 +48,13 @@ var MemoryStorage = {
     delete dataStorage[key];
 
     // Save data storage to file
-    MemorStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
+    MemoryStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
       var deferred = Kinvey.Defer.deferred();
 
       // Write the file
       var data = JSON.stringify(dataStorage);
-      MemoryStorage.fs.writeFile(MemorStorage.filename, data, function(err) {
-        deferred.resolve();
+      MemoryStorage.fs.writeFile(MemoryStorage.filename, data, function() {
+        deferred.resolve(null);
       });
 
       return deferred.promise;
@@ -71,7 +71,7 @@ var MemoryStorage = {
     var value = dataStorage[key];
 
     if (value == null) {
-      MemorStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
+      MemoryStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
         // Read the file
         MemoryStorage.fs.readFile(MemoryStorage.filename, function(err, json) {
           if (err) {
@@ -80,14 +80,14 @@ var MemoryStorage = {
           else {
             try {
               // Parse the JSON
-              data = JSON.parse(json);
+              var data = JSON.parse(json);
 
               // Get the value
               value = data[key];
               deferred.resolve(value);
 
-              // Save the value
-              MemoryStorage._save(key, value);
+              // Save the value to data storage
+              dataStorage[key] = value;
             } catch(e) {
               deferred.resolve(null);
             }
@@ -112,13 +112,13 @@ var MemoryStorage = {
     dataStorage[key] = value;
 
     // Save data storage to file
-    MemorStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
+    MemoryStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
       var deferred = Kinvey.Defer.deferred();
 
       // Write the file
       var data = JSON.stringify(dataStorage);
-      MemoryStorage.fs.writeFile(MemorStorage.filename, data, function(err) {
-        deferred.resolve();
+      MemoryStorage.fs.writeFile(MemoryStorage.filename, data, function() {
+        deferred.resolve(null);
       });
 
       return deferred.promise;
