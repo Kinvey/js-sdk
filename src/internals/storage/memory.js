@@ -20,10 +20,46 @@ var dataStorage = {};
 // `Storage` adapter for [Node.js](http://nodejs.org/).
 var MemoryStorage = {
   /**
+   * Filename to store data.
+   *
+   * @type {String}
+   */
+  filename: './kinvey-memory.txt',
+
+  /**
+   * The Node.js fs module.
+   *
+   * @type {Object}
+   */
+  fs: require('fs'),
+
+  /**
+   * Shared promise to keep asynchronous file operations
+   * in order.
+   *
+   * @type {Promise}
+   */
+  fsPromise: Kinvey.Defer.resolve(),
+
+  /**
    * @augments {Storage._destroy}
    */
   _destroy: function(key) {
     delete dataStorage[key];
+
+    // Save data storage to file
+    MemorStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
+      var deferred = Kinvey.Defer.deferred();
+
+      // Write the file
+      var data = JSON.stringify(dataStorage);
+      MemoryStorage.fs.writeFile(MemorStorage.filename, data, function(err) {
+        deferred.resolve();
+      });
+
+      return deferred.promise;
+    });
+
     return Kinvey.Defer.resolve(null);
   },
 
@@ -31,14 +67,63 @@ var MemoryStorage = {
    * @augments {Storage._get}
    */
   _get: function(key) {
-    return Kinvey.Defer.resolve(dataStorage[key] || null);
+    var deferred = Kinvey.Defer.deferred();
+    var value = dataStorage[key];
+
+    if (value == null) {
+      MemorStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
+        // Read the file
+        MemoryStorage.fs.readFile(MemoryStorage.filename, function(err, json) {
+          if (err) {
+            deferred.resolve(null);
+          }
+          else {
+            try {
+              // Parse the JSON
+              data = JSON.parse(json);
+
+              // Get the value
+              value = data[key];
+              deferred.resolve(value);
+
+              // Save the value
+              MemoryStorage._save(key, value);
+            } catch(e) {
+              deferred.resolve(null);
+            }
+          }
+        });
+
+        return deferred.promise;
+      });
+    }
+    else {
+      deferred.resolve(value);
+    }
+
+    return deferred.promise;
   },
 
   /**
    * @augments {Storage._save}
    */
   _save: function(key, value) {
+    // Save the value to data storage
     dataStorage[key] = value;
+
+    // Save data storage to file
+    MemorStorage.fsPromise = MemoryStorage.fsPromise.then(function() {
+      var deferred = Kinvey.Defer.deferred();
+
+      // Write the file
+      var data = JSON.stringify(dataStorage);
+      MemoryStorage.fs.writeFile(MemorStorage.filename, data, function(err) {
+        deferred.resolve();
+      });
+
+      return deferred.promise;
+    });
+
     return Kinvey.Defer.resolve(null);
   }
 };
