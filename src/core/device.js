@@ -23,7 +23,8 @@
 // Build the device information string sent along with every network request.
 // <js-library>/<version> [(<library>/<version>,...)] <platform> <version> <manufacturer> <id>
 var deviceInformation = function() {
-  var browser, platform, version, manufacturer, id, libraries = [];
+  var browser, model, os, osVersion, platform, platformVersion, deviceType, uuid;
+  //var browser, platform, version, manufacturer, id, libraries = [];
 
   // Helper function to detect the browser name and version.
   var browserDetect = function(ua) {
@@ -45,80 +46,102 @@ var deviceInformation = function() {
   if('undefined' !== typeof root.cordova &&
    'undefined' !== typeof root.device) {// PhoneGap
     var device = root.device;
-    libraries.push('phonegap/' + device.cordova);
-    platform     = device.platform;
-    version      = device.version;
-    manufacturer = device.model;
-    id           = device.uuid;
+    model = device.model;
+    os = device.platform;
+    osVersion = device.version;
+    platform = 'phonegap';
+    platformVersion = device.cordova;
+    uuid = device.uuid;
   }
   else if('undefined' !== typeof Titanium) {// Titanium.
-    libraries.push('titanium/' + Titanium.getVersion());
-
-    // If mobileweb, extract browser information.
-    if('mobileweb' === Titanium.Platform.getName()) {
-      browser = browserDetect(Titanium.Platform.getModel());
-      platform     = browser[1];
-      version      = browser[2];
-      manufacturer = Titanium.Platform.getOstype();
-    }
-    else {
-      platform     = Titanium.Platform.getOsname();
-      version      = Titanium.Platform.getVersion();
-      manufacturer = Titanium.Platform.getManufacturer();
-    }
-    id = Titanium.Platform.getId();
+    model = Titanium.Platform.getModel();
+    os = 'iPhone OS' === Titanium.Platform.getName() ? 'ios' : Titanium.Platform.getName() ;
+    osVersion = Titanium.Platform.getVersion();
+    platform = 'titanium';
+    platformVersion = Titanium.getVersion();
+    uuid = Titanium.Platform.getId();
   }
   else if('undefined' !== typeof forge) {// Trigger.io
-    libraries.push('triggerio/' + (forge.config.platform_version || ''));
-    id = forge.config.uuid;
+    //libraries.push('triggerio/' + (forge.config.platform_version || ''));
+
+    if (forge.is.android()){
+      os = 'android';
+    }
+    else if (forge.is.ios()){
+      os = 'ios';
+    }
+    else if (forge.is.web()){
+      os = 'mobileweb';
+    }
+    else {
+      os = 'unknown';
+    }
+    platform = 'triggerio';
+    platformVersion = forge.config.platform_version || '';
+    uuid = forge.config.uuid;
   }
   else if('undefined' !== typeof process) {// Node.js
-    platform     = process.title;
-    version      = process.version;
-    manufacturer = process.platform;
+    os = 'mobileweb';
+    platform = process.title;
+    platformVersion = process.version;
+    //manufacturer = process.platform;
   }
+  // // // Libraries.
+  else {
+    os = 'mobileweb';
+    if('undefined' !== typeof angular) {// AngularJS.
+      //libraries.push('angularjs/' + angular.version.full);
+      platform = 'angularjs';
+      platformVersion = angular.version.full;
+    }
+    else if('undefined' !== typeof Backbone) {// Backbone.js.
+      //libraries.push('backbonejs/' + Backbone.VERSION);
+      platform = 'backbonejs';
+      platformVersion = Backbone.VERSION;
+    }
+    else if('undefined' !== typeof Ember) {// Ember.js.
+      //libraries.push('emberjs/' + Ember.VERSION);
+      platform = 'emberjs';
+      platformVersion = Ember.VERSION;
 
-  // Libraries.
-  if('undefined' !== typeof angular) {// AngularJS.
-    libraries.push('angularjs/' + angular.version.full);
-  }
-  if('undefined' !== typeof Backbone) {// Backbone.js.
-    libraries.push('backbonejs/' + Backbone.VERSION);
-  }
-  if('undefined' !== typeof Ember) {// Ember.js.
-    libraries.push('emberjs/' + Ember.VERSION);
-  }
-  if('undefined' !== typeof jQuery) {// jQuery.
-    libraries.push('jquery/' + jQuery.fn.jquery);
-  }
-  if('undefined' !== typeof ko) {// Knockout.
-    libraries.push('knockout/' + ko.version);
-  }
-  if('undefined' !== typeof Zepto) {// Zepto.js.
-    libraries.push('zeptojs');
+    }
+    else if('undefined' !== typeof jQuery) {// jQuery.
+      //libraries.push('jquery/' + jQuery.fn.jquery);
+      platform = 'jquery';
+      platformVersion = jQuery.fn.jquery;
+    }
+    else if('undefined' !== typeof ko) {// Knockout.
+      //libraries.push('knockout/' + ko.version);
+      platform = 'knockout';
+      platformVersion = ko.version;
+    }
+    else if('undefined' !== typeof Zepto) {// Zepto.js.
+      //libraries.push('zeptojs');
+      platform = 'zeptojs';
+      platformVersion = '';
+    }
+
   }
 
   // Default platform, most likely this is just a plain web app.
   if(null == platform && root.navigator) {
     browser = browserDetect(root.navigator.userAgent);
-    platform     = browser[1];
-    version      = browser[2];
-    manufacturer = root.navigator.platform;
+    model = root.navigator.platform;
+    os = 'mobileweb';
+    platform = browser[1];
+    platformVersion = browser[2];
   }
 
   // Return the device information string.
-  var parts = [ 'js-<%= build %>/<%= pkg.version %>' ];
-  if(0 !== libraries.length) {// Add external library information.
-    parts.push('(' + libraries.sort().join(', ') + ')');
-  }
-  return parts.concat(
-    [
-      platform,
-      version,
-      manufacturer,
-      id
-    ].map(function(part) {
-      return null != part ? part.toString().replace(/\s/g, '_').toLowerCase() : 'unknown';
-    })
-  ).join(' ');
+  var result = {
+    'v' : '2',
+    'os' : os,
+    'osVersion': osVersion,
+    'platform' : platform,
+    'platformVersion': platformVersion,
+    'deviceType': deviceType,
+    'uuid' : uuid
+  };
+
+  return JSON.stringify(result);
 };
