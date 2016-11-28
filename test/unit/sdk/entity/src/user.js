@@ -3,12 +3,24 @@ import { randomString } from 'src/utils';
 import Promise from 'es6-promise';
 import nock from 'nock';
 
-export default class TestUser extends User {
+export default class User extends SDKUser {
+
+  static loadActiveUser(client) {
+    return super.loadActiveUser(client)
+      .then((activeUser) => {
+        if (isDefined(activeUser)) {
+          return new User(activeUser.data, { client: client });
+        }
+
+        return activeUser;
+      });
+  }
+
   static getActiveUser(client) {
     const activeUser = super.getActiveUser(client);
 
     if (activeUser) {
-      return new TestUser(activeUser.data);
+      return new User(activeUser.data);
     }
 
     return Promise.resolve(null);
@@ -47,5 +59,28 @@ export default class TestUser extends User {
 
     // Logout
     return super.logout(options);
+  }
+
+  me(options) {
+    const reply = {
+      _id: randomString(),
+      _kmd: {
+        lmt: new Date().toISOString(),
+        ect: new Date().toISOString(),
+        authtoken: randomString()
+      },
+      _acl: {
+        creator: randomString()
+      }
+    };
+
+    // Setup nock response
+    nock(this.client.apiHostname, { encodedQueryParams: true })
+      .get(`${this.pathname}/_me`)
+      .reply(200, reply, {
+        'content-type': 'application/json; charset=utf-8'
+      });
+
+    return super.me(options);
   }
 }
