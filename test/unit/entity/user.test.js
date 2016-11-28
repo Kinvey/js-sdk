@@ -1,7 +1,6 @@
 import { TestUser as User } from '../mocks';
 import { randomString } from 'src/utils';
 import { ActiveUserError, KinveyError } from 'src/errors';
-import { TestUser } from '../mocks';
 import expect from 'expect';
 import nock from 'nock';
 const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
@@ -78,7 +77,7 @@ describe('User', function() {
         });
 
       // Logout the test user
-      await TestUser.logout();
+      await User.logout();
 
       // Login
       user = await user.login(username, password);
@@ -117,7 +116,7 @@ describe('User', function() {
         });
 
       // Logout the test user
-      await TestUser.logout();
+      await User.logout();
 
       // Login
       user = await user.login({
@@ -163,7 +162,7 @@ describe('User', function() {
         });
 
       // Logout the test user
-      await TestUser.logout();
+      await User.logout();
 
       // Login
       user = await user.login({
