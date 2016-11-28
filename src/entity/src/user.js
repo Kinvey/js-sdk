@@ -184,6 +184,48 @@ export default class User {
   }
 
   /**
+   * Loads the active user (legacy).
+   *
+   * @deprecated Please use `User.loadActiveUser()`.
+   *
+   * @param {Client} [client=Client.sharedInstance()] Client to use to load the active user.
+   * @return {?User} The active user.
+   */
+  static loadActiveUserLegacy(client = Client.sharedInstance()) {
+    const activeUserData = CacheRequest.loadActiveUserLegacy(client);
+
+    if (isDefined(activeUserData)) {
+      return new User(activeUserData, { client: client });
+    }
+
+    return null;
+  }
+
+  /**
+   * Loads the active user.
+   *
+   * @param {Client} [client=Client.sharedInstance()] Client to use to load the active user.
+   * @return {?User} The active user.
+   */
+  static loadActiveUser(client = Client.sharedInstance()) {
+    return CacheRequest.loadActiveUser(client)
+      .then((activeUserData) => {
+        if (isDefined(activeUserData)) {
+          return new User(activeUserData, { client: client });
+        }
+
+        return null;
+      })
+      .then((activeUser) => {
+        if (isDefined(activeUser)) {
+          return activeUser.me();
+        }
+
+        return activeUser;
+      });
+  }
+
+  /**
    * Gets the active user. You can optionally provide a client
    * to use to lookup the active user.
    *
@@ -194,7 +236,7 @@ export default class User {
     const data = CacheRequest.getActiveUser(client);
 
     if (isDefined(data)) {
-      return new this(data, { client: client });
+      return new User(data, { client: client });
     }
 
     return null;

@@ -120,6 +120,9 @@ class Kinvey {
     // Initialize the client
     const client = Client.init(options);
 
+    // Load the active user
+    User.loadActiveUserLegacy(client);
+
     // Return the client
     return client;
   }
@@ -169,11 +172,10 @@ class Kinvey {
     }
 
     // Initialize the client
-    return Client.initialize(options)
-      .then(() => {
-        // Return the active user
-        return User.getActiveUser();
-      });
+    Client.initialize(options);
+
+    // Load the active user
+    return User.loadActiveUser();
   }
 
   /**

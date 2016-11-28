@@ -1,4 +1,3 @@
-import { CacheRequest } from './request';
 import { KinveyError } from './errors';
 import { Log, isDefined } from './utils';
 import url from 'url';
@@ -116,13 +115,6 @@ export class Client {
      * @type {?number}
      */
     this.defaultTimeout = isDefined(options.defaultTimeout) ? options.defaultTimeout : defaultTimeout;
-  }
-
-  /**
-   * Get the active user.
-   */
-  get activeUser() {
-    return CacheRequest.getActiveUser(this);
   }
 
   /**
@@ -268,7 +260,6 @@ export class Client {
   static init(options) {
     const client = new Client(options);
     sharedInstance = client;
-    CacheRequest.loadActiveUserLegacy(client);
     return client;
   }
 
@@ -290,8 +281,7 @@ export class Client {
   static initialize(options) {
     const client = new Client(options);
     sharedInstance = client;
-    return CacheRequest.loadActiveUser(client)
-      .then(() => client);
+    return client;
   }
 
   /**
