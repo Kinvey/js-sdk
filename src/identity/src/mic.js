@@ -100,7 +100,8 @@ export class MobileIdentityConnect extends Identity {
       body: {
         client_id: clientId,
         redirect_uri: redirectUri,
-        response_type: 'code'
+        response_type: 'code',
+        scope: 'openid'
       }
     });
     return request.execute()
@@ -129,7 +130,8 @@ export class MobileIdentityConnect extends Identity {
         query: {
           client_id: clientId,
           redirect_uri: redirectUri,
-          response_type: 'code'
+          response_type: 'code',
+          scope: 'openid'
         }
       }));
     }).then((popup) => {
