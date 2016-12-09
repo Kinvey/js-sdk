@@ -1,4 +1,5 @@
 import ActiveUserError from './src/activeUser';
+import BaseError from './src/base';
 import FeatureUnavailableError from './src/featureUnavailable';
 import IncompleteRequestBodyError from './src/incompleteRequestBody';
 import InsufficientCredentialsError from './src/insufficientCredentials';
@@ -22,6 +23,7 @@ import SyncError from './src/sync';
 // Export
 export {
   ActiveUserError,
+  BaseError,
   FeatureUnavailableError,
   IncompleteRequestBodyError,
   InsufficientCredentialsError,
