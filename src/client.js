@@ -112,6 +112,11 @@ export class Client {
     this.appVersion = options.appVersion;
 
     /**
+     * @type {?string}
+     */
+    this.keychainAccessGroup = options.keychainAccessGroup;
+
+    /**
      * @type {?number}
      */
     this.defaultTimeout = isDefined(options.defaultTimeout) ? options.defaultTimeout : defaultTimeout;
@@ -189,6 +194,18 @@ export class Client {
     }
 
     this._appVersion = appVersion;
+  }
+
+  get keychainAccessGroup() {
+    return this._keychainAccessGroup;
+  }
+
+  set keychainAccessGroup(accessGroup) {
+    if (isDefined(accessGroup) && isString(accessGroup) === false) {
+      throw new KinveyError('Keychain accessGroup is not a string. It must be a string value.');
+    }
+
+    this._keychainAccessGroup = accessGroup;
   }
 
   get defaultTimeout() {
