@@ -247,7 +247,8 @@ export class Client {
       appSecret: this.appSecret,
       masterSecret: this.masterSecret,
       encryptionKey: this.encryptionKey,
-      appVersion: this.appVersion
+      appVersion: this.appVersion,
+      keychainAccessGroup: this.keychainAccessGroup
     };
   }
 

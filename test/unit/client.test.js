@@ -61,6 +61,12 @@ describe('Client', () => {
       expect(client.appVersion).toEqual(appVersion);
     });
 
+    it('should be able to provide an keychainAccessGroup', () => {
+      const accessGroup = randomString();
+      const client = new Client({ keychainAccessGroup: accessGroup });
+      expect(client.keychainAccessGroup).toEqual(accessGroup);
+    });
+
     it('should be able to provide a defaultTimeout', () => {
       const timeout = 1;
       const client = new Client({ defaultTimeout: timeout });
@@ -103,6 +109,21 @@ describe('Client', () => {
       const client = new Client();
       client.defaultTimeout = timeout;
       expect(client.defaultTimeout).toEqual(timeout);
+    });
+  });
+
+  describe('keychainAccessGroup', function() {
+    it('should set the keychain access group to null', function() {
+      const client = new Client();
+      client.keychainAccessGroup = null;
+      expect(client.keychainAccessGroup).toEqual(null);
+    });
+
+    it('should set the keychain access group', function() {
+      const accessGroup = randomString();
+      const client = new Client();
+      client.keychainAccessGroup = accessGroup;
+      expect(client.keychainAccessGroup).toEqual(accessGroup);
     });
   });
 });
