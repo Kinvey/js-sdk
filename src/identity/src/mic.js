@@ -3,6 +3,7 @@ import Identity from './identity';
 import { SocialIdentity } from './enums';
 import { AuthType, RequestMethod, KinveyRequest } from '../../request';
 import { KinveyError, MobileIdentityConnectError } from '../../errors';
+import { isDefined } from '../../utils';
 import Promise from 'es6-promise';
 import path from 'path';
 import url from 'url';
@@ -45,6 +46,7 @@ export class MobileIdentityConnect extends Identity {
 
   login(redirectUri, authorizationGrant = AuthorizationGrant.AuthorizationCodeLoginPage, options = {}) {
     const clientId = this.client.appKey;
+    options.version = isDefined(options.version) ? options.version : 'v3'; // Set default version to v3
 
     const promise = Promise.resolve()
       .then(() => {
