@@ -1,49 +1,48 @@
 import Request, { KinveyRequest } from '../../../src/request';
+import { NotFoundError } from '../../../src/errors';
+import { randomString } from '../../../src/utils';
+import url from 'url';
+import nock from 'nock';
 import expect from 'expect';
-import regeneratorRuntime from 'regenerator-runtime'; // eslint-disable-line no-unused-vars
 
-describe('KinveyRequest', () => {
-  describe('constructor', () => {
-    it('should be an instance of Request', () => {
+describe('KinveyRequest', function() {
+  describe('constructor', function() {
+    it('should be an instance of Request', function() {
       const request = new KinveyRequest();
       expect(request).toBeA(KinveyRequest);
       expect(request).toBeA(Request);
     });
   });
 
-  describe('execute()', () => {
-    it('should refresh an expired MIC token');
-    // it('should refresh MIC token', async function() {
-    //   // Get the active user
-    //   const activeUser = await CacheRequest.getActiveUser(this.client);
+  describe('execute()', function() {
+    it('should throw a NotFoundError', function() {
+      const kinveyRequestId = randomString();
 
-    //   // Create the request
-    //   const request = new KinveyRequest({
-    //     method: RequestMethod.GET,
-    //     authType: AuthType.Session,
-    //     url: url.format({
-    //       protocol: this.client.protocol,
-    //       host: this.client.host,
-    //       pathname: '/foo'
-    //     }),
-    //     client: this.client
-    //   });
+      // Setup nock response
+      nock(this.client.apiHostname, { encodedQueryParams: true })
+        .get('/foo')
+        .reply(404, {
+          error: 'PathNotFound',
+          description: 'The path you tried to access does not exist.'
+        }, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'X-Kinvey-Request-Id': kinveyRequestId
+        });
 
-    //   // Login a user with MIC
-    //   // Send a request that results in a 401
-    //   // Refresh the MIC token
-    //   // Check that new request is sent with updated credentials
-
-    //   // Kinvey API Response
-    //   nock(request.client.baseUrl, { encodedQueryParams: true })
-    //     .matchHeader('authorization', `Kinvey ${activeUser._kmd.authtoken}`)
-    //     .get('/foo')
-    //     .query(true)
-    //     .reply(200, '', {
-    //       'content-type': 'application/json; charset=utf-8'
-    //     });
-
-    //   const response = await request.execute();
-    // });
+      const request = new KinveyRequest({
+        url: url.format({
+          protocol: this.client.protocol,
+          host: this.client.host,
+          pathname: '/foo',
+        })
+      });
+      return request.execute()
+        .catch((error) => {
+          expect(error).toBeA(NotFoundError);
+          expect(error.name).toEqual('NotFoundError');
+          expect(error.message).toEqual('The path you tried to access does not exist.');
+          expect(error.kinveyRequestId).toEqual(kinveyRequestId);
+        });
+    });
   });
 });
