@@ -1,5 +1,5 @@
-import { Kinvey, User } from './sdk';
 import Kinvey from 'src/kinvey';
+import { TestUser as User } from './mocks'
 import { randomString } from 'src/utils';
 import nock from 'nock';
 

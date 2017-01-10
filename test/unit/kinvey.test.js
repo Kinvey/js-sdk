@@ -1,4 +1,3 @@
-import { Kinvey, User } from './sdk';
 import Kinvey from 'src/kinvey';
 import { Client } from 'src/client';
 import { User } from 'src/entity';
