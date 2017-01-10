@@ -43,8 +43,8 @@ describe('MobileIdentityConnect', function() {
         // API Response
         nock(this.client.micHostname, { encodedQueryParams: true })
           .post(
-            '/oauth/auth',
-            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`
+            '/v3/oauth/auth',
+            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`
           )
           .reply(200, {
             temp_login_uri: tempLoginUriParts.href
@@ -83,8 +83,8 @@ describe('MobileIdentityConnect', function() {
         // API Response
         nock(this.client.micHostname, { encodedQueryParams: true })
           .post(
-            '/oauth/auth',
-            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`
+            '/v3/oauth/auth',
+            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`
           )
           .reply(200, {
             temp_login_uri: tempLoginUriParts.href
@@ -128,8 +128,8 @@ describe('MobileIdentityConnect', function() {
         // API Response
         nock(this.client.micHostname, { encodedQueryParams: true })
           .post(
-            '/oauth/auth',
-            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`
+            '/v3/oauth/auth',
+            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`
           )
           .reply(200, {
             temp_login_uri: tempLoginUriParts.href
