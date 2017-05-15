@@ -42,6 +42,7 @@
     "lodash": "4.17.4",
     "loglevel": "1.4.1",
     "promise-queue": "2.2.3",
+    "pubnub": "4.8.0",
     "qs": "6.4.0",
     "request": "2.81.0",
     "rxjs": "5.2.0",
