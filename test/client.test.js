@@ -71,8 +71,9 @@ describe('Client', () => {
   describe('appVersion', function() {
     it('should set the appVersion', function() {
       const appVersion = randomString();
-      const client = new Client();
-      client.appVersion = appVersion;
+      const client = new Client({
+        appVersion: appVersion
+      });
       expect(client.appVersion).toEqual(appVersion);
     });
   });
@@ -93,15 +94,17 @@ describe('Client', () => {
 
     it(`should use ${defaultTimeout}ms when defaultTimeout is less than 0`, function() {
       const timeout = -1;
-      const client = new Client();
-      client.defaultTimeout = timeout;
+      const client = new Client({
+        defaultTimeout: timeout
+      });
       expect(client.defaultTimeout).toEqual(defaultTimeout);
     });
 
     it('should set the defaultTimeout to 1', function() {
       const timeout = 1;
-      const client = new Client();
-      client.defaultTimeout = timeout;
+      const client = new Client({
+        defaultTimeout: timeout
+      });
       expect(client.defaultTimeout).toEqual(timeout);
     });
   });

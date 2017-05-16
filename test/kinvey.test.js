@@ -21,8 +21,14 @@ describe('Kinvey', function () {
   describe('appVersion', function() {
     it('should set the appVersion', function() {
       const appVersion = '1.0.0';
-      Kinvey.appVersion = appVersion;
-      expect(Kinvey.appVersion).toEqual(appVersion);
+      return Kinvey.initialize({
+        appKey: randomString(),
+        appSecret: randomString(),
+        appVersion: appVersion
+      })
+        .then(() => {
+          expect(Kinvey.appVersion).toEqual(appVersion);
+        });
     });
   });
 

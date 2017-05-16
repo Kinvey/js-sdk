@@ -2,6 +2,7 @@ import url from 'url';
 import assign from 'lodash/assign';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
+import uid from 'uid-safe';
 
 import { KinveyError } from 'src/errors';
 import { Log, isDefined } from 'src/utils';
@@ -37,8 +38,7 @@ export default class Client {
   constructor(options = {}) {
     options = assign({
       apiHostname: 'https://baas.kinvey.com',
-      micHostname: 'https://auth.kinvey.com',
-      liveServiceHostname: 'https://kls.kinvey.com'
+      micHostname: 'https://auth.kinvey.com'
     }, options);
 
     if (options.apiHostname && isString(options.apiHostname)) {
@@ -53,11 +53,10 @@ export default class Client {
       options.micHost = micHostnameParsed.host;
     }
 
-    if (options.liveServiceHostname && isString(options.liveServiceHostname)) {
-      const liveServiceHostnameParsed = url.parse(options.liveServiceHostname);
-      options.liveServiceProtocol = liveServiceHostnameParsed.protocol || 'https:';
-      options.liveServiceHost = liveServiceHostnameParsed.host;
-    }
+    /**
+     * @type {string}
+     */
+    this.deviceId = uid.sync(18);
 
     /**
      * @type {string}
@@ -78,16 +77,6 @@ export default class Client {
      * @type {string}
      */
     this.micHost = options.micHost;
-
-    /**
-     * @type {string}
-     */
-    this.liveServiceProtocol = options.liveServiceProtocol;
-
-    /**
-     * @type {string}
-     */
-    this.liveServiceHost = options.liveServiceHost;
 
     /**
      * @type {?string}
@@ -118,6 +107,9 @@ export default class Client {
      * @type {?number}
      */
     this.defaultTimeout = isDefined(options.defaultTimeout) ? options.defaultTimeout : defaultTimeout;
+
+    // Freeze the client class
+    Object.freeze(this);
   }
 
   /**
@@ -144,17 +136,6 @@ export default class Client {
     return url.format({
       protocol: this.micProtocol,
       host: this.micHost
-    });
-  }
-
-
-  /**
-   * Live Service host name used for streaming data.
-   */
-  get liveServiceHostname() {
-    return url.format({
-      protocol: this.liveServiceProtocol,
-      host: this.liveServiceHost
     });
   }
 
@@ -206,15 +187,13 @@ export default class Client {
    */
   toPlainObject() {
     return {
+      deviceId: this.deviceId,
       apiHostname: this.apiHostname,
       apiProtocol: this.apiProtocol,
       apiHost: this.apiHost,
       micHostname: this.micHostname,
       micProtocol: this.micProtocol,
       micHost: this.micHost,
-      liveServiceHostname: this.liveServiceHostname,
-      liveServiceHost: this.liveServiceHost,
-      liveServiceProtocol: this.liveServiceProtocol,
       appKey: this.appKey,
       appSecret: this.appSecret,
       masterSecret: this.masterSecret,
