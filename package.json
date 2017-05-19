@@ -74,6 +74,7 @@
     "json-loader": "^0.5.4",
     "mocha": "^3.0.0",
     "nock": "9.0.9",
+    "proxyquire": "1.8.0",
     "regenerator-runtime": "^0.9.5"
   },
   "engines": {
