@@ -13,8 +13,6 @@ import Request, { RequestMethod } from './request';
 import { KinveyResponse } from './response';
 import { CacheRack } from './rack';
 
-const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
-const activeUserCollectionName = process.env.KINVEY_USER_ACTIVE_COLLECTION_NAME || 'kinvey_active_user';
 const activeUsers = {};
 
 /**
@@ -118,11 +116,7 @@ export default class CacheRequest extends Request {
   static loadActiveUser(client = Client.sharedInstance()) {
     const request = new CacheRequest({
       method: RequestMethod.GET,
-      url: url.format({
-        protocol: client.apiProtocol,
-        host: client.apiHost,
-        pathname: `/${usersNamespace}/${client.appKey}/${activeUserCollectionName}`
-      })
+      url: `${client.apiHostname}/user/${client.appKey}/kinvey_active_user`
     });
     return request.execute()
       .then(response => response.data)
@@ -182,11 +176,7 @@ export default class CacheRequest extends Request {
       // Delete from cache
       const request = new CacheRequest({
         method: RequestMethod.DELETE,
-        url: url.format({
-          protocol: client.apiProtocol,
-          host: client.apiHost,
-          pathname: `/${usersNamespace}/${client.appKey}/${activeUserCollectionName}/${activeUser._id}`
-        })
+        url: `${client.apiHostname}/user/${client.appKey}/kinvey_active_user/${activeUser._id}`
       });
       promise = request.execute()
         .then(response => response.data)
@@ -217,11 +207,7 @@ export default class CacheRequest extends Request {
         // Save to cache
         const request = new CacheRequest({
           method: RequestMethod.POST,
-          url: url.format({
-            protocol: client.apiProtocol,
-            host: client.apiHost,
-            pathname: `/${usersNamespace}/${client.appKey}/${activeUserCollectionName}`
-          }),
+          url: `${client.apiHostname}/user/${client.appKey}/kinvey_active_user`,
           body: user
         });
         return request.execute()
