@@ -75,6 +75,7 @@
     "nock": "9.0.13",
     "regenerator-runtime": "^0.9.5",
     "ts-node": "3.0.4",
+    "request": "2.81.0"
     "typescript": "2.3.4"
   },
   "engines": {

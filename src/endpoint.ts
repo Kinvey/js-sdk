@@ -1,5 +1,6 @@
 import { Promise } from 'es6-promise';
 import isString = require('lodash/isString');
+import url from 'url';
 
 import { KinveyError } from './errors';
 import { Client } from './client';

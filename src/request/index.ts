@@ -1,6 +1,5 @@
 import { Promise } from 'es6-promise';
 import qs = require('qs');
-import appendQuery = require('append-query');
 import assign = require('lodash/assign');
 import isString = require('lodash/isString');
 import isNumber = require('lodash/isNumber');
