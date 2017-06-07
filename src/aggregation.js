@@ -12,7 +12,7 @@ import { Query } from './query';
 /**
  * @private
  */
-export default class Aggregation {
+export class Aggregation {
   constructor(options) {
     options = assign({
       query: null,

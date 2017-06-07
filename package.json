@@ -8,7 +8,7 @@
   },
   "license": "Apache-2.0",
   "author": "Kinvey, Inc.",
-  "main": "./dist/index.js",
+  "main": "./src/index.js",
   "es6": true,
   "contributors": [
     "Thomas Conner <thomas@kinvey.com>"
@@ -18,8 +18,8 @@
     "url": "git@github.com:Kinvey/js-sdk"
   },
   "scripts": {
-    "build": "npm run clean && npm run transpile",
-    "clean": "rm -rf dist && rm -rf coverage",
+    "build": "tsc",
+    "clean": "del dist coverage",
     "cover": "istanbul cover _mocha -- --compilers js:babel-core/register -r babel-polyfill -s 100 --recursive test/index test",
     "docs": "esdoc -c esdoc.json",
     "lint": "npm run lint:src",
@@ -27,7 +27,7 @@
     "lint:test": "eslint test/**",
     "preversion": "rm -rf node_modules && npm install && npm test",
     "postversion": "git push && git push --tags",
-    "test": "mocha --compilers js:babel-core/register -r babel-polyfill -s 100 --recursive test/index test",
+    "test": "mocha -r ts-node/register -s 100 --recursive tests/datastore.test.ts",
     "test:watch": "mocha -w --compilers js:babel-core/register -r babel-polyfill -s 100 --recursive test/index test",
     "transpile": "BABEL_ENV=production babel --no-comments --out-dir dist src"
   },
@@ -48,6 +48,9 @@
     "url-pattern": "1.0.3"
   },
   "devDependencies": {
+    "@types/es6-promise": "0.0.32",
+    "@types/lodash": "4.14.65",
+    "@types/mocha": "2.2.41",
     "app-module-path": "2.2.0",
     "babel-cli": "6.24.1",
     "babel-core": "6.24.1",
@@ -70,7 +73,9 @@
     "json-loader": "^0.5.4",
     "mocha": "^3.0.0",
     "nock": "9.0.13",
-    "request": "2.81.0"
+    "regenerator-runtime": "^0.9.5",
+    "ts-node": "3.0.4",
+    "typescript": "2.3.4"
   },
   "engines": {
     "node": "6.9.1"
