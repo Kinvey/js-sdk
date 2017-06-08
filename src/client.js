@@ -40,15 +40,45 @@ export default class Client {
       defaultTimeout: 60000
     }, options);
 
-    let apiHostname = options.apiHostname;
-    if (isString(apiHostname) === false) {
-      apiHostname = String(apiHostname);
+    if (options.apiHostname && isString(options.apiHostname)) {
+      let apiHostname = options.apiHostname;
+
+      if (/^https?:\/\//i.test(apiHostname) === false) {
+        apiHostname = `https://${apiHostname}`;
+      }
+
+      const apiHostnameParsed = url.parse(apiHostname);
+
+      /**
+       * @type {string}
+       */
+      this.apiProtocol = apiHostnameParsed.protocol;
+
+      /**
+       * @type {string}
+       */
+      this.apiHost = apiHostnameParsed.host;
     }
     this.apiHostname = apiHostname.replace(/\/+$/, '');
 
-    let micHostname = options.micHostname;
-    if (isString(apiHostname) === false) {
-      micHostname = String(micHostname);
+    if (options.micHostname && isString(options.micHostname)) {
+      let micHostname = options.micHostname;
+
+      if (/^https?:\/\//i.test(micHostname) === false) {
+        micHostname = `https://${micHostname}`;
+      }
+
+      const micHostnameParsed = url.parse(micHostname);
+
+      /**
+       * @type {string}
+       */
+      this.micProtocol = micHostnameParsed.protocol;
+
+      /**
+       * @type {string}
+       */
+      this.micHost = micHostnameParsed.host;
     }
     this.micHostname = micHostname.replace(/\/+$/, '');
 
@@ -56,7 +86,16 @@ export default class Client {
     if (isString(liveServiceHostname) === false) {
       liveServiceHostname = String(liveServiceHostname);
     }
-    this.liveServiceHostname = liveServiceHostname.replace(/\/+$/, '');
+
+    /**
+     * @type {string}
+     */
+    this.liveServiceProtocol = options.liveServiceProtocol;
+
+    /**
+     * @type {string}
+     */
+    this.liveServiceHost = options.liveServiceHost;
 
     /**
      * @type {?string}
