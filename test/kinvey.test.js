@@ -5,6 +5,7 @@ import { KinveyError } from 'src/errors';
 import { UserMock } from 'test/mocks';
 import expect from 'expect';
 import nock from 'nock';
+
 const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 const defaultMicProtocol = process.env.KINVEY_MIC_PROTOCOL || 'https:';
 const defaultMicHost = process.env.KINVEY_MIC_HOST || 'auth.kinvey.com';
@@ -13,16 +14,27 @@ describe('Kinvey', function () {
   afterEach(function() {
     // Reintialize with the previous client
     return Kinvey.initialize({
+      apiHostname: this.client.apiHostname,
+      micHostname: this.client.micHostname,
       appKey: this.client.appKey,
-      appSecret: this.client.appSecret
+      appSecret: this.client.appSecret,
+      masterSecret: this.client.masterSecret,
+      encryptionKey: this.client.encryptionKey,
+      appVersion: this.client.appVersion
     });
   });
 
   describe('appVersion', function() {
     it('should set the appVersion', function() {
       const appVersion = '1.0.0';
-      Kinvey.appVersion = appVersion;
-      expect(Kinvey.appVersion).toEqual(appVersion);
+      return Kinvey.initialize({
+        appKey: randomString(),
+        appSecret: randomString(),
+        appVersion: appVersion
+      })
+        .then(() => {
+          expect(Kinvey.appVersion).toEqual(appVersion);
+        });
     });
   });
 

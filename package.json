@@ -42,12 +42,14 @@
     "lodash": "4.17.4",
     "loglevel": "1.4.1",
     "promise-queue": "2.2.3",
+    "pubnub": "4.8.0",
     "qs": "6.4.0",
     "request": "2.81.0",
     "rxjs": "5.2.0",
     "sift": "3.2.7",
-    "uid": "0.0.2",
-    "url-pattern": "1.0.3"
+    "uid-safe": "2.1.4",
+    "url-pattern": "1.0.3",
+    "uuid": "3.0.1"
   },
   "devDependencies": {
     "app-module-path": "2.2.0",
@@ -73,6 +75,7 @@
     "json-loader": "^0.5.4",
     "mocha": "^3.0.0",
     "nock": "9.0.9",
+    "proxyquire": "1.8.0",
     "regenerator-runtime": "^0.9.5"
   },
   "engines": {

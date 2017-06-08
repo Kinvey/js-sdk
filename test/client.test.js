@@ -10,7 +10,6 @@ describe('Client', () => {
       expect(client).toBeA(Client);
       expect(client.apiHostname).toEqual('https://baas.kinvey.com');
       expect(client.micHostname).toEqual('https://auth.kinvey.com');
-      expect(client.liveServiceHostname).toEqual('https://kls.kinvey.com');
     });
 
     it('should be able to provide custom apiHostname', () => {
@@ -23,12 +22,6 @@ describe('Client', () => {
       const micHostname = 'https://myauth.kinvey.com';
       const client = new Client({ micHostname: micHostname });
       expect(client.micHostname).toEqual(micHostname);
-    });
-
-    it('should be able to provide custom liveServiceHostname', () => {
-      const liveServiceHostname = 'https://mylive.kinvey.com';
-      const client = new Client({ liveServiceHostname: liveServiceHostname });
-      expect(client.liveServiceHostname).toEqual(liveServiceHostname);
     });
 
     it('should be able to provide an appKey', () => {
@@ -71,8 +64,9 @@ describe('Client', () => {
   describe('appVersion', function() {
     it('should set the appVersion', function() {
       const appVersion = randomString();
-      const client = new Client();
-      client.appVersion = appVersion;
+      const client = new Client({
+        appVersion: appVersion
+      });
       expect(client.appVersion).toEqual(appVersion);
     });
   });
@@ -93,15 +87,17 @@ describe('Client', () => {
 
     it(`should use ${defaultTimeout}ms when defaultTimeout is less than 0`, function() {
       const timeout = -1;
-      const client = new Client();
-      client.defaultTimeout = timeout;
+      const client = new Client({
+        defaultTimeout: timeout
+      });
       expect(client.defaultTimeout).toEqual(defaultTimeout);
     });
 
     it('should set the defaultTimeout to 1', function() {
       const timeout = 1;
-      const client = new Client();
-      client.defaultTimeout = timeout;
+      const client = new Client({
+        defaultTimeout: timeout
+      });
       expect(client.defaultTimeout).toEqual(timeout);
     });
   });
