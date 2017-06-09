@@ -1,6 +1,7 @@
 import assign from 'lodash/assign';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
+import url from 'url';
 
 import { KinveyError } from 'src/errors';
 import { Log, isDefined } from 'src/utils';
@@ -36,66 +37,36 @@ export default class Client {
     options = assign({
       apiHostname: 'https://baas.kinvey.com',
       micHostname: 'https://auth.kinvey.com',
-      liveServiceHostname: 'https://kls.kinvey.com',
       defaultTimeout: 60000
     }, options);
 
-    if (options.apiHostname && isString(options.apiHostname)) {
-      let apiHostname = options.apiHostname;
+    this.apiHostname = options.apiHostname;
 
-      if (/^https?:\/\//i.test(apiHostname) === false) {
-        apiHostname = `https://${apiHostname}`;
-      }
-
-      const apiHostnameParsed = url.parse(apiHostname);
-
-      /**
-       * @type {string}
-       */
-      this.apiProtocol = apiHostnameParsed.protocol;
-
-      /**
-       * @type {string}
-       */
-      this.apiHost = apiHostnameParsed.host;
+    if (isString(this.apiHostname) === false) {
+      throw new KivneyError('apiHostname must be a string');  
     }
-    this.apiHostname = apiHostname.replace(/\/+$/, '');
-
-    if (options.micHostname && isString(options.micHostname)) {
-      let micHostname = options.micHostname;
-
-      if (/^https?:\/\//i.test(micHostname) === false) {
-        micHostname = `https://${micHostname}`;
-      }
-
-      const micHostnameParsed = url.parse(micHostname);
-
-      /**
-       * @type {string}
-       */
-      this.micProtocol = micHostnameParsed.protocol;
-
-      /**
-       * @type {string}
-       */
-      this.micHost = micHostnameParsed.host;
-    }
-    this.micHostname = micHostname.replace(/\/+$/, '');
-
-    let liveServiceHostname = options.liveServiceHostname;
-    if (isString(liveServiceHostname) === false) {
-      liveServiceHostname = String(liveServiceHostname);
+    
+    if (/^https?:\/\//i.test(this.apiHostname) === false) {
+      this.apiHostname = `https://${this.apiHostname}`;
     }
 
-    /**
-     * @type {string}
-     */
-    this.liveServiceProtocol = options.liveServiceProtocol;
+    const apiHostnameParsed = url.parse(this.apiHostname);
+    this.apiProtocol = apiHostnameParsed.protocol;
+    this.apiHost = apiHostnameParsed.host;
 
-    /**
-     * @type {string}
-     */
-    this.liveServiceHost = options.liveServiceHost;
+    this.micHostname = options.micHostname;
+
+    if (isString(this.micHostname) === false) {
+      throw new KivneyError('micHostname must be a string');  
+    }
+
+    if (/^https?:\/\//i.test(this.micHostname) === false) {
+      this.micHostname = `https://${this.micHostname}`;
+    }
+
+    const micHostnameParsed = url.parse(this.micHostname);
+    this.micProtocol = micHostnameParsed.protocol;
+    this.micHost = micHostnameParsed.host
 
     /**
      * @type {?string}
@@ -117,38 +88,24 @@ export default class Client {
      */
     this.encryptionKey = options.encryptionKey;
 
-    if (isDefined(options.appVersion)) {
-      let appVersion = options.appVersion;
+    /**
+     * @type {?string}
+     */
+    this.appVersion = options.appVersion;
 
-      if (isString(appVersion) === false) {
-        appVersion = String(appVersion);
-      }
+    this.defaultTimeout = options.defaultTimeout;
 
-      /**
-       * The version of your app. It will sent with Kinvey API requests
-       * using the X-Kinvey-Api-Version header.
-       * @type {?string}
-       */
-      this.appVersion = appVersion;
+    if (isNumber(this.defaultTimeout) === false || isNaN(this.defaultTimeout)) {
+      throw new KinveyError('Invalid default timeout. Default timeout must be a number.');
     }
 
-    if (isDefined(options.defaultTimeout)) {
-      let timeout = parseInt(options.defaultTimeout, 10);
-
-      if (isNumber(timeout) === false || isNaN(timeout)) {
-        throw new KinveyError('Invalid timeout. Timeout must be a number.');
-      }
-
-      if (timeout < 0) {
-        Log.info('Default timeout is less than 0. Setting default timeout to 60000ms.');
-        timeout = 60000;
-      }
-
-      /**
-       * @type {?number}
-       */
-      this.defaultTimeout = timeout;
+    if (this.defaultTimeout < 0) {
+      Log.info('Default timeout is less than 0. Setting default timeout to 60000ms.');
+      this.defaultTimeout = 60000;
     }
+
+    // Freeze this client instance
+    Object.freeze(this);
   }
 
   /**
@@ -156,25 +113,6 @@ export default class Client {
    */
   get activeUser() {
     return CacheRequest.getActiveUser(this);
-  }
-
-  /**
-   * Returns an object containing all the information for this Client.
-   *
-   * @return {Object} Object
-   */
-  toPlainObject() {
-    return {
-      apiHostname: this.apiHostname,
-      micHostname: this.micHostname,
-      liveServiceHostname: this.liveServiceHostname,
-      appKey: this.appKey,
-      appSecret: this.appSecret,
-      masterSecret: this.masterSecret,
-      encryptionKey: this.encryptionKey,
-      appVersion: this.appVersion,
-      defaultTimeout: this.defaultTimeout
-    };
   }
 
   /**

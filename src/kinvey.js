@@ -1,4 +1,5 @@
 import Promise from 'es6-promise';
+import url from 'url';
 
 import {
   ActiveUserError,
@@ -48,6 +49,7 @@ import { Acl, Metadata, User } from './entity';
 import { AuthorizationGrant } from './identity';
 import { AuthType, CacheRack, NetworkRack, Rack, RequestMethod, KinveyRequest } from './request';
 
+
 /**
  * The Kinvey class is used as the entry point for the Kinvey JavaScript SDK.
  */
@@ -77,21 +79,6 @@ class Kinvey {
    */
   static get appVersion() {
     return this.client.appVersion;
-  }
-
-  /**
-   * Set the version of your app. It will sent with Kinvey API requests
-   * using the X-Kinvey-Api-Version header.
-   *
-   * @param  {String} appVersion  App version.
-   *
-   * @example
-   * Kinvey.appVersion = '1.0.0';
-   * // or
-   * Kinvey.appVersion = 'v1';
-   */
-  static set appVersion(appVersion) {
-    this.client.appVersion = appVersion;
   }
 
   /**
@@ -162,7 +149,11 @@ class Kinvey {
     const request = new KinveyRequest({
       method: RequestMethod.GET,
       authType: AuthType.All,
-      url: `${this.client.apiHostname}/appdata/${client.appKey}`,
+      url: url.format({
+        protocol: this.client.apiProtocol,
+        host: this.client.apiHost,
+        pathname: `/appdata/${this.client.appKey}`
+      })
     });
 
     return request.execute()

@@ -18,14 +18,6 @@ describe('Kinvey', function () {
     });
   });
 
-  describe('appVersion', function() {
-    it('should set the appVersion', function() {
-      const appVersion = '1.0.0';
-      Kinvey.appVersion = appVersion;
-      expect(Kinvey.appVersion).toEqual(appVersion);
-    });
-  });
-
   describe('initialize()', function () {
     it('should throw an error if an appKey is not provided', function() {
       Kinvey.initialize({
