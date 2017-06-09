@@ -1,10 +1,12 @@
 import Promise from 'es6-promise';
 import qs from 'qs';
 import isString from 'lodash/isString';
+import url from 'url';
+import path from 'path';
 
 import { AuthType, RequestMethod, KinveyRequest } from 'src/request';
 import { KinveyError, MobileIdentityConnectError } from 'src/errors';
-import { isDefined, appendQuery } from 'src/utils';
+import { isDefined } from 'src/utils';
 import CorePopup from './popup';
 import Identity from './identity';
 import { SocialIdentity } from './enums';
@@ -65,7 +67,8 @@ export class MobileIdentityConnect extends Identity {
         session.identity = MobileIdentityConnect.identity;
         session.client_id = clientId;
         session.redirect_uri = redirectUri;
-        session.hostname = this.client.micHostname;
+        session.protocol = this.client.micProtocol;
+        session.host = this.client.micHost;
         return session;
       });
 
@@ -82,7 +85,7 @@ export class MobileIdentityConnect extends Identity {
         version = String(version);
       }
 
-      pathname = `/${version.indexOf('v') === 0 ? version : `v${version}`}${pathname}`;
+      pathname = path.join(pathname, version.indexOf('v') === 0 ? version : `v${version}`);
     }
 
     const request = new KinveyRequest({
@@ -90,7 +93,11 @@ export class MobileIdentityConnect extends Identity {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      url: `${this.client.micHostname}${pathname}`,
+      url: url.format({
+        protocol: this.client.micProtocol,
+        host: this.client.micHost,
+        pathname: pathname
+      }),
       properties: options.properties,
       body: {
         client_id: clientId,
@@ -106,11 +113,6 @@ export class MobileIdentityConnect extends Identity {
     const promise = Promise.resolve().then(() => {
       let pathname = '/oauth/auth';
       const popup = new Popup();
-      const queryStringObject = {
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        response_type: 'code'
-      };
 
       if (options.version) {
         let version = options.version;
@@ -119,10 +121,19 @@ export class MobileIdentityConnect extends Identity {
           version = String(version);
         }
 
-        pathname = `/${version.indexOf('v') === 0 ? version : `v${version}`}${pathname}`;
+        pathname = path.join(pathname, version.indexOf('v') === 0 ? version : `v${version}`);
       }
 
-      return popup.open(appendQuery(`${this.client.micHostname}${pathname}`, queryStringObject));
+      return popup.open(url.format({
+        protocol: this.client.micProtocol,
+        host: this.client.micHost,
+        pathname: pathname,
+        query: {
+          client_id: clientId,
+          redirect_uri: redirectUri,
+          response_type: 'code'
+        }
+      }));
     }).then((popup) => {
       const promise = new Promise((resolve, reject) => {
         let redirected = false;
@@ -133,7 +144,7 @@ export class MobileIdentityConnect extends Identity {
               redirected = true;
               popup.removeAllListeners();
               popup.close();
-              resolve(qs.parse(event.url.split('?')[1]).code);
+              resolve(url.parse(event.url, true).query.code);
             }
           } catch (error) {
             // Just catch the error
@@ -146,7 +157,7 @@ export class MobileIdentityConnect extends Identity {
               redirected = true;
               popup.removeAllListeners();
               popup.close();
-              resolve(qs.parse(event.url.split('?')[1]).code);
+              resolve(url.parse(event.url, true).query.code);
             } else if (redirected === false) {
               popup.removeAllListeners();
               popup.close();
@@ -198,7 +209,7 @@ export class MobileIdentityConnect extends Identity {
       const location = response.headers.get('location');
 
       if (location) {
-        return qs.parse(location.split('?')[1]).code;
+        return url.parse(location, true).query.code;
       }
 
       throw new MobileIdentityConnectError(`Unable to authorize user with username ${options.username}.`,
@@ -215,7 +226,11 @@ export class MobileIdentityConnect extends Identity {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       authType: AuthType.App,
-      url: `${this.client.micHostname}/oauth/token`,
+      url: url.format({
+        protocol: this.client.micProtocol,
+        host: this.client.micHost,
+        pathname: '/oauth/token'
+      }),
       properties: options.properties,
       body: {
         grant_type: 'authorization_code',
@@ -234,7 +249,14 @@ export class MobileIdentityConnect extends Identity {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       authType: AuthType.App,
-      url: appendQuery(`${this.client.micHostname}/oauth/invalidate`, { user: user._id }),
+      url: url.format({
+        protocol: this.client.micProtocol,
+        host: this.client.micHost,
+        pathname: '/oauth/invalidate',
+        query: {
+          user: user._id
+        }
+      }),
       properties: options.properties
     });
     return request.execute().then(response => response.data);
