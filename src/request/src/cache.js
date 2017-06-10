@@ -1,5 +1,4 @@
 import Promise from 'es6-promise';
-import Queue from 'promise-queue';
 import UrlPattern from 'url-pattern';
 import url from 'url';
 import cloneDeep from 'lodash/cloneDeep';
@@ -8,16 +7,12 @@ import Client from 'src/client';
 import { KinveyError } from 'src/errors';
 import Query from 'src/query';
 import Aggregation from 'src/aggregation';
-import { isDefined } from 'src/utils';
+import { isDefined, Queue } from 'src/utils';
 import Request, { RequestMethod } from './request';
 import { KinveyResponse } from './response';
 import { CacheRack } from './rack';
 
-const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
-const activeUserCollectionName = process.env.KINVEY_USER_ACTIVE_COLLECTION_NAME || 'kinvey_active_user';
 const activeUsers = {};
-
-Queue.configure(Promise);
 const queue = new Queue(1, Infinity);
 
 /**
@@ -119,13 +114,14 @@ export default class CacheRequest extends Request {
   }
 
   static loadActiveUser(client = Client.sharedInstance()) {
+
     return queue.add(() => {
       const request = new CacheRequest({
         method: RequestMethod.GET,
         url: url.format({
           protocol: client.apiProtocol,
           host: client.apiHost,
-          pathname: `/${usersNamespace}/${client.appKey}/${activeUserCollectionName}`
+          pathname: `/user/${client.appKey}/kinvey_active_user`
         })
       });
       return request.execute()
@@ -166,7 +162,7 @@ export default class CacheRequest extends Request {
           url: url.format({
             protocol: client.apiProtocol,
             host: client.apiHost,
-            pathname: `/${usersNamespace}/${client.appKey}/${activeUserCollectionName}`
+            pathname: `/user/${client.appKey}/kinvey_active_user`
           }),
           body: activeUser
         });
@@ -186,7 +182,7 @@ export default class CacheRequest extends Request {
               url: url.format({
                 protocol: client.apiProtocol,
                 host: client.apiHost,
-                pathname: `/${usersNamespace}/${client.appKey}/${activeUserCollectionName}/${prevActiveUser._id}`
+                pathname: `/user/${client.appKey}/kinvey_active_user/${prevActiveUser._id}`
               })
             });
             return request.execute()

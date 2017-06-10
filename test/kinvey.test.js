@@ -18,14 +18,6 @@ describe('Kinvey', function () {
     });
   });
 
-  describe('appVersion', function() {
-    it('should set the appVersion', function() {
-      const appVersion = '1.0.0';
-      Kinvey.appVersion = appVersion;
-      expect(Kinvey.appVersion).toEqual(appVersion);
-    });
-  });
-
   describe('initialize()', function () {
     it('should throw an error if an appKey is not provided', function() {
       Kinvey.initialize({
@@ -84,8 +76,7 @@ describe('Kinvey', function () {
         appSecret: randomString()
       }).then(() => {
         const client = Kinvey.client;
-        expect(client).toInclude({ micProtocol: defaultMicProtocol });
-        expect(client).toInclude({ micHost: defaultMicHost });
+        expect(client).toInclude({ micHostname: 'https://auth.kinvey.com' });
       });
     });
 
@@ -97,8 +88,7 @@ describe('Kinvey', function () {
         micHostname: micHostname
       }).then(() => {
         const client = Kinvey.client;
-        expect(client).toInclude({ micProtocol: 'https:' });
-        expect(client).toInclude({ micHost: 'auth.example.com' });
+        expect(client).toInclude({ micHostname: micHostname });
       });
     });
 

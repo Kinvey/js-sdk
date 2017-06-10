@@ -1,14 +1,14 @@
 import Promise from 'es6-promise';
-import url from 'url';
+import { Buffer } from 'buffer/';
 import qs from 'qs';
-import appendQuery from 'append-query';
 import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
 import isEmpty from 'lodash/isEmpty';
+import url from 'url';
 
 import Query from 'src/query';
 import Aggregation from 'src/aggregation';
-import { isDefined } from 'src/utils';
+import { isDefined, appendQuery } from 'src/utils';
 import { InvalidCredentialsError, NoActiveUserError, KinveyError } from 'src/errors';
 import { SocialIdentity } from 'src/identity';
 import Request, { RequestMethod } from './request';
@@ -17,10 +17,6 @@ import Headers from './headers';
 import { KinveyResponse } from './response';
 import { NetworkRack } from './rack';
 
-const tokenPathname = process.env.KINVEY_MIC_TOKEN_PATHNAME || '/oauth/token';
-const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
-const defaultApiVersion = process.env.KINVEY_DEFAULT_API_VERSION || 4;
-const customPropertiesMaxBytesAllowed = process.env.KINVEY_MAX_HEADER_BYTES || 2000;
 
 export default class NetworkRequest extends Request {
   constructor(options = {}) {
@@ -226,7 +222,7 @@ export class KinveyRequest extends NetworkRequest {
 
     // Add the X-Kinvey-API-Version header
     if (!headers.has('X-Kinvey-Api-Version')) {
-      headers.set('X-Kinvey-Api-Version', defaultApiVersion);
+      headers.set('X-Kinvey-Api-Version', 4);
     }
 
 
@@ -260,10 +256,10 @@ export class KinveyRequest extends NetworkRequest {
       if (!isEmpty(customPropertiesHeader)) {
         const customPropertiesByteCount = byteCount(customPropertiesHeader);
 
-        if (customPropertiesByteCount >= customPropertiesMaxBytesAllowed) {
+        if (customPropertiesByteCount >= 2000) {
           throw new Error(
             `The custom properties are ${customPropertiesByteCount} bytes.` +
-            `It must be less then ${customPropertiesMaxBytesAllowed} bytes.`,
+            'It must be less then 2000 bytes.',
             'Please remove some custom properties.');
         }
 
@@ -415,7 +411,7 @@ export class KinveyRequest extends NetworkRequest {
                 url: url.format({
                   protocol: session.protocol || this.client.micProtocol,
                   host: session.host || this.client.micHost,
-                  pathname: tokenPathname
+                  pathname: '/oauth/token'
                 }),
                 body: {
                   grant_type: 'refresh_token',
@@ -442,7 +438,7 @@ export class KinveyRequest extends NetworkRequest {
                     url: url.format({
                       protocol: this.client.apiProtocol,
                       host: this.client.apiHost,
-                      pathname: `/${usersNamespace}/${this.client.appKey}/login`
+                      pathname: `/user/${this.client.appKey}/login`
                     }),
                     properties: this.properties,
                     body: data,
