@@ -976,7 +976,8 @@ describe('User', function() {
       const user = new User({ _id: randomString(), email: randomString() });
 
       nock(this.client.apiHostname, { encodedQueryParams: true })
-        .delete(`${user.pathname}/${user._id}?hard=true`)
+        .delete(`${user.pathname}/${user._id}`)
+        .query({ hard: true })
         .reply(204);
 
       return User.remove(user._id, { hard: true })

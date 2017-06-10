@@ -78,21 +78,6 @@ class Kinvey {
   }
 
   /**
-   * Set the version of your app. It will sent with Kinvey API requests
-   * using the X-Kinvey-Api-Version header.
-   *
-   * @param  {String} appVersion  App version.
-   *
-   * @example
-   * Kinvey.appVersion = '1.0.0';
-   * // or
-   * Kinvey.appVersion = 'v1';
-   */
-  static set appVersion(appVersion) {
-    this.client.appVersion = appVersion;
-  }
-
-  /**
    * Initializes the SDK with your app's information. The SDK is initialized when the returned
    * promise resolves.
    *
@@ -179,7 +164,11 @@ class Kinvey {
     const request = new KinveyRequest({
       method: RequestMethod.GET,
       authType: AuthType.All,
-      url: `${this.client.apiHostname}/appdata/${client.appKey}`,
+      url: url.format({
+        protocol: this.client.apiProtocol,
+        host: this.client.apiHost,
+        pathname: `/appdata/${this.client.appKey}`
+      })
     });
 
     return request.execute()
