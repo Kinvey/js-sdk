@@ -1,3 +1,5 @@
+import url from 'url';
+
 import {
   ActiveUserError,
   APIVersionNotAvailableError,
@@ -168,7 +170,8 @@ class Kinvey {
         protocol: this.client.apiProtocol,
         host: this.client.apiHost,
         pathname: `/appdata/${this.client.appKey}`
-      })
+      }),
+      client: client
     });
 
     return request.execute()
