@@ -1,16 +1,18 @@
-import { QueryError } from 'src/errors';
-import { nested, isDefined } from 'src/utils';
-import sift from 'sift';
-import assign from 'lodash/assign';
-import isArray from 'lodash/isArray';
-import isNumber from 'lodash/isNumber';
-import isString from 'lodash/isString';
-import isObject from 'lodash/isObject';
-import isRegExp from 'lodash/isRegExp';
-import isEmpty from 'lodash/isEmpty';
-import forEach from 'lodash/forEach';
-import findKey from 'lodash/findKey';
-import has from 'lodash/has';
+import assign = require('lodash/assign');
+import isArray = require('lodash/isArray');
+import isNumber = require('lodash/isNumber');
+import isString = require('lodash/isString');
+import isObject = require('lodash/isObject');
+import isRegExp = require('lodash/isRegExp');
+import isEmpty = require('lodash/isEmpty');
+import forEach = require('lodash/forEach');
+import findKey = require('lodash/findKey');
+import has = require('lodash/has');
+import sift = require('sift');
+
+import { QueryError } from './errors/query';
+import { nested, isDefined } from './utils/object';
+
 const unsupportedFilters = ['$nearSphere'];
 
 export interface QueryConfig {
@@ -108,7 +110,7 @@ export class Query {
   set fields(fields) {
     fields = fields || [];
 
-    if (!isArray(fields)) {
+    if (isArray(fields) === false) {
       throw new QueryError('fields must be an Array');
     }
 
@@ -460,7 +462,7 @@ export class Query {
    * @param {boolean} [options.dotMatchesAll=false] Toggles dot matches all.
    * @returns {Query} The query.
    */
-  matches(field, regExp, options = {}) {
+  matches(field, regExp, options: { ignoreCase?: boolean, multiline?: boolean, extended?: boolean, dotMatchesAll?: boolean }) {
     const flags = [];
 
     if (!isRegExp(regExp)) {
@@ -533,19 +535,18 @@ export class Query {
    * @throws {QueryError} `bottomRightCoord` must be of type `Array<number, number>`.
    * @returns {Query} The query.
    */
-  withinBox(field, bottomLeftCoord, upperRightCoord) {
-    if (!isArray(bottomLeftCoord) || !isNumber(bottomLeftCoord[0]) || !isNumber(bottomLeftCoord[1])) {
+  withinBox(field, bottomLeftCoord: number[], upperRightCoord: number[]) {
+    if (isArray(bottomLeftCoord) === false
+      || isNumber(bottomLeftCoord[0]) === false
+      || isNumber(bottomLeftCoord[1]) === false) {
       throw new QueryError('bottomLeftCoord must be a [number, number]');
     }
 
-    if (!isArray(upperRightCoord) || !isNumber(upperRightCoord[0]) || !isNumber(upperRightCoord[1])) {
+    if (isArray(upperRightCoord) === false
+      || isNumber(upperRightCoord[0]) === false
+      || isNumber(upperRightCoord[1]) === false) {
       throw new QueryError('upperRightCoord must be a [number, number]');
     }
-
-    bottomLeftCoord[0] = parseFloat(bottomLeftCoord[0]);
-    bottomLeftCoord[1] = parseFloat(bottomLeftCoord[1]);
-    upperRightCoord[0] = parseFloat(upperRightCoord[0]);
-    upperRightCoord[1] = parseFloat(upperRightCoord[1]);
 
     const coords = [
       [bottomLeftCoord[0], bottomLeftCoord[1]],
@@ -667,7 +668,7 @@ export class Query {
    * @returns {Query} The query.
    */
   join(operator, queries) {
-    let that = this;
+    let that: Query = this;
     const currentQuery = {};
 
     // Cast, validate, and parse arguments. If `queries` are supplied, obtain
@@ -820,7 +821,13 @@ export class Query {
    * @returns {Object} Query string object.
    */
   toQueryString() {
-    const queryString = {};
+    const queryString = {
+      query: undefined,
+      fields: undefined,
+      limit: undefined,
+      skip: undefined,
+      sort: undefined
+    };
 
     if (!isEmpty(this.filter)) {
       queryString.query = this.filter;

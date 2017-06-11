@@ -19,16 +19,16 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "del dist coverage",
-    "cover": "istanbul cover _mocha -- --compilers js:babel-core/register -r babel-polyfill -s 100 --recursive test/index test",
+    "clean": "rm -rf dist && rm -rf coverage",
+    "cover": "istanbul cover _mocha -- --opts mocha.opts",
     "docs": "esdoc -c esdoc.json",
     "lint": "npm run lint:src",
     "lint:src": "eslint src/**",
     "lint:test": "eslint test/**",
     "preversion": "rm -rf node_modules && npm install && npm test",
     "postversion": "git push && git push --tags",
-    "test": "mocha -r ts-node/register -s 100 --recursive tests/datastore.test.ts",
-    "test:watch": "mocha -w --compilers js:babel-core/register -r babel-polyfill -s 100 --recursive test/index test",
+    "test": "mocha --opts mocha.opts",
+    "test:watch": "mocha --opts mocha.opts --watch",
     "transpile": "BABEL_ENV=production babel --no-comments --out-dir dist src"
   },
   "dependencies": {
@@ -75,7 +75,7 @@
     "nock": "9.0.13",
     "regenerator-runtime": "^0.9.5",
     "ts-node": "3.0.4",
-    "request": "2.81.0"
+    "request": "2.81.0",
     "typescript": "2.3.4"
   },
   "engines": {

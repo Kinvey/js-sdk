@@ -1,5 +1,5 @@
-import uid from 'uid';
+import uid = require('uid');
 
-export function randomString(size?: number, prefix = '') {
+export function randomString(size?: string, prefix = '') {
   return `${prefix}${uid(size)}`;
 }

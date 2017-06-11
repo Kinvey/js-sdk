@@ -1,0 +1,4 @@
+--compilers ts:ts-node/register
+--reporter spec
+--watch-extensions ts
+tests/**/*.spec.ts

@@ -1,30 +1,43 @@
-import assign from 'lodash/assign';
-import forEach from 'lodash/forEach';
-import isString from 'lodash/isString';
-import isObject from 'lodash/isObject';
-import isFunction from 'lodash/isFunction';
-import cloneDeep from 'lodash/cloneDeep';
+import assign = require('lodash/assign');
+import forEach = require('lodash/forEach');
+import isString = require('lodash/isString');
+import isObject = require('lodash/isObject');
+import isFunction = require('lodash/isFunction');
+import cloneDeep = require('lodash/cloneDeep');
 
-import { KinveyError } from 'src/errors';
-import { isDefined } from 'src/utils';
+import { KinveyError } from './errors/kinvey';
+import { isDefined } from './utils/object';
 import { Query } from './query';
 
-/**
- * @private
- */
+function createFunctionString(fn, ...args) {
+
+}
+
+export interface AggregationConfig {
+  query?: Query;
+  initial?: {};
+  key?: {};
+  reduce?: string;
+}
+
 export class Aggregation {
-  constructor(options) {
-    options = assign({
+  key: {};
+  reduce: string;
+  private _initial: {};
+  private _query: Query;
+
+  constructor(config?: AggregationConfig) {
+    config = assign({
       query: null,
       initial: {},
       key: {},
-      reduceFn: function () {}.toString()
-    }, options);
+      reduceFn: function () {}
+    }, config);
 
-    this.query = options.query;
-    this.initial = options.initial;
-    this.key = options.key;
-    this.reduceFn = options.reduceFn;
+    this.query = config.query;
+    this.initial = config.initial;
+    this.key = config.key;
+    this.reduce = config.reduce;
   }
 
   get initial() {
@@ -32,7 +45,7 @@ export class Aggregation {
   }
 
   set initial(initial) {
-    if (!isObject(initial)) {
+    if (isObject(initial) === false) {
       throw new KinveyError('initial must be an Object.');
     }
 
@@ -44,41 +57,25 @@ export class Aggregation {
   }
 
   set query(query) {
-    if (isDefined(query) && !(query instanceof Query)) {
+    if (isDefined(query) && (query instanceof Query) === false) {
       throw new KinveyError('Invalid query. It must be an instance of the Query class.');
     }
 
     this._query = query;
   }
 
-  get reduceFn() {
-    return this._reduceFn;
-  }
-
-  set reduceFn(fn) {
-    if (isFunction(fn)) {
-      fn = fn.toString();
-    }
-
-    if (!isString(fn)) {
-      throw new KinveyError('fn argument must be of type function or string.');
-    }
-
-    this._reduceFn = fn;
-  }
-
-  by(field) {
+  by(field: string): this {
     this.key[field] = true;
     return this;
   }
 
-  process(entities = []) {
+  process(entities = []): any {
     const aggregation = this.toPlainObject();
     const keys = Object.keys(aggregation.key);
-    const reduceFn = aggregation.reduceFn.replace(/function[\s\S]*?\([\s\S]*?\)/, '');
-    aggregation.reduce = new Function(['doc', 'out'], reduceFn); // eslint-disable-line no-new-func
+    const reduce = aggregation.reduce.toString().replace(/function[\s\S]*?\([\s\S]*?\)/, '');
+    aggregation.reduce = new Function('doc', 'result', reduce); // eslint-disable-line no-new-func
 
-    if (this.query) {
+    if (isDefined(this.query)) {
       entities = this.query.process(entities);
     }
 
@@ -119,88 +116,90 @@ export class Aggregation {
         result = newResult;
       }
     });
-    return [result];
+    return result;
   }
 
-  toPlainObject() {
+  toPlainObject(): any {
     return {
       key: this.key,
       initial: this.initial,
-      reduce: this.reduceFn,
-      reduceFn: this.reduceFn,
+      reduce: this.reduce,
+      reduceFn: this.reduce,
       condition: this.query ? this.query.toPlainObject().filter : {},
       query: this.query ? this.query.toPlainObject() : null
     };
   }
 
-  static count(field = '') {
+  static count(field = ''): Aggregation {
     field = field.replace('\'', '\\\'');
 
     const aggregation = new Aggregation();
-    aggregation.by(field);
     aggregation.initial = { count: 0 };
-    aggregation.reduceFn = ''
-      + 'function(doc, out) {'
-      + '  out.count += 1;'
-      + '  return out;'
-      + '}';
+    aggregation.by(field);
+    aggregation.reduce = `
+      function(doc, result) {
+        result.count += 1;
+        return result;
+      }
+    `;
     return aggregation;
   }
 
-  static sum(field = '') {
+  static sum(field = ''): Aggregation {
     field = field.replace('\'', '\\\'');
 
     const aggregation = new Aggregation();
-    // aggregation.by(field);
     aggregation.initial = { sum: 0 };
-    aggregation.reduceFn = ''
-      + 'function(doc, out) {'
-      + `  out.sum += doc["${field}"];`
-      + '  return out;'
-      + '}';
+    aggregation.reduce = `
+      function(doc, result) {
+        result.sum += doc["${field}"];
+        return result;
+      }
+    `;
+
     return aggregation;
   }
 
-  static min(field = '') {
+  static min(field = ''): Aggregation {
     field = field.replace('\'', '\\\'');
 
     const aggregation = new Aggregation();
-    // aggregation.by(field);
     aggregation.initial = { min: Infinity };
-    aggregation.reduceFn = ''
-      + 'function(doc, out) {'
-      + `  out.min = Math.min(out.min, doc["${field}"]);`
-      + '  return out;'
-      + '}';
+    aggregation.reduce = `
+      function(doc, result) {
+        result.min = Math.min(result.min, doc["${field}"]);
+        return result;
+      }
+    `;
     return aggregation;
   }
 
-  static max(field = '') {
+  static max(field = ''): Aggregation {
     field = field.replace('\'', '\\\'');
 
     const aggregation = new Aggregation();
-    // aggregation.by(field);
     aggregation.initial = { max: -Infinity };
-    aggregation.reduceFn = ''
-      + 'function(doc, out) {'
-      + `  out.max = Math.max(out.max, doc["${field}"]);`
-      + '  return out;'
-      + '}';
+    aggregation.reduce = `
+      function(doc, result) {
+        result.max = Math.max(result.max, doc["${field}"]);
+        return result;
+      }
+    `
     return aggregation;
   }
 
-  static average(field = '') {
+  static average(field = ''): Aggregation {
     field = field.replace('\'', '\\\'');
 
     const aggregation = new Aggregation();
-    // aggregation.by(field);
     aggregation.initial = { count: 0, average: 0 };
-    aggregation.reduceFn = ''
-      + 'function(doc, out) {'
-      + `  out.average = (out.average * out.count + doc["${field}"]) / (out.count + 1);`
-      + '  out.count += 1;'
-      + '  return out;'
-      + '}';
+    aggregation.reduce = `
+      function(doc, result) {
+        result.average = (result.average * result.count + doc["${field}"]) / (result.count + 1);
+        result.count += 1;
+        return result;
+      }
+    `
     return aggregation;
   }
 }
