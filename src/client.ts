@@ -1,9 +1,10 @@
-import url from 'url';
+import url = require('url');
 import * as _ from 'lodash';
 
-import { KinveyError } from 'src/errors';
-import { Log, isDefined } from 'src/utils';
-import { CacheRequest } from './request';
+import { KinveyError } from './errors';
+import { isDefined } from './utils/object';
+import { Log } from './utils/log';
+import { KinveyCacheRequest } from './request/kinvey';
 
 const defaultTimeout = process.env.KINVEY_DEFAULT_TIMEOUT || 60000;
 let sharedInstance = null;
@@ -11,7 +12,6 @@ let sharedInstance = null;
 export interface ClientConfig {
   apiHostname?: string;
   micHostname?: string;
-  liveServiceHostname?: string;
   appKey: string;
   appSecret?: string;
   masterSecret?: string;
@@ -29,8 +29,6 @@ export class Client {
   apiHost: string;
   micProtocol: string;
   micHost: string;
-  liveServiceProtocol: string;
-  liveServiceHost: string;
   appKey: string;
   appSecret?: string;
   masterSecret?: string;
@@ -61,7 +59,6 @@ export class Client {
     config = _.assign({
       apiHostname: 'https://baas.kinvey.com',
       micHostname: 'https://auth.kinvey.com',
-      liveServiceHostname: 'https://kls.kinvey.com'
     }, config);
 
     if (config.apiHostname && _.isString(config.apiHostname)) {
