@@ -1,7 +1,9 @@
 import url = require('url');
+import MemoryCache = require('fast-memory-cache');
 import assign = require('lodash/assign');
 import isNumber = require('lodash/isNumber');
 import isString = require('lodash/isString');
+import isFunction = require('lodash/isFunction');
 
 import { KinveyError } from './errors/kinvey';
 import { isDefined } from './utils/object';
@@ -36,6 +38,7 @@ export class Client {
   encryptionKey?: string;
   appVersion?: string;
   defaultTimeout?: number;
+  private storage: any;
 
   /**
    * Creates a new instance of the Client class.
@@ -122,6 +125,7 @@ export class Client {
     }
 
     this.defaultTimeout = config.defaultTimeout;
+    this.storage = new MemoryCache();
 
     // Freeze this client instance
     Object.freeze(this);
@@ -148,24 +152,37 @@ export class Client {
   }
 
   /**
-   * Returns an object containing all the information for this Client.
-   *
-   * @return {Object} Object
+   * Get the active user.
    */
-  toPlainObject(): {} {
-    return {
-      apiHostname: this.apiHostname,
-      apiProtocol: this.apiProtocol,
-      apiHost: this.apiHost,
-      micHostname: this.micHostname,
-      micProtocol: this.micProtocol,
-      micHost: this.micHost,
-      appKey: this.appKey,
-      appSecret: this.appSecret,
-      masterSecret: this.masterSecret,
-      encryptionKey: this.encryptionKey,
-      appVersion: this.appVersion
-    };
+  get activeUser() {
+    let value = this.storage.get(this.appKey);
+
+    try {
+      value = JSON.parse(value);
+    } catch (e) {
+        // Catch exception
+    }
+
+    return value;
+  }
+
+  /**
+   * Set the active user.
+   */
+  set activeUser(activeUser) {
+    if (isDefined(activeUser)) {
+      this.storage.set(this.appKey, JSON.stringify(activeUser));
+    } else {
+      if (isFunction(this.storage.remove)) {
+        this.storage.remove(this.appKey);
+      } else if (isFunction(this.storage.delete)) {
+        this.storage.delete(this.appKey);
+      }
+    }
+  }
+
+  useActiveUserStorage(StorageClass) {
+    this.storage = new StorageClass();
   }
 
   /**
@@ -183,11 +200,29 @@ export class Client {
    * @param {string}    [options.appVersion]                               App Version
    * @return {Promise}                                                     A promise.
    */
-  static initialize(config: ClientConfig) {
-    const client = new Client(config);
+  static initialize() {
+    throw new KinveyError('Please use Client.init().');
+  }
+
+  /**
+   * Initializes the Client class by creating a new instance of the
+   * Client class and storing it as a shared instance. The returned promise
+   * resolves with the shared instance of the Client class.
+   *
+   * @param {Object}    options                                            Options
+   * @param {string}    [options.apiHostname='https://baas.kinvey.com']    Host name used for Kinvey API requests
+   * @param {string}    [options.micHostname='https://auth.kinvey.com']    Host name used for Kinvey MIC requests
+   * @param {string}    [options.appKey]                                   App Key
+   * @param {string}    [options.appSecret]                                App Secret
+   * @param {string}    [options.masterSecret]                             App Master Secret
+   * @param {string}    [options.encryptionKey]                            App Encryption Key
+   * @param {string}    [options.appVersion]                               App Version
+   * @return {Promise}                                                     A promise.
+   */
+  static init(options) {
+    const client = new Client(options);
     sharedInstance = client;
-    return CacheRequest.loadActiveUser(client)
-      .then(() => client);
+    return client;
   }
 
   /**
@@ -200,7 +235,7 @@ export class Client {
    * @example
    * var client = Kinvey.Client.sharedInstance();
    */
-  static sharedInstance(): Client {
+  static sharedInstance() {
     if (isDefined(sharedInstance) === false) {
       throw new KinveyError('You have not initialized the library. ' +
         'Please call Kinvey.init() to initialize the library.');
