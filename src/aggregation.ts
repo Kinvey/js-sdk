@@ -9,10 +9,6 @@ import { KinveyError } from './errors/kinvey';
 import { isDefined } from './utils/object';
 import { Query } from './query';
 
-function createFunctionString(fn, ...args) {
-
-}
-
 export interface AggregationConfig {
   query?: Query;
   initial?: {};

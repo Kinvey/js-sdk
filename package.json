@@ -32,7 +32,6 @@
     "transpile": "BABEL_ENV=production babel --no-comments --out-dir dist src"
   },
   "dependencies": {
-    "buffer": "5.0.6",
     "es6-error": "4.0.2",
     "es6-promise": "4.1.0",
     "events": "1.1.1",

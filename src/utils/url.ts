@@ -1,16 +1,19 @@
-import url from 'url';
-import qs from 'qs';
-import assign from 'lodash/assign';
-import isArray from 'lodash/isArray';
-import isPlainObject from 'lodash/isPlainObject';
-import isString from 'lodash/isString';
-import isEmpty from 'lodash/isEmpty';
+import url = require('url');
+import qs = require('qs');
+import assign = require('lodash/assign');
+import isArray = require('lodash/isArray');
+import isPlainObject = require('lodash/isPlainObject');
+import isString = require('lodash/isString');
+import isEmpty = require('lodash/isEmpty');
 import { isDefined } from './object';
 
-/**
- * @private
- */
-function serialize(obj, options = {}, prefix) {
+export interface SerializeOptions {
+  removeNull: boolean;
+  encodeComponent: boolean;
+  encodeComponents: boolean;
+}
+
+function serialize(obj: any, options?: SerializeOptions, prefix?: string) {
   const str = [];
   let useArraySyntax = false;
 
@@ -46,10 +49,7 @@ function serialize(obj, options = {}, prefix) {
   return str.join('&');
 }
 
-/**
- * @private
- */
-export function appendQuery(uri, query, options = {}) {
+export function appendQuery(uri, query, options?: SerializeOptions) {
   const parts = url.parse(uri, true);
   const queryToAppend = isString(query) ? qs.parse(query) : query;
   const parsedQuery = assign({}, parts.query, queryToAppend);

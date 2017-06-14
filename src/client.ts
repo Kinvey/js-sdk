@@ -1,20 +1,19 @@
 import url = require('url');
-import MemoryCache = require('fast-memory-cache');
 import assign = require('lodash/assign');
-import isNumber = require('lodash/isNumber');
 import isString = require('lodash/isString');
-import isFunction = require('lodash/isFunction');
+import isNumber = require('lodash/isNumber');
 
 import { KinveyError } from './errors/kinvey';
 import { isDefined } from './utils/object';
 import { Log } from './utils/log';
-import { KinveyCacheRequest } from './request/kinvey';
 
+const defaultTimeout = 60000;
 let sharedInstance = null;
 
 export interface ClientConfig {
   apiHostname?: string;
   micHostname?: string;
+  liveServiceHostname?: string;
   appKey: string;
   appSecret?: string;
   masterSecret?: string;
@@ -28,8 +27,10 @@ export interface ClientConfig {
  * to send requests to different environments on the Kinvey platform.
  */
 export class Client {
+  apiHostname: string;
   apiProtocol: string;
   apiHost: string;
+  micHostname: string;
   micProtocol: string;
   micHost: string;
   appKey: string;
@@ -38,7 +39,6 @@ export class Client {
   encryptionKey?: string;
   appVersion?: string;
   defaultTimeout?: number;
-  private storage: any;
 
   /**
    * Creates a new instance of the Client class.
@@ -66,27 +66,31 @@ export class Client {
       defaultTimeout: 60000
     }, config);
 
-    if (isString(config.apiHostname) === false) {
+    this.apiHostname = config.apiHostname;
+
+    if (isString(this.apiHostname) === false) {
       throw new KinveyError('apiHostname must be a string');
     }
 
-    if (/^https?:\/\//i.test(config.apiHostname) === false) {
-      config.apiHostname = `https://${config.apiHostname}`;
+    if (/^https?:\/\//i.test(this.apiHostname) === false) {
+      this.apiHostname = `https://${this.apiHostname}`;
     }
 
-    const apiHostnameParsed = url.parse(config.apiHostname);
+    const apiHostnameParsed = url.parse(this.apiHostname);
     this.apiProtocol = apiHostnameParsed.protocol;
     this.apiHost = apiHostnameParsed.host;
 
-    if (isString(config.micHostname) === false) {
+    this.micHostname = config.micHostname;
+
+    if (isString(this.micHostname) === false) {
       throw new KinveyError('micHostname must be a string');
     }
 
     if (/^https?:\/\//i.test(this.micHostname) === false) {
-      config.micHostname = `https://${config.micHostname}`;
+      this.micHostname = `https://${this.micHostname}`;
     }
 
-    const micHostnameParsed = url.parse(config.micHostname);
+    const micHostnameParsed = url.parse(this.micHostname);
     this.micProtocol = micHostnameParsed.protocol;
     this.micHost = micHostnameParsed.host
 
@@ -115,74 +119,19 @@ export class Client {
      */
     this.appVersion = config.appVersion;
 
-    if (isNumber(config.defaultTimeout) === false || isNaN(config.defaultTimeout)) {
+    this.defaultTimeout = config.defaultTimeout;
+
+    if (isNumber(this.defaultTimeout) === false || isNaN(this.defaultTimeout)) {
       throw new KinveyError('Invalid default timeout. Default timeout must be a number.');
     }
 
-    if (config.defaultTimeout < 0) {
+    if (this.defaultTimeout < 0) {
       Log.info('Default timeout is less than 0. Setting default timeout to 60000ms.');
-      config.defaultTimeout = 60000;
+      this.defaultTimeout = 60000;
     }
-
-    this.defaultTimeout = config.defaultTimeout;
-    this.storage = new MemoryCache();
 
     // Freeze this client instance
     Object.freeze(this);
-  }
-
-  /**
-   * API host name used for Kinvey API requests.
-   */
-  get apiHostname(): string {
-    return url.format({
-      protocol: this.apiProtocol,
-      host: this.apiHost
-    });
-  }
-
-  /**
-   * Mobile Identity Connect host name used for MIC requests.
-   */
-  get micHostname(): string {
-    return url.format({
-      protocol: this.micProtocol,
-      host: this.micHost
-    });
-  }
-
-  /**
-   * Get the active user.
-   */
-  get activeUser() {
-    let value = this.storage.get(this.appKey);
-
-    try {
-      value = JSON.parse(value);
-    } catch (e) {
-        // Catch exception
-    }
-
-    return value;
-  }
-
-  /**
-   * Set the active user.
-   */
-  set activeUser(activeUser) {
-    if (isDefined(activeUser)) {
-      this.storage.set(this.appKey, JSON.stringify(activeUser));
-    } else {
-      if (isFunction(this.storage.remove)) {
-        this.storage.remove(this.appKey);
-      } else if (isFunction(this.storage.delete)) {
-        this.storage.delete(this.appKey);
-      }
-    }
-  }
-
-  useActiveUserStorage(StorageClass) {
-    this.storage = new StorageClass();
   }
 
   /**

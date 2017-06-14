@@ -1,5 +1,14 @@
-import uid = require('uid');
+function uid(size = 10) {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-export function randomString(size?: string, prefix = '') {
+  for (let i = 0; i < size; i += 1) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+
+  return text;
+}
+
+export function randomString(size?: number, prefix = '') {
   return `${prefix}${uid(size)}`;
 }

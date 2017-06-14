@@ -1,12 +1,16 @@
+import { Promise } from 'es6-promise';
 import assign = require('lodash/assign');
 import isEmpty = require('lodash/isEmpty');
 import cloneDeep = require('lodash/cloneDeep');
-import appendQuery = require('append-query');
+import isArray = require('lodash/isArray');
+import keyBy = require('lodash/keyBy');
+import values = require('lodash/values');
+import url = require('url');
 import qs = require('qs');
 import UrlPattern = require('url-pattern');
 
 import { Request, RequestMethod, RequestOptions, RequestObject } from './';
-import { KinveyResponse } from './response';
+import { KinveyResponse, StatusCode } from './response';
 import { Properties } from './properties';
 import { Header } from './headers';
 import { CacheRack, NetworkRack } from '../rack';
@@ -14,44 +18,48 @@ import { Client } from '../client';
 import { Query } from '../query';
 import { Aggregation } from '../aggregation';
 import { isDefined } from '../utils/object';
+import { appendQuery } from '../utils/url';
+import { Entity } from '../entity';
+import { ActiveUserHelper } from '../entity/activeUserHelper';
 import {
     KinveyError,
     InvalidCredentialsError,
-    NoActiveUserError
+    NoActiveUserError,
+    NotFoundError
 } from '../errors';
 
 export const enum AuthType {
-    All,
-    App,
-    Basic,
-    Default,
-    Master,
-    None,
-    Session
+  All,
+  App,
+  Basic,
+  Default,
+  Master,
+  None,
+  Session
 }
 
 export interface KinveyRequestOptions extends RequestOptions {
-    client?: Client;
-    authType?: AuthType;
-    query?: Query;
-    aggregation?: Aggregation;
-    properties?: Properties;
-    skipBL?: boolean;
-    trace?: boolean;
+  client?: Client;
+  authType?: AuthType;
+  query?: Query;
+  aggregation?: Aggregation;
+  properties?: Properties;
+  skipBL?: boolean;
+  trace?: boolean;
 }
 
 export interface KinveyRequestObject extends RequestObject {
-    appKey?: string;
-    encryptionKey?: string;
-    collection?: string;
-    entityId?: string;
+  appKey?: string;
+  encryptionKey?: string;
+  collection?: string;
+  entityId?: string;
 }
 
 export interface AuthObject {
-    scheme: string;
-    username?: string;
-    password?: string;
-    credentials?: string;
+  scheme: string;
+  username?: string;
+  password?: string;
+  credentials?: string;
 }
 
 const Auth = {
@@ -100,7 +108,7 @@ const Auth = {
     },
 
     session(client: Client): Promise<AuthObject> {
-        const activeUser = CacheRequest.getActiveUser(client);
+        const activeUser = ActiveUserHelper.get(client);
 
         if (isDefined(activeUser) === false) {
             return Promise.reject(
@@ -132,7 +140,7 @@ function byteCount(str) {
   return 0;
 }
 
-export class KinveyRequest extends Request {
+class KinveyRequest extends Request {
     authType: AuthType;
     skipBL = false;
     trace = false;
@@ -282,6 +290,10 @@ export class KinveyRequest extends Request {
         return appendQuery(urlString, qs.stringify(queryString));
     }
 
+    set url(urlString) {
+        this._url = urlString;
+    }
+
     get properties() {
         return this._properties;
     }
@@ -335,7 +347,7 @@ export class KinveyRequest extends Request {
                     let credentials = authInfo.credentials;
 
                     if (isDefined(authInfo.username)) {
-                        credentials = new Buffer(`${authInfo.username}:${authInfo.password}`).toString('base64');
+                        credentials = btoa(`${authInfo.username}:${authInfo.password}`);
                     }
 
                     return {
@@ -374,54 +386,51 @@ export class KinveyRequest extends Request {
 }
 
 export class KinveyCacheRequest extends KinveyRequest {
-    private appKey?: string;
-    private collection?: string;
-    private entityId?: string;
+  private appKey?: string;
+  private collection?: string;
+  private entityId?: string;
 
-    constructor(options: KinveyRequestOptions) {
-        super(options);
-        this.rack = CacheRack;
-    }
+  constructor(options: KinveyRequestOptions) {
+    super(options);
+    this.rack = CacheRack;
+  }
 
-    set body(body) {
-        this.body = cloneDeep(body);
-    }
+  set body(body) {
+    this.body = cloneDeep(body);
+  }
 
-    set url(urlString) {
-        super.url = urlString;
-        const pathname = global.escape(url.parse(urlString).pathname);
-        const pattern = new UrlPattern('(/:namespace)(/)(:appKey)(/)(:collection)(/)(:entityId)(/)');
-        const { appKey, collection, entityId } = pattern.match(pathname) || {};
-        this.appKey = appKey;
-        this.collection = collection;
-        this.entityId = entityId;
-    }
+  execute(): Promise<KinveyResponse> {
+    const pathname = encodeURI(url.parse(this.url).pathname);
+    const pattern = new UrlPattern('(/:namespace)(/)(:appKey)(/)(:collection)(/)(:entityId)(/)');
+    const { appKey, collection, entityId } = pattern.match(pathname) || { appKey: undefined, collection: undefined, entityId: undefined };
+    this.appKey = appKey;
+    this.collection = collection;
+    this.entityId = entityId;
 
-    execute() {
-        return super.execute()
-            .then((response) => {
-                // If a query was provided then process the data with the query
-                if (isDefined(this.query) && isDefined(response.data)) {
-                    response.data = this.query.process(response.data);
-                }
+    return super.execute()
+      .then((response: KinveyResponse) => {
+        // If a query was provided then process the data with the query
+        if (isDefined(this.query) && isDefined(response.data)) {
+          response.data = this.query.process(response.data);
+        }
 
-                // If an aggregation was provided then process the data with the aggregation
-                if (isDefined(this.aggregation) && isDefined(response.data)) {
-                    response.data = this.aggregation.process(response.data);
-                }
+        // If an aggregation was provided then process the data with the aggregation
+        if (isDefined(this.aggregation) && isDefined(response.data)) {
+          response.data = this.aggregation.process(response.data);
+        }
 
-                return response;
-            });
-    }
+        return response;
+      });
+  }
 
-    toPlainObject(): KinveyRequestObject {
-        const obj = <KinveyRequestObject>super.toPlainObject();
-        obj.appKey = this.appKey;
-        obj.collection = this.collection;
-        obj.entityId = this.entityId;
-        obj.encryptionKey = this.client ? this.client.encryptionKey : undefined;
-        return obj;
-    }
+  toPlainObject(): KinveyRequestObject {
+    const obj = <KinveyRequestObject>super.toPlainObject();
+    obj.appKey = this.appKey;
+    obj.collection = this.collection;
+    obj.entityId = this.entityId;
+    obj.encryptionKey = this.client ? this.client.encryptionKey : undefined;
+    return obj;
+  }
 }
 
 export class KinveyNetworkRequest extends KinveyRequest {
@@ -429,4 +438,141 @@ export class KinveyNetworkRequest extends KinveyRequest {
         super(options);
         this.rack = NetworkRack;
     }
+}
+
+export class KinveyDeltaFetchRequest extends KinveyNetworkRequest {
+  execute(): Promise<KinveyResponse> {
+    const request = new KinveyCacheRequest({
+      method: RequestMethod.GET,
+      url: this.url,
+      headers: this.headers,
+      query: this.query,
+      timeout: this.timeout,
+      client: this.client
+    });
+    return request.execute()
+      .then(response => response.data)
+      .catch((error: Error) => {
+        if ((error instanceof NotFoundError) === false) {
+          throw error;
+        }
+
+        return [];
+      })
+      .then((cacheData: Entity[]) => {
+        if (isArray(cacheData) && cacheData.length > 0) {
+          const cacheDocuments = keyBy(cacheData, '_id');
+          const query = new Query(this.query);
+          query.fields = ['_id', '_kmd.lmt'];
+          const request = new KinveyNetworkRequest({
+            method: RequestMethod.GET,
+            url: this.url,
+            headers: this.headers,
+            authType: this.authType,
+            query: query,
+            timeout: this.timeout,
+            client: this.client,
+            properties: this.properties,
+            skipBL: this.skipBL,
+            trace: this.trace,
+            followRedirect: this.followRedirect
+          });
+
+          return request.execute()
+            .then(response => response.data)
+            .then((networkData: Entity[]) => {
+              const networkDocuments = keyBy(networkData, '_id');
+              const deltaSet = networkDocuments;
+              const cacheDocumentIds = Object.keys(cacheDocuments);
+
+              cacheDocumentIds.forEach((id) => {
+                const cacheDocument = cacheDocuments[id];
+                const networkDocument = networkDocuments[id];
+
+                if (networkDocument) {
+                  if (isDefined(networkDocument._kmd) && isDefined(cacheDocument._kmd)
+                      && networkDocument._kmd.lmt === cacheDocument._kmd.lmt) {
+                    delete deltaSet[id];
+                  } else {
+                    delete cacheDocuments[id];
+                  }
+                } else {
+                  delete cacheDocuments[id];
+                }
+              });
+
+              const deltaSetIds = Object.keys(deltaSet);
+              const promises = [];
+              let i = 0;
+
+              while (i < deltaSetIds.length) {
+                const query = new Query(this.query);
+                const ids = deltaSetIds.slice(i, deltaSetIds.length > 200 + i ? 200 : deltaSetIds.length);
+                query.contains('_id', ids);
+
+                const request = new KinveyNetworkRequest({
+                  method: RequestMethod.GET,
+                  url: this.url,
+                  headers: this.headers,
+                  authType: this.authType,
+                  query: query,
+                  timeout: this.timeout,
+                  client: this.client,
+                  properties: this.properties,
+                  skipBL: this.skipBL,
+                  trace: this.trace,
+                  followRedirect: this.followRedirect
+                });
+
+                const promise = request.execute();
+                promises.push(promise);
+                i += 200;
+              }
+
+              return Promise.all(promises);
+            })
+            .then((responses: KinveyResponse[]) => {
+              const response = responses.reduce((result, response) => {
+                if (response.isSuccess()) {
+                  const headers = result.headers;
+                  headers.addAll(response.headers);
+                  result.headers = headers;
+                  result.data = result.data.concat(response.data);
+                }
+
+                return result;
+              }, new KinveyResponse({
+                statusCode: StatusCode.Ok,
+                data: []
+              }));
+
+              response.data = response.data.concat(values(cacheDocuments));
+
+              if (isDefined(this.query)) {
+                const query = new Query(this.query);
+                query.skip = 0;
+                query.limit = 0;
+                response.data = query.process(response.data);
+              }
+
+              return response;
+            });
+        }
+
+        const request = new KinveyNetworkRequest({
+          method: RequestMethod.GET,
+          url: this.url,
+          headers: this.headers,
+          authType: this.authType,
+          query: this.query,
+          timeout: this.timeout,
+          client: this.client,
+          properties: this.properties,
+          skipBL: this.skipBL,
+          trace: this.trace,
+          followRedirect: this.followRedirect
+        });
+        return request.execute();
+      });
+  }
 }

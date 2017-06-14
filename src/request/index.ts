@@ -8,11 +8,10 @@ import { Response } from './response';
 import { Headers } from './headers';
 import { Rack } from '../rack';
 import { Client } from '../client';
-import { isDefined } from '../object';
-import {
-  KinveyError,
-  NoResponseError
-} from '../errors';
+import { isDefined } from '../utils/object';
+import { Properties } from './properties';
+import { KinveyError } from '../errors/kinvey';
+import { NoResponseError } from '../errors/noResponse';
 
 /**
  * @private
@@ -32,10 +31,9 @@ export interface RequestOptions {
   url?: string;
   body?: any;
   data?: any;
-  properties?: {};
+  properties?: Properties;
   timeout?: number;
   followRedirect?: boolean;
-  cacheBust?: boolean;
 }
 
 export interface RequestObject {
@@ -49,8 +47,8 @@ export interface RequestObject {
 
 export class Request {
   method: RequestMethod;
+  url: string;
   body?: any;
-  cacheBust = false;
   protected rack?: Rack;
   protected _headers: Headers;
   protected _url: string;
@@ -66,9 +64,7 @@ export class Request {
     this.headers = options.headers || new Headers();
     this.url = options.url || '';
     this.body = options.body || options.data;
-    this.timeout = isDefined(options.timeout) ? options.timeout : this.client.defaultTimeout;
     this.followRedirect = options.followRedirect === true;
-    this.cacheBust = options.cacheBust === true;
   }
 
   get headers() {
@@ -81,22 +77,6 @@ export class Request {
     }
 
     this._headers = headers;
-  }
-
-  get url() {
-    // If `cache` is true, add a cache busting query string.
-    // This is useful for Android < 4.0 which caches all requests aggressively.
-    if (this.cacheBust === true) {
-      return appendQuery(this._url, qs.stringify({
-        _: Math.random().toString(36).substr(2)
-      }));
-    }
-
-    return this._url;
-  }
-
-  set url(urlString) {
-    this._url = urlString;
   }
 
   get data() {

@@ -1,16 +1,24 @@
-import url from 'url';
-import isString from 'lodash/isString';
+import { Promise } from 'es6-promise';
+import url = require('url');
+import isString = require('lodash/isString');
+import differenceBy = require('lodash/differenceBy');
+import keyBy = require('lodash/keyBy');
+import isArray = require('lodash/isArray');
+import remove = require('lodash/remove');
 
-import { CacheRequest } from './request/cache';
-import { KinveyError } from './errors';
-import { isDefined } from './object';
-import { Client } from './client';
-import { KinveyObservable } from './observable';
-import { AuthType, RequestOptions, RequestMethod } from './request/request';
-import { KinveyRequest } from './request/network';
-import { DeltaFetchRequest } from './request/deltafetch.js';
-import { Query } from './query';
-import { Aggregation } from './aggregation';
+import { CacheRequest } from '../request/cache';
+import { KinveyError } from '../errors/kinvey';
+import { SyncError } from '../errors/sync';
+import { NotFoundError } from '../errors/notFound';
+import { isDefined } from '../utils/object';
+import { Client } from '../client';
+import { KinveyObservable } from '../utils/observable';
+import { RequestOptions, RequestMethod } from '../request';
+import { AuthType, KinveyCacheRequest, KinveyNetworkRequest, KinveyDeltaFetchRequest } from '../request/kinvey';
+import { Query } from '../query';
+import { Aggregation } from '../aggregation';
+import { Entity } from '../entity';
+import { Metadata } from '../entity/metadata';
 
 const pushInProgress = new Map();
 
@@ -26,6 +34,22 @@ export enum DataStoreType {
   Sync
 }
 
+interface SyncEntity extends Entity {
+  collection: string;
+  state: {
+    method?: RequestMethod
+    operation?: RequestMethod
+  },
+  entityId: string;
+}
+
+export interface PushSyncResult<T extends Entity> {
+  _id: string;
+  operation: RequestMethod;
+  entity?: T;
+  error?: Error;
+}
+
 export interface DataStoreConfig {
   client?: Client;
   useDeltaFetch?: boolean;
@@ -34,12 +58,13 @@ export interface DataStoreConfig {
 
 export interface DataStoreRequestOptions extends RequestOptions {
   useDeltaFetch?: boolean;
+  client?: Client;
 }
 
 /**
  * The DataStore class is used to find, create, update, remove, count and group entities.
  */
-export class DataStore {
+export class DataStore<T extends Entity> {
   collection: string;
   type = DataStoreType.Network;
   config: DataStoreConfig;
@@ -115,7 +140,7 @@ export class DataStore {
    * @param   {Boolean}               [options.useDeltaFetch]             Turn on or off the use of delta fetch.
    * @return  {Observable}                                                Observable.
    */
-  find(query?: Query, options?: DataStoreRequestOptions) {
+  find(query?: Query, options?: DataStoreRequestOptions): KinveyObservable<T[]> {
     return KinveyObservable.create((observer) => {
       if (isDefined(query) && (query instanceof Query) === false) {
         return observer.error(new KinveyError('Invalid query. It must be an instance of the Query class.'));
@@ -124,7 +149,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.GET,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -172,7 +197,7 @@ export class DataStore {
         .then((cacheEntities) => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Network) {
             const useDeltaFetch = options.useDeltaFetch === true || this.config.useDeltaFetch === true;
-            let request = new KinveyRequest({
+            let request = new KinveyNetworkRequest({
               method: RequestMethod.GET,
               authType: AuthType.Default,
               url: url.format({
@@ -187,7 +212,7 @@ export class DataStore {
             });
 
             if (useDeltaFetch === true) {
-              request = new DeltaFetchRequest(request);
+              request = new KinveyDeltaFetchRequest(request);
             }
 
             return request.execute()
@@ -205,16 +230,16 @@ export class DataStore {
               })
               .then((networkEntities) => {
                 if (this.type === DataStoreType.Cache) {
-                  const request = new CacheRequest({
+                  const request = new KinveyCacheRequest({
                     method: RequestMethod.PUT,
                     url: url.format({
                       protocol: this.client.apiProtocol,
                       host: this.client.apiHost,
                       pathname: this.pathname
                     }),
-                    properties: options.properties,
                     body: networkEntities,
-                    timeout: options.timeout
+                    timeout: options.timeout,
+                    properties: options.properties
                   });
                   return request.execute()
                     .then(response => response.data);
@@ -243,7 +268,7 @@ export class DataStore {
    * @param   {Boolean}               [options.useDeltaFetch]          Turn on or off the use of delta fetch.
    * @return  {Observable}                                             Observable.
    */
-  findById(id: string, options?: DataStoreRequestOptions) {
+  findById(id: string, options?: DataStoreRequestOptions): KinveyObservable<T|undefined> {
     return KinveyObservable.create((observer) => {
       if (isDefined(id) === false) {
         observer.next(undefined);
@@ -253,7 +278,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.GET,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -302,7 +327,7 @@ export class DataStore {
         .then((cacheEntity) => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Network) {
             const useDeltaFetch = options.useDeltaFetch === true || this.config.useDeltaFetch === true;
-            let request = new KinveyRequest({
+            let request = new KinveyNetworkRequest({
               method: RequestMethod.GET,
               authType: AuthType.Default,
               url: url.format({
@@ -316,14 +341,14 @@ export class DataStore {
             });
 
             if (useDeltaFetch === true) {
-              request = new DeltaFetchRequest(request);
+              request = new KinveyDeltaFetchRequest(request);
             }
 
             return request.execute()
               .then(response => response.data)
               .then((networkEntity) => {
                 if (this.type === DataStoreType.Cache) {
-                  const request = new CacheRequest({
+                  const request = new KinveyCacheRequest({
                     method: RequestMethod.PUT,
                     url: url.format({
                       protocol: this.client.apiProtocol,
@@ -360,7 +385,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                   Timeout for the request.
    * @return  {Observable}                                                Observable.
    */
-  group(aggregation: Aggregation, options?: DataStoreRequestOptions) {
+  group(aggregation: Aggregation, options?: DataStoreRequestOptions): KinveyObservable<any> {
     return KinveyObservable.create((observer) => {
       if ((aggregation instanceof Aggregation) === false) {
         return observer.error(new KinveyError('Invalid aggregation. It must be an instance of the Aggregation class.'));
@@ -369,7 +394,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.POST,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -417,7 +442,7 @@ export class DataStore {
         .then((cacheAggregate) => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Network) {
             const useDeltaFetch = options.useDeltaFetch === true || this.config.useDeltaFetch === true;
-            const request = new KinveyRequest({
+            const request = new KinveyNetworkRequest({
               method: RequestMethod.POST,
               authType: AuthType.Default,
               url: url.format({
@@ -456,7 +481,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                Timeout for the request.
    * @return  {Observable}                                             Observable.
    */
-  count(query?: Query, options?: DataStoreRequestOptions) {
+  count(query?: Query, options?: DataStoreRequestOptions): KinveyObservable<number> {
      return KinveyObservable.create((observer) => {
       if (isDefined(query) && (query instanceof Query) === false) {
         return observer.error(new KinveyError('Invalid query. It must be an instance of the Query class.'));
@@ -465,7 +490,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.GET,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -488,7 +513,7 @@ export class DataStore {
         })
         .then((cacheCount) => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Network) {
-            let request = new KinveyRequest({
+            let request = new KinveyNetworkRequest({
               method: RequestMethod.GET,
               authType: AuthType.Default,
               url: url.format({
@@ -524,7 +549,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                 Timeout for the request.
    * @return  {Promise}                                                 Promise.
    */
-  create(entity: {}, options?: DataStoreRequestOptions) {
+  create(entity: T, options?: DataStoreRequestOptions): Promise<T> {
     return KinveyObservable.create((observer) => {
       if (isDefined(entity) === false) {
         observer.next(null);
@@ -541,7 +566,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.POST,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -555,7 +580,7 @@ export class DataStore {
             return request.execute()
               .then(response => response.data)
               .then((entity) => {
-                return this.syncManager.addCreateOperation(entity, options)
+                return this.addCreateOperation(entity, options)
                   .then(() => entity);
               })
               .then((entity) => {
@@ -583,7 +608,7 @@ export class DataStore {
         })
         .then(() => {
           if (this.type === DataStoreType.Network) {
-            const request = new KinveyRequest({
+            const request = new KinveyNetworkRequest({
               method: RequestMethod.POST,
               authType: AuthType.Default,
               url: url.format({
@@ -618,7 +643,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                 Timeout for the request.
    * @return  {Promise}                                                 Promise.
    */
-  update(entity: {}, options?: DataStoreRequestOptions) {
+  update(entity: T, options?: DataStoreRequestOptions): Promise<T> {
     return KinveyObservable.create((observer) => {
       if (isDefined(entity) === false) {
         observer.next(null);
@@ -642,7 +667,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.PUT,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -656,7 +681,7 @@ export class DataStore {
             return request.execute()
               .then(response => response.data)
               .then((entity) => {
-                return this.syncManager.addUpdateOperation(entity, options)
+                return this.addUpdateOperation(entity, options)
                   .then(() => entity);
               })
               .then((entity) => {
@@ -684,7 +709,7 @@ export class DataStore {
         })
         .then(() => {
           if (this.type === DataStoreType.Network) {
-            const request = new KinveyRequest({
+            const request = new KinveyNetworkRequest({
               method: RequestMethod.PUT,
               authType: AuthType.Default,
               url: url.format({
@@ -719,7 +744,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                 Timeout for the request.
    * @return  {Promise}                                                 Promise.
    */
-  save(entity: {}, options?: DataStoreRequestOptions) {
+  save(entity: T, options?: DataStoreRequestOptions): Promise<T> {
     if (isDefined(entity._id)) {
       return this.update(entity, options);
     }
@@ -749,7 +774,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.GET,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -774,7 +799,7 @@ export class DataStore {
                         .then(() => entity);
                     }
 
-                    return this.syncManager.addDeleteOperation(entity, options)
+                    return this.addDeleteOperation(entity, options)
                       .then(() => entity);
                   }))
                   .then(() => entities);
@@ -793,7 +818,7 @@ export class DataStore {
                   const query = new Query()
                   query.contains('_id', ids);
                   return this.push(query, options)
-                    .then(results => results.concat(localEntities));
+                    .then(results => results.concat(localEntities as any));
                 }
 
                 return entities;
@@ -801,7 +826,7 @@ export class DataStore {
               .then((results) => {
                 return Promise.all(results.map((result) => {
                   if (isDefined(result.error) === false) {
-                    const request = new CacheRequest({
+                    const request = new KinveyCacheRequest({
                       method: RequestMethod.DELETE,
                       authType: AuthType.Default,
                       url: url.format({
@@ -819,8 +844,8 @@ export class DataStore {
                   return { count: 0 };
                 }));
               })
-              .then((results) => {
-                return reduce(results, (totalResult, result) => {
+              .then((results: { count: number }[]) => {
+                return results.reduce((totalResult, result) => {
                   totalResult.count += result.count;
                   return totalResult;
                 }, { count: 0 });
@@ -831,7 +856,7 @@ export class DataStore {
           return [];
         })
         .then(() => {
-          const request = new KinveyRequest({
+          const request = new KinveyNetworkRequest({
             method: RequestMethod.DELETE,
             authType: AuthType.Default,
             url: url.format({
@@ -868,7 +893,7 @@ export class DataStore {
       Promise.resolve()
         .then(() => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Sync) {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.GET,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -898,7 +923,7 @@ export class DataStore {
                       .then(() => entity);
                   }
 
-                  return this.syncManager.addDeleteOperation(entity, options)
+                  return this.addDeleteOperation(entity, options)
                     .then(() => entity);
                 }
 
@@ -916,7 +941,7 @@ export class DataStore {
               })
               .then((entity) => {
                 if (isDefined(entity)) {
-                  const request = new CacheRequest({
+                  const request = new KinveyCacheRequest({
                     method: RequestMethod.DELETE,
                     authType: AuthType.Default,
                     url: url.format({
@@ -938,7 +963,7 @@ export class DataStore {
         })
         .then(() => {
           if (this.type === DataStoreType.Network) {
-            const request = new KinveyRequest({
+            const request = new KinveyNetworkRequest({
               method: RequestMethod.DELETE,
               authType: AuthType.Default,
               url: url.format({
@@ -983,7 +1008,7 @@ export class DataStore {
       ));
     }
 
-    const request = new CacheRequest({
+    const request = new KinveyCacheRequest({
       method: RequestMethod.GET,
       url: url.format({
         protocol: this.client.apiProtocol,
@@ -1015,7 +1040,7 @@ export class DataStore {
             })
             .then((entity) => {
               // Remove from cache
-              const request = new CacheRequest({
+              const request = new KinveyCacheRequest({
                 method: RequestMethod.DELETE,
                 authType: AuthType.Default,
                 url: url.format({
@@ -1031,11 +1056,82 @@ export class DataStore {
             });
         }));
       })
-      .then((results) => {
-        return reduce(results, (totalResult, result) => {
+      .then((results: { count: number }[]) => {
+        return results.reduce((totalResult, result) => {
           totalResult.count += result.count;
           return totalResult;
         }, { count: 0 });
+      });
+  }
+
+  private addCreateOperation(entity, options: DataStoreRequestOptions) {
+    return this.addOperation(RequestMethod.POST, entity, options);
+  }
+
+  private addUpdateOperation(entity, options: DataStoreRequestOptions) {
+    return this.addOperation(RequestMethod.PUT, entity, options);
+  }
+
+  private addDeleteOperation(entity, options: DataStoreRequestOptions) {
+    return this.addOperation(RequestMethod.DELETE, entity, options);
+  }
+
+  private addOperation(operation = RequestMethod.POST, entity: T, options: DataStoreRequestOptions): Promise<T> {
+    // Just return null if nothing was provided
+    // to be added to the sync table
+    if (isDefined(entity) === false) {
+      return Promise.resolve(null);
+    }
+
+    // Validate that the entity has an id
+    const id = entity._id;
+    if (isDefined(id) === false) {
+      return Promise.reject(
+        new SyncError('An entity is missing an _id. All entities must have an _id in order to be added to the sync table.')
+      );
+    }
+
+    // Find an existing sync operation for the entity
+    const query = new Query().equalTo('entityId', id);
+    const findRequest = new KinveyCacheRequest({
+      method: RequestMethod.GET,
+      url: url.format({
+        protocol: this.client.apiProtocol,
+        host: this.client.apiHost,
+        pathname: this.pathname
+      }),
+      query: query,
+      timeout: options.timeout,
+      properties: options.properties
+    });
+    return findRequest.execute()
+      .then(response => response.data)
+      .then((entities) => {
+        const syncEntity = entities.length === 1
+          ? entities[0]
+          : { collection: this.collection, state: {}, entityId: id };
+
+        // Update the state
+        syncEntity.state = syncEntity.state || {};
+        syncEntity.state.operation = operation;
+
+        // Send a request to save the sync entity
+        const request = new KinveyCacheRequest({
+          method: RequestMethod.PUT,
+          url: url.format({
+            protocol: this.client.apiProtocol,
+            host: this.client.apiHost,
+            pathname: this.pathname
+          }),
+          body: syncEntity,
+          timeout: options.timeout,
+          properties: options.properties,
+          client: this.client
+        });
+        return request.execute();
+      })
+      .then(() => {
+        return entity;
       });
   }
 
@@ -1052,7 +1148,7 @@ export class DataStore {
    *                                                                            from the local cache.
    * @return  {Promise}                                                         Promise
    */
-  pendingSyncEntities(query?: Query, options?: DataStoreRequestOptions) {
+  pendingSyncEntities(query?: Query, options?: DataStoreRequestOptions): Promise<SyncEntity[]> {
     if (this.type === DataStoreType.Network) {
       return Promise.reject(new KinveyError(
         'A Network DataStore does not support sync. Please use a Cache or Sync DataStore.'
@@ -1065,7 +1161,7 @@ export class DataStore {
       ));
     }
 
-    const request = new CacheRequest({
+    const request = new KinveyCacheRequest({
       method: RequestMethod.GET,
       url: url.format({
         protocol: this.client.apiProtocol,
@@ -1087,7 +1183,7 @@ export class DataStore {
           syncQuery.contains('entityId', entities.map(entity => entity._id));
         }
 
-        const request = new CacheRequest({
+        const request = new KinveyCacheRequest({
           method: RequestMethod.GET,
           url: url.format({
             protocol: this.client.apiProtocol,
@@ -1117,7 +1213,7 @@ export class DataStore {
    *                                                                            from the local cache.
    * @return  {Promise}                                                         Promise
    */
-  pendingSyncCount(query?: Query, options?: DataStoreRequestOptions) {
+  pendingSyncCount(query?: Query, options?: DataStoreRequestOptions): Promise<number> {
     return this.pendingSyncEntities(query, options)
       .then(entities => entities.length);
   }
@@ -1133,7 +1229,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                         Timeout for the request.
    * @return  {Promise}                                                         Promise
    */
-  push(query?: Query, options?: DataStoreRequestOptions) {
+  push(query?: Query, options?: DataStoreRequestOptions): Promise<PushSyncResult<T>[]> {
     const batchSize = 100;
     let i = 0;
 
@@ -1176,15 +1272,15 @@ export class DataStore {
                 const { entityId, state = {} } = syncEntity;
                 const operation = state.operation || state.method;
 
-                if (operation === SyncOperation.Delete) {
+                if (operation === RequestMethod.DELETE) {
                   // Remove the entity from the network.
-                  const request = new KinveyRequest({
+                  const request = new KinveyNetworkRequest({
                     method: RequestMethod.DELETE,
                     authType: AuthType.Default,
                     url: url.format({
                       protocol: this.client.apiProtocol,
                       host: this.client.apiHost,
-                      pathname: `${this.backendPathname}/${entityId}`
+                      pathname: `${this.pathname}/${entityId}`
                     }),
                     properties: options.properties,
                     timeout: options.timeout,
@@ -1193,12 +1289,12 @@ export class DataStore {
                   return request.execute()
                     .then(() => {
                       // Remove the sync entity from the cache
-                      const request = new CacheRequest({
+                      const request = new KinveyCacheRequest({
                         method: RequestMethod.DELETE,
                         url: url.format({
                           protocol: this.client.apiProtocol,
                           host: this.client.apiHost,
-                          pathname: `${this.pathname}/${syncEntity._id}`
+                          pathname: `/appdata/${this.client.appKey}/kinvey_sync/${syncEntity._id}`
                         }),
                         properties: options.properties,
                         timeout: options.timeout
@@ -1219,16 +1315,16 @@ export class DataStore {
                       };
                       return result;
                     });
-                } else if (operation === SyncOperation.Create || operation === SyncOperation.Update) {
+                } else if (operation === RequestMethod.POST || operation === RequestMethod.PUT) {
                   let local = false;
 
                   // Get the entity from cache
-                  const request = new CacheRequest({
+                  const request = new KinveyCacheRequest({
                     method: RequestMethod.GET,
                     url: url.format({
                       protocol: this.client.apiProtocol,
                       host: this.client.apiHost,
-                      pathname: `${this.backendPathname}/${entityId}`
+                      pathname: `${this.pathname}/${entityId}`
                     }),
                     properties: options.properties,
                     timeout: options.timeout
@@ -1237,13 +1333,13 @@ export class DataStore {
                     .then(response => response.data)
                     .then((entity) => {
                       // Save the entity to the backend.
-                      const request = new KinveyRequest({
+                      const request = new KinveyNetworkRequest({
                         method: RequestMethod.PUT,
                         authType: AuthType.Default,
                         url: url.format({
                           protocol: this.client.apiProtocol,
                           host: this.client.apiHost,
-                          pathname: `${this.backendPathname}/${entityId}`
+                          pathname: `${this.pathname}/${entityId}`
                         }),
                         properties: options.properties,
                         timeout: options.timeout,
@@ -1252,7 +1348,7 @@ export class DataStore {
                       });
 
                       // Send a POST request, and update the url.
-                      if (operation === SyncOperation.Create) {
+                      if (operation === RequestMethod.POST) {
                         // If the entity was created locally then delete the autogenerated _id
                         if (isDefined(entity._kmd) && entity._kmd.local === true) {
                           local = true;
@@ -1263,7 +1359,7 @@ export class DataStore {
                         request.url = url.format({
                           protocol: this.client.apiProtocol,
                           host: this.client.apiHost,
-                          pathname: this.backendPathname
+                          pathname: this.pathname
                         });
                       }
 
@@ -1271,12 +1367,12 @@ export class DataStore {
                         .then(response => response.data)
                         .then((entity) => {
                           // Remove the sync entity
-                          const request = new CacheRequest({
+                          const request = new KinveyCacheRequest({
                             method: RequestMethod.DELETE,
                             url: url.format({
                               protocol: this.client.apiProtocol,
                               host: this.client.apiHost,
-                              pathname: `${this.pathname}/${syncEntity._id}`
+                              pathname: `/appdata/${this.client.appKey}/kinvey_sync/${syncEntity._id}`
                             }),
                             properties: options.properties,
                             timeout: options.timeout
@@ -1284,12 +1380,12 @@ export class DataStore {
                           return request.execute()
                             .then(() => {
                               // Save the result of the network request locally.
-                              const request = new CacheRequest({
+                              const request = new KinveyCacheRequest({
                                 method: RequestMethod.PUT,
                                 url: url.format({
                                   protocol: this.client.apiProtocol,
                                   host: this.client.apiHost,
-                                  pathname: `${this.backendPathname}/${entity._id}`
+                                  pathname: `${this.pathname}/${entity._id}`
                                 }),
                                 properties: options.properties,
                                 timeout: options.timeout,
@@ -1301,12 +1397,12 @@ export class DataStore {
                             .then((entity) => {
                               // Remove the original entity if it was created locally
                               if (local) {
-                                const request = new CacheRequest({
+                                const request = new KinveyCacheRequest({
                                   method: RequestMethod.DELETE,
                                   url: url.format({
                                     protocol: this.client.apiProtocol,
                                     host: this.client.apiHost,
-                                    pathname: `${this.backendPathname}/${entityId}`
+                                    pathname: `${this.pathname}/${entityId}`
                                   }),
                                   properties: options.properties,
                                   timeout: options.timeout
@@ -1357,7 +1453,7 @@ export class DataStore {
                   _id: entityId,
                   operation: operation,
                   entity: undefined,
-                  error: new SyncError('Unable to sync the entity since the operation was not recognized.', syncEntity)
+                  error: new SyncError('Unable to sync the entity since the operation was not recognized.')
                 };
               })).then((results) => {
                 // Concat the results
@@ -1404,7 +1500,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                         Timeout for the request.
    * @return  {Promise}                                                         Promise
    */
-  pull(query?: Query, options?: DataStoreRequestOptions) {
+  pull(query?: Query, options?: DataStoreRequestOptions): Promise<T[]> {
     if (this.type === DataStoreType.Network) {
       return Promise.reject(new KinveyError(
         'A Network DataStore does not support sync. Please use a Cache or Sync DataStore.'
@@ -1436,7 +1532,7 @@ export class DataStore {
 
 
         const useDeltaFetch = options.useDeltaFetch === true || this.config.useDeltaFetch === true;
-        let request = new KinveyRequest({
+        let request = new KinveyNetworkRequest({
           method: RequestMethod.GET,
           authType: AuthType.Default,
           url: url.format({
@@ -1452,7 +1548,7 @@ export class DataStore {
 
         // Should we use delta fetch?
         if (useDeltaFetch === true) {
-          request = new DeltaFetchRequest(request);
+          request = new KinveyDeltaFetchRequest(request);
         }
 
         // Execute the request
@@ -1462,7 +1558,7 @@ export class DataStore {
       .then((entities) => {
         return this.clear(query, options)
           .then(() => {
-            const request = new CacheRequest({
+            const request = new KinveyCacheRequest({
               method: RequestMethod.PUT,
               url: url.format({
                 protocol: this.client.apiProtocol,
@@ -1491,7 +1587,7 @@ export class DataStore {
    * @param   {Number}                [options.timeout]                         Timeout for the request.
    * @return  {Promise}                                                         Promise
    */
-  sync(query?: Query, options?: DataStoreRequestOptions) {
+  sync(query?: Query, options?: DataStoreRequestOptions): Promise<{ push: PushSyncResult<T>[], pull: T[] }> {
     return this.push(query, options)
       .then((push) => {
         return this.pull(query, options)
@@ -1521,7 +1617,7 @@ export class DataStore {
     return this.pendingSyncEntities(query, options)
       .then((entities) => {
         return Promise.all(entities.map((entity) => {
-          const request = new CacheRequest({
+          const request = new KinveyCacheRequest({
             method: RequestMethod.DELETE,
             url: url.format({
               protocol: this.client.apiProtocol,
@@ -1544,12 +1640,12 @@ export class DataStore {
    * @param  {StoreType}    [type=DataStoreType.Network]  Type of store to return.
    * @return {DataStore}                                  DataStore instance.
    */
-  static collection(collection, type? = DataStoreType.Cache, config?: DataStoreConfig) {
+  static collection<T extends Entity>(collection, type = DataStoreType.Cache, config?: DataStoreConfig): DataStore<T> {
     if (isDefined(collection) === false || isString(collection) === false) {
       throw new KinveyError('A collection is required and must be a string.');
     }
 
-    return new DataStore(collection, type, config);
+    return new DataStore<T>(collection, type, config);
   }
 
   /**
@@ -1558,10 +1654,10 @@ export class DataStore {
    * @param  {Object} [options={}] Options
    * @return {Promise<Object>} The result of clearing the cache.
    */
-  static clearCache(options = {}) {
+  static clearCache(options: DataStoreRequestOptions) {
     const client = options.client || Client.sharedInstance();
-    const pathname = `/${appdataNamespace}/${client.appKey}`;
-    const request = new CacheRequest({
+    const pathname = `/appdata/${client.appKey}`;
+    const request = new KinveyCacheRequest({
       method: RequestMethod.DELETE,
       url: url.format({
         protocol: client.apiProtocol,

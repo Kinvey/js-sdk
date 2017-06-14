@@ -739,7 +739,7 @@ export class Query {
 
     // Apply the query
     const json = this.toPlainObject();
-    data = sift(json.filter, data);
+    data = (sift as any)(json.filter, data);
 
     // Remove fields
     if (isArray(json.fields) && json.fields.length > 0) {
