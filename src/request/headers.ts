@@ -1,5 +1,5 @@
 import { isString, isPlainObject } from 'lodash'
-import { isDefined } from '../object';
+import { isDefined } from '../utils/object';
 
 export interface Header {
   name: string;

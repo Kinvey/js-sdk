@@ -66,10 +66,10 @@ export interface DataStoreRequestOptions extends RequestOptions {
  */
 export class DataStore<T extends Entity> {
   collection: string;
-  type = DataStoreType.Network;
-  config: DataStoreConfig;
+  private _type = DataStoreType.Network;
+  private config: DataStoreConfig;
 
-  protected constructor(collection: string, type = DataStoreType.Network, config: DataStoreConfig) {
+  protected constructor(collection: string, type = DataStoreType.Cache, config: DataStoreConfig) {
     if (collection && isString(collection) === false) {
       throw new KinveyError('Collection must be a string.');
     }
@@ -82,7 +82,7 @@ export class DataStore<T extends Entity> {
     /**
      * @type {DataStoreType}
      */
-    this.type = type;
+    this._type = type;
 
     /**
      * @type {DataStoreConfig}
@@ -90,11 +90,15 @@ export class DataStore<T extends Entity> {
     this.config = config || <DataStoreConfig>{};
   }
 
+  get type(): DataStoreType {
+    return this._type;
+  }
+
   /**
    * The client for the store.
    * @return {Client} Client
    */
-  get client() {
+  get client(): Client {
     if (isDefined(this.config.client)) {
       return this.config.client;
     }
@@ -106,7 +110,7 @@ export class DataStore<T extends Entity> {
    * Set the client for the store
    * @param {Client} [client] Client
    */
-  set client(client) {
+  set client(client: Client) {
     if (client instanceof Client) {
       this.config.client = client;
     }
@@ -140,7 +144,7 @@ export class DataStore<T extends Entity> {
    * @param   {Boolean}               [options.useDeltaFetch]             Turn on or off the use of delta fetch.
    * @return  {Observable}                                                Observable.
    */
-  find(query?: Query, options?: DataStoreRequestOptions): KinveyObservable<T[]> {
+  find(query?: Query, options = <DataStoreRequestOptions>{}): KinveyObservable<T[]> {
     return KinveyObservable.create((observer) => {
       if (isDefined(query) && (query instanceof Query) === false) {
         return observer.error(new KinveyError('Invalid query. It must be an instance of the Query class.'));
@@ -183,8 +187,8 @@ export class DataStore<T extends Entity> {
               })
               .then((syncCount) => {
                 if (syncCount > 0) {
-                  throw new KinveyError('Unable to fetch the entities on the backend.'
-                    + ` There are ${syncCount} entities that need`
+                  throw new KinveyError('Unable to fetch the entities from the backend.'
+                    + ` There ${syncCount === 1 ? 'is' : 'are'} ${syncCount} ${syncCount === 1 ? 'entity' : 'entities'} that need`
                     + ' to be synced.');
                 }
 
@@ -212,7 +216,19 @@ export class DataStore<T extends Entity> {
             });
 
             if (useDeltaFetch === true) {
-              request = new KinveyDeltaFetchRequest(request);
+              request = new KinveyDeltaFetchRequest({
+                method: RequestMethod.GET,
+                authType: AuthType.Default,
+                url: url.format({
+                  protocol: this.client.apiProtocol,
+                  host: this.client.apiHost,
+                  pathname: this.pathname
+                }),
+                query: query,
+                properties: options.properties,
+                timeout: options.timeout,
+                client: this.client
+              });
             }
 
             return request.execute()
@@ -643,7 +659,7 @@ export class DataStore<T extends Entity> {
    * @param   {Number}                [options.timeout]                 Timeout for the request.
    * @return  {Promise}                                                 Promise.
    */
-  update(entity: T, options?: DataStoreRequestOptions): Promise<T> {
+  update(entity: T, options = <DataStoreRequestOptions>{}): Promise<T> {
     return KinveyObservable.create((observer) => {
       if (isDefined(entity) === false) {
         observer.next(null);
@@ -1098,7 +1114,7 @@ export class DataStore<T extends Entity> {
       url: url.format({
         protocol: this.client.apiProtocol,
         host: this.client.apiHost,
-        pathname: this.pathname
+        pathname: `/appdata/${this.client.appKey}/kinvey_sync`
       }),
       query: query,
       timeout: options.timeout,
@@ -1121,7 +1137,7 @@ export class DataStore<T extends Entity> {
           url: url.format({
             protocol: this.client.apiProtocol,
             host: this.client.apiHost,
-            pathname: this.pathname
+            pathname: `/appdata/${this.client.appKey}/kinvey_sync`
           }),
           body: syncEntity,
           timeout: options.timeout,
@@ -1148,7 +1164,7 @@ export class DataStore<T extends Entity> {
    *                                                                            from the local cache.
    * @return  {Promise}                                                         Promise
    */
-  pendingSyncEntities(query?: Query, options?: DataStoreRequestOptions): Promise<SyncEntity[]> {
+  pendingSyncEntities(query?: Query, options = <DataStoreRequestOptions>{}): Promise<SyncEntity[]> {
     if (this.type === DataStoreType.Network) {
       return Promise.reject(new KinveyError(
         'A Network DataStore does not support sync. Please use a Cache or Sync DataStore.'

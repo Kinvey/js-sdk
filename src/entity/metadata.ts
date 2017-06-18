@@ -1,7 +1,7 @@
 import isPlainObject = require('lodash/isPlainObject');
 
-import { KinveyError } from './errors';
-import { isDefined } from './utils/object';
+import { KinveyError } from '../errors';
+import { isDefined } from '../utils/object';
 
 /**
  * The Metadata class is used to as a wrapper for accessing the `_kmd` properties of an entity.

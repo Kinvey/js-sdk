@@ -4,7 +4,7 @@ import assign = require('lodash/assign');
 import isString = require('lodash/isString');
 import isNumber = require('lodash/isNumber');
 
-import { Response } from './response';
+import { Response, ResponseObject } from './response';
 import { Headers } from './headers';
 import { Rack } from '../rack';
 import { Client } from '../client';
@@ -55,16 +55,16 @@ export class Request {
   protected _timeout: number;
   protected _followRedirect = true;
 
-  constructor(options: RequestOptions) {
-    options = assign({
+  constructor(config = <RequestOptions>{}) {
+    config = assign({
       followRedirect: true
-    }, options);
+    }, config);
 
-    this.method = options.method || RequestMethod.GET;
-    this.headers = options.headers || new Headers();
-    this.url = options.url || '';
-    this.body = options.body || options.data;
-    this.followRedirect = options.followRedirect === true;
+    this.method = config.method || RequestMethod.GET;
+    this.headers = config.headers || new Headers();
+    this.url = config.url || '';
+    this.body = config.body || config.data;
+    this.followRedirect = config.followRedirect === true;
   }
 
   get headers() {
@@ -107,7 +107,7 @@ export class Request {
     this._followRedirect = !!followRedirect;
   }
 
-  execute() {
+  execute(): Promise<Response> {
     if (isDefined(this.rack) === false) {
       return Promise.reject(
         new KinveyError('Unable to execute the request. Please provide a rack to execute the request.')
@@ -115,7 +115,7 @@ export class Request {
     }
 
     return this.rack.execute(this.toPlainObject())
-      .then((response) => {
+      .then((response: Response|ResponseObject) => {
         if (isDefined(response) === false) {
           throw new NoResponseError();
         }

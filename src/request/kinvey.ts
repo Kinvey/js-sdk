@@ -12,13 +12,14 @@ import UrlPattern = require('url-pattern');
 import { Request, RequestMethod, RequestOptions, RequestObject } from './';
 import { KinveyResponse, StatusCode } from './response';
 import { Properties } from './properties';
-import { Header } from './headers';
+import { Headers, Header } from './headers';
 import { CacheRack, NetworkRack } from '../rack';
 import { Client } from '../client';
 import { Query } from '../query';
 import { Aggregation } from '../aggregation';
 import { isDefined } from '../utils/object';
 import { appendQuery } from '../utils/url';
+import { btoa } from '../utils/string';
 import { Entity } from '../entity';
 import { ActiveUserHelper } from '../entity/activeUserHelper';
 import {
@@ -279,6 +280,14 @@ class KinveyRequest extends Request {
         return headers;
     }
 
+    set headers(headers) {
+      if ((headers instanceof Headers) === false) {
+        headers = new Headers(headers);
+      }
+
+      this._headers = headers;
+    }
+
     get url() {
         const urlString = this._url;
         const queryString = this.query ? this.query.toQueryString() : {};
@@ -386,6 +395,7 @@ class KinveyRequest extends Request {
 }
 
 export class KinveyCacheRequest extends KinveyRequest {
+  private _body?: any;
   private appKey?: string;
   private collection?: string;
   private entityId?: string;
@@ -395,8 +405,12 @@ export class KinveyCacheRequest extends KinveyRequest {
     this.rack = CacheRack;
   }
 
+  get body() {
+    return this._body;
+  }
+
   set body(body) {
-    this.body = cloneDeep(body);
+    this._body = cloneDeep(body);
   }
 
   execute(): Promise<KinveyResponse> {
@@ -434,10 +448,10 @@ export class KinveyCacheRequest extends KinveyRequest {
 }
 
 export class KinveyNetworkRequest extends KinveyRequest {
-    constructor(options: KinveyRequestOptions) {
-        super(options);
-        this.rack = NetworkRack;
-    }
+  constructor(options: KinveyRequestOptions) {
+    super(options);
+    this.rack = NetworkRack;
+  }
 }
 
 export class KinveyDeltaFetchRequest extends KinveyNetworkRequest {
@@ -546,7 +560,7 @@ export class KinveyDeltaFetchRequest extends KinveyNetworkRequest {
                 data: []
               }));
 
-              response.data = response.data.concat(values(cacheDocuments));
+              response.data = values(cacheDocuments).concat(response.data);
 
               if (isDefined(this.query)) {
                 const query = new Query(this.query);

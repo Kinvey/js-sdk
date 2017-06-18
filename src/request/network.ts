@@ -1,4 +1,4 @@
-import { Request, RequestOptions } from './request';
+import { Request, RequestOptions } from './';
 import { NetworkRack } from '../rack';
 
 export class NetworkRequest extends Request {

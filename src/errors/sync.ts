@@ -1,6 +1,6 @@
 import { KinveyError } from './kinvey';
 
-function SyncError(message = '', debug = '', code = -1, kinveyRequestId?: string) {
+function SyncError(message?: string, debug?: string, code?: number, kinveyRequestId?: string) {
   this.name = 'SyncError';
   this.message = message || 'An error occurred during sync.';
   this.debug = debug;

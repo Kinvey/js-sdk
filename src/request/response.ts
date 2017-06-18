@@ -6,7 +6,6 @@ import {
   APIVersionNotImplementedError,
   AppProblemError,
   BadRequestError,
-  BaseError,
   BLError,
   CORSDisabledError,
   DuplicateEndUsersError,
@@ -49,6 +48,12 @@ export enum StatusCode {
 export interface ResponseOptions {
   statusCode?: StatusCode;
   headers?: Headers;
+  data?: any;
+}
+
+export interface ResponseObject {
+  statusCode: number;
+  headers?: any;
   data?: any;
 }
 
@@ -96,7 +101,7 @@ export class Response {
 }
 
 export class KinveyResponse extends Response {
-  get error(): BaseError {
+  get error(): Error {
     if (this.isSuccess()) {
       return null;
     }

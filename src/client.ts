@@ -66,6 +66,18 @@ export class Client {
       defaultTimeout: 60000
     }, config);
 
+    // Check that an appKey or appId was provided
+    if (isDefined(config.appKey) === false) {
+      throw new KinveyError('No App Key was provided.'
+        + ' Unable to create a new Client without an App Key.');
+    }
+
+    // Check that an appSecret or masterSecret was provided
+    if (isDefined(config.appSecret) === false && isDefined(config.masterSecret) === false) {
+      throw new KinveyError('No App Secret or Master Secret was provided.'
+        + ' Unable to create a new Client without an App Key.');
+    }
+
     this.apiHostname = config.apiHostname;
 
     if (isString(this.apiHostname) === false) {
@@ -184,7 +196,7 @@ export class Client {
    * @example
    * var client = Kinvey.Client.sharedInstance();
    */
-  static sharedInstance() {
+  static sharedInstance(): Client {
     if (isDefined(sharedInstance) === false) {
       throw new KinveyError('You have not initialized the library. ' +
         'Please call Kinvey.init() to initialize the library.');

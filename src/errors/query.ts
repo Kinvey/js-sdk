@@ -1,6 +1,6 @@
 import { KinveyError } from './kinvey';
 
-function QueryError(message = '', debug = '', code = -1, kinveyRequestId?: string) {
+function QueryError(message?: string, debug?: string, code?: number, kinveyRequestId?: string) {
   this.name = 'QueryError';
   this.message = message || 'An error occurred.';
   this.debug = debug;

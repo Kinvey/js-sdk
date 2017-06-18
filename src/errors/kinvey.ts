@@ -1,4 +1,4 @@
-function KinveyError(message = '', debug = '', code = -1, kinveyRequestId?: string) {
+function KinveyError(message?: string, debug?: string, code?: number, kinveyRequestId?: string) {
   this.name = 'KinveyError';
   this.message = message || 'An error occurred.';
   this.debug = debug;

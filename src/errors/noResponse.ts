@@ -1,6 +1,6 @@
 import { KinveyError } from './kinvey';
 
-function NoResponseError(message = '', debug = '', code = -1, kinveyRequestId?: string) {
+function NoResponseError(message?: string, debug?: string, code?: number, kinveyRequestId?: string) {
   this.name = 'NoResponseError';
   this.message = message || 'No response was provided.';
   this.debug = debug;

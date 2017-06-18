@@ -23,6 +23,14 @@ export interface QueryConfig {
   skip?: number;
 }
 
+interface QueryString {
+  query?: any;
+  fields?: any;
+  limit?: any;
+  skip?: any;
+  sort?: any;
+}
+
 /**
  * The Query class is used to query for a subset of
  * entities using the Kinvey API.
@@ -820,20 +828,14 @@ export class Query {
    *
    * @returns {Object} Query string object.
    */
-  toQueryString() {
-    const queryString = {
-      query: undefined,
-      fields: undefined,
-      limit: undefined,
-      skip: undefined,
-      sort: undefined
-    };
+  toQueryString(): QueryString {
+    const queryString = <QueryString>{};
 
-    if (!isEmpty(this.filter)) {
+    if (isEmpty(this.filter) === false) {
       queryString.query = this.filter;
     }
 
-    if (!isEmpty(this.fields)) {
+    if (isEmpty(this.fields) === false) {
       queryString.fields = this.fields.join(',');
     }
 
@@ -862,7 +864,7 @@ export class Query {
    *
    * @return {string} Query string string.
    */
-  toString() {
+  toString(): string {
     return JSON.stringify(this.toQueryString());
   }
 }
