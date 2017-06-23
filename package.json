@@ -27,8 +27,8 @@
     "lint:test": "eslint test/**",
     "preversion": "rm -rf node_modules && npm install && npm test",
     "postversion": "git push && git push --tags",
-    "test": "mocha --opts mocha.opts",
-    "test:watch": "mocha --opts mocha.opts --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "transpile": "BABEL_ENV=production babel --no-comments --out-dir dist src"
   },
   "dependencies": {
@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@types/es6-promise": "0.0.32",
+    "@types/jest": "20.0.2",
     "@types/lodash": "4.14.65",
     "@types/mocha": "2.2.41",
     "app-module-path": "2.2.0",
@@ -69,13 +70,15 @@
     "eslint-plugin-import": "2.3.0",
     "expect": "^1.20.2",
     "istanbul": "1.1.0-alpha.1",
+    "jest": "20.0.4",
     "json-loader": "^0.5.4",
     "mocha": "^3.0.0",
     "nock": "9.0.13",
     "regenerator-runtime": "^0.9.5",
+    "ts-jest": "20.0.6",
     "ts-node": "3.0.4",
-    "request": "2.81.0",
-    "typescript": "2.3.4"
+    "typescript": "2.3.4",
+    "xhr": "2.4.0"
   },
   "engines": {
     "node": "6.9.1"
@@ -84,5 +87,18 @@
     "Kinvey",
     "JavaScript",
     "SDK"
-  ]
+  ],
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "setupTestFrameworkScriptFile": "<rootDir>/tests/index.ts",
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
+  }
 }

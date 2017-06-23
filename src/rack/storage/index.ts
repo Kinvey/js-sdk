@@ -3,7 +3,7 @@ import isString = require('lodash/isString');
 import isArray = require('lodash/isArray');
 
 import { isDefined } from '../../utils/object';
-import { Queue } from '../../utils/promise.js';
+import { Queue } from '../../utils/promise';
 import { NotFoundError } from '../../errors';
 import { MemoryAdapter } from './memory';
 import { Adapter } from './adapter';

@@ -1,5 +1,6 @@
 import { Promise } from 'es6-promise';
 
+
 /**
  * @private
  */
@@ -20,15 +21,18 @@ function resolveWith(value) {
  * @private
  */
 export class Queue {
+  pendingPromises = 0;
+  maxPendingPromises = Infinity;
+  maxQueuedPromises = Infinity;
+  queue = [];
+
   constructor(maxPendingPromises, maxQueuedPromises) {
-    this.pendingPromises = 0;
     this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
     this.maxQueuedPromises = typeof maxQueuedPromises !== 'undefined' ? maxQueuedPromises : Infinity;
-    this.queue = [];
   }
 
   add(promiseGenerator) {
-    return new Promise((resolve, reject, notify) => {
+    return new Promise((resolve, reject) => {
       if (this.queue.length >= this.maxQueuedPromises) {
         reject(new Error('Queue limit reached'));
         return;
@@ -37,8 +41,7 @@ export class Queue {
       this.queue.push({
         promiseGenerator: promiseGenerator,
         resolve: resolve,
-        reject: reject,
-        notify: notify || noop
+        reject: reject
       });
 
       this._dequeue();

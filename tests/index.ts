@@ -1,4 +1,5 @@
-import httpRequest = require('request');
+import xhr = require('xhr');
+import isFunction = require('lodash/isFunction');
 
 import { Kinvey } from '../src/kinvey';
 import { randomString } from '../src/utils/string';
@@ -8,6 +9,8 @@ import { TimeoutError, NetworkConnectionError } from '../src/errors';
 import { NetworkRack } from '../src/rack';
 
 class HttpMiddleware extends Middleware {
+  xhrRequest?: XMLHttpRequest;
+
   constructor(name = 'Http Middleware') {
     super(name);
   }
@@ -16,7 +19,7 @@ class HttpMiddleware extends Middleware {
     const promise = new Promise((resolve, reject) => {
       const { url, method, headers, body, timeout, followRedirect } = request;
 
-      httpRequest({
+      this.xhrRequest = xhr({
         method: method,
         url: url,
         headers: headers,
@@ -24,14 +27,12 @@ class HttpMiddleware extends Middleware {
         followRedirect: followRedirect,
         timeout: timeout
       }, (error, response, body) => {
-        if (isDefined(response) === false) {
+        if (isDefined(error)) {
           if (error.code === 'ESOCKETTIMEDOUT' || error.code === 'ETIMEDOUT') {
             return reject(new TimeoutError('The network request timed out.'));
-          } else if (error.code === 'ENOENT') {
-            return reject(new NetworkConnectionError('You do not have a network connection.'));
           }
 
-          return reject(error);
+          return reject(new NetworkConnectionError('There was an error connecting to the network.', error));
         }
 
         return resolve({
@@ -47,6 +48,10 @@ class HttpMiddleware extends Middleware {
   }
 
   cancel() {
+    if (isDefined(this.xhrRequest) && isFunction(this.xhrRequest.abort)) {
+      this.xhrRequest.abort();
+    }
+
     return Promise.resolve();
   }
 }
@@ -55,7 +60,7 @@ class HttpMiddleware extends Middleware {
 NetworkRack.useHttpMiddleware(new HttpMiddleware());
 
 // Init Kinvey
-before(function() {
+beforeAll(function() {
   Kinvey.init({
     appKey: randomString(),
     appSecret: randomString()
