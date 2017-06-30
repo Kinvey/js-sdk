@@ -1,0 +1,5 @@
+--compilers ts:ts-node/register --disableWarnings
+--reporter spec
+--watch-extensions ts
+tests/index.ts
+tests/**/*.spec.ts
