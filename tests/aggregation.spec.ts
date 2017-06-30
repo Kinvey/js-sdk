@@ -1,4 +1,6 @@
-import { Aggregation } from '../src/aggregation';
+import expect = require('expect');
+
+import { Aggregation } from '../src/datastore/aggregation';
 import { randomString } from '../src/utils/string';
 import { isDefined } from '../src/utils/object';
 
@@ -7,7 +9,7 @@ const commonTitle = 'Kinvey';
 describe('Aggregation', () => {
   let entities = [];
 
-  beforeEach(() => {
+  before(() => {
     function createEntity(title?: string) {
       return {
         _id: randomString(),
@@ -37,7 +39,7 @@ describe('Aggregation', () => {
   });
 
   describe('count()', () => {
-    test('should return the count of a unique property value for all entities', () => {
+    it('should return the count of a unique property value for all entities', () => {
       const aggregation = Aggregation.count('title');
       const results = aggregation.process(entities);
       results.forEach((result) => {
@@ -51,7 +53,7 @@ describe('Aggregation', () => {
   });
 
   describe('sum()', () => {
-    test('should return the quantity sum', () => {
+    it('should return the quantity sum', () => {
       let sum = 0;
       entities.forEach(entity => {
         sum += entity.quantity;
@@ -64,7 +66,7 @@ describe('Aggregation', () => {
   });
 
   describe('min()', () => {
-    test('should return the minimum quanity', () => {
+    it('should return the minimum quanity', () => {
       let min = Infinity;
       entities.forEach(entity => {
         min = Math.min(min, entity.quantity);

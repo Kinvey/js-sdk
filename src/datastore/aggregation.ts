@@ -5,8 +5,8 @@ import isObject = require('lodash/isObject');
 import isFunction = require('lodash/isFunction');
 import cloneDeep = require('lodash/cloneDeep');
 
-import { KinveyError } from './errors/kinvey';
-import { isDefined } from './utils/object';
+import { KinveyError } from '../errors/kinvey';
+import { isDefined } from '../utils/object';
 import { Query } from './query';
 
 export interface AggregationConfig {

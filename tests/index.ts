@@ -1,5 +1,6 @@
-import xhr = require('xhr');
+import httpRequest = require('request');
 import isFunction = require('lodash/isFunction');
+import nock = require('nock');
 
 import { Kinvey } from '../src/kinvey';
 import { randomString } from '../src/utils/string';
@@ -19,7 +20,7 @@ class HttpMiddleware extends Middleware {
     const promise = new Promise((resolve, reject) => {
       const { url, method, headers, body, timeout, followRedirect } = request;
 
-      this.xhrRequest = xhr({
+      httpRequest({
         method: method,
         url: url,
         headers: headers,
@@ -27,12 +28,14 @@ class HttpMiddleware extends Middleware {
         followRedirect: followRedirect,
         timeout: timeout
       }, (error, response, body) => {
-        if (isDefined(error)) {
+        if (isDefined(response) === false) {
           if (error.code === 'ESOCKETTIMEDOUT' || error.code === 'ETIMEDOUT') {
             return reject(new TimeoutError('The network request timed out.'));
+          } else if (error.code === 'ENOENT') {
+            return reject(new NetworkConnectionError('You do not have a network connection.'));
           }
 
-          return reject(new NetworkConnectionError('There was an error connecting to the network.', error));
+          return reject(error);
         }
 
         return resolve({
@@ -60,9 +63,14 @@ class HttpMiddleware extends Middleware {
 NetworkRack.useHttpMiddleware(new HttpMiddleware());
 
 // Init Kinvey
-beforeAll(function() {
+before(function() {
   Kinvey.init({
     appKey: randomString(),
     appSecret: randomString()
   });
+});
+
+// Clean up nock
+afterEach(function() {
+  nock.cleanAll();
 });

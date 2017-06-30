@@ -1,42 +1,101 @@
-import Promise from 'es6-promise';
-import map from 'lodash/map';
-import assign from 'lodash/assign';
-import isFunction from 'lodash/isFunction';
-import isNumber from 'lodash/isNumber';
-import url from 'url';
+import { Promise } from 'es6-promise';
+import map = require('lodash/map');
+import assign = require('lodash/assign');
+import isFunction = require('lodash/isFunction');
+import isNumber = require('lodash/isNumber');
+import url = require('url');
 
-import {
-  NetworkRequest,
-  KinveyRequest,
-  AuthType,
-  RequestMethod,
-  Headers
-} from 'src/request';
-import { KinveyError } from 'src/errors';
-import { KinveyObservable, Log, isDefined } from 'src/utils';
-import Query from 'src/query';
-import NetworkStore from './networkstore';
+import { RequestMethod } from '../request';
+import { Headers } from '../request/headers';
+import { NetworkRequest } from '../request/network';
+import { AuthType, KinveyNetworkRequest } from '../request/kinvey';
+import { KinveyError } from '../errors';
+import { KinveyObservable } from '../utils/observable';
+import { Log } from '../utils/log';
+import { isDefined } from '../utils/object';
+import { Query } from './query';
+import { DataStore, DataStoreRequestOptions } from './';
+import { Entity } from '../entity';
+import { Client } from '../client';
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-// Calculate where we should start the file upload
 function getStartIndex(rangeHeader, max) {
   const start = rangeHeader ? parseInt(rangeHeader.split('-')[1], 10) + 1 : 0;
   return start >= max ? max - 1 : start;
 }
 
-/**
- * The FileStore class is used to find, save, update, remove, count and group files.
- */
-export default class FileStore extends NetworkStore {
+export interface File extends Entity {
+  _data?: string;
+  _downloadURL?: string;
+  _filename: string;
+  mimeType: string;
+  _public?: boolean;
+  size: number;
+}
+
+export interface FileMetadata {
+  _id?: string;
+  filename?: string;
+  public?: boolean;
+  size?: number;
+  mimeType?: string;
+}
+
+interface PrivateFileMetadata extends FileMetadata {
+  _filename?: string;
+  _public?: boolean;
+}
+
+export interface FileStoreRequestOptions extends DataStoreRequestOptions {
+  download?: boolean;
+  mimeType?: string;
+  stream?: boolean;
+  tls?: boolean;
+  ttl?: number;
+}
+
+interface GCSRequestOptions extends FileStoreRequestOptions {
+  count?: number;
+  start?: number;
+  maxBackoff?: number;
+}
+
+export interface FileStoreConfig {
+  client?: Client;
+}
+
+export class FileStore<T extends File> {
+  private config: FileStoreConfig;
+
+  constructor(config = <FileStoreConfig>{}) {
+    this.config = config;
+  }
+
   /**
-   * @private
-   * The pathname for the store.
-   *
-   * @return  {string}  Pathname
+   * The client for the store.
+   * @return {Client} Client
    */
+  get client(): Client {
+    if (isDefined(this.config.client)) {
+      return this.config.client;
+    }
+
+    return Client.sharedInstance();
+  }
+
+  /**
+   * Set the client for the store
+   * @param {Client} [client] Client
+   */
+  set client(client: Client) {
+    if (client instanceof Client) {
+      this.config.client = client;
+    }
+  }
+
   get pathname() {
     return `/blob/${this.client.appKey}`;
   }
@@ -72,22 +131,20 @@ export default class FileStore extends NetworkStore {
    *   ...
    * });
    */
-  find(query, options = {}) {
+  find(query?: Query, options = <FileStoreRequestOptions>{}): KinveyObservable<T[]> {
     options = assign({ tls: true }, options);
     const queryStringObject = { tls: options.tls === true };
 
     if (isNumber(options.ttl)) {
-      queryStringObject.ttl_in_seconds = parseInt(options.ttl, 10);
+      (queryStringObject as any).ttl_in_seconds = options.ttl;
     }
 
-    const stream = KinveyObservable.create((observer) => {
-      // Check that the query is valid
-      if (isDefined(query) && !(query instanceof Query)) {
+    return KinveyObservable.create((observer) => {
+      if (isDefined(query) && (query instanceof Query) === false) {
         return observer.error(new KinveyError('Invalid query. It must be an instance of the Query class.'));
       }
 
-      // Create the request
-      const request = new KinveyRequest({
+      const request = new KinveyNetworkRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
         url: url.format({
@@ -103,21 +160,20 @@ export default class FileStore extends NetworkStore {
       });
       return request.execute()
         .then(response => response.data)
-        .then(data => observer.next(data))
+        .then((files) => {
+          if (options.download === true) {
+            return Promise.all(files.map(file => this.downloadByUrl(file._downloadURL, options)));
+          }
+
+          return files;
+        })
+        .then(files => observer.next(files))
         .then(() => observer.complete())
         .catch(error => observer.error(error));
     });
-    return stream.toPromise()
-      .then((files) => {
-        if (options.download === true) {
-          return Promise.all(map(files, file => this.downloadByUrl(file._downloadURL, options)));
-        }
-
-        return files;
-      });
   }
 
-  findById(id, options) {
+  findById(id: string, options = <FileStoreRequestOptions>{}): KinveyObservable<T> {
     return this.download(id, options);
   }
 
@@ -143,21 +199,21 @@ export default class FileStore extends NetworkStore {
    *   ...
    * });
   */
-  download(name, options = {}) {
+  download(name: string, options = <FileStoreRequestOptions>{}): KinveyObservable<T> {
     options = assign({ tls: true }, options);
     const queryStringObject = { tls: options.tls === true };
 
     if (isNumber(options.ttl)) {
-      queryStringObject.ttl_in_seconds = parseInt(options.ttl, 10);
+      (queryStringObject as any).ttl_in_seconds = options.ttl;
     }
 
-    const stream = KinveyObservable.create((observer) => {
+    return KinveyObservable.create((observer) => {
       if (isDefined(name) === false) {
         observer.next(undefined);
         return observer.complete();
       }
 
-      const request = new KinveyRequest({
+      const request = new KinveyNetworkRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
         url: url.format({
@@ -172,19 +228,18 @@ export default class FileStore extends NetworkStore {
       });
       return request.execute()
         .then(response => response.data)
+        .then((file) => {
+          if (options.stream === true) {
+            return file;
+          }
+
+          options.mimeType = file.mimeType;
+          return this.downloadByUrl(file._downloadURL, options);
+        })
         .then(data => observer.next(data))
         .then(() => observer.complete())
         .catch(error => observer.error(error));
     });
-    return stream.toPromise()
-      .then((file) => {
-        if (options.stream === true) {
-          return file;
-        }
-
-        options.mimeType = file.mimeType;
-        return this.downloadByUrl(file._downloadURL, options);
-      });
   }
 
   /**
@@ -194,7 +249,7 @@ export default class FileStore extends NetworkStore {
    * @param   {Object}        [options]                                     Options
    * @return  {Promise<string>}                                             File content.
   */
-  downloadByUrl(url, options = {}) {
+  downloadByUrl(url: string, options = <FileStoreRequestOptions>{}): Promise<any> {
     const request = new NetworkRequest({
       method: RequestMethod.GET,
       url: url,
@@ -226,7 +281,7 @@ export default class FileStore extends NetworkStore {
    *   ...
    * });
    */
-  stream(name, options = {}) {
+  stream(name: string, options = <FileStoreRequestOptions>{}) {
     options.stream = true;
     return this.download(name, options);
   }
@@ -239,21 +294,19 @@ export default class FileStore extends NetworkStore {
    * @param {Object} [options={}] Options
    * @return {Promise<File>} A file entity.
    */
-  upload(file, metadata = {}, options = {}) {
-    // Set defaults for metadata
+  upload(file: any, metadata = <FileMetadata>{}, options = <GCSRequestOptions>{}): Promise<T> {
     metadata = assign({
       filename: file._filename || file.name,
       public: false,
       size: file.size || file.length,
       mimeType: file.mimeType || file.type || 'application/octet-stream'
     }, metadata);
-    metadata._filename = metadata.filename;
+    (metadata as PrivateFileMetadata)._filename = metadata.filename;
     delete metadata.filename;
-    metadata._public = metadata.public;
+    (metadata as PrivateFileMetadata)._public = metadata.public;
     delete metadata.public;
 
-    // Create the file on Kinvey
-    const request = new KinveyRequest({
+    const request = new KinveyNetworkRequest({
       method: RequestMethod.POST,
       authType: AuthType.Default,
       url: url.format({
@@ -268,8 +321,6 @@ export default class FileStore extends NetworkStore {
     });
     request.headers.set('X-Kinvey-Content-Type', metadata.mimeType);
 
-    // If the file metadata contains an _id then
-    // update the file
     if (metadata._id) {
       request.method = RequestMethod.PUT;
       request.url = url.format({
@@ -279,7 +330,6 @@ export default class FileStore extends NetworkStore {
       });
     }
 
-    // Execute the request
     return request.execute()
       .then(response => response.data)
       .then((data) => {
@@ -293,28 +343,26 @@ export default class FileStore extends NetworkStore {
         delete data._uploadURL;
 
         // Execute the status check request
-        const statusCheckRequest = new NetworkRequest({
+        const request = new NetworkRequest({
           method: RequestMethod.PUT,
           url: uploadUrl,
           timeout: options.timeout
         });
-        statusCheckRequest.headers.addAll(headers.toPlainObject());
-        statusCheckRequest.headers.set('Content-Range', `bytes */${metadata.size}`);
-        return statusCheckRequest.execute(true)
-          .then((statusCheckResponse) => {
-            Log.debug('File upload status check response', statusCheckResponse);
-
-            if (statusCheckResponse.isSuccess() === false) {
-              throw statusCheckResponse.error;
+        request.headers.addAll(headers.toPlainObject());
+        request.headers.set('Content-Range', `bytes */${metadata.size}`);
+        return request.execute()
+          .then((response) => {
+            if (response.isSuccess() === false) {
+              throw response.error;
             }
 
-            if (statusCheckResponse.statusCode !== 308) {
+            if (response.statusCode !== 308) {
               return file;
             }
 
             // Upload the file
-            options.start = getStartIndex(statusCheckResponse.headers.get('range'), metadata.size);
-            return this.uploadToGCS(uploadUrl, headers, file, metadata, options);
+            options.start = getStartIndex(response.headers.get('range'), metadata.size);
+            return this.uploadToGCS(uploadUrl, headers, file, metadata, options as GCSRequestOptions);
           })
           .then((file) => {
             data._data = file;
@@ -323,11 +371,7 @@ export default class FileStore extends NetworkStore {
       });
   }
 
-  /**
-   * @private
-   */
-  uploadToGCS(uploadUrl, headers, file, metadata, options = {}) {
-    // Set default options
+  private uploadToGCS(uploadUrl: string, headers: Headers, file: any, metadata: FileMetadata, options = <GCSRequestOptions>{}): Promise<any> {
     options = assign({
       count: 0,
       start: 0,
@@ -335,7 +379,7 @@ export default class FileStore extends NetworkStore {
     }, options);
 
     Log.debug('Start file upload');
-    Log.debug('File upload upload url', uploadUrl);
+    Log.debug('File upload url', uploadUrl);
     Log.debug('File upload headers', headers.toPlainObject());
     Log.debug('File upload file', file);
     Log.debug('File upload metadata', metadata);
@@ -350,7 +394,7 @@ export default class FileStore extends NetworkStore {
     });
     request.headers.addAll(headers.toPlainObject());
     request.headers.set('Content-Range', `bytes ${options.start}-${metadata.size - 1}/${metadata.size}`);
-    return request.execute(true)
+    return request.execute()
       .then((response) => {
         Log.debug('File upload response', response);
 
@@ -375,7 +419,6 @@ export default class FileStore extends NetworkStore {
 
           Log.debug(`File upload will try again in ${backoff} seconds.`);
 
-
           // Upload the remaining protion of the file after the backoff time has passed
           return new Promise((resolve) => {
             setTimeout(() => {
@@ -392,24 +435,38 @@ export default class FileStore extends NetworkStore {
       });
   }
 
-  /**
-   * @private
-   */
-  create(file, metadata, options) {
+  create(file: any, metadata?: FileMetadata, options?: FileStoreRequestOptions) {
+    return this.upload(file, metadata, options);
+  }
+
+  update(file: any, metadata?: FileMetadata, options?: FileStoreRequestOptions) {
     return this.upload(file, metadata, options);
   }
 
   /**
-   * @private
+   * Remove a single file from the file store by id.
+   *
+   * @param   {string}                id                               File id to remove.
+   * @param   {Object}                [options]                        Options
+   * @param   {Properties}            [options.properties]             Custom properties to send with
+   *                                                                   the request.
+   * @param   {Number}                [options.timeout]                Timeout for the request.
+   * @return  {Observable}                                             Observable.
    */
-  update(file, metadata, options) {
-    return this.upload(file, metadata, options);
-  }
-
-  /**
-   * @private
-   */
-  remove() {
-    throw new KinveyError('Please use removeById() to remove files one by one.');
+  removeById(id: string, options = <FileStoreRequestOptions>{}) {
+    const request = new KinveyNetworkRequest({
+      method: RequestMethod.DELETE,
+      authType: AuthType.Default,
+      url: url.format({
+        protocol: this.client.apiProtocol,
+        host: this.client.apiHost,
+        pathname: `${this.pathname}/${id}`
+      }),
+      properties: options.properties,
+      timeout: options.timeout,
+      client: this.client
+    });
+    return request.execute()
+      .then(response => response.data);
   }
 }

@@ -3,9 +3,9 @@ import nock = require('nock');
 import cloneDeep = require('lodash/cloneDeep');
 
 import { DataStore, DataStoreType } from '../src/datastore';
+import { Query } from '../src/datastore/query';
 import { randomString } from '../src/utils/string';
 import { KinveyError } from '../src/errors';
-import { Query } from '../src/query';
 
 describe('DataStore', function() {
   describe('find()', function() {

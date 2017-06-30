@@ -15,8 +15,8 @@ import { Client } from '../client';
 import { KinveyObservable } from '../utils/observable';
 import { RequestOptions, RequestMethod } from '../request';
 import { AuthType, KinveyCacheRequest, KinveyNetworkRequest, KinveyDeltaFetchRequest } from '../request/kinvey';
-import { Query } from '../query';
-import { Aggregation } from '../aggregation';
+import { Query } from './query';
+import { Aggregation } from './aggregation';
 import { Entity } from '../entity';
 import { Metadata } from '../entity/metadata';
 

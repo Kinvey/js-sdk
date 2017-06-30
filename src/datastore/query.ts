@@ -10,8 +10,8 @@ import findKey = require('lodash/findKey');
 import has = require('lodash/has');
 import sift = require('sift');
 
-import { QueryError } from './errors/query';
-import { nested, isDefined } from './utils/object';
+import { QueryError } from '../errors/query';
+import { nested, isDefined } from '../utils/object';
 
 const unsupportedFilters = ['$nearSphere'];
 
