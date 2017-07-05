@@ -200,7 +200,6 @@ export class DataStore<T extends Entity> {
         })
         .then((cacheEntities) => {
           if (this.type === DataStoreType.Cache || this.type === DataStoreType.Network) {
-            const useDeltaFetch = options.useDeltaFetch === true || this.config.useDeltaFetch === true;
             let request = new KinveyNetworkRequest({
               method: RequestMethod.GET,
               authType: AuthType.Default,
@@ -215,7 +214,7 @@ export class DataStore<T extends Entity> {
               client: this.client
             });
 
-            if (useDeltaFetch === true) {
+            if (options.useDeltaFetch === true || this.config.useDeltaFetch === true) {
               request = new KinveyDeltaFetchRequest({
                 method: RequestMethod.GET,
                 authType: AuthType.Default,
@@ -1516,7 +1515,7 @@ export class DataStore<T extends Entity> {
    * @param   {Number}                [options.timeout]                         Timeout for the request.
    * @return  {Promise}                                                         Promise
    */
-  pull(query?: Query, options?: DataStoreRequestOptions): Promise<T[]> {
+  pull(query?: Query, options = <DataStoreRequestOptions>{}): Promise<T[]> {
     if (this.type === DataStoreType.Network) {
       return Promise.reject(new KinveyError(
         'A Network DataStore does not support sync. Please use a Cache or Sync DataStore.'

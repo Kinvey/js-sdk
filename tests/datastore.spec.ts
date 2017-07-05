@@ -7,11 +7,11 @@ import { Query } from '../src/datastore/query';
 import { randomString } from '../src/utils/string';
 import { KinveyError } from '../src/errors';
 
-describe('DataStore', function() {
-  describe('find()', function() {
-    it('should throw an error if the query argument is not an instance of the Query class', function(done) {
+describe('DataStore', () => {
+  describe('find()', () => {
+    it('should throw an error if the query argument is not an instance of the Query class', (done) => {
       const datastore = DataStore.collection(randomString());
-      datastore.find(<any>{})
+      datastore.find({})
         .subscribe(null, (error) => {
           try {
             expect(error).toBeA(KinveyError);
@@ -24,7 +24,7 @@ describe('DataStore', function() {
         });
     });
 
-    it('should throw an error if there are pending sync items that fail to be pushed', function(done) {
+    it('should throw an error if there are pending sync items that fail to be pushed', (done) => {
       const entity1 = { _id: randomString() };
       let datastore = DataStore.collection(randomString(), DataStoreType.Sync);
       datastore.save(entity1)
@@ -49,7 +49,34 @@ describe('DataStore', function() {
         .catch(done);
     });
 
-    it('should return an array of entities', function(done) {
+    it('should not throw an error if there are pending sync items that fail to be pushed but the type is DataStoreType.Network', (done) => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const onNextSpy = expect.createSpy();
+      let datastore = DataStore.collection(randomString(), DataStoreType.Sync);
+
+      datastore.save(entity1)
+        .then(() => {
+          nock(datastore.client.apiHostname)
+            .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
+            .reply(200, [entity1, entity2]);
+
+          datastore = DataStore.collection(datastore.collection, DataStoreType.Network);
+          datastore.find()
+            .subscribe(onNextSpy, done, () => {
+              try {
+                expect(onNextSpy.calls.length).toEqual(1);
+                expect(onNextSpy).toHaveBeenCalledWith([entity1, entity2]);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        })
+        .catch(done);
+    });
+
+    it('should return an array of entities from the cache and the backend', (done) => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
       const onNextSpy = expect.createSpy();
@@ -79,7 +106,62 @@ describe('DataStore', function() {
         });
     });
 
-    it('should return an array of entities that match the query', function(done) {
+    it('should return an array of entities only from the backend', (done) => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const onNextSpy = expect.createSpy();
+      const datastore = DataStore.collection(randomString(), DataStoreType.Network);
+
+      nock(datastore.client.apiHostname)
+        .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
+        .reply(200, [entity1, entity2]);
+
+      datastore.find()
+        .subscribe(null, done, () => {
+          nock(datastore.client.apiHostname)
+            .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
+            .reply(200, [entity1, entity2]);
+
+          return datastore.find()
+            .subscribe(onNextSpy, done, () => {
+              try {
+                expect(onNextSpy.calls.length).toEqual(1);
+                expect(onNextSpy).toHaveBeenCalledWith([entity1, entity2]);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+    });
+
+    it('should return an array of entities only from the cache', (done) => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const onNextSpy = expect.createSpy();
+      let datastore = DataStore.collection(randomString());
+
+      nock(datastore.client.apiHostname)
+        .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
+        .reply(200, [entity1, entity2]);
+
+      datastore.find()
+        .subscribe(null, done, () => {
+          datastore = DataStore.collection(datastore.collection, DataStoreType.Sync);
+          return datastore.find()
+            .subscribe(onNextSpy, done, () => {
+              try {
+                expect(onNextSpy.calls.length).toEqual(1);
+                expect(onNextSpy).toHaveBeenCalledWith([entity1, entity2]);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+    });
+
+    it('should return an array of entities that match the query', (done) => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
       const onNextSpy = expect.createSpy();
@@ -113,7 +195,7 @@ describe('DataStore', function() {
         });
     });
 
-    it('should fetch changed entities using delta fetch', function(done) {
+    it('should only fetch changed entities when using delta fetch', (done) => {
       const time = new Date();
       const entity1 = { _id: randomString(), _kmd: { lmt: new Date(time.setSeconds(time.getSeconds() - 1)).toISOString() }, title: randomString() };
       const entity2 = { _id: randomString(), _kmd: { lmt: new Date(time.setSeconds(time.getSeconds() - 1)).toISOString() }, title: randomString() };
@@ -124,8 +206,8 @@ describe('DataStore', function() {
         .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
         .reply(200, [entity1, entity2]);
 
-      datastore.find()
-        .subscribe(null, done, () => {
+      datastore.pull()
+        .then(() => {
           const updatedEntity2 = cloneDeep(entity2);
           updatedEntity2.title = randomString();
           updatedEntity2._kmd.lmt = new Date().toISOString();
@@ -157,40 +239,36 @@ describe('DataStore', function() {
                 done(error);
               }
             });
-        });
+        })
+        .catch(done);
     });
 
-    it('should update the cache to match backend', function(done) {
-      const entity1 = { _id: randomString() };
+    it('should update the cache to match the backend', (done) => {
+      let entity1 = { _id: randomString(), title: undefined };
       const entity2 = { _id: randomString() };
       const entity3 = { _id: randomString() };
-      const datastore = DataStore.collection(randomString());
+      let datastore = DataStore.collection(randomString());
+      const onNextSpy = expect.createSpy();
 
       nock(datastore.client.apiHostname)
         .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
         .reply(200, [entity1, entity2]);
 
-      datastore.find()
-        .toPromise()
+      datastore.pull()
         .then(() => {
+          entity1 = { _id: entity1._id, title: randomString() };
           nock(datastore.client.apiHostname)
             .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
             .reply(200, [entity1, entity3]);
           return datastore.find().toPromise();
         })
         .then(() => {
-          const onNextSpy = expect.createSpy();
-
-          nock(datastore.client.apiHostname)
-            .get(`/appdata/${datastore.client.appKey}/${datastore.collection}`)
-            .reply(200, [entity1, entity3]);
-
+          datastore = DataStore.collection(datastore.collection, DataStoreType.Sync);
           datastore.find()
             .subscribe(onNextSpy, done, () => {
               try {
-                expect(onNextSpy.calls.length).toEqual(2);
-                expect(onNextSpy.calls[0].arguments).toEqual([[entity1, entity3]]);
-                expect(onNextSpy.calls[1].arguments).toEqual([[entity1, entity3]]);
+                expect(onNextSpy.calls.length).toEqual(1);
+                expect(onNextSpy).toHaveBeenCalledWith([entity1, entity3]);
                 done();
               } catch (error) {
                 done(error);

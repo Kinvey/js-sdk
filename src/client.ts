@@ -6,6 +6,7 @@ import isNumber = require('lodash/isNumber');
 import { KinveyError } from './errors/kinvey';
 import { isDefined } from './utils/object';
 import { Log } from './utils/log';
+import { Entity } from './entity';
 
 const defaultTimeout = 60000;
 let sharedInstance = null;
@@ -39,6 +40,7 @@ export class Client {
   encryptionKey?: string;
   appVersion?: string;
   defaultTimeout?: number;
+  activeUser?: Entity;
 
   /**
    * Creates a new instance of the Client class.
@@ -141,9 +143,20 @@ export class Client {
       Log.info('Default timeout is less than 0. Setting default timeout to 60000ms.');
       this.defaultTimeout = 60000;
     }
+  }
 
-    // Freeze this client instance
-    Object.freeze(this);
+  _setActiveUser(activeUser: Entity): Promise<Entity|null> {
+    if (isDefined(activeUser)) {
+      this.activeUser = activeUser;
+      return Promise.resolve(activeUser);
+    }
+
+    return this._removeActiveUser();
+  }
+
+  _removeActiveUser(): Promise<null> {
+    delete this.activeUser;
+    return Promise.resolve(null);
   }
 
   /**

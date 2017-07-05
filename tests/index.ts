@@ -8,6 +8,7 @@ import { Middleware } from '../src/rack/middleware';
 import { isDefined } from '../src/utils/object';
 import { TimeoutError, NetworkConnectionError } from '../src/errors';
 import { NetworkRack } from '../src/rack';
+import { Client } from '../src/client';
 
 class HttpMiddleware extends Middleware {
   xhrRequest?: XMLHttpRequest;

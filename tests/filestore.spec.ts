@@ -11,6 +11,8 @@ import { KinveyError, NotFoundError, ServerError } from '../src/errors';
 import { randomString } from '../src/utils/string';
 import { Query } from '../src/datastore/query';
 
+import { Client } from '../src/client';
+
 chai.use(chaiAsPromised);
 chai.should();
 
