@@ -59,12 +59,12 @@ export default class CacheRequest extends Request {
 
   set url(urlString) {
     super.url = urlString;
-    const pathname = global.escape(url.parse(urlString).pathname);
-    const pattern = new UrlPattern('(/:namespace)(/)(:appKey)(/)(:collection)(/)(:entityId)(/)');
-    const { appKey, collection, entityId } = pattern.match(pathname) || {};
-    this.appKey = appKey;
-    this.collection = collection;
-    this.entityId = entityId;
+    const pathname = global.decodeURIComponent(url.parse(urlString).pathname);
+    const urlParts = pathname.replace(/^\//g, '').split('/');
+    // pathname has the following form 'namespace/appKey/collection/id'
+    this.appKey = urlParts[1];
+    this.collection = urlParts[2];
+    this.entityId = urlParts[3];
   }
 
   execute() {
