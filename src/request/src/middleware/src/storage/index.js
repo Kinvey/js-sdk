@@ -4,7 +4,7 @@ import isArray from 'lodash/isArray';
 
 import { isDefined, Queue } from 'src/utils';
 import { KinveyError, NotFoundError } from 'src/errors';
-import { MemoryAdapter } from './src/memory';
+import { MemoryAdapter } from './memory';
 
 const queue = new Queue(1, Infinity);
 
