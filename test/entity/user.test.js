@@ -2,7 +2,7 @@ import { Acl, Metadata, User } from 'src/entity';
 import { UserMock } from 'test/mocks';
 import { randomString } from 'src/utils';
 import { ActiveUserError, InvalidCredentialsError, KinveyError } from 'src/errors';
-import { CacheRequest } from 'src/request';
+import { ActiveUserHelper } from 'src/entity/src/activeUserHelper';
 import { CacheStore, SyncStore } from 'src/datastore';
 import Client from 'src/client';
 import Query from 'src/query';
@@ -307,7 +307,7 @@ describe('User', function() {
           expect(user.data.password).toEqual(undefined);
           expect(user.isActive()).toEqual(true);
 
-          const storedUser = CacheRequest.getActiveUser(this.client);
+          const storedUser = ActiveUserHelper.get(this.client);
           expect(storedUser.password).toEqual(undefined);
         });
     });
@@ -976,7 +976,8 @@ describe('User', function() {
       const user = new User({ _id: randomString(), email: randomString() });
 
       nock(this.client.apiHostname, { encodedQueryParams: true })
-        .delete(`${user.pathname}/${user._id}?hard=true`)
+        .delete(`${user.pathname}/${user._id}`)
+        .query({ hard: true })
         .reply(204);
 
       return User.remove(user._id, { hard: true })

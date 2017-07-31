@@ -9,9 +9,6 @@ import { KinveyObservable, isDefined } from 'src/utils';
 import Query from 'src/query';
 import NetworkStore from './networkstore';
 
-const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
-const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
-
 /**
  * The UserStore class is used to find, save, update, remove, count and group users.
  */
@@ -26,7 +23,7 @@ export default class UserStore extends NetworkStore {
    * @return  {string}   Pathname
    */
   get pathname() {
-    return `/${usersNamespace}/${this.client.appKey}`;
+    return `/user/${this.client.appKey}`;
   }
 
   /**
@@ -113,7 +110,7 @@ export default class UserStore extends NetworkStore {
       url: url.format({
         protocol: this.client.apiProtocol,
         host: this.client.apiHost,
-        pathname: `/${rpcNamespace}/${this.client.appKey}/check-username-exists`
+        pathname: `/rpc/${this.client.appKey}/check-username-exists`
       }),
       properties: options.properties,
       data: { username: username },

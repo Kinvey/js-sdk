@@ -5,9 +5,9 @@ import isNumber from 'lodash/isNumber';
 
 import { KinveyError } from 'src/errors';
 import { Log, isDefined } from 'src/utils';
-import { CacheRequest } from './request';
+import { ActiveUserHelper } from 'src/entity/src/activeUserHelper';
 
-const defaultTimeout = process.env.KINVEY_DEFAULT_TIMEOUT || 60000;
+const DEFAULT_TIMEOUT = 60000;
 let sharedInstance = null;
 
 /**
@@ -38,7 +38,8 @@ export default class Client {
     options = assign({
       apiHostname: 'https://baas.kinvey.com',
       micHostname: 'https://auth.kinvey.com',
-      liveServiceHostname: 'https://kls.kinvey.com'
+      liveServiceHostname: 'https://kls.kinvey.com',
+      defaultTimeout: DEFAULT_TIMEOUT
     }, options);
 
     if (options.apiHostname && isString(options.apiHostname)) {
@@ -82,20 +83,24 @@ export default class Client {
     }
 
     if (options.liveServiceHostname && isString(options.liveServiceHostname)) {
-      const liveServiceHostnameParsed = url.parse(options.liveServiceHostname);
-      options.liveServiceProtocol = liveServiceHostnameParsed.protocol || 'https:';
-      options.liveServiceHost = liveServiceHostnameParsed.host;
+      let liveServiceHostname = options.liveServiceHostname;
+
+      if (/^https?:\/\//i.test(liveServiceHostname) === false) {
+        liveServiceHostname = `https://${liveServiceHostname}`;
+      }
+
+      const liveServiceHostnameParsed = url.parse(liveServiceHostname);
+
+      /**
+       * @type {string}
+       */
+      this.liveServiceProtocol = liveServiceHostnameParsed.protocol;
+
+      /**
+       * @type {string}
+       */
+      this.liveServiceHost = liveServiceHostnameParsed.host;
     }
-
-    /**
-     * @type {string}
-     */
-    this.liveServiceProtocol = options.liveServiceProtocol;
-
-    /**
-     * @type {string}
-     */
-    this.liveServiceHost = options.liveServiceHost;
 
     /**
      * @type {?string}
@@ -125,14 +130,14 @@ export default class Client {
     /**
      * @type {?number}
      */
-    this.defaultTimeout = isDefined(options.defaultTimeout) ? options.defaultTimeout : defaultTimeout;
+    this.defaultTimeout = isNumber(options.defaultTimeout) && options.defaultTimeout >= 0 ? options.defaultTimeout : DEFAULT_TIMEOUT;
   }
 
   /**
    * Get the active user.
    */
   get activeUser() {
-    return CacheRequest.getActiveUser(this);
+    return ActiveUserHelper.get(this);
   }
 
   /**
@@ -155,7 +160,6 @@ export default class Client {
     });
   }
 
-
   /**
    * Live Service host name used for streaming data.
    */
@@ -164,47 +168,6 @@ export default class Client {
       protocol: this.liveServiceProtocol,
       host: this.liveServiceHost
     });
-  }
-
-  /**
-   * The version of your app. It will sent with Kinvey API requests
-   * using the X-Kinvey-Api-Version header.
-   */
-  get appVersion() {
-    return this._appVersion;
-  }
-
-  /**
-   * Set the version of your app. It will sent with Kinvey API requests
-   * using the X-Kinvey-Api-Version header.
-   *
-   * @param  {String} appVersion  App version.
-   */
-  set appVersion(appVersion) {
-    if (appVersion && !isString(appVersion)) {
-      appVersion = String(appVersion);
-    }
-
-    this._appVersion = appVersion;
-  }
-
-  get defaultTimeout() {
-    return this._defaultTimeout;
-  }
-
-  set defaultTimeout(timeout) {
-    timeout = parseInt(timeout, 10);
-
-    if (isNumber(timeout) === false || isNaN(timeout)) {
-      throw new KinveyError('Invalid timeout. Timeout must be a number.');
-    }
-
-    if (timeout < 0) {
-      Log.info(`Default timeout is less than 0. Setting default timeout to ${defaultTimeout}ms.`);
-      timeout = defaultTimeout;
-    }
-
-    this._defaultTimeout = timeout;
   }
 
   /**
@@ -246,11 +209,29 @@ export default class Client {
    * @param {string}    [options.appVersion]                               App Version
    * @return {Promise}                                                     A promise.
    */
-  static initialize(options) {
+  static initialize() {
+    throw new KinveyError('Please use Client.init().');
+  }
+
+  /**
+   * Initializes the Client class by creating a new instance of the
+   * Client class and storing it as a shared instance. The returned promise
+   * resolves with the shared instance of the Client class.
+   *
+   * @param {Object}    options                                            Options
+   * @param {string}    [options.apiHostname='https://baas.kinvey.com']    Host name used for Kinvey API requests
+   * @param {string}    [options.micHostname='https://auth.kinvey.com']    Host name used for Kinvey MIC requests
+   * @param {string}    [options.appKey]                                   App Key
+   * @param {string}    [options.appSecret]                                App Secret
+   * @param {string}    [options.masterSecret]                             App Master Secret
+   * @param {string}    [options.encryptionKey]                            App Encryption Key
+   * @param {string}    [options.appVersion]                               App Version
+   * @return {Promise}                                                     A promise.
+   */
+  static init(options) {
     const client = new Client(options);
     sharedInstance = client;
-    return CacheRequest.loadActiveUser(client)
-      .then(() => client);
+    return client;
   }
 
   /**

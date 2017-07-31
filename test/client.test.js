@@ -102,30 +102,24 @@ describe('Client', () => {
   });
 
   describe('defaultTimeout', function() {
-    it('should throw an Error if it is not a Number', function() {
-      expect(() => {
-        const timeout = 'foo';
-        const client = new Client();
-        client.defaultTimeout = timeout;
-      }).toThrow(/Invalid timeout. Timeout must be a number./);
-    });
-
     it(`should set default timeout to ${defaultTimeout}ms`, function() {
       const client = new Client();
       expect(client.defaultTimeout).toEqual(defaultTimeout);
     });
 
     it(`should use ${defaultTimeout}ms when defaultTimeout is less than 0`, function() {
-      const timeout = -1;
-      const client = new Client();
-      client.defaultTimeout = timeout;
+      const client = new Client({ defaultTimeout: -1 });
+      expect(client.defaultTimeout).toEqual(defaultTimeout);
+    });
+
+    it(`should use ${defaultTimeout}ms when defaultTimeout is not a number`, function() {
+      const client = new Client({ defaultTimeout: 'foo' });
       expect(client.defaultTimeout).toEqual(defaultTimeout);
     });
 
     it('should set the defaultTimeout to 1', function() {
       const timeout = 1;
-      const client = new Client();
-      client.defaultTimeout = timeout;
+      const client = new Client({ defaultTimeout: timeout });
       expect(client.defaultTimeout).toEqual(timeout);
     });
   });

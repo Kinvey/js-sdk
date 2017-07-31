@@ -1,6 +1,3 @@
-import Promise from 'es6-promise';
-import url from 'url';
-
 import {
   ActiveUserError,
   APIVersionNotAvailableError,
@@ -39,7 +36,7 @@ import {
   UserAlreadyExistsError,
   WritesToCollectionDisallowedError
 } from 'src/errors';
-import { Log } from 'src/utils';
+import { Log, isDefined } from 'src/utils';
 import Client from './client';
 import CustomEndpoint from './endpoint';
 import Query from './query';
@@ -48,8 +45,6 @@ import DataStore, { DataStoreType, FileStore, SyncOperation } from './datastore'
 import { Acl, Metadata, User } from './entity';
 import { AuthorizationGrant } from './identity';
 import { AuthType, CacheRack, NetworkRack, Rack, RequestMethod, KinveyRequest } from './request';
-
-const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 
 /**
  * The Kinvey class is used as the entry point for the Kinvey JavaScript SDK.
@@ -124,29 +119,48 @@ class Kinvey {
    *   // ...
    * });
    */
-  static initialize(options = {}) {
+  static initialize() {
+    throw new KinveyError('Please use Kinvey.init().');
+  }
+
+  /**
+   * Initializes the SDK with your app's information. The SDK is initialized when the returned
+   * promise resolves.
+   *
+   * @param {Object}    options                                            Options
+   * @param {string}    [options.apiHostname='https://baas.kinvey.com']    Host name used for Kinvey API requests
+   * @param {string}    [options.micHostname='https://auth.kinvey.com']    Host name used for Kinvey MIC requests
+   * @param {string}    [options.appKey]                                   App Key
+   * @param {string}    [options.appSecret]                                App Secret
+   * @param {string}    [options.masterSecret]                             App Master Secret
+   * @param {string}    [options.encryptionKey]                            App Encryption Key
+   * @param {string}    [options.appVersion]                               App Version
+   * @return {Promise}                                                     A promise.
+   *
+   * @throws  {KinveyError}  If an `options.appKey` is not provided.
+   * @throws  {KinveyError}  If neither an `options.appSecret` or `options.masterSecret` is provided.
+   *
+   * @example
+   * const client = Kinvey.init({
+   *   appKey: 'appKey',
+   *   appSecret: 'appSecret'
+   * });
+   */
+  static init(options = {}) {
     // Check that an appKey or appId was provided
-    if (!options.appKey) {
-      return Promise.reject(
-        new KinveyError('No App Key was provided. ' +
-          'Unable to create a new Client without an App Key.')
-      );
+    if (isDefined(options.appKey) === false) {
+      throw new KinveyError('No App Key was provided.'
+        + ' Unable to create a new Client without an App Key.');
     }
 
     // Check that an appSecret or masterSecret was provided
-    if (!options.appSecret && !options.masterSecret) {
-      return Promise.reject(
-        new KinveyError('No App Secret or Master Secret was provided. ' +
-          'Unable to create a new Client without an App Key.')
-      );
+    if (isDefined(options.appSecret) === false && isDefined(options.masterSecret) === false) {
+      throw new KinveyError('No App Secret or Master Secret was provided.'
+        + ' Unable to create a new Client without an App Key.');
     }
 
     // Initialize the client
-    return Client.initialize(options)
-      .then(() => {
-        // Return the active user
-        return User.getActiveUser();
-      });
+    return Client.init(options);
   }
 
   /**
@@ -165,11 +179,7 @@ class Kinvey {
     const request = new KinveyRequest({
       method: RequestMethod.GET,
       authType: AuthType.All,
-      url: url.format({
-        protocol: client.apiProtocol,
-        host: client.apiHost,
-        pathname: `${appdataNamespace}/${client.appKey}`
-      })
+      url: `${this.client.apiHostname}/appdata/${client.appKey}`,
     });
 
     return request.execute()
@@ -236,4 +246,5 @@ Kinvey.NetworkRack = NetworkRack;
 Kinvey.Rack = Rack;
 
 // Export
+export { Kinvey };
 export default Kinvey;

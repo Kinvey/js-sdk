@@ -1,5 +1,5 @@
-import url from 'url';
 import isString from 'lodash/isString';
+import url from 'url';
 
 import { CacheRequest, RequestMethod } from 'src/request';
 import { KinveyError } from 'src/errors';
@@ -8,8 +8,6 @@ import Client from 'src/client';
 import NetworkStore from './networkstore';
 import CacheStore from './cachestore';
 import SyncStore from './syncstore';
-
-const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 
 /**
  * @typedef   {Object}    DataStoreType
@@ -79,7 +77,7 @@ export default class DataStore {
    */
   static clearCache(options = {}) {
     const client = options.client || Client.sharedInstance();
-    const pathname = `/${appdataNamespace}/${client.appKey}`;
+    const pathname = `/appdata/${client.appKey}`;
     const request = new CacheRequest({
       method: RequestMethod.DELETE,
       url: url.format({
