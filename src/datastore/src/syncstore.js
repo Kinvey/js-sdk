@@ -2,16 +2,16 @@ import url from 'url';
 
 import { CacheRequest, RequestMethod } from 'src/request';
 import { KinveyError } from 'src/errors';
-import Query from 'src/query';
-import Aggregation from 'src/aggregation';
+import { Query } from 'src/query';
+import { Aggregation } from 'src/aggregation';
 import { KinveyObservable, isDefined } from 'src/utils';
-import CacheStore from './cachestore';
+import { CacheStore } from './cachestore';
 
 /**
  * The SyncStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-export default class SyncStore extends CacheStore {
+export class SyncStore extends CacheStore {
   get syncAutomatically() {
     return false;
   }

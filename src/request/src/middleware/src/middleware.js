@@ -1,8 +1,8 @@
 import Promise from 'es6-promise';
 
-import AsciiTree from './asciitree';
+import { AsciiTree } from './asciitree';
 
-export default class Middleware {
+export class Middleware {
   constructor(name = 'Middleware') {
     this.name = name;
   }

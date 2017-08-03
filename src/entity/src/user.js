@@ -5,27 +5,20 @@ import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import url from 'url';
 
-import Client from 'src/client';
-import { AuthType, RequestMethod, KinveyRequest, CacheRequest } from 'src/request';
+import { Client } from 'src/client';
+import { AuthType, RequestMethod, KinveyRequest } from 'src/request';
 import { KinveyError, NotFoundError, ActiveUserError } from 'src/errors';
-import DataStore, { UserStore } from 'src/datastore';
-import { Facebook, Google, LinkedIn, MobileIdentityConnect } from 'src/identity';
+import { DataStore, UserStore } from 'src/datastore';
+import { MobileIdentityConnect } from 'src/identity';
 import { Log, isDefined } from 'src/utils';
-import Acl from './acl';
-import Metadata from './metadata';
-
-const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
-const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
-const idAttribute = process.env.KINVEY_ID_ATTRIBUTE || '_id';
-const socialIdentityAttribute = process.env.KINVEY_SOCIAL_IDENTITY_ATTRIBUTE || '_socialIdentity';
-const usernameAttribute = process.env.KINVEY_USERNAME_ATTRIBUTE || 'username';
-const emailAttribute = process.env.KINVEY_EMAIL_ATTRIBUTE || 'email';
+import { Acl } from './acl';
+import { Metadata } from './metadata';
 
 /**
  * The User class is used to represent a single user on the Kinvey platform.
  * Use the user class to manage the active user lifecycle and perform user operations.
  */
-export default class User {
+export class User {
   /**
    * Create a new instance of a User.
    *
@@ -56,7 +49,7 @@ export default class User {
    * @return {?string} _id
    */
   get _id() {
-    return this.data[idAttribute];
+    return this.data._id;
   }
 
   /**
@@ -92,7 +85,7 @@ export default class User {
    * @return {Object} _socialIdentity
    */
   get _socialIdentity() {
-    return this.data[socialIdentityAttribute];
+    return this.data._socialIdentity;
   }
 
   /**
@@ -110,7 +103,7 @@ export default class User {
    * @return {?string} Username
    */
   get username() {
-    return this.data[usernameAttribute];
+    return this.data.username;
   }
 
   /**
@@ -119,14 +112,14 @@ export default class User {
    * @return {?string} Email
    */
   get email() {
-    return this.data[emailAttribute];
+    return this.data.email;
   }
 
   /**
    * @private
    */
   get pathname() {
-    return `/${usersNamespace}/${this.client.appKey}`;
+    return `/user/${this.client.appKey}`;
   }
 
   /**
@@ -237,10 +230,12 @@ export default class User {
         delete data.password;
 
         // Store the active user
-        this.data = data;
-        return CacheRequest.setActiveUser(this.client, this.data);
+        return this.client.setActiveUser(data);
       })
-      .then(() => this);
+      .then((data) => {
+        this.data = data;
+        return this;
+      });
   }
 
   /**
@@ -269,11 +264,11 @@ export default class User {
     const activeUser = User.getActiveUser(this.client);
 
     if (isActive) {
-      throw new ActiveUserError('This user is already the active user.');
+      return Promise.reject(new ActiveUserError('This user is already the active user.'));
     }
 
     if (isDefined(activeUser)) {
-      throw new ActiveUserError('An active user already exists. Please logout the active user before you login.');
+      return Promise.reject(new ActiveUserError('An active user already exists. Please logout the active user before you login.'));
     }
 
     const mic = new MobileIdentityConnect({ client: this.client });
@@ -305,9 +300,9 @@ export default class User {
   connectIdentity(identity, session, options = {}) {
     const isActive = this.isActive();
     const data = {};
-    const socialIdentity = data[socialIdentityAttribute] || {};
+    const socialIdentity = data._socialIdentity || {};
     socialIdentity[identity] = session;
-    data[socialIdentityAttribute] = socialIdentity;
+    data._socialIdentity = socialIdentity;
 
     if (isActive) {
       return this.update(data, options);
@@ -338,105 +333,6 @@ export default class User {
   }
 
   /**
-   * Connect a Facebook identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  connectFacebook(clientId, options = {}) {
-    const facebook = new Facebook({ client: this.client });
-    return facebook.login(clientId, options)
-      .then(session => this.connectIdentity(Facebook.identity, session, options));
-  }
-
-  /**
-   * Connect a Facebook identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  static connectFacebook(clientId, options = {}) {
-    const user = new this({}, options);
-    return user.connectFacebook(clientId, options);
-  }
-
-  /**
-   * Diconnect a Facebook identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  disconnectFacebook(options = {}) {
-    return this.disconnectIdentity(Facebook.identity, options);
-  }
-
-  /**
-   * Connect a Google identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  connectGoogle(clientId, options = {}) {
-    const google = new Google({ client: this.client });
-    return google.login(clientId, options)
-      .then(session => this.connectIdentity(Google.identity, session, options));
-  }
-
-  /**
-   * Connect a Google identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  static connectGoogle(clientId, options = {}) {
-    const user = new this({}, options);
-    return user.connectGoogle(clientId, options);
-  }
-
-  /**
-   * Diconnect a Google identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  disconnectGoogle(options = {}) {
-    return this.disconnectIdentity(Google.identity, options);
-  }
-
-  /**
-   * Connect a LinkedIn identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  googleconnectLinkedIn(clientId, options = {}) {
-    const linkedIn = new LinkedIn({ client: this.client });
-    return linkedIn.login(clientId, options)
-      .then(session => this.connectIdentity(LinkedIn.identity, session, options));
-  }
-
-  /**
-   * Connect a LinkedIn identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  static connectLinkedIn(clientId, options = {}) {
-    const user = new this({}, options);
-    return user.connectLinkedIn(clientId, options);
-  }
-
-  /**
-   * Diconnect a LinkedIn identity.
-   *
-   * @param  {Object}         [options]     Options
-   * @return {Promise<User>}                The user.
-   */
-  disconnectLinkedIn(options = {}) {
-    return this.disconnectIdentity(LinkedIn.identity, options);
-  }
-
-  /**
    * @private
    * Disconnects the user from an identity.
    *
@@ -447,13 +343,7 @@ export default class User {
   disconnectIdentity(identity, options = {}) {
     let promise = Promise.resolve();
 
-    if (identity === Facebook.identity) {
-      promise = Facebook.logout(this, options);
-    } else if (identity === Google.identity) {
-      promise = Google.logout(this, options);
-    } else if (identity === LinkedIn.identity) {
-      promise = LinkedIn.logout(this, options);
-    } else if (identity === MobileIdentityConnect.identity) {
+    if (identity === MobileIdentityConnect.identity) {
       promise = MobileIdentityConnect.logout(this, options);
     }
 
@@ -463,12 +353,12 @@ export default class User {
       })
       .then(() => {
         const data = this.data;
-        const socialIdentity = data[socialIdentityAttribute] || {};
+        const socialIdentity = data._socialIdentity || {};
         delete socialIdentity[identity];
-        data[socialIdentityAttribute] = socialIdentity;
+        data._socialIdentity = socialIdentity;
         this.data = data;
 
-        if (!this[idAttribute]) {
+        if (!this._id) {
           return this;
         }
 
@@ -503,7 +393,9 @@ export default class User {
         Log.error(error);
         return null;
       })
-      .then(() => CacheRequest.setActiveUser(this.client, null))
+      .then(() => {
+        return this.client.setActiveUser(null);
+      })
       .catch((error) => {
         Log.error(error);
         return null;
@@ -575,15 +467,16 @@ export default class User {
     return request.execute()
       .then(response => response.data)
       .then((data) => {
-        this.data = data;
-
         if (options.state === true) {
-          return CacheRequest.setActiveUser(this.client, this.data);
+          return this.client.setActiveUser(data);
         }
 
-        return this;
+        return data;
       })
-      .then(() => this);
+      .then((data) => {
+        this.data = data;
+        return this;
+      });
   }
 
   /**
@@ -612,8 +505,8 @@ export default class User {
    */
   signupWithIdentity(identity, session, options = {}) {
     const data = {};
-    data[socialIdentityAttribute] = {};
-    data[socialIdentityAttribute][identity] = session;
+    data._socialIdentity = {};
+    data._socialIdentity[identity] = session;
     return this.signup(data, options);
   }
 
@@ -645,7 +538,7 @@ export default class User {
     return store.update(data, options)
       .then((data) => {
         if (this.isActive()) {
-          return CacheRequest.setActiveUser(this.client, data);
+          return this.client.setActiveUser(data);
         }
 
         return data;
@@ -701,17 +594,17 @@ export default class User {
         // Remove sensitive data
         delete data.password;
 
-        // Replace the data
-        this.data = data;
-
         // Store the active user
         if (this.isActive()) {
-          return CacheRequest.setActiveUser(this.client, this.data);
+          return this.client.setActiveUser(data);
         }
 
         return data;
       })
-      .then(() => this);
+      .then((data) => {
+        this.data = data;
+        return this;
+      });
   }
 
   /**
@@ -738,7 +631,7 @@ export default class User {
    * @return {?User} The active user.
    */
   static getActiveUser(client = Client.sharedInstance()) {
-    const data = CacheRequest.getActiveUser(client);
+    const data = client.getActiveUser();
 
     if (isDefined(data)) {
       return new this(data, { client: client });
@@ -773,7 +666,7 @@ export default class User {
       url: url.format({
         protocol: client.apiProtocol,
         host: client.apiHost,
-        pathname: `/${rpcNamespace}/${client.appKey}/${username}/user-email-verification-initiate`
+        pathname: `/rpc/${client.appKey}/${username}/user-email-verification-initiate`
       }),
       properties: options.properties,
       timeout: options.timeout,
@@ -809,7 +702,7 @@ export default class User {
       url: url.format({
         protocol: client.apiProtocol,
         host: client.apiHost,
-        pathname: `/${rpcNamespace}/${client.appKey}/user-forgot-username`
+        pathname: `/rpc/${client.appKey}/user-forgot-username`
       }),
       properties: options.properties,
       data: { email: email },
@@ -846,7 +739,7 @@ export default class User {
       url: url.format({
         protocol: client.apiProtocol,
         host: client.apiHost,
-        pathname: `/${rpcNamespace}/${client.appKey}/${username}/user-password-reset-initiate`
+        pathname: `/rpc/${client.appKey}/${username}/user-password-reset-initiate`
       }),
       properties: options.properties,
       timeout: options.timeout,
@@ -901,12 +794,5 @@ export default class User {
   static restore() {
     return Promise.reject(new KinveyError('This function requires a master secret to be provided for your application.'
       + ' We strongly advise not to do this.'));
-  }
-
-  /**
-   * @private
-   */
-  static usePopupClass(popupClass) {
-    MobileIdentityConnect.usePopupClass(popupClass);
   }
 }

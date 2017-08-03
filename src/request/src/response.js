@@ -29,7 +29,7 @@ import {
   UserAlreadyExistsError,
   WritesToCollectionDisallowedError
 } from 'src/errors';
-import Headers from './headers';
+import { Headers } from './headers';
 
 /**
  * @private
@@ -54,7 +54,7 @@ export { StatusCode };
 /**
  * @private
  */
-export default class Response {
+export class Response {
   constructor(options = {}) {
     options = assign({
       statusCode: StatusCode.Empty,
@@ -111,6 +111,14 @@ export default class Response {
       || this.statusCode === StatusCode.NotModified
       || this.statusCode === StatusCode.TemporaryRedirect
       || this.statusCode === StatusCode.PermanentRedirect;
+  }
+
+  isServerError() {
+    return this.statusCode >= 500 && this.statusCode < 600;
+  }
+
+  isClientError() {
+    return this.statusCode >= 400 && this.statusCode < 500;
   }
 }
 

@@ -27,4 +27,4 @@ Log.setDefaultLevel(Log.levels.SILENT);
 /**
  * @private
  */
-export default Log;
+export { Log };

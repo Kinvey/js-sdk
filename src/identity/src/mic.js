@@ -1,18 +1,15 @@
 import Promise from 'es6-promise';
-import url from 'url';
-import urlJoin from 'url-join';
 import isString from 'lodash/isString';
+import url from 'url';
+import urljoin from 'url-join';
 
 import { AuthType, RequestMethod, KinveyRequest } from 'src/request';
 import { KinveyError, MobileIdentityConnectError } from 'src/errors';
 import { isDefined } from 'src/utils';
-import CorePopup from './popup';
-import Identity from './identity';
+import { CorePopup } from './popup';
+import { Identity } from './identity';
 import { SocialIdentity } from './enums';
 
-const authPathname = process.env.KINVEY_MIC_AUTH_PATHNAME || '/oauth/auth';
-const tokenPathname = process.env.KINVEY_MIC_TOKEN_PATHNAME || '/oauth/token';
-const invalidatePathname = process.env.KINVEY_MIC_INVALIDATE_PATHNAME || '/oauth/invalidate';
 let Popup = CorePopup;
 
 /**
@@ -81,20 +78,31 @@ export class MobileIdentityConnect extends Identity {
     return promise;
   }
 
-  _prependVersion(urlPath, version) {
-    let result = urlPath;
-    if (version) {
-      if (!isString(version)) {
-        version = String(version);
-      }
-
-      result = urlJoin(!version.indexOf('v') ? version : `v${version}`, urlPath);
-    }
-    return result;
+  refresh(token, clientId, redirectUri, options = {}) {
+    return Promise.resolve()
+      .then(() => this.refreshToken(token, clientId, redirectUri, options))
+      .then((session) => {
+        session.identity = MobileIdentityConnect.identity;
+        session.client_id = clientId;
+        session.redirect_uri = redirectUri;
+        session.protocol = this.client.micProtocol;
+        session.host = this.client.micHost;
+        return session;
+      });
   }
 
   requestTempLoginUrl(clientId, redirectUri, options = {}) {
-    const pathname = this._prependVersion(authPathname, options.version);
+    let pathname = '/oauth/auth';
+
+    if (options.version) {
+      let version = options.version;
+
+      if (isString(version) === false) {
+        version = String(version);
+      }
+
+      pathname = urljoin(version.indexOf('v') === 0 ? version : `v${version}`, pathname);
+    }
 
     const request = new KinveyRequest({
       method: RequestMethod.POST,
@@ -119,8 +127,18 @@ export class MobileIdentityConnect extends Identity {
 
   requestCodeWithPopup(clientId, redirectUri, options = {}) {
     const promise = Promise.resolve().then(() => {
-      const pathname = this._prependVersion(authPathname, options.version);
+      let pathname = '/oauth/auth';
       const popup = new Popup();
+
+      if (options.version) {
+        let version = options.version;
+
+        if (!isString(version)) {
+          version = String(version);
+        }
+
+        pathname = urljoin(version.indexOf('v') === 0 ? version : `v${version}`, pathname);
+      }
 
       return popup.open(url.format({
         protocol: this.client.micProtocol,
@@ -227,7 +245,7 @@ export class MobileIdentityConnect extends Identity {
       url: url.format({
         protocol: this.client.micProtocol,
         host: this.client.micHost,
-        pathname: tokenPathname
+        pathname: '/oauth/token'
       }),
       properties: options.properties,
       body: {
@@ -236,6 +254,30 @@ export class MobileIdentityConnect extends Identity {
         redirect_uri: redirectUri,
         code: code
       }
+    });
+    return request.execute().then(response => response.data);
+  }
+
+  refreshToken(token, clientId, redirectUri, options = {}) {
+    const request = new KinveyRequest({
+      method: RequestMethod.POST,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      authType: AuthType.App,
+      url: url.format({
+        protocol: this.client.micProtocol,
+        host: this.client.micHost,
+        pathname: '/oauth/token'
+      }),
+      body: {
+        grant_type: 'refresh_token',
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        refresh_token: token
+      },
+      properties: options.properties,
+      timeout: options.timeout
     });
     return request.execute().then(response => response.data);
   }
@@ -250,8 +292,10 @@ export class MobileIdentityConnect extends Identity {
       url: url.format({
         protocol: this.client.micProtocol,
         host: this.client.micHost,
-        pathname: invalidatePathname,
-        query: { user: user._id }
+        pathname: '/oauth/invalidate',
+        query: {
+          user: user._id
+        }
       }),
       properties: options.properties
     });
@@ -261,9 +305,9 @@ export class MobileIdentityConnect extends Identity {
   /**
    * @private
    */
-  static usePopupClass(popupClass) {
-    if (isDefined(popupClass)) {
-      Popup = popupClass;
+  static usePopupClass(PopupClass) {
+    if (isDefined(PopupClass)) {
+      Popup = PopupClass;
     }
   }
 }

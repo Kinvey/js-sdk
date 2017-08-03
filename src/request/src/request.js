@@ -1,15 +1,14 @@
 import Promise from 'es6-promise';
 import qs from 'qs';
-import appendQuery from 'append-query';
 import assign from 'lodash/assign';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 
-import Client from 'src/client';
+import { Client } from 'src/client';
 import { KinveyError, NoResponseError } from 'src/errors';
-import { isDefined } from 'src/utils';
-import Response from './response';
-import Headers from './headers';
+import { isDefined, appendQuery } from 'src/utils';
+import { Response } from './response';
+import { Headers } from './headers';
 
 /**
  * @private
@@ -28,7 +27,7 @@ export { RequestMethod };
 /**
  * @private
  */
-export default class Request {
+export class Request {
   constructor(options = {}) {
     options = assign({
       followRedirect: true
@@ -154,21 +153,22 @@ export default class Request {
       );
     }
 
-    return this.rack.execute(this.toPlainObject()).then((response) => {
-      if (isDefined(response) === false) {
-        throw new NoResponseError();
-      }
+    return this.rack.execute(this)
+      .then((response) => {
+        if (isDefined(response) === false) {
+          throw new NoResponseError();
+        }
 
-      if ((response instanceof Response) === false) {
-        response = new Response({
-          statusCode: response.statusCode,
-          headers: response.headers,
-          data: response.data
-        });
-      }
+        if ((response instanceof Response) === false) {
+          response = new Response({
+            statusCode: response.statusCode,
+            headers: response.headers,
+            data: response.data
+          });
+        }
 
-      return response;
-    });
+        return response;
+      });
   }
 
   cancel() {

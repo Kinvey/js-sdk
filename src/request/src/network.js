@@ -1,28 +1,22 @@
 import Promise from 'es6-promise';
-import url from 'url';
+import { Buffer } from 'buffer/';
 import qs from 'qs';
-import appendQuery from 'append-query';
-import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
+import assign from 'lodash/assign';
 import isEmpty from 'lodash/isEmpty';
+import url from 'url';
 
-import Query from 'src/query';
-import Aggregation from 'src/aggregation';
-import { isDefined } from 'src/utils';
-import { InvalidCredentialsError, NoActiveUserError, KinveyError } from 'src/errors';
-import { SocialIdentity } from 'src/identity';
-import Request, { RequestMethod } from './request';
-import CacheRequest from './cache';
-import Headers from './headers';
+import { Query } from 'src/query';
+import { Aggregation } from 'src/aggregation';
+import { isDefined, appendQuery } from 'src/utils';
+import { NoActiveUserError, KinveyError, InvalidCredentialsError } from 'src/errors';
+import { Request, RequestMethod } from './request';
+import { Headers } from './headers';
 import { KinveyResponse } from './response';
 import { NetworkRack } from './rack';
 
-const tokenPathname = process.env.KINVEY_MIC_TOKEN_PATHNAME || '/oauth/token';
-const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
-const defaultApiVersion = process.env.KINVEY_DEFAULT_API_VERSION || 4;
-const customPropertiesMaxBytesAllowed = process.env.KINVEY_MAX_HEADER_BYTES || 2000;
 
-export default class NetworkRequest extends Request {
+export class NetworkRequest extends Request {
   constructor(options = {}) {
     super(options);
     this.rack = NetworkRack;
@@ -122,7 +116,7 @@ const Auth = {
    * @returns {Object}
    */
   session(client) {
-    const activeUser = CacheRequest.getActiveUser(client);
+    const activeUser = client.getActiveUser();
 
     if (!isDefined(activeUser)) {
       return Promise.reject(
@@ -226,7 +220,7 @@ export class KinveyRequest extends NetworkRequest {
 
     // Add the X-Kinvey-API-Version header
     if (!headers.has('X-Kinvey-Api-Version')) {
-      headers.set('X-Kinvey-Api-Version', defaultApiVersion);
+      headers.set('X-Kinvey-Api-Version', 4);
     }
 
 
@@ -260,10 +254,10 @@ export class KinveyRequest extends NetworkRequest {
       if (!isEmpty(customPropertiesHeader)) {
         const customPropertiesByteCount = byteCount(customPropertiesHeader);
 
-        if (customPropertiesByteCount >= customPropertiesMaxBytesAllowed) {
+        if (customPropertiesByteCount >= 2000) {
           throw new Error(
             `The custom properties are ${customPropertiesByteCount} bytes.` +
-            `It must be less then ${customPropertiesMaxBytesAllowed} bytes.`,
+            'It must be less then 2000 bytes.',
             'Please remove some custom properties.');
         }
 
@@ -391,82 +385,80 @@ export class KinveyRequest extends NetworkRequest {
         return response;
       })
       .catch((error) => {
-        if (error instanceof InvalidCredentialsError && retry === true) {
-          const activeUser = CacheRequest.getActiveUser(this.client);
+        if (retry && error instanceof InvalidCredentialsError) {
+          const activeUser = this.client.getActiveUser();
 
-          if (!isDefined(activeUser)) {
-            throw error;
-          }
+          if (isDefined(activeUser)) {
+            const socialIdentity = isDefined(activeUser._socialIdentity) ? activeUser._socialIdentity : {};
+            const sessionKey = Object.keys(socialIdentity)
+              .find(sessionKey => socialIdentity[sessionKey].identity === 'kinveyAuth');
+            const oldSession = socialIdentity[sessionKey];
 
-          const socialIdentities = isDefined(activeUser._socialIdentity) ? activeUser._socialIdentity : {};
-          const sessionKey = Object.keys(socialIdentities)
-            .find(sessionKey => socialIdentities[sessionKey].identity === SocialIdentity.MobileIdentityConnect);
-          const session = socialIdentities[sessionKey];
-
-          if (isDefined(session)) {
-            // Refresh MIC Token
-            if (session.identity === SocialIdentity.MobileIdentityConnect) {
-              const refreshMICRequest = new KinveyRequest({
+            if (isDefined(oldSession)) {
+              const request = new KinveyRequest({
                 method: RequestMethod.POST,
                 headers: {
                   'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 authType: AuthType.App,
                 url: url.format({
-                  protocol: session.protocol || this.client.micProtocol,
-                  host: session.host || this.client.micHost,
-                  pathname: tokenPathname
+                  protocol: this.client.micProtocol,
+                  host: this.client.micHost,
+                  pathname: '/oauth/token'
                 }),
                 body: {
                   grant_type: 'refresh_token',
-                  client_id: session.client_id,
-                  redirect_uri: session.redirect_uri,
-                  refresh_token: session.refresh_token
+                  client_id: oldSession.client_id,
+                  redirect_uri: oldSession.redirect_uri,
+                  refresh_token: oldSession.refresh_token
                 },
-                timeout: this.timeout,
-                properties: this.properties
+                properties: this.properties,
+                timeout: this.timeout
               });
-
-              return refreshMICRequest.execute(false, false)
+              return request.execute()
                 .then(response => response.data)
-                .then((newSession) => {
-                  // Login the user with the new mic session
+                .then((session) => {
+                  session.identity = oldSession.identity;
+                  session.client_id = oldSession.client_id;
+                  session.redirect_uri = oldSession.redirect_uri;
+                  session.protocol = this.client.micProtocol;
+                  session.host = this.client.micHost;
+                  return session;
+                })
+                .then((session) => {
                   const data = {};
-                  data._socialIdentity = {};
-                  data._socialIdentity[session.identity] = newSession;
+                  socialIdentity[session.identity] = session;
+                  data._socialIdentity = socialIdentity;
 
-                  // Login the user
-                  const loginRequest = new KinveyRequest({
+                  const request = new KinveyRequest({
                     method: RequestMethod.POST,
                     authType: AuthType.App,
                     url: url.format({
                       protocol: this.client.apiProtocol,
                       host: this.client.apiHost,
-                      pathname: `/${usersNamespace}/${this.client.appKey}/login`
+                      pathname: `/user/${this.client.appKey}/login`
                     }),
                     properties: this.properties,
                     body: data,
                     timeout: this.timeout,
                     client: this.client
                   });
-                  return loginRequest.execute(false, false)
-                    .then(response => response.data);
+                  return request.execute()
+                    .then((response) => response.data)
+                    .then((user) => {
+                      user._socialIdentity[session.identity] = defaults(user._socialIdentity[session.identity], session);
+                      return this.client.setActiveUser(user);
+                    });
                 })
-                .then((user) => {
-                  user._socialIdentity[session.identity] = defaults(user._socialIdentity[session.identity], session);
-                  return CacheRequest.setActiveUser(this.client, user);
+                .then(() => {
+                  return this.execute(rawResponse, false);
                 })
-                .then(() => this.execute(rawResponse, false))
-                .catch(() => {
-                  throw error;
-                });
+                .catch(() => Promise.reject(error));
             }
           }
-
-          throw error;
         }
 
-        throw error;
+        return Promise.reject(error);
       });
   }
 }

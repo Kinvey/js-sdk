@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function KinveyInternalErrorRetry(message, debug, code, kinveyRequestId) {
   this.name = 'KinveyInternalErrorRetry';
@@ -10,4 +10,4 @@ function KinveyInternalErrorRetry(message, debug, code, kinveyRequestId) {
 }
 KinveyInternalErrorRetry.prototype = Object.create(BaseError.prototype);
 KinveyInternalErrorRetry.prototype.constructor = KinveyInternalErrorRetry;
-export default KinveyInternalErrorRetry;
+export { KinveyInternalErrorRetry };

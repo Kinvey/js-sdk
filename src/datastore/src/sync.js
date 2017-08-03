@@ -14,11 +14,9 @@ import {
 } from 'src/request';
 import { SyncError } from 'src/errors';
 import { isDefined } from 'src/utils';
-import Client from 'src/client';
-import Query from 'src/query';
+import { Client } from 'src/client';
+import { Query } from 'src/query';
 
-const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
-const syncCollectionName = process.env.KINVEY_SYNC_COLLECTION_NAME || 'kinvey_sync';
 const pushInProgress = new Map();
 
 /**
@@ -36,7 +34,7 @@ export { SyncOperation };
 /**
  * @private
  */
-export default class SyncManager {
+export class SyncManager {
   constructor(collection, options = {}) {
     if (!collection) {
       throw new SyncError('A collection is required.');
@@ -63,7 +61,7 @@ export default class SyncManager {
    * @return {String} sync pathname
    */
   get pathname() {
-    return `/${appdataNamespace}/${this.client.appKey}/${syncCollectionName}`;
+    return `/appdata/${this.client.appKey}/kinvey_sync`;
   }
 
   /**
@@ -72,7 +70,7 @@ export default class SyncManager {
    * @return {String} sync pathname
    */
   get backendPathname() {
-    return `/${appdataNamespace}/${this.client.appKey}/${this.collection}`;
+    return `/appdata/${this.client.appKey}/${this.collection}`;
   }
 
   find(query, options = {}) {

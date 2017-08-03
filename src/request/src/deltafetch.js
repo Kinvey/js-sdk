@@ -9,18 +9,18 @@ import isString from 'lodash/isString';
 
 import { KinveyError, NotFoundError } from 'src/errors';
 import { isDefined } from 'src/utils';
-import Query from 'src/query';
+import { Query } from 'src/query';
 import { RequestMethod } from './request';
 import { KinveyRequest } from './network';
-import CacheRequest from './cache';
-import Response, { StatusCode } from './response';
+import { CacheRequest } from './cache';
+import { Response, StatusCode } from './response';
 
 const maxIdsPerRequest = 200;
 
 /**
  * @private
  */
-export default class DeltaFetchRequest extends KinveyRequest {
+export class DeltaFetchRequest extends KinveyRequest {
   get method() {
     return super.method;
   }

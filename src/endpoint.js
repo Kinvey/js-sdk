@@ -1,17 +1,15 @@
 import Promise from 'es6-promise';
-import url from 'url';
 import isString from 'lodash/isString';
+import url from 'url';
 
 import { KinveyError } from './errors';
-import Client from './client';
+import { Client } from './client';
 import { RequestMethod, AuthType, KinveyRequest } from './request';
-
-const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
 
 /**
  * Executes a custom endpoint on the Kinvey backend.
  */
-export default class CustomEndpoint {
+export class CustomEndpoint {
   constructor() {
     throw new KinveyError('Not allowed to create an instance of the `CustomEndpoint` class.',
       'Please use `CustomEndpoint.execute()` function.');
@@ -52,7 +50,7 @@ export default class CustomEndpoint {
       url: url.format({
         protocol: client.apiProtocol,
         host: client.apiHost,
-        pathname: `/${rpcNamespace}/${client.appKey}/custom/${endpoint}`
+        pathname: `/rpc/${client.appKey}/custom/${endpoint}`
       }),
       properties: options.properties,
       body: args,

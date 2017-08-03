@@ -1,9 +1,8 @@
-import Request, { KinveyRequest } from 'src/request';
+import { Request, KinveyRequest } from 'src/request';
 import { InvalidCredentialsError, ServerError, TimeoutError } from 'src/errors';
 import { randomString } from 'src/utils';
 import { AuthorizationGrant } from 'src/identity';
 import { UserMock } from 'test/mocks';
-import url from 'url';
 import nock from 'nock';
 import expect from 'expect';
 
@@ -26,11 +25,7 @@ describe('KinveyRequest', () => {
         .reply(200, reply);
 
       const request = new KinveyRequest({
-        url: url.format({
-          protocol: this.client.apiProtocol,
-          host: this.client.apiHost,
-          pathname: '/foo'
-        })
+        url: `${this.client.apiHostname}/foo`
       });
       return request.execute()
         .then((response) => {
@@ -48,11 +43,7 @@ describe('KinveyRequest', () => {
         });
 
       const request = new KinveyRequest({
-        url: url.format({
-          protocol: this.client.apiProtocol,
-          host: this.client.apiHost,
-          pathname: '/foo'
-        })
+        url: `${this.client.apiHostname}/foo`
       });
       return request.execute()
         .then((response) => {
@@ -73,11 +64,7 @@ describe('KinveyRequest', () => {
         });
 
       const request = new KinveyRequest({
-        url: url.format({
-          protocol: this.client.apiProtocol,
-          host: this.client.apiHost,
-          pathname: '/foo'
-        }),
+        url: `${this.client.apiHostname}/foo`,
         followRedirect: false
       });
       return request.execute()
@@ -102,11 +89,7 @@ describe('KinveyRequest', () => {
         });
 
       const request = new KinveyRequest({
-        url: url.format({
-          protocol: this.client.apiProtocol,
-          host: this.client.apiHost,
-          pathname: '/foo'
-        })
+        url: `${this.client.apiHostname}/foo`
       });
       return request.execute()
         .catch((error) => {
@@ -127,11 +110,7 @@ describe('KinveyRequest', () => {
         .reply(200);
 
       const request = new KinveyRequest({
-        url: url.format({
-          protocol: this.client.apiProtocol,
-          host: this.client.apiHost,
-          pathname: '/foo'
-        })
+        url: `${this.client.apiHostname}/foo`
       });
       return request.execute()
         .catch((error) => {
@@ -152,11 +131,7 @@ describe('KinveyRequest', () => {
           });
 
         const request = new KinveyRequest({
-          url: url.format({
-            protocol: this.client.apiProtocol,
-            host: this.client.apiHost,
-            pathname: '/foo'
-          })
+          url: `${this.client.apiHostname}/foo`
         });
         return request.execute()
           .catch((error) => {
@@ -195,11 +170,7 @@ describe('KinveyRequest', () => {
               });
 
             const request = new KinveyRequest({
-              url: url.format({
-                protocol: this.client.apiProtocol,
-                host: this.client.apiHost,
-                pathname: '/foo'
-              })
+              url: `${this.client.apiHostname}/foo`
             });
             return request.execute()
               .catch((error) => {
@@ -246,7 +217,7 @@ describe('KinveyRequest', () => {
             nock(this.client.apiHostname, { encodedQueryParams: true })
               .post(`/user/${this.client.appKey}/login`, { _socialIdentity: { kinveyAuth: newSession } })
               .reply(200, {
-                _id: randomString(),
+                _id: user._id,
                 _kmd: {
                   lmt: new Date().toISOString(),
                   ect: new Date().toISOString(),
@@ -265,11 +236,7 @@ describe('KinveyRequest', () => {
               .reply(200, reply);
 
             const request = new KinveyRequest({
-              url: url.format({
-                protocol: this.client.apiProtocol,
-                host: this.client.apiHost,
-                pathname: '/foo'
-              })
+              url: `${this.client.apiHostname}/foo`
             });
             return request.execute()
               .then((response) => {

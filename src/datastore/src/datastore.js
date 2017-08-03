@@ -1,15 +1,13 @@
-import url from 'url';
 import isString from 'lodash/isString';
+import url from 'url';
 
 import { CacheRequest, RequestMethod } from 'src/request';
 import { KinveyError } from 'src/errors';
 import { isDefined } from 'src/utils';
-import Client from 'src/client';
-import NetworkStore from './networkstore';
-import CacheStore from './cachestore';
-import SyncStore from './syncstore';
-
-const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
+import { Client } from 'src/client';
+import { NetworkStore } from './networkstore';
+import { CacheStore } from './cachestore';
+import { SyncStore } from './syncstore';
 
 /**
  * @typedef   {Object}    DataStoreType
@@ -28,7 +26,7 @@ export { DataStoreType };
 /**
  * The DataStore class is used to find, create, update, remove, count and group entities.
  */
-export default class DataStore {
+export class DataStore {
   constructor() {
     throw new KinveyError('Not allowed to construct a DataStore instance.'
       + ' Please use the collection() function to get an instance of a DataStore instance.');
@@ -79,7 +77,7 @@ export default class DataStore {
    */
   static clearCache(options = {}) {
     const client = options.client || Client.sharedInstance();
-    const pathname = `/${appdataNamespace}/${client.appKey}`;
+    const pathname = `/appdata/${client.appKey}`;
     const request = new CacheRequest({
       method: RequestMethod.DELETE,
       url: url.format({

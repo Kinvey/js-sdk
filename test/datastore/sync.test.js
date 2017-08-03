@@ -1,8 +1,8 @@
-import SyncManager, { SyncOperation } from 'src/datastore/src/sync';
+import { SyncManager, SyncOperation } from 'src/datastore/src/sync';
 import { SyncStore } from 'src/datastore';
 import { SyncError } from 'src/errors';
 import { randomString } from 'src/utils';
-import Query from 'src/query';
+import { Query } from 'src/query';
 import nock from 'nock';
 import expect from 'expect';
 import chai from 'chai';

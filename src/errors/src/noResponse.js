@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function NoResponseError(message, debug, code, kinveyRequestId) {
   this.name = 'NoResponseError';
@@ -10,4 +10,4 @@ function NoResponseError(message, debug, code, kinveyRequestId) {
 }
 NoResponseError.prototype = Object.create(BaseError.prototype);
 NoResponseError.prototype.constructor = NoResponseError;
-export default NoResponseError;
+export { NoResponseError };

@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function IncompleteRequestBodyError(message, debug, code, kinveyRequestId) {
   this.name = 'IncompleteRequestBodyError';
@@ -10,4 +10,4 @@ function IncompleteRequestBodyError(message, debug, code, kinveyRequestId) {
 }
 IncompleteRequestBodyError.prototype = Object.create(BaseError.prototype);
 IncompleteRequestBodyError.prototype.constructor = IncompleteRequestBodyError;
-export default IncompleteRequestBodyError;
+export { IncompleteRequestBodyError };

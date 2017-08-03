@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function APIVersionNotImplementedError(message, debug, code, kinveyRequestId) {
   this.name = 'APIVersionNotImplementedError';
@@ -10,4 +10,4 @@ function APIVersionNotImplementedError(message, debug, code, kinveyRequestId) {
 }
 APIVersionNotImplementedError.prototype = Object.create(BaseError.prototype);
 APIVersionNotImplementedError.prototype.constructor = APIVersionNotImplementedError;
-export default APIVersionNotImplementedError;
+export { APIVersionNotImplementedError };

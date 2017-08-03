@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function InvalidQuerySyntaxError(message, debug, code, kinveyRequestId) {
   this.name = 'InvalidQuerySyntaxError';
@@ -10,4 +10,4 @@ function InvalidQuerySyntaxError(message, debug, code, kinveyRequestId) {
 }
 InvalidQuerySyntaxError.prototype = Object.create(BaseError.prototype);
 InvalidQuerySyntaxError.prototype.constructor = InvalidQuerySyntaxError;
-export default InvalidQuerySyntaxError;
+export { InvalidQuerySyntaxError };
