@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function MissingRequestHeaderError(message, debug, code, kinveyRequestId) {
   this.name = 'MissingRequestHeaderError';
@@ -10,4 +10,4 @@ function MissingRequestHeaderError(message, debug, code, kinveyRequestId) {
 }
 MissingRequestHeaderError.prototype = Object.create(BaseError.prototype);
 MissingRequestHeaderError.prototype.constructor = MissingRequestHeaderError;
-export default MissingRequestHeaderError;
+export { MissingRequestHeaderError };

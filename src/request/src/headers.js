@@ -4,7 +4,7 @@ import isPlainObject from 'lodash/isPlainObject';
 
 import { isDefined } from 'src/utils';
 
-export default class Headers {
+export class Headers {
   constructor(headers = {}) {
     this.headers = {};
     this.addAll(headers);

@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function AppProblemError(message, debug, code, kinveyRequestId) {
   this.name = 'AppProblemError';
@@ -10,4 +10,4 @@ function AppProblemError(message, debug, code, kinveyRequestId) {
 }
 AppProblemError.prototype = Object.create(BaseError.prototype);
 AppProblemError.prototype.constructor = AppProblemError;
-export default AppProblemError;
+export { AppProblemError };

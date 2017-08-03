@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function QueryError(message, debug, code, kinveyRequestId) {
   this.name = 'QueryError';
@@ -10,4 +10,4 @@ function QueryError(message, debug, code, kinveyRequestId) {
 }
 QueryError.prototype = Object.create(BaseError.prototype);
 QueryError.prototype.constructor = QueryError;
-export default QueryError;
+export { QueryError };

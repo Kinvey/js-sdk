@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function ServerError(message, debug, code, kinveyRequestId) {
   this.name = 'ServerError';
@@ -10,4 +10,4 @@ function ServerError(message, debug, code, kinveyRequestId) {
 }
 ServerError.prototype = Object.create(BaseError.prototype);
 ServerError.prototype.constructor = ServerError;
-export default ServerError;
+export { ServerError };

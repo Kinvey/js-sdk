@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function WritesToCollectionDisallowedError(message, debug, code, kinveyRequestId) {
   this.name = 'WritesToCollectionDisallowedError';
@@ -10,4 +10,4 @@ function WritesToCollectionDisallowedError(message, debug, code, kinveyRequestId
 }
 WritesToCollectionDisallowedError.prototype = Object.create(BaseError.prototype);
 WritesToCollectionDisallowedError.prototype.constructor = WritesToCollectionDisallowedError;
-export default WritesToCollectionDisallowedError;
+export { WritesToCollectionDisallowedError };

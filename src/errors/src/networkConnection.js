@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function NetworkConnectionError(message, debug, code, kinveyRequestId) {
   this.name = 'NetworkConnectionError';
@@ -10,4 +10,4 @@ function NetworkConnectionError(message, debug, code, kinveyRequestId) {
 }
 NetworkConnectionError.prototype = Object.create(BaseError.prototype);
 NetworkConnectionError.prototype.constructor = NetworkConnectionError;
-export default NetworkConnectionError;
+export { NetworkConnectionError };

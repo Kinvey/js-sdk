@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function InsufficientCredentialsError(message, debug, code, kinveyRequestId) {
   this.name = 'InsufficientCredentialsError';
@@ -10,4 +10,4 @@ function InsufficientCredentialsError(message, debug, code, kinveyRequestId) {
 }
 InsufficientCredentialsError.prototype = Object.create(BaseError.prototype);
 InsufficientCredentialsError.prototype.constructor = InsufficientCredentialsError;
-export default InsufficientCredentialsError;
+export { InsufficientCredentialsError };

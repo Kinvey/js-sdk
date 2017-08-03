@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function BadRequestError(message, debug, code, kinveyRequestId) {
   this.name = 'BadRequestError';
@@ -10,4 +10,4 @@ function BadRequestError(message, debug, code, kinveyRequestId) {
 }
 BadRequestError.prototype = Object.create(BaseError.prototype);
 BadRequestError.prototype.constructor = BadRequestError;
-export default BadRequestError;
+export { BadRequestError };

@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function JSONParseError(message, debug, code, kinveyRequestId) {
   this.name = 'JSONParseError';
@@ -10,4 +10,4 @@ function JSONParseError(message, debug, code, kinveyRequestId) {
 }
 JSONParseError.prototype = Object.create(BaseError.prototype);
 JSONParseError.prototype.constructor = JSONParseError;
-export default JSONParseError;
+export { JSONParseError };

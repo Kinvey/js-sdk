@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function NoActiveUserError(message, debug, code, kinveyRequestId) {
   this.name = 'NoActiveUserError';
@@ -10,4 +10,4 @@ function NoActiveUserError(message, debug, code, kinveyRequestId) {
 }
 NoActiveUserError.prototype = Object.create(BaseError.prototype);
 NoActiveUserError.prototype.constructor = NoActiveUserError;
-export default NoActiveUserError;
+export { NoActiveUserError };

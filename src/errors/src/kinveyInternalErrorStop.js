@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function KinveyInternalErrorStop(message, debug, code, kinveyRequestId) {
   this.name = 'KinveyInternalErrorStop';
@@ -10,4 +10,4 @@ function KinveyInternalErrorStop(message, debug, code, kinveyRequestId) {
 }
 KinveyInternalErrorStop.prototype = Object.create(BaseError.prototype);
 KinveyInternalErrorStop.prototype.constructor = KinveyInternalErrorStop;
-export default KinveyInternalErrorStop;
+export { KinveyInternalErrorStop };

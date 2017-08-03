@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function NotFoundError(message, debug, code, kinveyRequestId) {
   this.name = 'NotFoundError';
@@ -10,4 +10,4 @@ function NotFoundError(message, debug, code, kinveyRequestId) {
 }
 NotFoundError.prototype = Object.create(BaseError.prototype);
 NotFoundError.prototype.constructor = NotFoundError;
-export default NotFoundError;
+export { NotFoundError };

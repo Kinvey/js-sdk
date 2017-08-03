@@ -8,4 +8,4 @@ function BaseError(message, debug, code, kinveyRequestId) {
 }
 BaseError.prototype = Object.create(Error.prototype);
 BaseError.prototype.constructor = BaseError;
-export default BaseError;
+export { BaseError };
