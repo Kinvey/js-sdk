@@ -1,6 +1,6 @@
 import { MobileIdentityConnect, AuthorizationGrant } from 'src/identity';
 import { InsufficientCredentialsError, MobileIdentityConnectError } from 'src/errors';
-import Client from 'src/client';
+import { Client } from 'src/client';
 import { randomString } from 'src/utils';
 import assign from 'lodash/assign';
 import expect from 'expect';

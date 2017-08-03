@@ -4,7 +4,7 @@ import { User } from 'src/entity';
 import nock from 'nock';
 import url from 'url';
 
-export default class UserMock extends User {
+export class UserMock extends User {
   static getActiveUser(client) {
     const activeUser = super.getActiveUser(client);
 

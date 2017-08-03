@@ -1,6 +1,6 @@
 import expect from 'expect';
 import { randomString } from 'src/utils';
-import Query from 'src/query';
+import { Query } from 'src/query';
 
 describe('Query', function() {
   describe('constructor', function() {
