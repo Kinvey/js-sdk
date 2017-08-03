@@ -1,4 +1,4 @@
-import DataStore, { DataStoreType, NetworkStore, CacheStore, SyncStore } from 'src/datastore';
+import { DataStore, DataStoreType, NetworkStore, CacheStore, SyncStore } from 'src/datastore';
 import { KinveyError } from 'src/errors';
 import expect from 'expect';
 const collection = 'Books';

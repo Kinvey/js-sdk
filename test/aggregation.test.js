@@ -1,4 +1,4 @@
-import Aggregation from 'src/aggregation';
+import { Aggregation } from 'src/aggregation';
 import { SyncStore } from 'src/datastore';
 import { isDefined, randomString } from 'src/utils';
 import nock from 'nock';

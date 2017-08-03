@@ -1,11 +1,5 @@
 import expect from 'expect';
-import url from 'url';
-import Request, { CacheRequest, RequestMethod } from 'src/request';
-import { User } from 'src/entity';
-import { randomString } from 'src/utils';
-
-const usersNamespace = 'user';
-const activeUserCollectionName = 'kinvey_active_user';
+import { Request, CacheRequest } from 'src/request';
 
 describe('CacheRequest', function() {
   describe('constructor', function() {
