@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function InvalidIdentifierError(message, debug, code, kinveyRequestId) {
   this.name = 'InvalidIdentifierError';
@@ -10,4 +10,4 @@ function InvalidIdentifierError(message, debug, code, kinveyRequestId) {
 }
 InvalidIdentifierError.prototype = Object.create(BaseError.prototype);
 InvalidIdentifierError.prototype.constructor = InvalidIdentifierError;
-export default InvalidIdentifierError;
+export { InvalidIdentifierError };

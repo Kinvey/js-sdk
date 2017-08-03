@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function CORSDisabledError(message, debug, code, kinveyRequestId) {
   this.name = 'CORSDisabledError';
@@ -10,4 +10,4 @@ function CORSDisabledError(message, debug, code, kinveyRequestId) {
 }
 CORSDisabledError.prototype = Object.create(BaseError.prototype);
 CORSDisabledError.prototype.constructor = CORSDisabledError;
-export default CORSDisabledError;
+export { CORSDisabledError };

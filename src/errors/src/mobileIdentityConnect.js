@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function MobileIdentityConnectError(message, debug, code, kinveyRequestId) {
   this.name = 'MobileIdentityConnectError';
@@ -10,4 +10,4 @@ function MobileIdentityConnectError(message, debug, code, kinveyRequestId) {
 }
 MobileIdentityConnectError.prototype = Object.create(BaseError.prototype);
 MobileIdentityConnectError.prototype.constructor = MobileIdentityConnectError;
-export default MobileIdentityConnectError;
+export { MobileIdentityConnectError };

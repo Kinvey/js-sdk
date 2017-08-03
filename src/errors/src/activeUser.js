@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function ActiveUserError(message, debug, code, kinveyRequestId) {
   this.name = 'ActiveUserError';
@@ -10,5 +10,5 @@ function ActiveUserError(message, debug, code, kinveyRequestId) {
 }
 ActiveUserError.prototype = Object.create(BaseError.prototype);
 ActiveUserError.prototype.constructor = ActiveUserError;
-export default ActiveUserError;
+export { ActiveUserError };
 

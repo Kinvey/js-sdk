@@ -1,19 +1,18 @@
-import UrlPattern from 'url-pattern';
 import url from 'url';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { KinveyError } from 'src/errors';
-import Query from 'src/query';
-import Aggregation from 'src/aggregation';
+import { Query } from 'src/query';
+import { Aggregation } from 'src/aggregation';
 import { isDefined } from 'src/utils';
-import Request from './request';
+import { Request } from './request';
 import { KinveyResponse } from './response';
 import { CacheRack } from './rack';
 
 /**
  * @private
  */
-export default class CacheRequest extends Request {
+export class CacheRequest extends Request {
   constructor(options = {}) {
     super(options);
     this.aggregation = options.aggregation;

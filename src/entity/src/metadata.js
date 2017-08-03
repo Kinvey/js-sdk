@@ -6,7 +6,7 @@ import { isDefined } from 'src/utils';
 /**
  * The Metadata class is used to as a wrapper for accessing the `_kmd` properties of an entity.
  */
-export default class Metadata {
+export class Metadata {
   constructor(entity) {
     if (isPlainObject(entity) === false) {
       throw new KinveyError('entity argument must be an object');

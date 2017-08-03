@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function PopupError(message, debug, code, kinveyRequestId) {
   this.name = 'PopupError';
@@ -10,4 +10,4 @@ function PopupError(message, debug, code, kinveyRequestId) {
 }
 PopupError.prototype = Object.create(BaseError.prototype);
 PopupError.prototype.constructor = PopupError;
-export default PopupError;
+export { PopupError };

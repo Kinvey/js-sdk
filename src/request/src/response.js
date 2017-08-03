@@ -29,7 +29,7 @@ import {
   UserAlreadyExistsError,
   WritesToCollectionDisallowedError
 } from 'src/errors';
-import Headers from './headers';
+import { Headers } from './headers';
 
 /**
  * @private
@@ -54,7 +54,7 @@ export { StatusCode };
 /**
  * @private
  */
-export default class Response {
+export class Response {
   constructor(options = {}) {
     options = assign({
       statusCode: StatusCode.Empty,
