@@ -1,6 +1,6 @@
 import { CacheStore, SyncStore, SyncOperation } from 'src/datastore';
-import Query from 'src/query';
-import Aggregation from 'src/aggregation';
+import { Query } from 'src/query';
+import { Aggregation } from 'src/aggregation';
 import { KinveyError, NotFoundError, ServerError } from 'src/errors';
 import { randomString } from 'src/utils';
 import nock from 'nock';

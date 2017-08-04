@@ -10,18 +10,18 @@ import url from 'url';
 
 import { CacheRequest, AuthType, RequestMethod } from 'src/request';
 import { KinveyError, NotFoundError } from 'src/errors';
-import Query from 'src/query';
-import Aggregation from 'src/aggregation';
+import { Query } from 'src/query';
+import { Aggregation } from 'src/aggregation';
 import { Metadata } from 'src/entity';
 import { KinveyObservable, isDefined } from 'src/utils';
-import NetworkStore from './networkstore';
-import SyncManager from './sync';
+import { NetworkStore } from './networkstore';
+import { SyncManager } from './sync';
 
 /**
  * The CacheStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-export default class CacheStore extends NetworkStore {
+export class CacheStore extends NetworkStore {
   constructor(collection, options = {}) {
     super(collection, options);
 

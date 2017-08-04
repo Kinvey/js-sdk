@@ -7,7 +7,7 @@ import chaiAsPromised from 'chai-as-promised';
 import { FileStore } from 'src/datastore';
 import { KinveyError, NotFoundError, ServerError } from 'src/errors';
 import { randomString } from 'src/utils';
-import Query from 'src/query';
+import { Query } from 'src/query';
 
 chai.use(chaiAsPromised);
 chai.should();

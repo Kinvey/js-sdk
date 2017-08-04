@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function StaleRequestError(message, debug, code, kinveyRequestId) {
   this.name = 'StaleRequestError';
@@ -10,4 +10,4 @@ function StaleRequestError(message, debug, code, kinveyRequestId) {
 }
 StaleRequestError.prototype = Object.create(BaseError.prototype);
 StaleRequestError.prototype.constructor = StaleRequestError;
-export default StaleRequestError;
+export { StaleRequestError };

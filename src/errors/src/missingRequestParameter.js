@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function MissingRequestParameterError(message, debug, code, kinveyRequestId) {
   this.name = 'MissingRequestParameterError';
@@ -10,4 +10,4 @@ function MissingRequestParameterError(message, debug, code, kinveyRequestId) {
 }
 MissingRequestParameterError.prototype = Object.create(BaseError.prototype);
 MissingRequestParameterError.prototype.constructor = MissingRequestParameterError;
-export default MissingRequestParameterError;
+export { MissingRequestParameterError };

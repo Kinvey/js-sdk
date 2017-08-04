@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function TimeoutError(message, debug, code, kinveyRequestId) {
   this.name = 'TimeoutError';
@@ -10,4 +10,4 @@ function TimeoutError(message, debug, code, kinveyRequestId) {
 }
 TimeoutError.prototype = Object.create(BaseError.prototype);
 TimeoutError.prototype.constructor = TimeoutError;
-export default TimeoutError;
+export { TimeoutError };

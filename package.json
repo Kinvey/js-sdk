@@ -1,6 +1,6 @@
 {
   "name": "kinvey-js-sdk",
-  "version": "3.6.0-ns.9",
+  "version": "3.7.2",
   "description": "Kinvey JavaScript SDK for developing JavaScript applications. This is the core code used to create specific bundles for all other JavaScript platforms.",
   "homepage": "http://www.kinvey.com",
   "bugs": {
@@ -8,7 +8,7 @@
   },
   "license": "Apache-2.0",
   "author": "Kinvey, Inc.",
-  "main": "./dist/index.js",
+  "main": "dist/",
   "es6": true,
   "contributors": [
     "Thomas Conner <thomas@kinvey.com>"

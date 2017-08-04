@@ -2,7 +2,7 @@ import { AuthType, DeltaFetchRequest, RequestMethod } from 'src/request';
 import { KinveyError } from 'src/errors';
 import { SyncStore } from 'src/datastore';
 import { randomString } from 'src/utils';
-import Query from 'src/query';
+import { Query } from 'src/query';
 import nock from 'nock';
 import expect from 'expect';
 const collection = 'books';

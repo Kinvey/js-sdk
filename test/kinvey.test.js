@@ -1,6 +1,6 @@
 import { Kinvey } from 'src/kinvey';
 import { randomString } from 'src/utils';
-import Client from 'src/client';
+import { Client } from 'src/client';
 import { UserMock } from 'test/mocks';
 import expect from 'expect';
 import nock from 'nock';
@@ -60,25 +60,6 @@ describe('Kinvey', function () {
         micHostname: micHostname
       });
       expect(client).toInclude({ micHostname: micHostname });
-    });
-
-    it('should set additional modules after init', function() {
-      // Initialize Kinvey
-      Kinvey.init({
-        appKey: randomString(),
-        appSecret: randomString()
-      });
-
-      expect(Kinvey.Acl).toNotEqual(undefined);
-      expect(Kinvey.Aggregation).toNotEqual(undefined);
-      expect(Kinvey.AuthorizationGrant).toNotEqual(undefined);
-      expect(Kinvey.CustomEndpoint).toNotEqual(undefined);
-      expect(Kinvey.DataStore).toNotEqual(undefined);
-      expect(Kinvey.DataStoreType).toNotEqual(undefined);
-      expect(Kinvey.Files).toNotEqual(undefined);
-      expect(Kinvey.Metadata).toNotEqual(undefined);
-      expect(Kinvey.Query).toNotEqual(undefined);
-      expect(Kinvey.User).toNotEqual(undefined);
     });
   });
 

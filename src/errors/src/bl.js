@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function BLError(message, debug, code, kinveyRequestId) {
   this.name = 'BLError';
@@ -10,4 +10,4 @@ function BLError(message, debug, code, kinveyRequestId) {
 }
 BLError.prototype = Object.create(BaseError.prototype);
 BLError.prototype.constructor = BLError;
-export default BLError;
+export { BLError };

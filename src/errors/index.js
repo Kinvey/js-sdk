@@ -1,81 +1,37 @@
-import ActiveUserError from './src/activeUser';
-import APIVersionNotAvailableError from './src/apiVersionNotAvailable';
-import APIVersionNotImplementedError from './src/apiVersionNotImplemented';
-import AppProblemError from './src/appProblem';
-import BadRequestError from './src/badRequest';
-import BaseError from './src/base';
-import BLError from './src/bl';
-import CORSDisabledError from './src/corsDisabled';
-import DuplicateEndUsersError from './src/duplicateEndUsers';
-import FeatureUnavailableError from './src/featureUnavailable';
-import IncompleteRequestBodyError from './src/incompleteRequestBody';
-import IndirectCollectionAccessDisallowedError from './src/indirectCollectionAccessDisallowed';
-import InsufficientCredentialsError from './src/insufficientCredentials';
-import InvalidCredentialsError from './src/invalidCredentials';
-import InvalidIdentifierError from './src/invalidIdentifier';
-import InvalidQuerySyntaxError from './src/invalidQuerySyntax';
-import JSONParseError from './src/jsonParse';
-import KinveyInternalErrorRetry from './src/kinveyInternalErrorRetry';
-import KinveyInternalErrorStop from './src/kinveyInternalErrorStop';
-import KinveyError from './src/kinvey';
-import MissingQueryError from './src/missingQuery';
-import MissingRequestHeaderError from './src/missingRequestHeader';
-import MissingRequestParameterError from './src/missingRequestParameter';
-import MobileIdentityConnectError from './src/mobileIdentityConnect';
-import NetworkConnectionError from './src/networkConnection';
-import NoActiveUserError from './src/noActiveUser';
-import NoResponseError from './src/noResponse';
-import NotFoundError from './src/notFound';
-import ParameterValueOutOfRangeError from './src/parameterValueOutOfRange';
-import PopupError from './src/popup';
-import QueryError from './src/query';
-import ServerError from './src/server';
-import StaleRequestError from './src/staleRequest';
-import SyncError from './src/sync';
-import TimeoutError from './src/timeout';
-import UserAlreadyExistsError from './src/userAlreadyExists';
-import WritesToCollectionDisallowedError from './src/writesToCollectionDisallowed';
-
-// Export
-export {
-  ActiveUserError,
-  APIVersionNotAvailableError,
-  APIVersionNotImplementedError,
-  AppProblemError,
-  BadRequestError,
-  BaseError,
-  BLError,
-  CORSDisabledError,
-  DuplicateEndUsersError,
-  FeatureUnavailableError,
-  IncompleteRequestBodyError,
-  IndirectCollectionAccessDisallowedError,
-  InsufficientCredentialsError,
-  InvalidCredentialsError,
-  InvalidIdentifierError,
-  InvalidQuerySyntaxError,
-  JSONParseError,
-  KinveyInternalErrorRetry,
-  KinveyInternalErrorStop,
-  KinveyError,
-  MissingQueryError,
-  MissingRequestHeaderError,
-  MissingRequestParameterError,
-  MobileIdentityConnectError,
-  NetworkConnectionError,
-  NoActiveUserError,
-  NoResponseError,
-  NotFoundError,
-  ParameterValueOutOfRangeError,
-  PopupError,
-  QueryError,
-  ServerError,
-  StaleRequestError,
-  SyncError,
-  TimeoutError,
-  UserAlreadyExistsError,
-  WritesToCollectionDisallowedError,
-};
-
-// Export default
-export default KinveyError;
+export * from './src/activeUser';
+export * from './src/apiVersionNotAvailable';
+export * from './src/apiVersionNotImplemented';
+export * from './src/appProblem';
+export * from './src/badRequest';
+export * from './src/base';
+export * from './src/bl';
+export * from './src/corsDisabled';
+export * from './src/duplicateEndUsers';
+export * from './src/featureUnavailable';
+export * from './src/incompleteRequestBody';
+export * from './src/indirectCollectionAccessDisallowed';
+export * from './src/insufficientCredentials';
+export * from './src/invalidCredentials';
+export * from './src/invalidIdentifier';
+export * from './src/invalidQuerySyntax';
+export * from './src/jsonParse';
+export * from './src/kinveyInternalErrorRetry';
+export * from './src/kinveyInternalErrorStop';
+export * from './src/kinvey';
+export * from './src/missingQuery';
+export * from './src/missingRequestHeader';
+export * from './src/missingRequestParameter';
+export * from './src/mobileIdentityConnect';
+export * from './src/networkConnection';
+export * from './src/noActiveUser';
+export * from './src/noResponse';
+export * from './src/notFound';
+export * from './src/parameterValueOutOfRange';
+export * from './src/popup';
+export * from './src/query';
+export * from './src/server';
+export * from './src/staleRequest';
+export * from './src/sync';
+export * from './src/timeout';
+export * from './src/userAlreadyExists';
+export * from './src/writesToCollectionDisallowed';

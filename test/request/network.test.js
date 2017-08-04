@@ -1,9 +1,8 @@
-import Request, { KinveyRequest } from 'src/request';
+import { Request, KinveyRequest } from 'src/request';
 import { InvalidCredentialsError, ServerError, TimeoutError } from 'src/errors';
 import { randomString } from 'src/utils';
 import { AuthorizationGrant } from 'src/identity';
 import { UserMock } from 'test/mocks';
-import url from 'url';
 import nock from 'nock';
 import expect from 'expect';
 
@@ -218,7 +217,7 @@ describe('KinveyRequest', () => {
             nock(this.client.apiHostname, { encodedQueryParams: true })
               .post(`/user/${this.client.appKey}/login`, { _socialIdentity: { kinveyAuth: newSession } })
               .reply(200, {
-                _id: randomString(),
+                _id: user._id,
                 _kmd: {
                   lmt: new Date().toISOString(),
                   ect: new Date().toISOString(),
