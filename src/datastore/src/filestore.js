@@ -458,3 +458,6 @@ export class FileStore extends NetworkStore {
     throw new KinveyError('Please use removeById() to remove files one by one.');
   }
 }
+
+const Files = new FileStore();
+export { Files };
