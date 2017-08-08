@@ -718,7 +718,7 @@ export default class User {
     // Check if this is the active user
     if (this.isActive() === false) {
       return Promise.reject(
-        new KinveyError('This user must be the active user to register from real time.')
+        new KinveyError('This user must be the active user in order to register for real time.')
       );
     }
 
@@ -743,7 +743,7 @@ export default class User {
     // Check if this is the active user
     if (this.isActive() === false) {
       return Promise.reject(
-        new KinveyError('This user must be the active user to unregister from real time.')
+        new KinveyError('This user must be the active user in order to unregister for real time.')
       );
     }
 

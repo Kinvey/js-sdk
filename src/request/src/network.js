@@ -363,6 +363,7 @@ export class KinveyRequest extends NetworkRequest {
       });
   }
 
+  /** @returns {Promise} */
   execute(rawResponse = false, retry = true) {
     return this.getAuthorizationHeader()
       .then((authorizationHeader) => {
