@@ -6,13 +6,13 @@ import url from 'url';
 import { AuthType, RequestMethod, KinveyRequest } from 'src/request';
 import { KinveyError } from 'src/errors';
 import { KinveyObservable, isDefined } from 'src/utils';
-import Query from 'src/query';
-import NetworkStore from './networkstore';
+import { Query } from 'src/query';
+import { NetworkStore } from './networkstore';
 
 /**
  * The UserStore class is used to find, save, update, remove, count and group users.
  */
-export default class UserStore extends NetworkStore {
+export class UserStore extends NetworkStore {
   constructor(options) {
     super(null, options);
   }

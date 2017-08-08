@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function APIVersionNotAvailableError(message, debug, code, kinveyRequestId) {
   this.name = 'APIVersionNotAvailableError';
@@ -10,4 +10,4 @@ function APIVersionNotAvailableError(message, debug, code, kinveyRequestId) {
 }
 APIVersionNotAvailableError.prototype = Object.create(BaseError.prototype);
 APIVersionNotAvailableError.prototype.constructor = APIVersionNotAvailableError;
-export default APIVersionNotAvailableError;
+export { APIVersionNotAvailableError };

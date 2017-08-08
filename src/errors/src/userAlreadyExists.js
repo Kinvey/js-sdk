@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function UserAlreadyExistsError(message, debug, code, kinveyRequestId) {
   this.name = 'UserAlreadyExistsError';
@@ -10,4 +10,4 @@ function UserAlreadyExistsError(message, debug, code, kinveyRequestId) {
 }
 UserAlreadyExistsError.prototype = Object.create(BaseError.prototype);
 UserAlreadyExistsError.prototype.constructor = UserAlreadyExistsError;
-export default UserAlreadyExistsError;
+export { UserAlreadyExistsError };

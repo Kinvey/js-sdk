@@ -1,9 +1,9 @@
 import Promise from 'es6-promise';
 
 import { isDefined } from 'src/utils';
-import Middleware from './middleware';
+import { Middleware } from './middleware';
 
-export default class ParseMiddleware extends Middleware {
+export class ParseMiddleware extends Middleware {
   constructor(name = 'Parse Middleware') {
     super(name);
   }
@@ -17,7 +17,7 @@ export default class ParseMiddleware extends Middleware {
           try {
             response.data = JSON.parse(response.data);
           } catch (error) {
-            // Just catch the error
+            // Just catch the JSON parse error
           }
         }
       }

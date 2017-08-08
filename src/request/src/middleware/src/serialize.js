@@ -1,9 +1,9 @@
 import Promise from 'es6-promise';
 
 import { isDefined } from 'src/utils';
-import Middleware from './middleware';
+import { Middleware } from './middleware';
 
-export default class SerializeMiddleware extends Middleware {
+export class SerializeMiddleware extends Middleware {
   constructor(name = 'Serialize Middleware') {
     super(name);
   }

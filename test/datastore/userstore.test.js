@@ -1,5 +1,5 @@
 import { UserStore } from 'src/datastore';
-import Query from 'src/query';
+import { Query } from 'src/query';
 import { KinveyError } from 'src/errors';
 import { randomString } from 'src/utils';
 import nock from 'nock';

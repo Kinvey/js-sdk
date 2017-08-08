@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function SyncError(message, debug, code, kinveyRequestId) {
   this.name = 'SyncError';
@@ -10,4 +10,4 @@ function SyncError(message, debug, code, kinveyRequestId) {
 }
 SyncError.prototype = Object.create(BaseError.prototype);
 SyncError.prototype.constructor = SyncError;
-export default SyncError;
+export { SyncError };

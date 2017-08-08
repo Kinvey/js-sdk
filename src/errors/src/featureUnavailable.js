@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function FeatureUnavailableError(message, debug, code, kinveyRequestId) {
   this.name = 'FeatureUnavailableError';
@@ -10,4 +10,4 @@ function FeatureUnavailableError(message, debug, code, kinveyRequestId) {
 }
 FeatureUnavailableError.prototype = Object.create(BaseError.prototype);
 FeatureUnavailableError.prototype.constructor = FeatureUnavailableError;
-export default FeatureUnavailableError;
+export { FeatureUnavailableError };

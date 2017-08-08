@@ -1,24 +1,22 @@
 import Promise from 'es6-promise';
 import { Buffer } from 'buffer/';
 import qs from 'qs';
-import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
+import assign from 'lodash/assign';
 import isEmpty from 'lodash/isEmpty';
 import url from 'url';
 
-import Query from 'src/query';
-import Aggregation from 'src/aggregation';
+import { Query } from 'src/query';
+import { Aggregation } from 'src/aggregation';
 import { isDefined, appendQuery } from 'src/utils';
-import { InvalidCredentialsError, NoActiveUserError, KinveyError } from 'src/errors';
-import { SocialIdentity } from 'src/identity';
-import { ActiveUserHelper } from 'src/entity/src/activeUserHelper';
-import Request, { RequestMethod } from './request';
-import Headers from './headers';
+import { NoActiveUserError, KinveyError, InvalidCredentialsError } from 'src/errors';
+import { Request, RequestMethod } from './request';
+import { Headers } from './headers';
 import { KinveyResponse } from './response';
 import { NetworkRack } from './rack';
 
 
-export default class NetworkRequest extends Request {
+export class NetworkRequest extends Request {
   constructor(options = {}) {
     super(options);
     this.rack = NetworkRack;

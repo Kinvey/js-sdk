@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function MissingQueryError(message, debug, code, kinveyRequestId) {
   this.name = 'MissingQueryError';
@@ -10,4 +10,4 @@ function MissingQueryError(message, debug, code, kinveyRequestId) {
 }
 MissingQueryError.prototype = Object.create(BaseError.prototype);
 MissingQueryError.prototype.constructor = MissingQueryError;
-export default MissingQueryError;
+export { MissingQueryError };

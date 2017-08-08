@@ -4,11 +4,11 @@ import assign from 'lodash/assign';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 
-import Client from 'src/client';
+import { Client } from 'src/client';
 import { KinveyError, NoResponseError } from 'src/errors';
 import { isDefined, appendQuery } from 'src/utils';
-import Response from './response';
-import Headers from './headers';
+import { Response } from './response';
+import { Headers } from './headers';
 
 /**
  * @private
@@ -27,7 +27,7 @@ export { RequestMethod };
 /**
  * @private
  */
-export default class Request {
+export class Request {
   constructor(options = {}) {
     options = assign({
       followRedirect: true

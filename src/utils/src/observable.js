@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 /**
  * @private
  */
-export default class KinveyObservable extends Observable {
+export class KinveyObservable extends Observable {
   toPromise() {
     return new Promise((resolve, reject) => {
       let value;

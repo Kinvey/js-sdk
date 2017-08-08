@@ -6,8 +6,8 @@ import urljoin from 'url-join';
 import { AuthType, RequestMethod, KinveyRequest } from 'src/request';
 import { KinveyError, MobileIdentityConnectError } from 'src/errors';
 import { isDefined } from 'src/utils';
-import CorePopup from './popup';
-import Identity from './identity';
+import { CorePopup } from './popup';
+import { Identity } from './identity';
 import { SocialIdentity } from './enums';
 
 let Popup = CorePopup;

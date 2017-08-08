@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function IndirectCollectionAccessDisallowedError(message, debug, code, kinveyRequestId) {
   this.name = 'IndirectCollectionAccessDisallowedError';
@@ -10,4 +10,4 @@ function IndirectCollectionAccessDisallowedError(message, debug, code, kinveyReq
 }
 IndirectCollectionAccessDisallowedError.prototype = Object.create(BaseError.prototype);
 IndirectCollectionAccessDisallowedError.prototype.constructor = IndirectCollectionAccessDisallowedError;
-export default IndirectCollectionAccessDisallowedError;
+export { IndirectCollectionAccessDisallowedError };

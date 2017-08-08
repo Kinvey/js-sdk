@@ -1,11 +1,9 @@
 import url from 'url';
-import assign from 'lodash/assign';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 
 import { KinveyError } from 'src/errors';
-import { Log, isDefined } from 'src/utils';
-import { ActiveUserHelper } from 'src/entity/src/activeUserHelper';
+import { isDefined } from 'src/utils';
 
 const DEFAULT_TIMEOUT = 60000;
 let sharedInstance = null;
@@ -14,7 +12,7 @@ let sharedInstance = null;
  * The Client class stores information about your application on the Kinvey platform. You can create mutiple clients
  * to send requests to different environments on the Kinvey platform.
  */
-export default class Client {
+export class Client {
   /**
    * Creates a new instance of the Client class.
    *

@@ -1,10 +1,10 @@
 import isEmpty from 'lodash/isEmpty';
 
 import { isDefined } from 'src/utils';
-import Middleware from './middleware';
+import { Middleware } from './middleware';
 import { Storage } from './storage';
 
-export default class CacheMiddleware extends Middleware {
+export class CacheMiddleware extends Middleware {
   constructor(name = 'Cache Middleware') {
     super(name);
   }

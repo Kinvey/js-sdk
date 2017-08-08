@@ -21,7 +21,7 @@ function deviceInformation() {
   }).join(' ');
 }
 
-export default class HttpMiddleware extends Middleware {
+export class HttpMiddlewareMock extends Middleware {
   constructor(name = 'Http Middleware') {
     super(name);
   }

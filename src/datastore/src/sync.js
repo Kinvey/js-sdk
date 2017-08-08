@@ -14,8 +14,8 @@ import {
 } from 'src/request';
 import { SyncError } from 'src/errors';
 import { isDefined } from 'src/utils';
-import Client from 'src/client';
-import Query from 'src/query';
+import { Client } from 'src/client';
+import { Query } from 'src/query';
 
 const pushInProgress = new Map();
 
@@ -34,7 +34,7 @@ export { SyncOperation };
 /**
  * @private
  */
-export default class SyncManager {
+export class SyncManager {
   constructor(collection, options = {}) {
     if (!collection) {
       throw new SyncError('A collection is required.');

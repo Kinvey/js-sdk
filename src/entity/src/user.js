@@ -5,21 +5,20 @@ import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import url from 'url';
 
-import Client from 'src/client';
+import { Client } from 'src/client';
 import { AuthType, RequestMethod, KinveyRequest } from 'src/request';
 import { KinveyError, NotFoundError, ActiveUserError } from 'src/errors';
-import DataStore, { UserStore } from 'src/datastore';
+import { DataStore, UserStore } from 'src/datastore';
 import { MobileIdentityConnect } from 'src/identity';
 import { Log, isDefined } from 'src/utils';
-import { ActiveUserHelper } from './activeUserHelper';
-import Acl from './acl';
-import Metadata from './metadata';
+import { Acl } from './acl';
+import { Metadata } from './metadata';
 
 /**
  * The User class is used to represent a single user on the Kinvey platform.
  * Use the user class to manage the active user lifecycle and perform user operations.
  */
-export default class User {
+export class User {
   /**
    * Create a new instance of a User.
    *

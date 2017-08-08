@@ -12,7 +12,7 @@ import { isDefined } from 'src/utils';
  * var entity = { _acl: {} };
  * var acl = new Kinvey.Acl(entity);
  */
-export default class Acl {
+export class Acl {
   constructor(entity) {
     if (isPlainObject(entity) === false) {
       throw new KinveyError('entity argument must be an object');

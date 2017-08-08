@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function DuplicateEndUsersError(message, debug, code, kinveyRequestId) {
   this.name = 'DuplicateEndUsersError';
@@ -10,4 +10,4 @@ function DuplicateEndUsersError(message, debug, code, kinveyRequestId) {
 }
 DuplicateEndUsersError.prototype = Object.create(BaseError.prototype);
 DuplicateEndUsersError.prototype.constructor = DuplicateEndUsersError;
-export default DuplicateEndUsersError;
+export { DuplicateEndUsersError };

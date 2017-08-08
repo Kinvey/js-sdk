@@ -4,15 +4,15 @@ import url from 'url';
 
 import { DeltaFetchRequest, KinveyRequest, AuthType, RequestMethod } from 'src/request';
 import { KinveyError } from 'src/errors';
-import Query from 'src/query';
-import Client from 'src/client';
+import { Query } from 'src/query';
+import { Client } from 'src/client';
 import { KinveyObservable, Log, isDefined } from 'src/utils';
-import Aggregation from 'src/aggregation';
+import { Aggregation } from 'src/aggregation';
 
 /**
  * The NetworkStore class is used to find, create, update, remove, count and group entities over the network.
  */
-export default class NetworkStore {
+export class NetworkStore {
   constructor(collection, options = {}) {
     if (collection && !isString(collection)) {
       throw new KinveyError('Collection must be a string.');

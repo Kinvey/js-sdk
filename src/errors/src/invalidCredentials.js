@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function InvalidCredentialsError(message, debug, code, kinveyRequestId) {
   this.name = 'InvalidCredentialsError';
@@ -10,4 +10,4 @@ function InvalidCredentialsError(message, debug, code, kinveyRequestId) {
 }
 InvalidCredentialsError.prototype = Object.create(BaseError.prototype);
 InvalidCredentialsError.prototype.constructor = InvalidCredentialsError;
-export default InvalidCredentialsError;
+export { InvalidCredentialsError };

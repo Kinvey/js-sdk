@@ -1,4 +1,4 @@
-import BaseError from './base';
+import { BaseError } from './base';
 
 function ParameterValueOutOfRangeError(message, debug, code, kinveyRequestId) {
   this.name = 'ParameterValueOutOfRangeError';
@@ -10,4 +10,4 @@ function ParameterValueOutOfRangeError(message, debug, code, kinveyRequestId) {
 }
 ParameterValueOutOfRangeError.prototype = Object.create(BaseError.prototype);
 ParameterValueOutOfRangeError.prototype.constructor = ParameterValueOutOfRangeError;
-export default ParameterValueOutOfRangeError;
+export { ParameterValueOutOfRangeError };

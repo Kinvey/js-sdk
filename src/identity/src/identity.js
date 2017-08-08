@@ -1,10 +1,10 @@
-import Client from 'src/client';
+import { Client } from 'src/client';
 import { KinveyError } from 'src/errors';
 
 /**
  * @private
  */
-export default class Identity {
+export class Identity {
   constructor(options = {}) {
     this.client = options.client || Client.sharedInstance();
   }
