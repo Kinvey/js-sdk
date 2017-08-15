@@ -13,6 +13,7 @@ import { Facebook, Google, LinkedIn, MobileIdentityConnect } from 'src/identity'
 import { Log, isDefined } from 'src/utils';
 import Acl from './acl';
 import Metadata from './metadata';
+import { getLiveService } from '../../live';
 
 const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
 const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
@@ -195,10 +196,10 @@ export default class User {
     }
 
     if ((!isDefined(credentials.username)
-        || credentials.username === ''
-        || !isDefined(credentials.password)
-        || credentials.password === ''
-      ) && !isDefined(credentials._socialIdentity)) {
+      || credentials.username === ''
+      || !isDefined(credentials.password)
+      || credentials.password === ''
+    ) && !isDefined(credentials._socialIdentity)) {
       return Promise.reject(
         new KinveyError('Username and/or password missing. Please provide both a username and password to login.')
       );
@@ -498,7 +499,14 @@ export default class User {
       client: this.client
     });
 
-    return request.execute()
+    let prm = Promise.resolve();
+    const liveService = getLiveService();
+
+    if (liveService.isInitialized()) {
+      prm = liveService.shutDown();
+    }
+
+    return prm.then(() => request.execute())
       .catch((error) => {
         Log.error(error);
         return null;
