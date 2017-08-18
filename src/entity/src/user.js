@@ -13,7 +13,7 @@ import { Facebook, Google, LinkedIn, MobileIdentityConnect } from 'src/identity'
 import { Log, isDefined } from 'src/utils';
 import Acl from './acl';
 import Metadata from './metadata';
-import { getLiveService } from '../../live';
+import { LiveServiceFacade } from '../../live';
 
 const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
 const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
@@ -500,10 +500,9 @@ export default class User {
     });
 
     let prm = Promise.resolve();
-    const liveService = getLiveService(this.client);
 
-    if (liveService.isInitialized()) {
-      prm = liveService.unregister();
+    if (LiveServiceFacade.isInitialized()) {
+      prm = LiveServiceFacade.unregister();
     }
 
     return prm.then(() => request.execute())

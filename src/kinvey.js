@@ -48,7 +48,7 @@ import DataStore, { DataStoreType, FileStore, SyncOperation } from './datastore'
 import { Acl, Metadata, User } from './entity';
 import { AuthorizationGrant } from './identity';
 import { AuthType, CacheRack, NetworkRack, Rack, RequestMethod, KinveyRequest } from './request';
-import { getLiveServiceFacade, Stream } from './live';
+import { LiveServiceFacade, Stream } from './live';
 
 const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 
@@ -145,7 +145,6 @@ class Kinvey {
     // Initialize the client
     return Client.initialize(options)
       .then(() => {
-        Kinvey.LiveService = getLiveServiceFacade(Client.sharedInstance());
         // Return the active user
         return User.getActiveUser();
       });
@@ -187,6 +186,7 @@ Kinvey.CustomEndpoint = CustomEndpoint;
 Kinvey.DataStore = DataStore;
 Kinvey.DataStoreType = DataStoreType;
 Kinvey.Stream = Stream;
+Kinvey.LiveService = LiveServiceFacade;
 Kinvey.Files = new FileStore();
 Kinvey.Group = Aggregation;
 Kinvey.Log = Log;
