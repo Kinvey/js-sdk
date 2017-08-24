@@ -3,12 +3,12 @@ import isArray from 'lodash/isArray';
 import url from 'url';
 
 import { DeltaFetchRequest, KinveyRequest, AuthType, RequestMethod } from 'src/request';
-import { LiveServiceManager } from 'src/live';
 import { KinveyError } from 'src/errors';
 import Query from 'src/query';
 import Client from 'src/client';
 import { KinveyObservable, isDefined } from 'src/utils';
 import Aggregation from 'src/aggregation';
+import { getLiveCollectionManager } from '../../live';
 
 const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 
@@ -477,14 +477,16 @@ export default class NetworkStore {
   /**
    * Subscribes to the live stream for the collection
    */
-  subscribe(options = {}) {
-    return LiveServiceManager.subscribe(this.collection, options);
+  subscribe(receiver) {
+    const manager = getLiveCollectionManager();
+    return manager.subscribeCollection(this.collection, receiver);
   }
 
   /**
    * Unsubscribes from the live stream for the collection
    */
-  unsubscribe(options = {}) {
-    return LiveServiceManager.unsubscribe(this.collection, options);
+  unsubscribe() {
+    const manager = getLiveCollectionManager();
+    return manager.unsubscribeCollection(this.collection);
   }
 }

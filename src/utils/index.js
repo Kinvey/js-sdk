@@ -1,13 +1,13 @@
 import { isDefined, nested } from './src/object';
 import KinveyObservable from './src/observable';
-import { randomString } from './src/string';
 import Log from './src/log';
+
+export * from './src/string';
 
 // Export
 export {
   KinveyObservable,
   Log,
   isDefined,
-  nested,
-  randomString
+  nested
 };

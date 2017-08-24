@@ -13,6 +13,7 @@ import { Facebook, Google, LinkedIn, MobileIdentityConnect } from 'src/identity'
 import { Log, isDefined } from 'src/utils';
 import Acl from './acl';
 import Metadata from './metadata';
+import { getLiveService } from '../../live';
 
 const usersNamespace = process.env.KINVEY_USERS_NAMESPACE || 'user';
 const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
@@ -195,10 +196,10 @@ export default class User {
     }
 
     if ((!isDefined(credentials.username)
-        || credentials.username === ''
-        || !isDefined(credentials.password)
-        || credentials.password === ''
-      ) && !isDefined(credentials._socialIdentity)) {
+      || credentials.username === ''
+      || !isDefined(credentials.password)
+      || credentials.password === ''
+    ) && !isDefined(credentials._socialIdentity)) {
       return Promise.reject(
         new KinveyError('Username and/or password missing. Please provide both a username and password to login.')
       );
@@ -498,7 +499,8 @@ export default class User {
       client: this.client
     });
 
-    return request.execute()
+    return this.unregisterFromLiveService()
+      .then(() => request.execute())
       .catch((error) => {
         Log.error(error);
         return null;
@@ -714,54 +716,48 @@ export default class User {
       .then(() => this);
   }
 
-  registerRealTime(options = {}) {
-    // Check if this is the active user
-    if (this.isActive() === false) {
-      return Promise.reject(
-        new KinveyError('This user must be the active user to register from real time.')
-      );
+  /**
+   * @returns {Promise}
+   */
+  static registerForLiveService() {
+    const activeUser = User.getActiveUser();
+
+    if (activeUser) {
+      return activeUser.registerForLiveService();
     }
 
-    // Register the active user
-    const request = new KinveyRequest({
-      method: RequestMethod.POST,
-      authType: AuthType.Session,
-      url: url.format({
-        protocol: this.client.apiProtocol,
-        host: this.client.apiHost,
-        pathname: `/user/${this.client.appKey}/${this._id}/register-realtime`
-      }),
-      body: { deviceId: this.client.deviceId },
-      properties: options.properties,
-      timeout: options.timeout
-    });
-    return request.execute()
-      .then(response => response.data);
+    return Promise.reject(new ActiveUserError('There is no active user'));
   }
 
-  unregisterRealTime(options = {}) {
-    // Check if this is the active user
-    if (this.isActive() === false) {
-      return Promise.reject(
-        new KinveyError('This user must be the active user to unregister from real time.')
-      );
+  /**
+   * @returns {Promise}
+   */
+  static unregisterFromLiveService() {
+    const activeUser = User.getActiveUser();
+
+    if (activeUser) {
+      return activeUser.unregisterFromLiveService();
     }
 
-    // Unregister the active user
-    const request = new KinveyRequest({
-      method: RequestMethod.POST,
-      authType: AuthType.Session,
-      url: url.format({
-        protocol: this.client.apiProtocol,
-        host: this.client.apiHost,
-        pathname: `/user/${this.client.appKey}/${this._id}/unregister-realtime`
-      }),
-      body: { deviceId: this.client.deviceId },
-      properties: options.properties,
-      timeout: options.timeout
-    });
-    return request.execute()
-      .then(response => response.data);
+    return Promise.reject(new ActiveUserError('There is no active user'));
+  }
+
+  registerForLiveService() {
+    const liveService = getLiveService(this.client);
+    let promise = Promise.resolve();
+    if (!liveService.isInitialized()) {
+      promise = liveService.fullInitialization(this);
+    }
+    return promise;
+  }
+
+  unregisterFromLiveService() {
+    const liveService = getLiveService(this.client);
+    let promise = Promise.resolve();
+    if (liveService.isInitialized()) {
+      promise = liveService.fullUninitialization();
+    }
+    return promise;
   }
 
   /**
