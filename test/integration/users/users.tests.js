@@ -2,6 +2,8 @@ testRunner.run(testFunc);
 
 function testFunc() {
 
+    const collectionName = 'Books';
+
     function uid(size = 10) {
         let text = '';
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -26,225 +28,315 @@ function testFunc() {
         expect(user).to.deep.equal(Kinvey.User.getActiveUser());
     }
 
-    before((done) => {
-        Kinvey.initialize({
-            appKey: 'kid_H1fs4gFsZ',
-            appSecret: 'aa42a6d47d0049129c985bfb37821877'
-        });
-        done();
-    });
 
-    describe('login()', function() {
-        beforeEach(function(done) {
-            Kinvey.User.logout()
-                .then(() => {
-                    done();
-                })
+    describe('User tests', function() {
+
+        before((done) => {
+            Kinvey.initialize({
+                appKey: 'kid_H1fs4gFsZ',
+                appSecret: 'aa42a6d47d0049129c985bfb37821877'
+            });
+            done();
         });
 
-        it('should throw an error if an active user already exists', function(done) {
-            Kinvey.User.signup(randomString(), randomString())
-                .then(() => {
-                    return Kinvey.User.login(randomString(), randomString());
-                })
-                .catch((error) => {
-                    expect(error.message).to.contain('An active user already exists.');
-                    done();
-                }).catch(done);
+        describe('login()', function() {
+
+            beforeEach(function(done) {
+                Kinvey.User.logout()
+                    .then(() => {
+                        done();
+                    })
+            });
+
+            afterEach(function(done) {
+                Kinvey.User.logout()
+                    .then(() => {
+                        done();
+                    })
+            });
+
+            it('should throw an error if an active user already exists', function(done) {
+                Kinvey.User.signup(randomString(), randomString())
+                    .then(() => {
+                        return Kinvey.User.login(randomString(), randomString());
+                    })
+                    .catch((error) => {
+                        expect(error.message).to.contain('An active user already exists.');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if a username is not provided', function(done) {
+                Kinvey.User.login(null, randomString())
+                    .catch((error) => {
+                        expect(error.message).to.contain('Username and/or password missing');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if the username is an empty string', function(done) {
+                Kinvey.User.login(' ', randomString())
+                    .catch((error) => {
+                        expect(error.message).to.contain('Username and/or password missing');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if a password is not provided', function(done) {
+                Kinvey.User.login(randomString())
+                    .catch((error) => {
+                        expect(error.message).to.contain('Username and/or password missing');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if the password is an empty string', function(done) {
+                Kinvey.User.login(randomString(), ' ')
+                    .catch((error) => {
+                        expect(error.message).to.contain('Username and/or password missing');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if the username and/or password is invalid', function(done) {
+                const user = new Kinvey.User();
+                user.login(randomString(), randomString())
+                    .catch((error) => {
+                        expect(error.message).to.contain('Invalid credentials. Please retry your request with correct credentials');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should login a user', function(done) {
+                const username = randomString();
+                const password = randomString();
+                Kinvey.User.signup({
+                        username: username,
+                        password: password
+                    })
+                    .then(() => {
+                        Kinvey.User.logout()
+                            .then(() => {
+                                Kinvey.User.login(username, password)
+                                    .then((user) => {
+                                        assertUserData(user, username);
+                                        done();
+                                    }).catch(done);
+                            }).catch(done);
+                    }).catch(done);
+            });
+
+            it('should login a user by providing credentials as an object', function(done) {
+                const username = randomString();
+                const password = randomString();
+                Kinvey.User.signup({
+                        username: username,
+                        password: password
+                    })
+                    .then(() => {
+                        Kinvey.User.logout()
+                            .then(() => {
+                                Kinvey.User.login({
+                                        username: username,
+                                        password: password
+                                    })
+                                    .then((user) => {
+                                        assertUserData(user, username);
+                                        done();
+                                    }).catch(done);
+                            }).catch(done);
+                    }).catch(done);
+            });
         });
 
-        it('should throw an error if a username is not provided', function(done) {
-            Kinvey.User.login(null, randomString())
-                .catch((error) => {
-                    expect(error.message).to.contain('Username and/or password missing');
-                    done();
-                }).catch(done);
-        });
-
-        it('should throw an error if the username is an empty string', function(done) {
-            Kinvey.User.login(' ', randomString())
-                .catch((error) => {
-                    expect(error.message).to.contain('Username and/or password missing');
-                    done();
-                }).catch(done);
-        });
-
-        it('should throw an error if a password is not provided', function(done) {
-            Kinvey.User.login(randomString())
-                .catch((error) => {
-                    expect(error.message).to.contain('Username and/or password missing');
-                    done();
-                }).catch(done);
-        });
-
-        it('should throw an error if the password is an empty string', function(done) {
-            Kinvey.User.login(randomString(), ' ')
-                .catch((error) => {
-                    expect(error.message).to.contain('Username and/or password missing');
-                    done();
-                }).catch(done);
-        });
-
-        it('should throw an error if the username and/or password is invalid', function(done) {
-            const user = new Kinvey.User();
-            user.login(randomString(), randomString())
-                .catch((error) => {
-                    expect(error.message).to.contain('Invalid credentials. Please retry your request with correct credentials');
-                    done();
-                }).catch(done);
-        });
-
-        it('should login a user', function(done) {
+        describe('logout()', function() {
+            let cacheDataStore;
+            const networkDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             const username = randomString();
             const password = randomString();
-            Kinvey.User.signup({
-                    username: username,
-                    password: password
-                })
-                .then(() => {
-                    Kinvey.User.logout()
-                        .then(() => {
-                            Kinvey.User.login(username, password)
-                                .then((user) => {
-                                    assertUserData(user, username);
-                                    done();
-                                }).catch(done);
-                        }).catch(done);
-                }).catch(done);
-        });
 
-        it('should login a user by providing credentials as an object', function(done) {
-            const username = randomString();
-            const password = randomString();
-            Kinvey.User.signup({
-                    username: username,
-                    password: password
-                })
-                .then(() => {
-                    Kinvey.User.logout()
-                        .then(() => {
-                            Kinvey.User.login({
-                                    username: username,
-                                    password: password
-                                })
-                                .then((user) => {
-                                    assertUserData(user, username);
-                                    done();
-                                }).catch(done);
-                        }).catch(done);
-                }).catch(done);
-        });
-    });
+            before((done) => {
 
-    describe('signup', function() {
-        beforeEach(function(done) {
-            Kinvey.User.logout()
-                .then(() => {
-                    done();
-                })
-        });
-
-        it('should signup and set the user as the active user', function(done) {
-            const user = new Kinvey.User();
-            const username = randomString();
-            user.signup({
-                    username: username,
-                    password: randomString()
-                })
-                .then((user) => {
-                    assertUserData(user, username);
-                    done();
-                }).catch(done);
-        });
-
-        it('should signup with a user and set the user as the active user', function(done) {
-            const user = new Kinvey.User({
-                username: randomString(),
-                password: randomString()
+                cacheDataStore = Kinvey.DataStore.collection(collectionName);
+                Kinvey.User.signup({
+                        username: username,
+                        password: password
+                    })
+                    .then(() => {
+                        cacheDataStore.save({
+                                field: 'value'
+                            })
+                            .then(() => {
+                                cacheDataStore.pull()
+                                    .then((entities) => {
+                                        expect(entities.length).to.be.greaterThan(0);
+                                        done();
+                                    }).catch(done);
+                            }).catch(done);
+                    }).catch(done);
             });
-            Kinvey.User.signup(user)
-                .then((user) => {
-                    expect(user.isActive()).to.equal(true);
-                    expect(user).to.deep.equal(Kinvey.User.getActiveUser());
-                    done();
-                }).catch(done);
+
+            afterEach((done) => {
+                Kinvey.User.logout()
+                    .then(() => {
+                        done();
+                    })
+            });
+
+            after((done) => {
+                Kinvey.User.login({
+                        username: username,
+                        password: password
+                    })
+                    .then(() => {
+                        const query = new Kinvey.Query();
+                        query.equalTo('field', 'value');
+                        networkDataStore.remove(query)
+                            .then(() => {
+                                done();
+                            }).catch(done);
+                    }).catch(done);
+            });
+
+            it('should logout the active user', function(done) {
+                Kinvey.User.logout()
+                    .then(() => {
+                        expect(Kinvey.User.getActiveUser()).to.equal(null);
+                        Kinvey.User.signup()
+                            .then(() => {
+                                const dataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+                                dataStore.find().toPromise()
+                                    .then((entities) => {
+                                        expect(entities).to.deep.equal([]);
+                                        done();
+                                    }).catch(done);
+                            }).catch(done);
+                    }).catch(done);
+            });
+
+            it('should logout when there is not an active user', (done) => {
+                Kinvey.User.logout()
+                    .then(() => {
+                        expect(Kinvey.User.getActiveUser()).to.equal(null);
+                        Kinvey.User.logout()
+                            .then(() => {
+                                expect(Kinvey.User.getActiveUser()).to.equal(null);
+                                done();
+                            }).catch(done);
+                    }).catch(done);
+            });
         });
 
-        it('should signup user and not set the user as the active user', function(done) {
-            Kinvey.User.signup({
+        describe('signup', function() {
+            beforeEach(function(done) {
+                Kinvey.User.logout()
+                    .then(() => {
+                        done();
+                    })
+            });
+
+            it('should signup and set the user as the active user', function(done) {
+                const user = new Kinvey.User();
+                const username = randomString();
+                user.signup({
+                        username: username,
+                        password: randomString()
+                    })
+                    .then((user) => {
+                        assertUserData(user, username);
+                        done();
+                    }).catch(done);
+            });
+
+            it('should signup with a user and set the user as the active user', function(done) {
+                const user = new Kinvey.User({
                     username: randomString(),
                     password: randomString()
-                }, {
-                    state: false
-                })
-                .then((user) => {
-                    expect(user.isActive()).to.equal(false);
-                    expect(user).to.not.deep.equal(Kinvey.User.getActiveUser());
-                    done();
-                }).catch(done);
-        });
-
-        it('should signup an implicit user and set the user as the active user', function(done) {
-            Kinvey.User.signup()
-                .then((user) => {
-                    expect(user.isActive()).to.equal(true);
-                    expect(user).to.deep.equal(Kinvey.User.getActiveUser());
-                    done();
-                }).catch(done);
-        });
-
-        it('should merge the signup data and set the user as the active user', function(done) {
-            const user = new Kinvey.User({
-                username: randomString(),
-                password: randomString()
+                });
+                Kinvey.User.signup(user)
+                    .then((user) => {
+                        expect(user.isActive()).to.equal(true);
+                        expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+                        done();
+                    }).catch(done);
             });
-            const username = randomString();
-            user.signup({
-                    username: username
-                })
-                .then((user) => {
-                    expect(user.isActive()).to.equal(true);
-                    expect(user.username).to.equal(username);
-                    expect(user).to.deep.equal(Kinvey.User.getActiveUser());
-                    done();
-                }).catch(done);
-        });
 
-        it('should throw an error if an active user already exists', function(done) {
-            Kinvey.User.signup({
-                    username: randomString(),
-                    password: randomString()
-                })
-                .then(() => {
-                    Kinvey.User.signup({
+            it('should signup user and not set the user as the active user', function(done) {
+                Kinvey.User.signup({
                         username: randomString(),
                         password: randomString()
-                    });
-                })
-                .catch((error) => {
-                    expect(error.message).to.contain('An active user already exists.');
-                    done();
-                }).catch(done);
-        });
+                    }, {
+                        state: false
+                    })
+                    .then((user) => {
+                        expect(user.isActive()).to.equal(false);
+                        expect(user).to.not.deep.equal(Kinvey.User.getActiveUser());
+                        done();
+                    }).catch(done);
+            });
 
-        it('should not throw an error with an active user and options.state set to false', function(done) {
-            Kinvey.User.signup({
+            it('should signup an implicit user and set the user as the active user', function(done) {
+                Kinvey.User.signup()
+                    .then((user) => {
+                        expect(user.isActive()).to.equal(true);
+                        expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+                        done();
+                    }).catch(done);
+            });
+
+            it('should merge the signup data and set the user as the active user', function(done) {
+                const user = new Kinvey.User({
                     username: randomString(),
                     password: randomString()
-                })
-                .then(() => {
-                    Kinvey.User.signup({
+                });
+                const username = randomString();
+                user.signup({
+                        username: username
+                    })
+                    .then((user) => {
+                        expect(user.isActive()).to.equal(true);
+                        expect(user.username).to.equal(username);
+                        expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if an active user already exists', function(done) {
+                Kinvey.User.signup({
+                        username: randomString(),
+                        password: randomString()
+                    })
+                    .then(() => {
+                        Kinvey.User.signup({
                             username: randomString(),
                             password: randomString()
-                        }, {
-                            state: false
-                        })
-                        .then((user) => {
-                            expect(user.isActive()).to.equal(false);
-                            expect(user).to.not.equal(Kinvey.User.getActiveUser());
-                            done();
-                        }).catch(done);
-                })
+                        });
+                    })
+                    .catch((error) => {
+                        expect(error.message).to.contain('An active user already exists.');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should not throw an error with an active user and options.state set to false', function(done) {
+                Kinvey.User.signup({
+                        username: randomString(),
+                        password: randomString()
+                    })
+                    .then(() => {
+                        Kinvey.User.signup({
+                                username: randomString(),
+                                password: randomString()
+                            }, {
+                                state: false
+                            })
+                            .then((user) => {
+                                expect(user.isActive()).to.equal(false);
+                                expect(user).to.not.equal(Kinvey.User.getActiveUser());
+                                done();
+                            }).catch(done);
+                    })
+            });
         });
     });
 }
