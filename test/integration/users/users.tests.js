@@ -359,5 +359,43 @@ function testFunc() {
                     })
             });
         });
+
+        describe('update()', function() {
+
+            before((done) => {
+                Kinvey.User.logout()
+                    .then(() => {
+                        Kinvey.User.signup()
+                            .then(() => {
+                                done();
+                            }).catch(done);
+                    }).catch(done);
+            });
+
+            it('should update the active user', (done) => {
+                const email = randomString();
+
+                Kinvey.User.update({
+                        email: email
+                    })
+                    .then(() => {
+                        const activeUser = Kinvey.User.getActiveUser();
+                        expect(activeUser.data.email).to.equal(email);
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw an error if the user does not have an _id', (done) => {
+                const user = new Kinvey.User();
+
+                user.update({
+                        email: randomString()
+                    })
+                    .catch((error) => {
+                        expect(error.message).to.equal('User must have an _id.');
+                        done();
+                    }).catch(done);
+            });
+        });
     });
 }
