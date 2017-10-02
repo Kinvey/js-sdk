@@ -3,6 +3,7 @@ testRunner.run(testFunc);
 function testFunc() {
 
     const collectionName = 'Books';
+    const missingCredentialsError = 'Username and/or password missing';
 
     function uid(size = 10) {
         let text = '';
@@ -69,7 +70,7 @@ function testFunc() {
             it('should throw an error if a username is not provided', function(done) {
                 Kinvey.User.login(null, randomString())
                     .catch((error) => {
-                        expect(error.message).to.contain('Username and/or password missing');
+                        expect(error.message).to.contain(missingCredentialsError);
                         done();
                     }).catch(done);
             });
@@ -77,7 +78,7 @@ function testFunc() {
             it('should throw an error if the username is an empty string', function(done) {
                 Kinvey.User.login(' ', randomString())
                     .catch((error) => {
-                        expect(error.message).to.contain('Username and/or password missing');
+                        expect(error.message).to.contain(missingCredentialsError);
                         done();
                     }).catch(done);
             });
@@ -85,7 +86,7 @@ function testFunc() {
             it('should throw an error if a password is not provided', function(done) {
                 Kinvey.User.login(randomString())
                     .catch((error) => {
-                        expect(error.message).to.contain('Username and/or password missing');
+                        expect(error.message).to.contain(missingCredentialsError);
                         done();
                     }).catch(done);
             });
@@ -93,7 +94,7 @@ function testFunc() {
             it('should throw an error if the password is an empty string', function(done) {
                 Kinvey.User.login(randomString(), ' ')
                     .catch((error) => {
-                        expect(error.message).to.contain('Username and/or password missing');
+                        expect(error.message).to.contain(missingCredentialsError);
                         done();
                     }).catch(done);
             });
