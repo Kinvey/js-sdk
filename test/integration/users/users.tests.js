@@ -5,7 +5,7 @@ function testFunc() {
     const collectionName = 'Books';
     const missingCredentialsError = 'Username and/or password missing';
 
-    function uid(size = 10) {
+    const uid = (size = 10) => {
         let text = '';
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -16,13 +16,16 @@ function testFunc() {
         return text;
     }
 
-    function randomString(size = 18, prefix = '') {
+    const randomString = (size = 18, prefix = '') => {
         return `${prefix}${uid(size)}`;
     }
 
     const assertUserData = (user, expectedUsername) => {
         expect(user.data._id).to.exist;
         expect(user._kmd.authtoken).to.exist;
+        expect(user._kmd.lmt).to.exist;
+        expect(user._kmd.ect).to.exist;
+        expect(user._acl.creator).to.exist;
         expect(user.data.username).to.equal(expectedUsername);
         expect(user.data.password).to.equal(undefined);
         expect(user.isActive()).to.equal(true);
