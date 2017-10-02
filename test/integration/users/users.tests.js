@@ -251,14 +251,14 @@ function testFunc() {
             });
 
             it('should signup with a user and set the user as the active user', function(done) {
+                const username = randomString();
                 const user = new Kinvey.User({
-                    username: randomString(),
+                    username: username,
                     password: randomString()
                 });
                 Kinvey.User.signup(user)
                     .then((user) => {
-                        expect(user.isActive()).to.equal(true);
-                        expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+                        assertUserData(user, username);
                         done();
                     }).catch(done);
             });
