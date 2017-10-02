@@ -199,6 +199,7 @@ function testFunc() {
             });
 
             it('should logout the active user', function(done) {
+                expect(Kinvey.User.getActiveUser()).to.not.equal(null);
                 Kinvey.User.logout()
                     .then(() => {
                         expect(Kinvey.User.getActiveUser()).to.equal(null);
