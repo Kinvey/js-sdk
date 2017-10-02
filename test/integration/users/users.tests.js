@@ -266,6 +266,22 @@ function testFunc() {
                     }).catch(done);
             });
 
+            it('should signup with attributes and store them correctly', function(done) {
+                const data = {
+                    username: randomString(),
+                    password: randomString(),
+                    email: 'testEmail@test.com',
+                    additionalField: 'test'
+                }
+                Kinvey.User.signup(data)
+                    .then((user) => {
+                        assertUserData(user, data.username);
+                        expect(user.data.email).to.equal(data.email);
+                        expect(user.data.additionalField).to.equal(data.additionalField);
+                        done();
+                    }).catch(done);
+            });
+
             it('should signup user and not set the user as the active user', function(done) {
                 Kinvey.User.signup({
                         username: randomString(),
