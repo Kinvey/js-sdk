@@ -410,16 +410,16 @@ function testFunc() {
                                 password: randomString()
                             })
                             .then(() => {
-                                Kinvey.User.logout()
-                                    .then(() => {
-                                        Kinvey.User.signup({
-                                            username: randomString(),
-                                            first_name: firstName,
-                                            password: randomString()
-                                        }).then(() => {
-                                            done();
-                                        })
-                                    })
+                                Kinvey.User.signup({
+                                    username: randomString(),
+                                    first_name: firstName,
+                                    password: randomString()
+                                }, {
+                                    state: false
+                                }).then(() => {
+                                    done();
+                                })
+
                             })
                     })
             });
