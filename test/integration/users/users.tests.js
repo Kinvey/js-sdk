@@ -397,5 +397,64 @@ function testFunc() {
                     }).catch(done);
             });
         });
+
+        describe('lookup()', function() {
+            const firstName = randomString();
+
+            before((done) => {
+                Kinvey.User.logout()
+                    .then(() => {
+                        Kinvey.User.signup({
+                                username: randomString(),
+                                first_name: firstName,
+                                password: randomString()
+                            })
+                            .then(() => {
+                                Kinvey.User.logout()
+                                    .then(() => {
+                                        Kinvey.User.signup({
+                                            username: randomString(),
+                                            first_name: firstName,
+                                            password: randomString()
+                                        }).then(() => {
+                                            done();
+                                        })
+                                    })
+                            })
+                    })
+            });
+
+            it('should throw an error if the query argument is not an instance of the Query class', (done) => {
+                Kinvey.User.lookup({})
+                    .toPromise()
+                    .catch((error) => {
+                        expect(error.message).to.equal('Invalid query. It must be an instance of the Query class.');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should return an array of users matching the query', (done) => {
+                Kinvey.User.logout()
+                    .then(() => {
+                        Kinvey.User.signup()
+                            .then(() => {
+                                const query = new Kinvey.Query();
+                                query.equalTo('first_name', firstName);
+                                Kinvey.User.lookup(query)
+                                    .toPromise()
+                                    .then((users) => {
+                                        expect(users).to.be.an('array');
+                                        expect(users.length).to.equal(2);
+                                        users.forEach((user) => {
+                                            expect(user._id).to.exist;
+                                            expect(user.first_name).to.equal(firstName);
+                                            expect(user.username).to.exist;
+                                        })
+                                        done();
+                                    }).catch(done);
+                            }).catch(done);
+                    }).catch(done);
+            });
+        });
     });
 }
