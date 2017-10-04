@@ -374,14 +374,20 @@ function testFunc() {
 
             it('should update the active user', (done) => {
                 const email = randomString();
-
                 Kinvey.User.update({
                         email: email
                     })
                     .then(() => {
                         const activeUser = Kinvey.User.getActiveUser();
                         expect(activeUser.data.email).to.equal(email);
-                        done();
+                        const query = new Kinvey.Query();
+                        query.equalTo('email', email);
+                        Kinvey.User.lookup(query)
+                            .toPromise()
+                            .then((users) => {
+                                expect(users.length).to.equal(1);                            
+                                done();
+                            }).catch(done);
                     }).catch(done);
             });
 
