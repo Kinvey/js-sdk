@@ -456,5 +456,76 @@ function testFunc() {
                     }).catch(done);
             });
         });
+
+        describe('remove()', function() {
+            let userToRemoveId;
+            let username;
+
+            beforeEach((done) => {
+                username = randomString();
+                Kinvey.User.logout()
+                    .then(() => {
+                        Kinvey.User.signup({
+                                username: username,
+                                password: randomString()
+                            })
+                            .then((user) => {
+                                userToRemoveId = user._id;
+                                done();
+                            })
+                    })
+            });
+
+            it('should throw a KinveyError if an id is not provided', (done) => {
+                Kinvey.User.remove()
+                    .catch((error) => {
+                        expect(error.message).to.equal('An id was not provided.');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should throw a KinveyError if an id is not a string', (done) => {
+                Kinvey.User.remove(1)
+                    .catch((error) => {
+                        expect(error.message).to.equal('The id provided is not a string.');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should remove the user that matches the id argument', (done) => {
+                Kinvey.User.remove(userToRemoveId)
+                    .then(() => {
+                        Kinvey.User.me()
+                            .catch((error) => {
+                                expect(error.message).to.contain('Please retry your request with correct credentials');
+                                done();
+                            }).catch(done);
+                    }).catch(done);
+            });
+
+            it('should remove the user that matches the id argument permanently', (done) => {
+                Kinvey.User.logout()
+                    .then(() => {
+                        Kinvey.User.signup({
+                                username: randomString(),
+                                password: randomString()
+                            })
+                            .then((user) => {
+                                Kinvey.User.remove(userToRemoveId)
+                                    .then(() => {
+                                        const query = new Kinvey.Query();
+                                        query.equalTo('username', username);
+                                        Kinvey.User.lookup(query)
+                                            .toPromise()
+                                            .then((users) => {
+                                                expect(users).to.be.an('array');
+                                                expect(users.length).to.equal(0);
+                                                done();
+                                            }).catch(done);
+                                    }).catch(done);
+                            }).catch(done);
+                    }).catch(done);
+            });
+        });
     });
 }
