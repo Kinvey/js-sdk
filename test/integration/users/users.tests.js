@@ -531,5 +531,39 @@ function testFunc() {
                     }).catch(done);
             });
         });
+
+        describe('exists()', function() {
+            let username;
+
+            before((done) => {
+                username = randomString();
+                Kinvey.User.logout()
+                    .then(() => {
+                        Kinvey.User.signup({
+                                username: username,
+                                password: randomString()
+                            })
+                            .then(() => {
+                                done();
+                            })
+                    })
+            });
+
+            it('should return true if the user exists in the Backend', (done) => {
+                Kinvey.User.exists(username)
+                    .then((result) => {
+                        expect(result).to.be.true
+                        done();
+                    }).catch(done);
+            });
+
+            it('should return true if the user exists in the Backend', (done) => {
+                Kinvey.User.exists('not_existing_username')
+                    .then((result) => {
+                        expect(result).to.be.false
+                        done();
+                    }).catch(done);
+            });
+        });
     });
 }
