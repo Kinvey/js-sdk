@@ -557,7 +557,7 @@ function testFunc() {
                     }).catch(done);
             });
 
-            it('should return true if the user exists in the Backend', (done) => {
+            it('should return false if the user does not exist in the Backend', (done) => {
                 Kinvey.User.exists('not_existing_username')
                     .then((result) => {
                         expect(result).to.be.false
