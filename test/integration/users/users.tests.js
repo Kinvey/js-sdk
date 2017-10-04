@@ -511,16 +511,19 @@ function testFunc() {
                                 password: randomString()
                             })
                             .then((user) => {
-                                Kinvey.User.remove(userToRemoveId)
+                                Kinvey.User.remove(userToRemoveId, {
+                                        hard: true
+                                    })
                                     .then(() => {
-                                        const query = new Kinvey.Query();
-                                        query.equalTo('username', username);
-                                        Kinvey.User.lookup(query)
-                                            .toPromise()
-                                            .then((users) => {
-                                                expect(users).to.be.an('array');
-                                                expect(users.length).to.equal(0);
-                                                done();
+                                        Kinvey.User.logout()
+                                            .then(() => {
+                                                Kinvey.User.signup({
+                                                        username: username,
+                                                        password: randomString()
+                                                    })
+                                                    .then((users) => {
+                                                        done();
+                                                    }).catch(done);
                                             }).catch(done);
                                     }).catch(done);
                             }).catch(done);
