@@ -385,7 +385,7 @@ function testFunc() {
                         Kinvey.User.lookup(query)
                             .toPromise()
                             .then((users) => {
-                                expect(users.length).to.equal(1);                            
+                                expect(users.length).to.equal(1);
                                 done();
                             }).catch(done);
                     }).catch(done);
@@ -440,25 +440,20 @@ function testFunc() {
             });
 
             it('should return an array of users matching the query', (done) => {
-                Kinvey.User.logout()
-                    .then(() => {
-                        Kinvey.User.signup()
-                            .then(() => {
-                                const query = new Kinvey.Query();
-                                query.equalTo('first_name', firstName);
-                                Kinvey.User.lookup(query)
-                                    .toPromise()
-                                    .then((users) => {
-                                        expect(users).to.be.an('array');
-                                        expect(users.length).to.equal(2);
-                                        users.forEach((user) => {
-                                            expect(user._id).to.exist;
-                                            expect(user.first_name).to.equal(firstName);
-                                            expect(user.username).to.exist;
-                                        })
-                                        done();
-                                    }).catch(done);
-                            }).catch(done);
+                const query = new Kinvey.Query();
+                query.equalTo('first_name', firstName);
+                Kinvey.User.lookup(query)
+                    .toPromise()
+                    .then((users) => {
+                        expect(users).to.be.an('array');
+                        expect(users.length).to.equal(2);
+                        debugger
+                        users.forEach((user) => {
+                            expect(user._id).to.exist;
+                            expect(user.first_name).to.equal(firstName);
+                            expect(user.username).to.exist;
+                        })
+                        done();
                     }).catch(done);
             });
         });
