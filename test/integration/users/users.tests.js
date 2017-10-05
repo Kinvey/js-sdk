@@ -2,10 +2,6 @@ testRunner.run(testFunc);
 
 function testFunc() {
 
-    const collectionName = 'Books';
-    const missingCredentialsError = 'Username and/or password missing';
-    const createdUserIds = [];
-
     const uid = (size = 10) => {
         let text = '';
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -33,8 +29,22 @@ function testFunc() {
         expect(user).to.deep.equal(Kinvey.User.getActiveUser());
     }
 
+    const deleteUsers = (userIds, done) => {
+        async.eachLimit(userIds, 5, (userId, callback) => {
+            return Kinvey.User.remove(userId, {
+                    hard: true
+                })
+                .then(callback).catch(callback)
+        }, () => {
+            done();
+        });
+    }
 
     describe('User tests', function() {
+
+        const collectionName = 'Books';
+        const missingCredentialsError = 'Username and/or password missing';
+        const createdUserIds = [];
 
         before((done) => {
             Kinvey.initialize({
@@ -42,6 +52,10 @@ function testFunc() {
                 appSecret: 'aa42a6d47d0049129c985bfb37821877'
             });
             done();
+        });
+
+        after((done) => {
+            deleteUsers(createdUserIds, done)
         });
 
         describe('login()', function() {
@@ -487,6 +501,7 @@ function testFunc() {
                         })
                     })
                     .then((user) => {
+                        createdUserIds.push(user.data._id);
                         userToRemoveId = user._id;
                         done();
                     }).catch(done);
