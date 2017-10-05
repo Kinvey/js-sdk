@@ -23,7 +23,11 @@ function testFunc() {
         expect(user._kmd.lmt).to.exist;
         expect(user._kmd.ect).to.exist;
         expect(user._acl.creator).to.exist;
-        expect(user.data.username).to.equal(expectedUsername);
+        if (expectedUsername) {
+            expect(user.data.username).to.equal(expectedUsername);
+        } else {
+            expect(user.data.username).to.exist;
+        }
         expect(user.data.password).to.equal(undefined);
         expect(user.isActive()).to.equal(true);
         expect(user).to.deep.equal(Kinvey.User.getActiveUser());
@@ -324,8 +328,7 @@ function testFunc() {
                 return Kinvey.User.signup()
                     .then((user) => {
                         createdUserIds.push(user.data._id);
-                        expect(user.isActive()).to.equal(true);
-                        expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+                        assertUserData(user)
                         done();
                     }).catch(done);
             });
