@@ -1,4 +1,4 @@
-testRunner.run(testFunc);
+runner.run(testFunc);
 
 function testFunc() {
 
@@ -52,8 +52,8 @@ function testFunc() {
 
         before((done) => {
             Kinvey.initialize({
-                appKey: 'kid_H1fs4gFsZ',
-                appSecret: 'aa42a6d47d0049129c985bfb37821877'
+                appKey: externalConfig.appKey,
+                appSecret: externalConfig.appSecret
             });
             done();
         });
