@@ -28,7 +28,9 @@ function testFunc() {
             else {
                 resolve();
             }
-            }).catch(reject);
+            }).catch((err) => {
+                reject(err);
+            });
         })
     }
 
