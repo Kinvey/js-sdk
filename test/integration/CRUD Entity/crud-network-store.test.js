@@ -3,6 +3,7 @@ runner.run(testFunc);
 function testFunc() {
 
     const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
+    const notFoundMessage = 'This entity not found in the collection';
 
     const assertEntityMetadata = (entity) => {
         expect(entity._kmd.lmt).to.exist;
@@ -31,7 +32,7 @@ function testFunc() {
             }).catch((err) => {
                 reject(err);
             });
-        })
+        });
     }
 
     describe('Network Store', function() {
@@ -39,10 +40,12 @@ function testFunc() {
         const collectionName = externalConfig.collectionName;
         const store = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
         const entity1 = {
-            _id: randomString()
+            _id: randomString(),
+            customProperty: randomString()
         };
         const entity2 = {
-            _id: randomString()
+            _id: randomString(),
+            customProperty: randomString()
         };
 
         before((done) => {
@@ -109,7 +112,7 @@ function testFunc() {
                 const entityId = randomString();
                 return store.findById(entityId).toPromise()
                     .catch((error) => {
-                        expect(error.message).to.contain('This entity not found in the collection');
+                        expect(error.message).to.contain(notFoundMessage);
                         done();
                     }).catch(done);
             });
@@ -215,6 +218,7 @@ function testFunc() {
             it('should update an existing entity', (done) => {
                 const entityToUpdate = {
                     _id: entity1._id,
+                    customProperty: entity1.customProperty,
                     newProperty: randomString()
                 };
                 return store.save(entityToUpdate)
@@ -235,5 +239,83 @@ function testFunc() {
                     }).catch(done);
             });
         });
-    });
+
+        describe('removeById()', function () {
+            it('should throw a NotFoundError if the id argument does not exist', (done) => {
+                return store.removeById(randomString())
+                .catch((error) => {
+                    expect(error.message).to.equal(notFoundMessage);
+                    done();
+                }).catch(done);
+            });
+        
+            it('should remove only the entity that matches the id argument', (done) => {
+                const newEntity = {
+                    _id: randomString()
+                };
+                let remainingCount;
+
+                return store.count().toPromise()
+                .then((count) => {
+                    remainingCount = count;
+                    return store.save(newEntity)
+                })
+                .then(() => {
+                    return store.removeById(newEntity._id)
+                })
+                .then((result) => {
+                    expect(result.count).to.equal(1);
+                    return store.findById(newEntity._id).toPromise()
+                })
+                .catch((error) => {
+                    expect(error.message).to.contain(notFoundMessage);
+                    return store.count().toPromise()
+                })
+                .then((count) => {
+                    expect(count).to.equal(remainingCount);
+                    done();
+                }).catch(done);
+            });
+        });
+
+         describe('remove()', function () {
+            it('should throw an error for an invalid query', (done) => {
+                return store.remove({})
+                .catch((error) => {
+                    expect(error.message).to.equal(invalidQueryMessage);
+                    done();
+                }).catch(done);
+            });
+        
+            it('should remove all entities that match the query', (done) => {
+                const newEntity = {
+                    customProperty: entity2.customProperty
+                };
+                const query = new Kinvey.Query();
+                query.equalTo('customProperty', entity2.customProperty);
+                let initialCount;
+
+                return store.save(newEntity)
+                .then(() => {
+                    return store.count().toPromise()
+                })
+                .then((count) => {
+                    initialCount = count;
+                    return store.remove(query)
+                })
+                .then((result) => {
+                    expect(result.count).to.equal(2);
+                    return store.find(query).toPromise()
+                })
+                .then((result) => {
+                    expect(result).to.be.an('array').that.is.empty;
+                    return store.count().toPromise()
+                })
+                .then((count) => {
+                    expect(count).to.equal(initialCount - 2);
+                    done();
+                }).catch(done);
+            });
+          });
+        });
 }
