@@ -5,25 +5,31 @@ function testFunc() {
     const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
 
     const assertEntityMetadata = (entity) => {
-
         expect(entity._kmd.lmt).to.exist;
         expect(entity._kmd.ect).to.exist;
         expect(entity._acl.creator).to.exist;
     }
 
-    const cleanCollectionData = (collectionName, done) => {
+    const cleanCollectionData = (collectionName) => {
+        return new Promise((resolve, reject) => {
         const store = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
         return store.find().toPromise()
             .then((entities) => {
+             if (entities.length > 0) {
                 async.each(entities.map(a => a._id), (entityId, callback) => {
                     const query = new Kinvey.Query();
                     query.equalTo('_id', entityId);
                     return store.remove(query)
                         .then(callback)
                 }, () => {
-                    done();
+                    resolve();
                 });
-            }).catch(done);
+            }
+            else {
+                resolve();
+            }
+            }).catch(reject);
+        })
     }
 
     describe('Network Store', function() {
@@ -46,7 +52,7 @@ function testFunc() {
 
             Kinvey.User.signup()
                 .then(() => {
-                    cleanCollectionData(collectionName, done)
+                    return cleanCollectionData(collectionName)
                 })
                 .then(() => {
                     return store.save(entity1)
@@ -149,7 +155,7 @@ function testFunc() {
         });
 
         describe('save()', function() {
-            it('should throw an error if trying to save an array of entities', (done) => {
+            it('should throw an error when trying to save an array of entities', (done) => {
                 return store.save([entity1, entity2])
                     .catch((error) => {
                         expect(error.message).to.equal('Unable to create an array of entities.');
