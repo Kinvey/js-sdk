@@ -2,21 +2,6 @@ runner.run(testFunc);
 
 function testFunc() {
 
-    const uid = (size = 10) => {
-        let text = '';
-        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-        for (let i = 0; i < size; i += 1) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-
-        return text;
-    }
-
-    const randomString = (size = 18, prefix = '') => {
-        return `${prefix}${uid(size)}`;
-    }
-
     const assertUserData = (user, expectedUsername) => {
         expect(user.data._id).to.exist;
         expect(user._kmd.authtoken).to.exist;
