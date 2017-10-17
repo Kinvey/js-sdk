@@ -28,7 +28,7 @@ function testFunc() {
 
     describe('Network Store', function() {
 
-        const collectionName = 'Books';
+        const collectionName = externalConfig.collectionName;
         const store = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
         const entity1 = {
             _id: randomString()

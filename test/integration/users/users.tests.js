@@ -31,7 +31,7 @@ function testFunc() {
 
     describe('User tests', function() {
 
-        const collectionName = 'Books';
+        const collectionName = externalConfig.collectionName;
         const missingCredentialsError = 'Username and/or password missing';
         const createdUserIds = [];
 
