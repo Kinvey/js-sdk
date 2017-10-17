@@ -147,5 +147,85 @@ function testFunc() {
                     }).catch(done);
             });
         });
+
+        describe('save()', function() {
+            it('should throw an error if trying to save an array of entities', (done) => {
+                return store.save([entity1, entity2])
+                    .catch((error) => {
+                        expect(error.message).to.equal('Unable to create an array of entities.');
+                        done();
+                    }).catch(done);
+            });
+
+            it('should create a new entity without _id', (done) => {
+                const newEntity = {
+                    customProperty: randomString()
+                };
+                return store.save(newEntity)
+                    .then((createdEntity) => {
+                        expect(createdEntity._id).to.exist;
+                        expect(createdEntity.customProperty).to.equal(newEntity.customProperty);
+                        assertEntityMetadata(createdEntity);
+
+                        // Check the cache to make sure the entity was
+                        // not stored in the cache
+                        const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+                        const query = new Kinvey.Query();
+                        query.equalTo('_id', createdEntity._id);
+                        return syncStore.find(query).toPromise();
+                    })
+                    .then((entities) => {
+                        expect(entities).to.deep.equal([]);
+                        done()
+                    }).catch(done);
+            });
+
+            it('should create a new entity using its _id', (done) => {
+                const newEntity = {
+                    _id: randomString(),
+                    customProperty: randomString()
+                };
+                return store.save(newEntity)
+                    .then((createdEntity) => {
+                        expect(createdEntity._id).to.equal(newEntity._id);
+                        expect(createdEntity.customProperty).to.equal(newEntity.customProperty);
+                        assertEntityMetadata(createdEntity);
+
+                        // Check the cache to make sure the entity was
+                        // not stored in the cache
+                        const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+                        const query = new Kinvey.Query();
+                        query.equalTo('_id', createdEntity._id);
+                        return syncStore.find(query).toPromise();
+                    })
+                    .then((entities) => {
+                        expect(entities).to.deep.equal([]);
+                        done()
+                    }).catch(done);
+            });
+
+            it('should update an existing entity', (done) => {
+                const entityToUpdate = {
+                    _id: entity1._id,
+                    newProperty: randomString()
+                };
+                return store.save(entityToUpdate)
+                    .then((updatedEntity) => {
+                        expect(updatedEntity._id).to.equal(entity1._id);
+                        expect(updatedEntity.newProperty).to.equal(entityToUpdate.newProperty);
+
+                        // Check the cache to make sure the entity was
+                        // not stored in the cache
+                        const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+                        const query = new Kinvey.Query();
+                        query.equalTo('_id', updatedEntity._id);
+                        return syncStore.find(query).toPromise();
+                    })
+                    .then((entities) => {
+                        expect(entities).to.deep.equal([]);
+                        done()
+                    }).catch(done);
+            });
+        });
     });
 }
