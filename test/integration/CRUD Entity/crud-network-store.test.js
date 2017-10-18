@@ -278,7 +278,7 @@ function testFunc() {
       });
     });
 
-     describe('remove()', function () {
+    describe('remove()', function () {
       it('should throw an error for an invalid query', (done) => {
         return store.remove({})
         .catch((error) => {

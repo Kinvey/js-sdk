@@ -9,11 +9,11 @@ var uid = (size = 10) => {
     return text;
   }
   
-  var randomString = (size = 18, prefix = '') => {
-    return `${prefix}${uid(size)}`;
-  }
+var randomString = (size = 18, prefix = '') => {
+return `${prefix}${uid(size)}`;
+}
   
   
-  if (typeof module === 'object') {
-    module.exports = {};
-  }
+if (typeof module === 'object') {
+module.exports = {};
+}
