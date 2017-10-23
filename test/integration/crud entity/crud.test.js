@@ -38,11 +38,10 @@ function testFunc() {
     if (dataStoreType === Kinvey.DataStoreType.Cache) {
       secondCallArgs = spy.secondCall.args[0];
     }
-
-    if (isNaN(cacheExpectedEntities)) {
+    if (!_.isNumber(cacheExpectedEntities)) {
       assertEntityMetadata(firstCallArgs);
       deleteEntityMetadata(firstCallArgs);
-      if (cacheExpectedEntities instanceof Array) {
+      if (_.isArray(cacheExpectedEntities)) {
         firstCallArgs = _.sortBy(firstCallArgs, '_id');
         cacheExpectedEntities = _.sortBy(cacheExpectedEntities, '_id');
         backendExpectedEntities = _.sortBy(backendExpectedEntities, '_id');
@@ -50,7 +49,7 @@ function testFunc() {
       if (secondCallArgs) {
         assertEntityMetadata(secondCallArgs);
         deleteEntityMetadata(secondCallArgs);
-        if (cacheExpectedEntities instanceof Array) {
+        if (_.isArray(cacheExpectedEntities)) {
           secondCallArgs = _.sortBy(secondCallArgs, '_id');
         }
       }
