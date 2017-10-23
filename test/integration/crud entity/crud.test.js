@@ -1,11 +1,13 @@
 runner.run(testFunc);
 
 function testFunc() {
+  const collectionName = externalConfig.collectionName;
+  const appKey = externalConfig.appKey;
+  const appSecret = externalConfig.appSecret;
 
+  const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
   const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
   const notFoundErrorName = 'NotFoundError';
-  const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
-
 
   const assertEntityMetadata = (arrayOfEntities) => {
     const entities = [].concat(arrayOfEntities);
@@ -130,8 +132,7 @@ function testFunc() {
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
-
-      const collectionName = externalConfig.collectionName;
+      
       let networkStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
@@ -153,8 +154,8 @@ function testFunc() {
       before((done) => {
 
         Kinvey.initialize({
-          appKey: externalConfig.appKey,
-          appSecret: externalConfig.appSecret
+          appKey: appKey,
+          appSecret: appSecret
         });
 
         Kinvey.User.signup()
