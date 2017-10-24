@@ -174,6 +174,14 @@ function testFunc() {
             }).catch(done);
         });
 
+        it('should return undefined if an id is not provided', (done) => {
+          return storeToTest.findById().toPromise()
+            .then((result) => {
+              expect(result).to.be.undefined;
+              done();
+            }).catch(done);
+        });
+
         it('should return the entity that matches the id argument', (done) => {
           const onNextSpy = sinon.spy();
           return storeToTest.findById(entity2._id)
