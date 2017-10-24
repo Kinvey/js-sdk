@@ -12,7 +12,7 @@ function testFunc() {
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
-      
+
       let networkStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
@@ -354,6 +354,15 @@ function testFunc() {
                   }
                 });
             })
+        });
+        it('should return a { count: 0 } when no entities are removed', (done) => {
+          const query = new Kinvey.Query();
+          query.equalTo('_id', randomString());
+          return storeToTest.remove(query)
+            .then((result) => {
+              expect(result.count).to.equal(0);
+              done()
+            }).catch(done);
         });
       });
     });
