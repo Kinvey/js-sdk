@@ -84,6 +84,24 @@ var retrieveEntity = (collectionName, dataStoreType, entity, searchField) => {
     .then(result => result[0])
 }
 
+var validatePendingSyncCount = (dataStoreType, collectionName, itemsForSyncCount, done) => {
+  if (dataStoreType !== Kinvey.DataStoreType.Network) {
+    let expectedCount = 0;
+    if (dataStoreType === Kinvey.DataStoreType.Sync) {
+      expectedCount = itemsForSyncCount;
+    }
+    const store = Kinvey.DataStore.collection(collectionName, dataStoreType);
+    return store.pendingSyncCount()
+      .then((syncCount) => {
+        expect(syncCount).to.equal(expectedCount);
+        done();
+      }).catch(done);
+  }
+  else {
+    done();
+  }
+}
+
 var validateEntity = (dataStoreType, collectionName, expectedEntity, searchField) => {
   return new Promise((resolve, reject) => {
     let entityFromCache;

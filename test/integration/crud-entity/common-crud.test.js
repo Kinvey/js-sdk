@@ -198,6 +198,18 @@ function testFunc() {
 
       describe('save()', function () {
 
+        beforeEach((done) => {
+          if (dataStoreType !== Kinvey.DataStoreType.Network) {
+            return storeToTest.clearSync()
+              .then(() => {
+                done()
+              })
+          }
+          else {
+            done();
+          }
+        });
+
         it('should throw an error when trying to save an array of entities', (done) => {
           return storeToTest.save([entity1, entity2])
             .catch((error) => {
@@ -214,11 +226,14 @@ function testFunc() {
             .then((createdEntity) => {
               expect(createdEntity._id).to.exist;
               expect(createdEntity.customProperty).to.equal(newEntity.customProperty);
+              if (dataStoreType === Kinvey.DataStoreType.Sync) {
+                expect(createdEntity._kmd.local).to.be.true;
+              }
               newEntity._id = createdEntity._id;
               return validateEntity(dataStoreType, collectionName, newEntity);
             })
             .then(() => {
-              done();
+              validatePendingSyncCount(dataStoreType, collectionName, 1, done)
             }).catch((err) => {
               done(err);
             });
@@ -255,7 +270,7 @@ function testFunc() {
               return validateEntity(dataStoreType, collectionName, entityToUpdate, 'newProperty')
             })
             .then(() => {
-              done();
+              validatePendingSyncCount(dataStoreType, collectionName, 1, done)
             }).catch(done);
 
         });
@@ -313,6 +328,18 @@ function testFunc() {
 
       describe('remove()', function () {
 
+        before((done) => {
+          if (dataStoreType !== Kinvey.DataStoreType.Network) {
+            return storeToTest.clearSync()
+              .then(() => {
+                done()
+              })
+          }
+          else {
+            done();
+          }
+        });
+
         it('should throw an error for an invalid query', (done) => {
           return storeToTest.remove({})
             .catch((error) => {
@@ -348,6 +375,7 @@ function testFunc() {
                       .then((count) => {
                         expect(count).to.equal(initialCount - 2);
                         done();
+                        //validatePendingSyncCount(dataStoreType, collectionName, 0, done)
                       }).catch(done);
                   } catch (error) {
                     done(error);
@@ -355,6 +383,7 @@ function testFunc() {
                 });
             })
         });
+
         it('should return a { count: 0 } when no entities are removed', (done) => {
           const query = new Kinvey.Query();
           query.equalTo('_id', randomString());
