@@ -5,16 +5,17 @@ function testFunc() {
   const appKey = externalConfig.appKey;
   const appSecret = externalConfig.appSecret;
 
-  const dataStoreTypes = [Kinvey.DataStoreType.Cache];
+  const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
   const notFoundErrorName = 'NotFoundError';
   const shouldNotBeCalledErrorMessage = 'Should not be called';
 
 
   dataStoreTypes.forEach((currentDataStoreType) => {
-    describe(`Store Specific Tests`, () => {
+    describe(`${currentDataStoreType} Store CRUD Specific Tests`, () => {
 
       let networkStore;
       let syncStore;
+      let cacheStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
       const entity1 = {
@@ -25,7 +26,6 @@ function testFunc() {
         _id: randomString(),
         customProperty: randomString()
       };
-
 
       before((done) => {
 
@@ -39,9 +39,10 @@ function testFunc() {
             //store for setup
             networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+            cacheStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return cleanCollectionData(collectionName, Kinvey.DataStoreType.Network)
+            return cleanCollectionData(collectionName, Kinvey.DataStoreType.Cache)
           })
           .then(() => {
             return networkStore.save(entity1)
@@ -65,7 +66,7 @@ function testFunc() {
       });
 
       if (dataStoreType === Kinvey.DataStoreType.Cache) {
-        describe.skip(`${currentDataStoreType}`, function () {
+        describe('local cache removal', () => {
 
           it('find() should remove entities that no longer exist on the backend from the cache', (done) => {
             const entity = { '_id': randomString() };
@@ -144,6 +145,67 @@ function testFunc() {
           });
         });
       }
+
+      describe('clear()', () => {
+        let initialCacheCount;
+        let initialBackendCount;
+
+        beforeEach((done) => {
+          return syncStore.count().toPromise()
+            .then((count) => {
+              initialCacheCount = count;
+              return networkStore.count().toPromise()
+            })
+            .then((count) => {
+              initialBackendCount = count;
+              done();
+            });
+        })
+
+        it('should remove the entities from the cache, which match the query', (done) => {
+          let fieldValue = randomString();
+          return cacheStore.save({ 'customProperty': fieldValue })
+            .then(() => {
+              return cacheStore.save({ 'customProperty': fieldValue })
+            })
+            .then(() => {
+              const query = new Kinvey.Query();
+              query.equalTo('customProperty', fieldValue);
+              return storeToTest.clear(query)
+            })
+            .then((result) => {
+              expect(result.count).to.equal(2);
+              return syncStore.count().toPromise()
+            })
+            .then((count) => {
+              expect(count).to.equal(initialCacheCount);
+              return networkStore.count().toPromise()
+            })
+            .then((count) => {
+              expect(count).to.equal(initialBackendCount + 2);
+              done();
+            }).catch(done);
+        });
+
+        it('should remove all entities only from the cache', (done) => {
+          return syncStore.save({ '_id': randomString() })
+            .then(() => {
+              return storeToTest.clear()
+            })
+            .then((result) => {
+              expect(result.count).to.equal(initialCacheCount + 1);
+              return syncStore.count().toPromise()
+            })
+            .then((count) => {
+              expect(count).to.equal(0);
+              return networkStore.count().toPromise()
+            })
+            .then((count) => {
+              expect(count).to.equal(initialBackendCount);
+              done();
+            }).catch(done);
+        });
+      });
     });
   });
 }
