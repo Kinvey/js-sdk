@@ -8,7 +8,7 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
   const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
   const notFoundErrorName = 'NotFoundError';
-
+  const createdUserIds = []; 
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
@@ -30,7 +30,6 @@ function testFunc() {
         customProperty: randomString()
       };
 
-
       before((done) => {
 
         Kinvey.initialize({
@@ -39,7 +38,8 @@ function testFunc() {
         });
 
         Kinvey.User.signup()
-          .then(() => {
+          .then((user) => {
+            createdUserIds.push(user.data._id);
             //store for setup
             networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             //store to test
@@ -66,10 +66,12 @@ function testFunc() {
       });
 
       after((done) => {
-        return Kinvey.User.logout()
-          .then(() => {
-            done();
-          })
+        deleteUsers(createdUserIds, () => {
+          return Kinvey.User.logout()
+            .then(() => {
+              done();
+            })
+        })
       });
 
       describe('count()', function () {

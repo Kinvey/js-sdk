@@ -13,6 +13,17 @@ var randomString = (size = 18, prefix = '') => {
   return `${prefix}${uid(size)}`;
 }
 
+var deleteUsers = (userIds, done) => {
+  async.eachLimit(userIds, 5, (userId, callback) => {
+    return Kinvey.User.remove(userId, {
+        hard: true
+      })
+      .then(callback).catch(callback)
+  }, () => {
+    done();
+  });
+}
+
 var assertEntityMetadata = (arrayOfEntities) => {
   const entities = [].concat(arrayOfEntities);
   entities.forEach((entity) => {

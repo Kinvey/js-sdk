@@ -18,17 +18,6 @@ function testFunc() {
     expect(user).to.deep.equal(Kinvey.User.getActiveUser());
   }
 
-  const deleteUsers = (userIds, done) => {
-    async.eachLimit(userIds, 5, (userId, callback) => {
-      return Kinvey.User.remove(userId, {
-          hard: true
-        })
-        .then(callback).catch(callback)
-    }, () => {
-      done();
-    });
-  }
-
   describe('User tests', function() {
 
     const collectionName = externalConfig.collectionName;

@@ -8,7 +8,7 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
   const notFoundErrorName = 'NotFoundError';
   const shouldNotBeCalledErrorMessage = 'Should not be called';
-
+  const createdUserIds = [];
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`${currentDataStoreType} Store CRUD Specific Tests`, () => {
@@ -35,7 +35,8 @@ function testFunc() {
         });
 
         Kinvey.User.signup()
-          .then(() => {
+          .then((user) => {
+            createdUserIds.push(user.data._id);
             //store for setup
             networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
@@ -59,10 +60,12 @@ function testFunc() {
       });
 
       after((done) => {
-        return Kinvey.User.logout()
-          .then(() => {
-            done();
-          })
+        deleteUsers(createdUserIds, () => {
+          return Kinvey.User.logout()
+            .then(() => {
+              done();
+            })
+        })
       });
 
       if (dataStoreType === Kinvey.DataStoreType.Cache) {
