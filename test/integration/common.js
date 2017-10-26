@@ -77,24 +77,22 @@ var deleteEntityMetadata = (arrayOfEntities) => {
   return arrayOfEntities;
 }
 
-var validateReadResult = (dataStoreType, spy, cacheExpectedEntities, backendExpectedEntities) => {
+var validateReadResult = (dataStoreType, spy, cacheExpectedEntities, backendExpectedEntities, sortBeforeCompare) => {
   let firstCallArgs = spy.firstCall.args[0];
   let secondCallArgs;
   if (dataStoreType === Kinvey.DataStoreType.Cache) {
     secondCallArgs = spy.secondCall.args[0];
   }
-  if (!_.isNumber(cacheExpectedEntities)) {
-    assertEntityMetadata(firstCallArgs);
+  if (!_.isNumber(cacheExpectedEntities) && Object.keys([].concat(cacheExpectedEntities)[0]._id)) {
     deleteEntityMetadata(firstCallArgs);
-    if (_.isArray(cacheExpectedEntities)) {
+    if (sortBeforeCompare) {
       firstCallArgs = _.sortBy(firstCallArgs, '_id');
       cacheExpectedEntities = _.sortBy(cacheExpectedEntities, '_id');
       backendExpectedEntities = _.sortBy(backendExpectedEntities, '_id');
     }
     if (secondCallArgs) {
-      assertEntityMetadata(secondCallArgs);
       deleteEntityMetadata(secondCallArgs);
-      if (_.isArray(cacheExpectedEntities)) {
+      if (sortBeforeCompare) {
         secondCallArgs = _.sortBy(secondCallArgs, '_id');
       }
     }

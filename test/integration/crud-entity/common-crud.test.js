@@ -8,7 +8,7 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
   const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
   const notFoundErrorName = 'NotFoundError';
-  const createdUserIds = []; 
+  const createdUserIds = [];
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
@@ -134,7 +134,7 @@ function testFunc() {
           return storeToTest.find()
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3])
+                validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3], true)
                 return retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, entity3)
                   .then((result) => {
                     if (result) {
@@ -205,7 +205,7 @@ function testFunc() {
           for (let i = 0; i < dataCount; i++) {
             entities.push(getSingleEntity());
           }
-          
+
           return cleanUpCollectionData(collectionName, done)
             .then(() => {
               createData(collectionName, entities)
@@ -219,9 +219,9 @@ function testFunc() {
         it('should sort ascending and skip correctly', (done) => {
           const onNextSpy = sinon.spy();
           const query = new Kinvey.Query();
-          query.skip = dataCount - 1;
+          query.skip = dataCount - 2;
           query.ascending('_id');
-          const expectedEntities = [entities[dataCount - 1]];
+          const expectedEntities = [entities[dataCount - 2], entities[dataCount - 1]];
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
@@ -233,34 +233,36 @@ function testFunc() {
             });
         });
 
-        it('should sort ascending and limit correctly', (done) => {
-          const onNextSpy = sinon.spy();
-          const query = new Kinvey.Query();
-          query.limit = 1;
-          query.ascending('_id');
-          const expectedEntities = [entities[0]];
-          return storeToTest.find(query)
-            .subscribe(onNextSpy, done, () => {
-              try {
-                validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
-                done();
-              } catch (error) {
-                done(error);
-              }
-            });
-        });
-
-        it('should skip and limit correctly', (done) => {
+        it('should sort descending and limit correctly', (done) => {
           const onNextSpy = sinon.spy();
           const query = new Kinvey.Query();
           query.limit = 2;
-          query.skip = dataCount - 3;
-          query.ascending('_id');
-          const expectedEntities = [entities[dataCount - 2], entities[dataCount - 3]];
+          query.descending('_id');
+          const expectedEntities = [entities[dataCount - 1], entities[dataCount - 2]];
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+
+        it('with fields should return only the specified fields', (done) => {
+          const onNextSpy = sinon.spy();
+          const query = new Kinvey.Query();
+          query.limit = 1;
+          query.skip = dataCount - 2;
+          query.fields = ['customProperty']
+          query.ascending('_id');
+          delete entities[dataCount - 2].numberProperty;
+          const expectedEntity = entities[dataCount - 2];
+          return storeToTest.find(query)
+            .subscribe(onNextSpy, done, () => {
+              try {
+                validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
                 done();
               } catch (error) {
                 done(error);
@@ -301,6 +303,9 @@ function testFunc() {
               expect(createdEntity.customProperty).to.equal(newEntity.customProperty);
               if (dataStoreType === Kinvey.DataStoreType.Sync) {
                 expect(createdEntity._kmd.local).to.be.true;
+              }
+              else {
+                assertEntityMetadata(createdEntity);
               }
               newEntity._id = createdEntity._id;
               return validateEntity(dataStoreType, collectionName, newEntity);
@@ -422,14 +427,11 @@ function testFunc() {
         });
 
         it('should remove all entities that match the query', (done) => {
-          const newEntity = {
-            customProperty: entity2.customProperty
-          };
+          const newEntity = getSingleEntity();
           const query = new Kinvey.Query();
-          query.equalTo('customProperty', entity2.customProperty);
+          query.equalTo('customProperty', newEntity.customProperty);
           let initialCount;
-
-          return storeToTest.save(newEntity)
+          createData(collectionName, [newEntity, newEntity])
             .then(() => {
               return storeToTest.count().toPromise()
             })
@@ -454,7 +456,7 @@ function testFunc() {
                     done(error);
                   }
                 });
-            })
+            }).catch(done);
         });
 
         it('should return a { count: 0 } when no entities are removed', (done) => {
