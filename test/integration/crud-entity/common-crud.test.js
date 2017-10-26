@@ -65,12 +65,12 @@ function testFunc() {
       });
 
       after((done) => {
-        deleteUsers(createdUserIds, () => {
-          return Kinvey.User.logout()
-            .then(() => {
-              done();
-            })
-        })
+        deleteUsers(createdUserIds)
+          .then(() => {
+            return Kinvey.User.logout()
+          })
+          .then(() => done())
+          .catch(done)
       });
 
       describe('count()', function () {
@@ -129,7 +129,7 @@ function testFunc() {
             });
         });
 
-        it('should return all the entities from the backend', (done) => {
+        it('should return all the entities', (done) => {
           const onNextSpy = sinon.spy();
           return storeToTest.find()
             .subscribe(onNextSpy, done, () => {
@@ -206,14 +206,14 @@ function testFunc() {
             entities.push(getSingleEntity());
           }
 
-          return cleanUpCollectionData(collectionName, done)
+          cleanUpCollectionData(collectionName, done)
             .then(() => {
-              createData(collectionName, entities)
-                .then((result) => {
-                  entities = result;
-                  done();
-                });
+              return createData(collectionName, entities)
             })
+            .then((result) => {
+              entities = result;
+              done();
+            }).catch(done);
         });
 
         it('should sort ascending and skip correctly', (done) => {

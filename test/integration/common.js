@@ -27,31 +27,22 @@ var getSingleEntity = (_id, customPropertyValue, numberPropertyValue) => {
 var createData = (collectionName, arrayOfEntities) => {
   const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
   const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
-  const createdEntities = [];
-  return new Promise((resolve, reject) => {
-    async.eachLimit(arrayOfEntities, 20, (entity, callback) => {
-      return networkStore.save(entity)
-        .then((result) => {
-          createdEntities.push(deleteEntityMetadata(result));
-          callback();
-        }).catch(reject)
-    }, () => {
-      return syncStore.pull().then(() => {
-        resolve(_.sortBy(createdEntities, '_id'));
-      }).catch(reject);
-    });
-  });
+  return Promise.all(arrayOfEntities.map(entity => {
+    return networkStore.save(entity)
+  }))
+    .then(() => {
+      return syncStore.pull()
+    })
+    .then((result => _.sortBy(deleteEntityMetadata(result), '_id')))
 }
 
-var deleteUsers = (userIds, done) => {
-  async.eachLimit(userIds, 20, (userId, callback) => {
+var deleteUsers = (userIds) => {
+  return Promise.all(userIds.map(userId => {
     return Kinvey.User.remove(userId, {
       hard: true
     })
-      .then(callback).catch(callback)
-  }, () => {
-    done();
-  });
+  }))
+    .then(result => result)
 }
 
 var assertEntityMetadata = (arrayOfEntities) => {

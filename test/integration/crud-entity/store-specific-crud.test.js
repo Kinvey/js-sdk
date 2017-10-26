@@ -60,12 +60,12 @@ function testFunc() {
       });
 
       after((done) => {
-        deleteUsers(createdUserIds, () => {
-          return Kinvey.User.logout()
-            .then(() => {
-              done();
-            })
-        })
+        deleteUsers(createdUserIds)
+          .then(() => {
+            return Kinvey.User.logout()
+          })
+          .then(() => done())
+          .catch(done)
       });
 
       if (dataStoreType === Kinvey.DataStoreType.Cache) {
