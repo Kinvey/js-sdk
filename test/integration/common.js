@@ -83,7 +83,7 @@ var validateReadResult = (dataStoreType, spy, cacheExpectedEntities, backendExpe
   if (dataStoreType === Kinvey.DataStoreType.Cache) {
     secondCallArgs = spy.secondCall.args[0];
   }
-  if (!_.isNumber(cacheExpectedEntities) && Object.keys([].concat(cacheExpectedEntities)[0]._id)) {
+  if (!_.isNumber(cacheExpectedEntities) && [].concat(cacheExpectedEntities)[0].hasOwnProperty('_id')) {
     deleteEntityMetadata(firstCallArgs);
     if (sortBeforeCompare) {
       firstCallArgs = _.sortBy(firstCallArgs, '_id');
