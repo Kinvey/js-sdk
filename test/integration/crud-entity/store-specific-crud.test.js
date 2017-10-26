@@ -43,7 +43,7 @@ function testFunc() {
             cacheStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return cleanCollectionData(collectionName, Kinvey.DataStoreType.Cache)
+            return cleanUpCollectionData(collectionName)
           })
           .then(() => {
             return networkStore.save(entity1)

@@ -24,7 +24,6 @@ function testFunc() {
         _id: randomString(),
         customProperty: randomString()
       };
-
       const entity3 = {
         _id: randomString(),
         customProperty: randomString()
@@ -44,7 +43,7 @@ function testFunc() {
             networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return cleanCollectionData(collectionName, Kinvey.DataStoreType.Network)
+            return cleanUpCollectionData(collectionName, done)
           })
           .then(() => {
             return networkStore.save(entity1)
@@ -190,6 +189,78 @@ function testFunc() {
             .subscribe(onNextSpy, done, () => {
               try {
                 validateReadResult(dataStoreType, onNextSpy, entity2, entity2)
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+      });
+
+      describe('find with modifiers', function () {
+        let entities = [];
+        const dataCount = 20;
+        before((done) => {
+
+          for (let i = 0; i < dataCount; i++) {
+            entities.push(getSingleEntity());
+          }
+          
+          return cleanUpCollectionData(collectionName, done)
+            .then(() => {
+              createData(collectionName, entities)
+                .then((result) => {
+                  entities = result;
+                  done();
+                });
+            })
+        });
+
+        it('should sort ascending and skip correctly', (done) => {
+          const onNextSpy = sinon.spy();
+          const query = new Kinvey.Query();
+          query.skip = dataCount - 1;
+          query.ascending('_id');
+          const expectedEntities = [entities[dataCount - 1]];
+          return storeToTest.find(query)
+            .subscribe(onNextSpy, done, () => {
+              try {
+                validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+
+        it('should sort ascending and limit correctly', (done) => {
+          const onNextSpy = sinon.spy();
+          const query = new Kinvey.Query();
+          query.limit = 1;
+          query.ascending('_id');
+          const expectedEntities = [entities[0]];
+          return storeToTest.find(query)
+            .subscribe(onNextSpy, done, () => {
+              try {
+                validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+
+        it('should skip and limit correctly', (done) => {
+          const onNextSpy = sinon.spy();
+          const query = new Kinvey.Query();
+          query.limit = 2;
+          query.skip = dataCount - 3;
+          query.ascending('_id');
+          const expectedEntities = [entities[dataCount - 2], entities[dataCount - 3]];
+          return storeToTest.find(query)
+            .subscribe(onNextSpy, done, () => {
+              try {
+                validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                 done();
               } catch (error) {
                 done(error);

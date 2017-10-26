@@ -13,11 +13,41 @@ var randomString = (size = 18, prefix = '') => {
   return `${prefix}${uid(size)}`;
 }
 
+var getSingleEntity = (_id, customPropertyValue, numberPropertyValue) => {
+  let entity = {
+    customProperty: customPropertyValue || randomString(),
+    numberProperty: numberPropertyValue || Math.random()
+  };
+  if (_id) {
+    entity._id = _id;
+  }
+  return entity;
+}
+
+var createData = (collectionName, arrayOfEntities) => {
+  const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
+  const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+  const createdEntities = [];
+  return new Promise((resolve, reject) => {
+    async.eachLimit(arrayOfEntities, 20, (entity, callback) => {
+      return networkStore.save(entity)
+        .then((result) => {
+          createdEntities.push(deleteEntityMetadata(result));
+          callback();
+        }).catch(reject)
+    }, () => {
+      return syncStore.pull().then(() => {
+        resolve(_.sortBy(createdEntities, '_id'));
+      }).catch(reject);
+    });
+  });
+}
+
 var deleteUsers = (userIds, done) => {
-  async.eachLimit(userIds, 5, (userId, callback) => {
+  async.eachLimit(userIds, 20, (userId, callback) => {
     return Kinvey.User.remove(userId, {
-        hard: true
-      })
+      hard: true
+    })
       .then(callback).catch(callback)
   }, () => {
     done();
@@ -148,17 +178,23 @@ var validateEntity = (dataStoreType, collectionName, expectedEntity, searchField
   });
 }
 
-var cleanCollectionData = (collectionName, dataStoreType) => {
-
-  const store = Kinvey.DataStore.collection(collectionName, dataStoreType);
-  return store.find().toPromise()
+var cleanUpCollectionData = (collectionName, done) => {
+  const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
+  const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+  return networkStore.find().toPromise()
     .then((entities) => {
       if (entities && entities.length > 0) {
         const query = new Kinvey.Query();
         query.contains('_id', entities.map(a => a._id));
-        return store.remove(query);
+        return networkStore.remove(query)
       }
-    });
+    })
+    .then(() => {
+      return syncStore.clearSync()
+    })
+    .then(() => {
+      return syncStore.clear()
+    }).catch(done);
 }
 
 
