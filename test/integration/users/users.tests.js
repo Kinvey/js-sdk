@@ -33,7 +33,9 @@ function testFunc() {
     });
 
     after((done) => {
-      deleteUsers(createdUserIds, done)
+      deleteUsers(createdUserIds)
+      .then(() => done())
+      .catch(done)
     });
 
     describe('login()', function() {
@@ -465,22 +467,35 @@ function testFunc() {
     });
 
     describe('remove()', function() {
-      let userToRemoveId;
-      let username;
+      let userToRemoveId1;
+      let userToRemoveId2;
+      let username1 = randomString();
+      let username2 = randomString();
 
-      beforeEach((done) => {
+      before((done) => {
         username = randomString();
         return Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup({
-              username: username,
+              username: username1,
               password: randomString()
-            })
+            }) 
           })
           .then((user) => {
-            createdUserIds.push(user.data._id);
-            userToRemoveId = user._id;
-            done();
+            userToRemoveId1 = user.data._id;
+            createdUserIds.push(userToRemoveId1); 
+          })
+          .then(() => {
+            return Kinvey.User.signup({
+              username: username2,
+              password: randomString()
+            }, {
+              state: false
+            })
+            .then((user) => {
+              userToRemoveId2 = user.data._id;
+              done();
+            })
           }).catch(done);
       });
 
@@ -510,15 +525,15 @@ function testFunc() {
           })
           .then((user) => {
             createdUserIds.push(user.data._id);
-            return Kinvey.User.remove(userToRemoveId)
+            return Kinvey.User.remove(userToRemoveId1)
           })
           .then(() => {
-            return Kinvey.User.exists(username)
+            return Kinvey.User.exists(username1)
           })
           .then((result) => {
             expect(result).to.be.true
             const query = new Kinvey.Query();
-            query.equalTo('username', username);
+            query.equalTo('username', username1);
             return Kinvey.User.lookup(query).toPromise()
           })
           .then((users) => {
@@ -528,11 +543,11 @@ function testFunc() {
       });
 
       it('should remove the user that matches the id argument permanently', (done) => {
-        return Kinvey.User.remove(userToRemoveId, {
+        return Kinvey.User.remove(userToRemoveId2, {
             hard: true
           })
           .then(() => {
-            return Kinvey.User.exists(username)
+            return Kinvey.User.exists(username2)
           })
           .then((result) => {
             expect(result).to.be.false
