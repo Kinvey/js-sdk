@@ -8,7 +8,6 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
   const notFoundErrorName = 'NotFoundError';
   const shouldNotBeCalledErrorMessage = 'Should not be called';
-  const createdUserIds = [];
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`${currentDataStoreType} Store CRUD Specific Tests`, () => {
@@ -26,6 +25,7 @@ function testFunc() {
         _id: randomString(),
         customProperty: randomString()
       };
+      const createdUserIds = [];
 
       before((done) => {
 

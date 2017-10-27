@@ -8,7 +8,6 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
   const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
   const notFoundErrorName = 'NotFoundError';
-  const createdUserIds = [];
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
@@ -28,6 +27,8 @@ function testFunc() {
         _id: randomString(),
         customProperty: randomString()
       };
+
+      const createdUserIds = [];
 
       before((done) => {
 
@@ -296,7 +297,7 @@ function testFunc() {
             return storeToTest.clearSync()
               .then(() => {
                 done()
-              })
+              });
           }
           else {
             done();
@@ -437,7 +438,7 @@ function testFunc() {
         });
 
         it('should throw an error for an invalid query', (done) => {
-          return storeToTest.remove({})
+          storeToTest.remove({})
             .catch((error) => {
               expect(error.message).to.equal(invalidQueryMessage);
               done();

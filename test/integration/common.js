@@ -30,19 +30,16 @@ var createData = (collectionName, arrayOfEntities) => {
   return Promise.all(arrayOfEntities.map(entity => {
     return networkStore.save(entity)
   }))
-    .then(() => {
-      return syncStore.pull()
-    })
-    .then((result => _.sortBy(deleteEntityMetadata(result), '_id')))
+    .then(() => syncStore.pull())
+    .then(result => _.sortBy(deleteEntityMetadata(result), '_id'));
 }
 
 var deleteUsers = (userIds) => {
   return Promise.all(userIds.map(userId => {
     return Kinvey.User.remove(userId, {
       hard: true
-    })
-  }))
-    .then(result => result)
+    });
+  }));
 }
 
 var assertEntityMetadata = (arrayOfEntities) => {
