@@ -290,6 +290,124 @@ function testFunc() {
         });
       });
 
+      describe('Querying', function () {
+        let entities = [];
+        const dataCount = 10;
+        let stringPropertyName = 'customProperty';
+        let numberPropertyName = 'numberProperty';
+        let onNextSpy;
+        let query;
+
+        before((done) => {
+
+          for (let i = 0; i < dataCount; i++) {
+            entities.push(getSingleEntity(null, `${i}_test`, i));
+          }
+
+          cleanUpCollectionData(collectionName, done)
+            .then(() => {
+              return createData(collectionName, entities)
+            })
+            .then((result) => {
+              entities = _.sortBy(result, numberPropertyName);
+              done();
+            }).catch(done);
+        });
+
+        beforeEach((done) => {
+          onNextSpy = sinon.spy();
+          query = new Kinvey.Query();
+          done();
+        });
+
+        describe('Operators', function () {
+
+          it('query.equalTo', (done) => {
+            query.equalTo(stringPropertyName, entities[5][stringPropertyName]);
+            const expectedEntities = [entities[5]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.notEqualTo', (done) => {
+            query.notEqualTo(stringPropertyName, entities[5][stringPropertyName]);
+            const expectedEntities = entities.filter(entity => entity[stringPropertyName] != entities[5][stringPropertyName]);
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.greaterThan', (done) => {
+            query.greaterThan(numberPropertyName, entities[dataCount - 2][numberPropertyName]);
+            const expectedEntities = [entities[dataCount - 1]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.greaterThanOrEqualTo', (done) => {
+            query.greaterThanOrEqualTo(numberPropertyName, entities[dataCount - 2][numberPropertyName]);
+            const expectedEntities = [entities[dataCount - 2], entities[dataCount - 1]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.lessThan', (done) => {
+            query.lessThan(numberPropertyName, entities[2][numberPropertyName]);
+            const expectedEntities = [entities[0], entities[1]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.lessThanOrEqualTo', (done) => {
+            query.lessThanOrEqualTo(numberPropertyName, entities[1][numberPropertyName]);
+            const expectedEntities = [entities[0], entities[1]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+        });
+      });
+
       describe('save()', function () {
 
         beforeEach((done) => {

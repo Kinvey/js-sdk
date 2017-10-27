@@ -16,7 +16,7 @@ var randomString = (size = 18, prefix = '') => {
 var getSingleEntity = (_id, customPropertyValue, numberPropertyValue) => {
   let entity = {
     customProperty: customPropertyValue || randomString(),
-    numberProperty: numberPropertyValue || Math.random()
+    numberProperty: numberPropertyValue || numberPropertyValue === 0 ? numberPropertyValue : Math.random()
   };
   if (_id) {
     entity._id = _id;
