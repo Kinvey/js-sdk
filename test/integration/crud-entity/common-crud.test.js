@@ -17,15 +17,15 @@ function testFunc() {
       const dataStoreType = currentDataStoreType;
       const entity1 = {
         _id: randomString(),
-        customProperty: randomString()
+        textField: randomString()
       };
       const entity2 = {
         _id: randomString(),
-        customProperty: randomString()
+        textField: randomString()
       };
       const entity3 = {
         _id: randomString(),
-        customProperty: randomString()
+        textField: randomString()
       };
 
       const createdUserIds = [];
@@ -200,7 +200,7 @@ function testFunc() {
 
       describe('find with modifiers', function () {
         let entities = [];
-        const dataCount = 10;
+        const dataCount = 5;
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
@@ -273,11 +273,9 @@ function testFunc() {
         it.skip('with fields should return only the specified fields', (done) => {
           const onNextSpy = sinon.spy();
           const query = new Kinvey.Query();
-          query.limit = 1;
-          query.skip = dataCount - 2;
-          query.fields = ['customProperty']
+          query.fields = ['textField']
           query.ascending('_id');
-          const expectedEntity = { 'customProperty': entities[dataCount - 2].customProperty };
+          const expectedEntity = { 'textField': entities[dataCount - 2].textField };
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
@@ -293,23 +291,30 @@ function testFunc() {
       describe('Querying', function () {
         let entities = [];
         const dataCount = 10;
-        let stringPropertyName = 'customProperty';
-        let numberPropertyName = 'numberProperty';
+        const textFieldName = 'textField';
+        const numberFieldName = 'numberField';
+        const arrayFieldName = 'arrayField';
         let onNextSpy;
         let query;
 
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
-            entities.push(getSingleEntity(null, `${i}_test`, i));
+            entities.push(getSingleEntity(null, `test_${i}`, i, [`test_${i % 5}`, `second_test_${i % 5}`, `third_test_${i % 5}`]));
           }
+
+          // used to test exists and size operators and null values
+          entities[dataCount - 1][textFieldName] = null;
+          delete entities[dataCount - 1][numberFieldName]
+          entities[dataCount - 1][arrayFieldName] = [];
+          entities[dataCount - 2][arrayFieldName] = [{}, {}];
 
           cleanUpCollectionData(collectionName, done)
             .then(() => {
               return createData(collectionName, entities)
             })
             .then((result) => {
-              entities = _.sortBy(result, numberPropertyName);
+              entities = _.sortBy(result, numberFieldName);
               done();
             }).catch(done);
         });
@@ -320,10 +325,10 @@ function testFunc() {
           done();
         });
 
-        describe('Operators', function () {
+        describe('Comparison operators', function () {
 
           it('query.equalTo', (done) => {
-            query.equalTo(stringPropertyName, entities[5][stringPropertyName]);
+            query.equalTo(textFieldName, entities[5][textFieldName]);
             const expectedEntities = [entities[5]];
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
@@ -336,22 +341,8 @@ function testFunc() {
               });
           });
 
-          it('query.notEqualTo', (done) => {
-            query.notEqualTo(stringPropertyName, entities[5][stringPropertyName]);
-            const expectedEntities = entities.filter(entity => entity[stringPropertyName] != entities[5][stringPropertyName]);
-            return storeToTest.find(query)
-              .subscribe(onNextSpy, done, () => {
-                try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
-                  done();
-                } catch (error) {
-                  done(error);
-                }
-              });
-          });
-
-          it('query.greaterThan', (done) => {
-            query.greaterThan(numberPropertyName, entities[dataCount - 2][numberPropertyName]);
+          it('query.equalTo with null', (done) => {
+            query.equalTo(textFieldName, null);
             const expectedEntities = [entities[dataCount - 1]];
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
@@ -364,9 +355,51 @@ function testFunc() {
               });
           });
 
+          it('query.notEqualTo', (done) => {
+            query.notEqualTo(textFieldName, entities[5][textFieldName]);
+            const expectedEntities = entities.filter(entity => entity != entities[5]);
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it.skip('query.notEqualTo with null', (done) => {
+            query.notEqualTo(textFieldName, null);
+            const expectedEntities = entities.filter(entity => entity[textFieldName] === null);
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.greaterThan', (done) => {
+            query.greaterThan(numberFieldName, entities[dataCount - 3][numberFieldName]);
+            const expectedEntities = [entities[dataCount - 2]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
           it('query.greaterThanOrEqualTo', (done) => {
-            query.greaterThanOrEqualTo(numberPropertyName, entities[dataCount - 2][numberPropertyName]);
-            const expectedEntities = [entities[dataCount - 2], entities[dataCount - 1]];
+            query.greaterThanOrEqualTo(numberFieldName, entities[dataCount - 3][numberFieldName]);
+            const expectedEntities = [entities[dataCount - 3], entities[dataCount - 2]];
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
@@ -379,7 +412,7 @@ function testFunc() {
           });
 
           it('query.lessThan', (done) => {
-            query.lessThan(numberPropertyName, entities[2][numberPropertyName]);
+            query.lessThan(numberFieldName, entities[2][numberFieldName]);
             const expectedEntities = [entities[0], entities[1]];
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
@@ -393,7 +426,7 @@ function testFunc() {
           });
 
           it('query.lessThanOrEqualTo', (done) => {
-            query.lessThanOrEqualTo(numberPropertyName, entities[1][numberPropertyName]);
+            query.lessThanOrEqualTo(numberFieldName, entities[1][numberFieldName]);
             const expectedEntities = [entities[0], entities[1]];
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
@@ -404,6 +437,323 @@ function testFunc() {
                   done(error);
                 }
               });
+          });
+
+          it('query.exists', (done) => {
+            query.exists(numberFieldName);
+            const expectedEntities = entities.filter(entity => entity != entities[dataCount - 1]);
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.mod', (done) => {
+            query.mod(numberFieldName, 4, 2);
+            const expectedEntities = entities.filter(entity => entity[numberFieldName] % 4 === 2);
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          // TODO: Add more tests for regular expression
+          it('query.matches - with RegExp literal', (done) => {
+            query.matches(textFieldName, /^test_5/);
+            const expectedEntities = [entities[5]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('query.matches - with RegExp object', (done) => {
+            query.matches(textFieldName, new RegExp('^test_5'));
+            const expectedEntities = [entities[5]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('multiple operators', (done) => {
+            query.lessThan(numberFieldName, entities[2][numberFieldName])
+              .greaterThan(numberFieldName, entities[0][numberFieldName]);
+            const expectedEntities = [entities[1]];
+            return storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+        });
+
+        describe('Array Operators', () => {
+
+          describe('query.contains()', () => {
+
+            it('with single value', (done) => {
+              query.contains(textFieldName, entities[5][textFieldName]);
+              const expectedEntities = [entities[5]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('string field with an array of values', (done) => {
+              query.contains(textFieldName, entities[0][arrayFieldName]);
+              const expectedEntities = [entities[0]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('array field with an array of values', (done) => {
+              query.contains(arrayFieldName, entities[0][arrayFieldName]);
+              const expectedEntities = [entities[0], entities[5]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('in combination with an existing filter', (done) => {
+              query.notEqualTo(numberFieldName, entities[1][numberFieldName]);
+              query.contains(textFieldName, [entities[0][textFieldName], entities[1][textFieldName]]);
+              const expectedEntities = [entities[0]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('with null value', (done) => {
+              query.contains(textFieldName, [null]);
+              const expectedEntities = [entities[dataCount - 1]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+          });
+
+          describe('query.containsAll()', () => {
+
+            it('with single value', (done) => {
+              query.containsAll(textFieldName, entities[5][textFieldName]);
+              const expectedEntities = [entities[5]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('string field with an array of values', (done) => {
+              query.containsAll(textFieldName, [entities[5][textFieldName]]);
+              const expectedEntities = [entities[5]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('array field with an array of values', (done) => {
+              const arrayFieldValue = entities[5][arrayFieldName];
+              const filteredArray = arrayFieldValue.filter(entity => entity != arrayFieldValue[2]);
+              query.containsAll(arrayFieldName, filteredArray);
+              const expectedEntities = [entities[0], entities[5]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('in combination with an existing filter', (done) => {
+              query.notEqualTo(numberFieldName, entities[0][numberFieldName]);
+              query.containsAll(arrayFieldName, entities[5][arrayFieldName]);
+              const expectedEntities = [entities[5]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+          });
+
+          describe('query.notContainedIn()', () => {
+
+            it('with single value', (done) => {
+              query.notContainedIn(textFieldName, entities[5][textFieldName]);
+              const expectedEntities = entities.filter(entity => entity != entities[5]);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('string property with an array of values', (done) => {
+              query.notContainedIn(textFieldName, entities[0][arrayFieldName]);
+              const expectedEntities = entities.filter(entity => entity != entities[0]);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('array field with an array of values', (done) => {
+              query.notContainedIn(arrayFieldName, entities[0][arrayFieldName]);
+              const expectedEntities = entities.filter(entity => entity != entities[0] && entity != entities[5]);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('in combination with an existing filter', (done) => {
+              query.lessThanOrEqualTo(numberFieldName, entities[1][numberFieldName]);
+              query.notContainedIn(textFieldName, entities[0][arrayFieldName]);
+              const expectedEntities = [entities[1]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+          });
+
+          describe('query.size()', () => {
+
+            it('should return the elements with an array field, having the submitted size', (done) => {
+              query.size(arrayFieldName, 3);
+              const expectedEntities = entities.filter(entity => entity != entities[dataCount - 1] && entity != entities[dataCount - 2]);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('should return the elements with an empty array field, if the submitted size = 0', (done) => {
+              query.size(arrayFieldName, 0);
+              const expectedEntities = [entities[dataCount - 1]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('in combination with an existing filter', (done) => {
+              query.greaterThanOrEqualTo(numberFieldName, entities[dataCount - 3][numberFieldName]);
+              query.size(arrayFieldName, 3);
+              const expectedEntities = [entities[dataCount - 3]];
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
           });
         });
       });
@@ -432,12 +782,12 @@ function testFunc() {
 
         it('should create a new entity without _id', (done) => {
           let newEntity = {
-            customProperty: randomString()
+            textField: randomString()
           };
           return storeToTest.save(newEntity)
             .then((createdEntity) => {
               expect(createdEntity._id).to.exist;
-              expect(createdEntity.customProperty).to.equal(newEntity.customProperty);
+              expect(createdEntity.textField).to.equal(newEntity.textField);
               if (dataStoreType === Kinvey.DataStoreType.Sync) {
                 expect(createdEntity._kmd.local).to.be.true;
               }
@@ -457,12 +807,12 @@ function testFunc() {
         it('should create a new entity using its _id', (done) => {
           const newEntity = {
             _id: randomString(),
-            customProperty: randomString()
+            textField: randomString()
           };
           return storeToTest.save(newEntity)
             .then((createdEntity) => {
               expect(createdEntity._id).to.equal(newEntity._id);
-              expect(createdEntity.customProperty).to.equal(newEntity.customProperty);
+              expect(createdEntity.textField).to.equal(newEntity.textField);
               return validateEntity(dataStoreType, collectionName, newEntity);
             })
             .then(() => {
@@ -475,7 +825,7 @@ function testFunc() {
         it('should update an existing entity', (done) => {
           const entityToUpdate = {
             _id: entity1._id,
-            customProperty: entity1.customProperty,
+            textField: entity1.textField,
             newProperty: randomString()
           };
           return storeToTest.save(entityToUpdate)
@@ -566,7 +916,7 @@ function testFunc() {
         it('should remove all entities that match the query', (done) => {
           const newEntity = getSingleEntity();
           const query = new Kinvey.Query();
-          query.equalTo('customProperty', newEntity.customProperty);
+          query.equalTo('textField', newEntity.textField);
           let initialCount;
           createData(collectionName, [newEntity, newEntity])
             .then(() => {

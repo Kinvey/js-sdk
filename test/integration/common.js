@@ -13,10 +13,12 @@ var randomString = (size = 18, prefix = '') => {
   return `${prefix}${uid(size)}`;
 }
 
-var getSingleEntity = (_id, customPropertyValue, numberPropertyValue) => {
+var getSingleEntity = (_id, textValue, numberValue, array) => {
+
   let entity = {
-    customProperty: customPropertyValue || randomString(),
-    numberProperty: numberPropertyValue || numberPropertyValue === 0 ? numberPropertyValue : Math.random()
+    textField: textValue || randomString(),
+    numberField: numberValue || numberValue === 0 ? numberValue : Math.random(),
+    arrayField: array || [randomString(), randomString()]
   };
   if (_id) {
     entity._id = _id;
