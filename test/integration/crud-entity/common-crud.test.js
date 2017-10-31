@@ -197,10 +197,11 @@ function testFunc() {
             });
         });
       });
-
-      describe('find with modifiers', function () {
+      // These are smoke tests and will not be executed for now.
+      // If we decide to execute 'Modifiers' describe only for Sync data store, these tests will be added back
+      describe.skip('find with modifiers', function () {
         let entities = [];
-        const dataCount = 5;
+        const dataCount = 10;
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
@@ -294,6 +295,7 @@ function testFunc() {
         const textFieldName = 'textField';
         const numberFieldName = 'numberField';
         const arrayFieldName = 'arrayField';
+        const secondSortField = 'secondSortField'
         let onNextSpy;
         let query;
 
@@ -301,6 +303,11 @@ function testFunc() {
 
           for (let i = 0; i < dataCount; i++) {
             entities.push(getSingleEntity(null, `test_${i}`, i, [`test_${i % 5}`, `second_test_${i % 5}`, `third_test_${i % 5}`]));
+          }
+
+          const textArray = ['aaa', 'aaB', 'aac']
+          for (let i = 0; i < dataCount; i++) {
+            entities[i].secondSortField = textArray[i % 3];
           }
 
           // used to test exists and size operators and null values
@@ -368,10 +375,11 @@ function testFunc() {
                 }
               });
           });
-
+          
+          //should be added back for execution when MLIBZ-2157 is fixed
           it.skip('query.notEqualTo with null', (done) => {
             query.notEqualTo(textFieldName, null);
-            const expectedEntities = entities.filter(entity => entity[textFieldName] === null);
+            const expectedEntities = entities.filter(entity => entity[textFieldName] != null);
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
@@ -467,7 +475,7 @@ function testFunc() {
               });
           });
 
-          // TODO: Add more tests for regular expression
+          //TODO: Add more tests for regular expression
           it('query.matches - with RegExp literal', (done) => {
             query.matches(textFieldName, /^test_5/);
             const expectedEntities = [entities[5]];
@@ -756,6 +764,115 @@ function testFunc() {
             });
           });
         });
+
+
+        describe('Modifiers', () => {
+
+          let expectedAscendingCache;
+          let expectedAscendingServer;
+          let expectedDescending;
+
+          describe('Sort', () => {
+
+            before((done) => {
+              expectedAscendingCache = _.sortBy(entities, numberFieldName);
+              expectedAscendingServer = _.sortBy(entities, numberFieldName);
+              expectedAscendingServer.splice(0, 0, expectedAscendingServer.pop());
+              expectedDescending = expectedAscendingServer.slice().reverse();
+              done();
+            });
+
+            it('should sort ascending', (done) => {
+              query.ascending(numberFieldName);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    //when MLIBZ-2156 is fixed, expectedAscendingCache should be replaced with expectedAscendingServer
+                    validateReadResult(dataStoreType, onNextSpy, expectedAscendingCache, expectedAscendingServer);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('should sort descending', (done) => {
+              query.descending(numberFieldName);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedDescending, expectedDescending);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('should sort by two fields ascending and descending', (done) => {
+              query.ascending(secondSortField);
+              query.descending(textFieldName);
+              query.notEqualTo('_id', entities[dataCount - 1]._id);
+              const sortedEntities = _.orderBy(entities, [secondSortField, numberFieldName], ['asc', 'desc'])
+              const expectedEntities = sortedEntities.filter(entity => entity != entities[dataCount - 1])
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('should skip correctly', (done) => {
+              query.skip = dataCount - 3;
+              query.descending(numberFieldName);
+              const expectedEntities = expectedDescending.slice(dataCount - 3, dataCount);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('should limit correctly', (done) => {
+              query.limit = 2;
+              query.descending(numberFieldName);
+              const expectedEntities = expectedDescending.slice(0, 2);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+
+            it('should skip and then limit correctly', (done) => {
+              query.limit = 2;
+              query.skip = 3
+              query.descending(numberFieldName);
+              const expectedEntities = expectedDescending.slice(3, 5);
+              return storeToTest.find(query)
+                .subscribe(onNextSpy, done, () => {
+                  try {
+                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    done();
+                  } catch (error) {
+                    done(error);
+                  }
+                });
+            });
+          });
+        });
       });
 
       describe('save()', function () {
@@ -937,7 +1054,6 @@ function testFunc() {
                       .then((count) => {
                         expect(count).to.equal(initialCount - 2);
                         done();
-                        //validatePendingSyncCount(dataStoreType, collectionName, 0, done)
                       }).catch(done);
                   } catch (error) {
                     done(error);
