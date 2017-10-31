@@ -76,8 +76,5 @@
     "sinon-chai": "2.14.0",
     "webpack": "3.6.0"
   },
-  "pre-commit": [
-    "lint",
-    "test"
-  ]
+  "pre-commit": []
 }
