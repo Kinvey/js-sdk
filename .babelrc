@@ -1,13 +1,8 @@
 {
-  "ignore": [
-    "node_modules"
+  "only": [
+    "./packages/node_modules/",
+    "./test/unit/"
   ],
-  "presets": [
-    ["env", {
-      "targets": {
-        "browsers": ["last 2 versions", "safari >= 7"]
-      }
-    }]
-  ],
+  "presets": ["env"],
   "sourceMaps": true
 }

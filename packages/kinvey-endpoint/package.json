@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "version": "3.9.2",
+  "name": "kinvey-endpoint",
+  "main": "src/index.js",
+  "dependencies": {
+    "es6-promise": "4.1.1",
+    "kinvey-errors": "3.9.2",
+    "kinvey-client": "3.9.2",
+    "kinvey-request": "3.9.2",
+    "lodash": "4.17.4"
+  }
+}
