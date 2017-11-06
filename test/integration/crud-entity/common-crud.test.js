@@ -15,19 +15,9 @@ function testFunc() {
       let networkStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
-      const entity1 = {
-        _id: randomString(),
-        textField: randomString()
-      };
-      const entity2 = {
-        _id: randomString(),
-        textField: randomString()
-      };
-      const entity3 = {
-        _id: randomString(),
-        textField: randomString()
-      };
-
+      const entity1 = getSingleEntity(randomString());
+      const entity2 = getSingleEntity(randomString());
+      const entity3 = getSingleEntity(randomString());
       const createdUserIds = [];
 
       before((done) => {
