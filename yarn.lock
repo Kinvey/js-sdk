@@ -803,7 +803,7 @@ expand-range@^1.8.1:
   dependencies:
     fill-range "^2.1.0"
 
-expect@^1.20.2:
+expect@1.20.2, expect@^1.20.2:
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/expect/-/expect-1.20.2.tgz#d458fe4c56004036bae3232416a3f6361f04f965"
   dependencies:

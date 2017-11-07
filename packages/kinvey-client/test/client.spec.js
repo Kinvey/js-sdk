@@ -1,6 +1,6 @@
-import Client from 'src/client';
-import { randomString } from 'src/utils';
-import expect from 'expect';
+const { Client } = require('../src');
+const { randomString } = require('kinvey-utils/string');
+const expect = require('expect');
 const defaultTimeout = process.env.KINVEY_DEFAULT_TIMEOUT || 60000;
 
 describe('Client', () => {

@@ -1,25 +1,25 @@
-import { Acl } from 'src/entity';
-import { randomString } from 'src/utils';
-import { KinveyError } from 'src/errors';
-import expect from 'expect';
+const { Acl } = require('../src');
+const { randomString } = require('kinvey-utils/string');
+const { KinveyError } = require('kinvey-errors');
+const expect = require('expect');
 
-describe('Acl', function() {
-  describe('constructor', function() {
-    it('should throw an error if an entity is not provided', function() {
+describe('Acl', () => {
+  describe('constructor', () => {
+    it('should throw an error if an entity is not provided', () => {
       expect(() => {
         const acl = new Acl();
         return acl;
       }).toThrow(KinveyError, /entity argument must be an object/);
     });
 
-    it('should create an empty acl when the entity does not contain an _acl property', function() {
+    it('should create an empty acl when the entity does not contain an _acl property', () => {
       const entity = {};
       const acl = new Acl(entity);
       expect(acl.toPlainObject()).toEqual({});
       expect(entity._acl).toEqual({});
     });
 
-    it('should use the _acl property on the entity', function() {
+    it('should use the _acl property on the entity', () => {
       const aclProp = { r: [] };
       const entity = { _acl: aclProp };
       const acl = new Acl(entity);
@@ -28,29 +28,29 @@ describe('Acl', function() {
     });
   });
 
-  describe('creator', function() {
-    it('should be creator value', function() {
+  describe('creator', () => {
+    it('should be creator value', () => {
       const creator = randomString();
       const acl = new Acl({ _acl: { creator: creator } });
       expect(acl.creator).toEqual(creator);
     });
   });
 
-  describe('readers', function() {
-    it('should return an empty array if no readers exist', function() {
+  describe('readers', () => {
+    it('should return an empty array if no readers exist', () => {
       const acl = new Acl({ _acl: {} });
       expect(acl.readers).toBeA(Array);
       expect(acl.readers).toEqual([]);
     });
 
-    it('should return an empty array if readers is not an array', function() {
+    it('should return an empty array if readers is not an array', () => {
       const readers = randomString();
       const acl = new Acl({ _acl: { r: readers } });
       expect(acl.readers).toBeA(Array);
       expect(acl.readers).toEqual([]);
     });
 
-    it('should be readers value', function() {
+    it('should be readers value', () => {
       const readers = [randomString()];
       const acl = new Acl({ _acl: { r: readers } });
       expect(acl.readers).toBeA(Array);
@@ -58,21 +58,21 @@ describe('Acl', function() {
     });
   });
 
-  describe('writers', function() {
-    it('should return an empty array if no writers exist', function() {
+  describe('writers', () => {
+    it('should return an empty array if no writers exist', () => {
       const acl = new Acl({ _acl: {} });
       expect(acl.writers).toBeA(Array);
       expect(acl.writers).toEqual([]);
     });
 
-    it('should return an empty array if writers is not an array', function() {
+    it('should return an empty array if writers is not an array', () => {
       const writers = randomString();
       const acl = new Acl({ _acl: { w: writers } });
       expect(acl.writers).toBeA(Array);
       expect(acl.writers).toEqual([]);
     });
 
-    it('should be writers value', function() {
+    it('should be writers value', () => {
       const writers = [randomString()];
       const acl = new Acl({ _acl: { w: writers } });
       expect(acl.writers).toBeA(Array);
@@ -80,21 +80,21 @@ describe('Acl', function() {
     });
   });
 
-  describe('readerGroups', function() {
-    it('should return an empty array if no readerGroups exist', function() {
+  describe('readerGroups', () => {
+    it('should return an empty array if no readerGroups exist', () => {
       const acl = new Acl({ _acl: {} });
       expect(acl.readerGroups).toBeA(Array);
       expect(acl.readerGroups).toEqual([]);
     });
 
-    it('should return an empty array if readerGroups is not an array', function() {
+    it('should return an empty array if readerGroups is not an array', () => {
       const readerGroups = randomString();
       const acl = new Acl({ _acl: { groups: { r: readerGroups } } });
       expect(acl.readerGroups).toBeA(Array);
       expect(acl.readerGroups).toEqual([]);
     });
 
-    it('should be readerGroups value', function() {
+    it('should be readerGroups value', () => {
       const readerGroups = [randomString()];
       const acl = new Acl({ _acl: { groups: { r: readerGroups } } });
       expect(acl.readerGroups).toBeA(Array);
@@ -102,21 +102,21 @@ describe('Acl', function() {
     });
   });
 
-  describe('writerGroups', function() {
-    it('should return an empty array if no writerGroups exist', function() {
+  describe('writerGroups', () => {
+    it('should return an empty array if no writerGroups exist', () => {
       const acl = new Acl({ _acl: {} });
       expect(acl.writerGroups).toBeA(Array);
       expect(acl.writerGroups).toEqual([]);
     });
 
-    it('should return an empty array if writerGroups is not an array', function() {
+    it('should return an empty array if writerGroups is not an array', () => {
       const writerGroups = randomString();
       const acl = new Acl({ _acl: { groups: { w: writerGroups } } });
       expect(acl.writerGroups).toBeA(Array);
       expect(acl.writerGroups).toEqual([]);
     });
 
-    it('should be readerGroups value', function() {
+    it('should be readerGroups value', () => {
       const writerGroups = [randomString()];
       const acl = new Acl({ _acl: { groups: { w: writerGroups } } });
       expect(acl.writerGroups).toBeA(Array);
@@ -124,48 +124,48 @@ describe('Acl', function() {
     });
   });
 
-  describe('globallyReadable', function() {
-    it('should not be able to set it to a string', function() {
+  describe('globallyReadable', () => {
+    it('should not be able to set it to a string', () => {
       const acl = new Acl({ _acl: {} });
       acl.globallyReadable = 'true';
       expect(acl.isGloballyReadable()).toEqual(false);
     });
 
-    it('should be set to false', function() {
+    it('should be set to false', () => {
       const acl = new Acl({ _acl: {} });
       acl.globallyReadable = false;
       expect(acl.isGloballyReadable()).toEqual(false);
     });
 
-    it('should be set to true', function() {
+    it('should be set to true', () => {
       const acl = new Acl({ _acl: {} });
       acl.globallyReadable = true;
       expect(acl.isGloballyReadable()).toEqual(true);
     });
   });
 
-  describe('globallyWritable', function() {
-    it('should not be able to set it to a string', function() {
+  describe('globallyWritable', () => {
+    it('should not be able to set it to a string', () => {
       const acl = new Acl({ _acl: {} });
       acl.globallyWritable = 'true';
       expect(acl.isGloballyWritable()).toEqual(false);
     });
 
-    it('should be set to false', function() {
+    it('should be set to false', () => {
       const acl = new Acl({ _acl: {} });
       acl.globallyWritable = false;
       expect(acl.isGloballyWritable()).toEqual(false);
     });
 
-    it('should be set to true', function() {
+    it('should be set to true', () => {
       const acl = new Acl({ _acl: {} });
       acl.globallyWritable = true;
       expect(acl.isGloballyWritable()).toEqual(true);
     });
   });
 
-  describe('addReader()', function() {
-    it('should not add existing reader', function() {
+  describe('addReader()', () => {
+    it('should not add existing reader', () => {
       const user = randomString();
       const readers = [user];
       const acl = new Acl({ _acl: { r: readers } });
@@ -173,7 +173,7 @@ describe('Acl', function() {
       expect(acl.readers).toEqual(readers);
     });
 
-    it('should add a reader', function() {
+    it('should add a reader', () => {
       const entity = { _acl: {} };
       const user = randomString();
       const acl = new Acl(entity);
@@ -183,8 +183,8 @@ describe('Acl', function() {
     });
   });
 
-  describe('addReaderGroup()', function() {
-    it('should not add existing reader group', function() {
+  describe('addReaderGroup()', () => {
+    it('should not add existing reader group', () => {
       const group = randomString();
       const readerGroups = [group];
       const acl = new Acl({ _acl: { groups: { r: readerGroups } } });
@@ -192,7 +192,7 @@ describe('Acl', function() {
       expect(acl.readerGroups).toEqual(readerGroups);
     });
 
-    it('should not add existing reader group', function() {
+    it('should not add existing reader group', () => {
       const group = randomString();
       const acl = new Acl({ _acl: {} });
       acl.addReaderGroup(group);
@@ -200,8 +200,8 @@ describe('Acl', function() {
     });
   });
 
-  describe('addWriter()', function() {
-    it('should not add existing writer', function() {
+  describe('addWriter()', () => {
+    it('should not add existing writer', () => {
       const user = randomString();
       const writers = [user];
       const acl = new Acl({ _acl: { w: writers } });
@@ -209,7 +209,7 @@ describe('Acl', function() {
       expect(acl.writers).toEqual(writers);
     });
 
-    it('should add a writer', function() {
+    it('should add a writer', () => {
       const user = randomString();
       const acl = new Acl({ _acl: {} });
       acl.addWriter(user);
@@ -217,8 +217,8 @@ describe('Acl', function() {
     });
   });
 
-  describe('addWriterGroup()', function() {
-    it('should not add existing writer group', function() {
+  describe('addWriterGroup()', () => {
+    it('should not add existing writer group', () => {
       const group = randomString();
       const writerGroups = [group];
       const acl = new Acl({ _acl: { groups: { w: writerGroups } } });
@@ -226,7 +226,7 @@ describe('Acl', function() {
       expect(acl.writerGroups).toEqual(writerGroups);
     });
 
-    it('should not add existing reader group', function() {
+    it('should not add existing reader group', () => {
       const group = randomString();
       const acl = new Acl({ _acl: {} });
       acl.addWriterGroup(group);
@@ -234,39 +234,39 @@ describe('Acl', function() {
     });
   });
 
-  describe('isGloballyReadable()', function() {
-    it('should return false', function() {
+  describe('isGloballyReadable()', () => {
+    it('should return false', () => {
       const acl = new Acl({ _acl: { gr: false } });
       expect(acl.isGloballyReadable()).toEqual(false);
     });
 
-    it('should return true', function() {
+    it('should return true', () => {
       const acl = new Acl({ _acl: { gr: true } });
       expect(acl.isGloballyReadable()).toEqual(true);
     });
   });
 
-  describe('isGloballyWritable()', function() {
-    it('should return false', function() {
+  describe('isGloballyWritable()', () => {
+    it('should return false', () => {
       const acl = new Acl({ _acl: { gw: false } });
       expect(acl.isGloballyWritable()).toEqual(false);
     });
 
-    it('should return true', function() {
+    it('should return true', () => {
       const acl = new Acl({ _acl: { gw: true } });
       expect(acl.isGloballyWritable()).toEqual(true);
     });
   });
 
-  describe('removeReader()', function() {
-    it('should do nothing when the reader doesn\'t exist', function() {
+  describe('removeReader()', () => {
+    it('should do nothing when the reader doesn\'t exist', () => {
       const reader = randomString();
       const acl = new Acl({ _acl: { r: [] } });
       acl.removeReader(reader);
       expect(acl.readers).toEqual([]);
     });
 
-    it('should remove the reader', function() {
+    it('should remove the reader', () => {
       const reader = randomString();
       const acl = new Acl({ _acl: { r: [reader] } });
       acl.removeReader(reader);
@@ -274,15 +274,15 @@ describe('Acl', function() {
     });
   });
 
-  describe('removeReaderGroup()', function() {
-    it('should do nothing when the reader group doesn\'t exist', function() {
+  describe('removeReaderGroup()', () => {
+    it('should do nothing when the reader group doesn\'t exist', () => {
       const readerGroup = randomString();
       const acl = new Acl({ _acl: { groups: { r: [] } } });
       acl.removeReaderGroup(readerGroup);
       expect(acl.readerGroups).toEqual([]);
     });
 
-    it('should remove the reader group', function() {
+    it('should remove the reader group', () => {
       const group = randomString();
       const groups = [randomString()];
       const acl = new Acl({ _acl: { groups: { r: groups } } });
@@ -292,15 +292,15 @@ describe('Acl', function() {
     });
   });
 
-  describe('removeWriter()', function() {
-    it('should do nothing when the writer doesn\'t exist', function() {
+  describe('removeWriter()', () => {
+    it('should do nothing when the writer doesn\'t exist', () => {
       const writer = randomString();
       const acl = new Acl({ _acl: { w: [] } });
       acl.removeWriter(writer);
       expect(acl.writers).toEqual([]);
     });
 
-    it('should remove the writer', function() {
+    it('should remove the writer', () => {
       const writer = randomString();
       const acl = new Acl({ _acl: { w: [writer] } });
       acl.removeWriter(writer);
@@ -308,8 +308,8 @@ describe('Acl', function() {
     });
   });
 
-  describe('removeWriterGroup()', function() {
-    it('should do nothing when the writer group doesn\'t exist', function() {
+  describe('removeWriterGroup()', () => {
+    it('should do nothing when the writer group doesn\'t exist', () => {
       const writerGroup = randomString();
       const writerGroups = [randomString()];
       const acl = new Acl({ _acl: { groups: { w: writerGroups } } });
@@ -317,7 +317,7 @@ describe('Acl', function() {
       expect(acl.writerGroups).toEqual(writerGroups);
     });
 
-    it('should remove the writer group', function() {
+    it('should remove the writer group', () => {
       const group = randomString();
       const groups = [randomString()];
       const acl = new Acl({ _acl: { groups: { w: groups } } });
@@ -327,8 +327,8 @@ describe('Acl', function() {
     });
   });
 
-  describe('toPlainObject()', function() {
-    it('should return object', function() {
+  describe('toPlainObject()', () => {
+    it('should return object', () => {
       const _acl = {
         gr: true,
         gw: false,
