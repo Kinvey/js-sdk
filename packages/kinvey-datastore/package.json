@@ -27,6 +27,6 @@
     "request": "2.83.0"
   },
   "scripts": {
-    "test": "mocha -s 250 test/cachestore.spec.js"
+    "test": "mocha -s 250 test/**/*.spec.js"
   }
 }

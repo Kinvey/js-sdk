@@ -1,15 +1,55 @@
-const nock = require('nock');
-const expect = require('expect');
 const { Query } = require('kinvey-query');
 const { Aggregation } = require('kinvey-aggregation');
 const { KinveyError, NotFoundError, ServerError } = require('kinvey-errors');
 const { randomString } = require('kinvey-utils/string');
 const { NetworkStore, SyncStore } = require('../src');
 const { mockRequiresIn } = require('./require-helper');
+const { NetworkRack } = require('kinvey-request');
+const { User } = require('kinvey-user');
+const { Kinvey } = require('kinvey');
+const { HttpMiddleware } = require('./http');
+const nock = require('nock');
+const expect = require('expect');
 
 const collection = 'Books';
 
 describe('NetworkStore', () => {
+  let client;
+
+  before(() => {
+    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+  });
+
+  before(() => {
+    client = Kinvey.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+  });
+
+  before(() => {
+    const username = randomString();
+    const password = randomString();
+    const reply = {
+      _id: randomString(),
+      _kmd: {
+        lmt: new Date().toISOString(),
+        ect: new Date().toISOString(),
+        authtoken: randomString()
+      },
+      username: username,
+      _acl: {
+        creator: randomString()
+      }
+    };
+
+    nock(client.apiHostname)
+      .post(`/user/${client.appKey}/login`, { username: username, password: password })
+      .reply(200, reply);
+
+    return User.login(username, password);
+  });
+
   describe('pathname', () => {
     it(`should equal /appdata/<appkey>/${collection}`, () => {
       const store = new NetworkStore(collection);
@@ -17,10 +57,9 @@ describe('NetworkStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      expect(() => {
-        const store = new NetworkStore(collection);
-        store.pathname = `/tests/${collection}`;
-      }).toThrow();
+      const store = new NetworkStore(collection);
+      store.pathname = `/tests/${collection}`;
+      expect(store.pathname).toEqual(`/appdata/${store.client.appKey}/${collection}`);
     });
   });
 
@@ -43,8 +82,8 @@ describe('NetworkStore', () => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname)
+        .get(`/appdata/${client.appKey}/${collection}`)
         .reply(200, [entity1, entity2]);
 
       const store = new NetworkStore(collection);
@@ -60,7 +99,7 @@ describe('NetworkStore', () => {
       const query = new Query();
       query.equalTo('_id', entity1._id);
 
-      nock(this.client.apiHostname)
+      nock(client.apiHostname)
         .get(store.pathname)
         .query({ query: JSON.stringify({ _id: entity1._id }) })
         .reply(200, [entity1]);
@@ -75,8 +114,8 @@ describe('NetworkStore', () => {
   describe('findById()', () => {
     it('should throw a NotFoundError if the id argument does not exist', () => {
       const entityId = 1;
-      nock(this.client.apiHostname)
-        .get(`/appdata/${this.client.appKey}/${collection}/${entityId}`)
+      nock(client.apiHostname)
+        .get(`/appdata/${client.appKey}/${collection}/${entityId}`)
         .reply(404);
 
       const store = new NetworkStore(collection);
@@ -90,8 +129,8 @@ describe('NetworkStore', () => {
       const entityId = randomString();
       const entity1 = { _id: entityId };
 
-      nock(this.client.apiHostname)
-        .get(`/appdata/${this.client.appKey}/${collection}/${entityId}`)
+      nock(client.apiHostname)
+        .get(`/appdata/${client.appKey}/${collection}/${entityId}`)
         .reply(200, entity1);
 
       const store = new NetworkStore(collection);
@@ -113,8 +152,8 @@ describe('NetworkStore', () => {
     });
 
     it('should throw a ServerError', () => {
-      nock(this.client.apiHostname)
-        .post(`/appdata/${this.client.appKey}/${collection}/_group`)
+      nock(client.apiHostname)
+        .post(`/appdata/${client.appKey}/${collection}/_group`)
         .reply(500);
 
       const store = new NetworkStore(collection);
@@ -128,8 +167,8 @@ describe('NetworkStore', () => {
 
     it('should return the count of all unique properties on the collection', () => {
       const reply = [{ title: randomString(), count: 2 }, { title: randomString(), count: 1 }];
-      nock(this.client.apiHostname)
-        .post(`/appdata/${this.client.appKey}/${collection}/_group`)
+      nock(client.apiHostname)
+        .post(`/appdata/${client.appKey}/${collection}/_group`)
         .reply(200, reply);
 
       const store = new NetworkStore(collection);
@@ -153,8 +192,8 @@ describe('NetworkStore', () => {
     });
 
     it('should throw a ServerError', () => {
-      nock(this.client.apiHostname)
-        .get(`/appdata/${this.client.appKey}/${collection}/_count`)
+      nock(client.apiHostname)
+        .get(`/appdata/${client.appKey}/${collection}/_count`)
         .reply(500);
 
       const store = new NetworkStore(collection);
@@ -166,8 +205,8 @@ describe('NetworkStore', () => {
     });
 
     it('should return the count for the collection', () => {
-      nock(this.client.apiHostname)
-        .get(`/appdata/${this.client.appKey}/${collection}/_count`)
+      nock(client.apiHostname)
+        .get(`/appdata/${client.appKey}/${collection}/_count`)
         .reply(200, { count: 1 });
 
       const store = new NetworkStore(collection);
@@ -213,8 +252,8 @@ describe('NetworkStore', () => {
         summary: entity.summary
       };
 
-      nock(this.client.apiHostname)
-        .post(`/appdata/${this.client.appKey}/${collection}`, entity)
+      nock(client.apiHostname)
+        .post(`/appdata/${client.appKey}/${collection}`, entity)
         .reply(201, reply);
 
       return store.create(entity)
@@ -242,8 +281,8 @@ describe('NetworkStore', () => {
         summary: randomString(),
       };
 
-      nock(this.client.apiHostname)
-        .post(`/appdata/${this.client.appKey}/${collection}`, entity)
+      nock(client.apiHostname)
+        .post(`/appdata/${client.appKey}/${collection}`, entity)
         .reply(201, entity);
 
       return store.create(entity)
@@ -309,8 +348,8 @@ describe('NetworkStore', () => {
         author: randomString(),
         summary: randomString(),
       };
-      nock(this.client.apiHostname)
-        .put(`/appdata/${this.client.appKey}/${collection}/${entity._id}`, entity)
+      nock(client.apiHostname)
+        .put(`/appdata/${client.appKey}/${collection}/${entity._id}`, entity)
         .reply(200, entity);
 
       return store.update(entity)
@@ -368,8 +407,8 @@ describe('NetworkStore', () => {
     });
 
     it('should throw a ServerError', () => {
-      nock(this.client.apiHostname)
-        .delete(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname)
+        .delete(`/appdata/${client.appKey}/${collection}`)
         .reply(500);
 
       const store = new NetworkStore(collection);
@@ -383,8 +422,8 @@ describe('NetworkStore', () => {
     it('should remove all entities from the cache', () => {
       const reply = { count: 2 };
 
-      nock(this.client.apiHostname)
-        .delete(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname)
+        .delete(`/appdata/${client.appKey}/${collection}`)
         .reply(200, reply);
 
       const store = new NetworkStore(collection);
@@ -400,8 +439,8 @@ describe('NetworkStore', () => {
       const store = new NetworkStore(collection);
       const _id = randomString();
 
-      nock(this.client.apiHostname)
-        .delete(`/appdata/${this.client.appKey}/${collection}/${_id}`)
+      nock(client.apiHostname)
+        .delete(`/appdata/${client.appKey}/${collection}/${_id}`)
         .reply(404);
 
       return store.removeById(_id)
@@ -415,8 +454,8 @@ describe('NetworkStore', () => {
       const _id = randomString();
       const reply = { count: 1 };
 
-      nock(this.client.apiHostname)
-        .delete(`/appdata/${this.client.appKey}/${collection}/${_id}`)
+      nock(client.apiHostname)
+        .delete(`/appdata/${client.appKey}/${collection}/${_id}`)
         .reply(200, reply);
 
       return store.removeById(_id)
@@ -426,41 +465,41 @@ describe('NetworkStore', () => {
     });
   });
 
-  describe('when working with live service', () => {
-    const path = '../../../src/datastore/src/networkstore';
-    const managerMock = {
-      subscribeCollection: () => { },
-      unsubscribeCollection: () => { }
-    };
-    const requireMocks = {
-      '../../live': { getLiveCollectionManager: () => managerMock }
-    };
+  // describe('when working with live service', () => {
+  //   const path = '../src/datastore/networkstore';
+  //   const managerMock = {
+  //     subscribeCollection: () => { },
+  //     unsubscribeCollection: () => { }
+  //   };
+  //   const requireMocks = {
+  //     '../../live': { getLiveCollectionManager: () => managerMock }
+  //   };
 
-    /** @type {NetworkStore} */
-    let proxiedStore;
+  //   /** @type {NetworkStore} */
+  //   let proxiedStore;
 
-    beforeEach(() => {
-      const ProxiedNetworkStore = mockRequiresIn(__dirname, path, requireMocks, 'default');
-      proxiedStore = new ProxiedNetworkStore(collection);
-    });
+  //   beforeEach(() => {
+  //     const ProxiedNetworkStore = mockRequiresIn(__dirname, path, requireMocks, 'default');
+  //     proxiedStore = new ProxiedNetworkStore(collection);
+  //   });
 
-    afterEach(() => expect.restoreSpies());
+  //   afterEach(() => expect.restoreSpies());
 
-    describe('subscribe()', () => {
-      it('should call subscribeCollection() method of LiveCollectionManager class', () => {
-        const spy = expect.spyOn(managerMock, 'subscribeCollection');
-        const handler = { onMessage: () => { } };
-        proxiedStore.subscribe(handler);
-        expect(spy).toHaveBeenCalledWith(collection, handler);
-      });
-    });
+  //   describe('subscribe()', () => {
+  //     it('should call subscribeCollection() method of LiveCollectionManager class', () => {
+  //       const spy = expect.spyOn(managerMock, 'subscribeCollection');
+  //       const handler = { onMessage: () => { } };
+  //       proxiedStore.subscribe(handler);
+  //       expect(spy).toHaveBeenCalledWith(collection, handler);
+  //     });
+  //   });
 
-    describe('unsubscribe()', () => {
-      it('should call unsubscribeCollection() method of LiveCollectionManager class', () => {
-        const spy = expect.spyOn(managerMock, 'unsubscribeCollection');
-        proxiedStore.unsubscribe();
-        expect(spy).toHaveBeenCalledWith(collection);
-      });
-    });
-  });
+  //   describe('unsubscribe()', () => {
+  //     it('should call unsubscribeCollection() method of LiveCollectionManager class', () => {
+  //       const spy = expect.spyOn(managerMock, 'unsubscribeCollection');
+  //       proxiedStore.unsubscribe();
+  //       expect(spy).toHaveBeenCalledWith(collection);
+  //     });
+  //   });
+  // });
 });

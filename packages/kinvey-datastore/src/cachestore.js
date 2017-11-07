@@ -766,10 +766,18 @@ exports.CacheStore = class CacheStore extends NetworkStore {
           return Promise.all(map(entities, (entity) => {
             return Promise.resolve(entity)
               .then((entity) => {
-                const query = new Query();
-                query.equalTo('_id', entity._id);
-                return this.clearSync(query, options)
-                  .then(() => entity);
+                const metadata = new Metadata(entity);
+
+                // Clear any pending sync items if the entity
+                // was created locally
+                if (metadata.isLocal()) {
+                  const query = new Query();
+                  query.equalTo('_id', entity._id);
+                  return this.clearSync(query, options)
+                    .then(() => entity);
+                }
+
+                return entity;
               })
               .then((entity) => {
                 // Remove from cache

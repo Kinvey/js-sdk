@@ -3,27 +3,69 @@ const { Aggregation } = require('kinvey-aggregation');
 const { Query } = require('kinvey-query');
 const { KinveyError, NotFoundError } = require('kinvey-errors');
 const { randomString } = require('kinvey-utils/string');
+const { NetworkRack } = require('kinvey-request');
+const { User } = require('kinvey-user');
+const { Kinvey } = require('kinvey');
+const { HttpMiddleware } = require('./http');
 const nock = require('nock');
 const expect = require('expect');
 const collection = 'Books';
 
 describe('SyncStore', () => {
+  let client;
+
+  before(() => {
+    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+  });
+
+  before(() => {
+    client = Kinvey.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+  });
+
+  before(() => {
+    const username = randomString();
+    const password = randomString();
+    const reply = {
+      _id: randomString(),
+      _kmd: {
+        lmt: new Date().toISOString(),
+        ect: new Date().toISOString(),
+        authtoken: randomString()
+      },
+      username: username,
+      _acl: {
+        creator: randomString()
+      }
+    };
+
+    nock(client.apiHostname)
+      .post(`/user/${client.appKey}/login`, { username: username, password: password })
+      .reply(200, reply);
+
+    return User.login(username, password);
+  });
+
   afterEach(() => {
     const store = new SyncStore(collection);
-    return store.clear();
+    return store.clear()
+      .then(() => {
+        return store.clearSync();
+      });
   });
 
   describe('pathname', () => {
     it(`should equal /appdata/<appkey>/${collection}`, () => {
       const store = new SyncStore(collection);
-      expect(store.pathname).toEqual(`/appdata/${this.client.appKey}/${collection}`);
+      expect(store.pathname).toEqual(`/appdata/${client.appKey}/${collection}`);
     });
 
     it('should not be able to be changed', () => {
-      expect(() => {
-        const store = new SyncStore(collection);
-        store.pathname = `/tests/${collection}`;
-      }).toThrow();
+      const store = new SyncStore(collection);
+      store.pathname = `/tests/${collection}`;
+      expect(store.pathname).toEqual(`/appdata/${client.appKey}/${collection}`);
     });
   });
 
@@ -34,10 +76,9 @@ describe('SyncStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      expect(() => {
-        const store = new SyncStore(collection);
-        store.syncAutomatically = true;
-      }).toThrow();
+      const store = new SyncStore(collection);
+      store.syncAutomatically = true;
+      expect(store.syncAutomatically).toEqual(false);
     });
   });
 
@@ -651,8 +692,8 @@ describe('SyncStore', () => {
 
       return store.save(entity)
         .then(() => {
-          nock(this.client.apiHostname)
-            .put(`/appdata/${this.client.appKey}/${collection}/${entity._id}`, entity)
+          nock(client.apiHostname)
+            .put(`/appdata/${client.appKey}/${collection}/${entity._id}`, entity)
             .reply(200, entity);
 
           return store.push();
@@ -676,8 +717,8 @@ describe('SyncStore', () => {
           return store.save(entity2);
         })
         .then(() => {
-          nock(this.client.apiHostname)
-            .put(`/appdata/${this.client.appKey}/${collection}/${entity1._id}`, entity1)
+          nock(client.apiHostname)
+            .put(`/appdata/${client.appKey}/${collection}/${entity1._id}`, entity1)
             .reply(200, entity1);
 
           const query = new Query().equalTo('_id', entity1._id);
@@ -722,8 +763,8 @@ describe('SyncStore', () => {
 
       return store.save(entity1)
         .then(() => {
-          nock(this.client.apiHostname)
-            .put(`/appdata/${this.client.appKey}/${collection}/${entity1._id}`, entity1)
+          nock(client.apiHostname)
+            .put(`/appdata/${client.appKey}/${collection}/${entity1._id}`, entity1)
             .reply(200, entity1);
 
           nock(store.client.apiHostname)

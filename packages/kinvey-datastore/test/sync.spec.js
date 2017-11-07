@@ -3,6 +3,10 @@ const { SyncStore } = require('../src/syncstore');
 const { SyncError } = require('kinvey-errors');
 const { randomString } = require('kinvey-utils/string');
 const { Query } = require('kinvey-query');
+const { NetworkRack } = require('kinvey-request');
+const { User } = require('kinvey-user');
+const { Kinvey } = require('kinvey');
+const { HttpMiddleware } = require('./http');
 const nock = require('nock');
 const expect = require('expect');
 const chai = require('chai');
@@ -11,6 +15,42 @@ chai.should();
 const collection = 'Books';
 
 describe('Sync', () => {
+  let client;
+
+  before(() => {
+    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+  });
+
+  before(() => {
+    client = Kinvey.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+  });
+
+  before(() => {
+    const username = randomString();
+    const password = randomString();
+    const reply = {
+      _id: randomString(),
+      _kmd: {
+        lmt: new Date().toISOString(),
+        ect: new Date().toISOString(),
+        authtoken: randomString()
+      },
+      username: username,
+      _acl: {
+        creator: randomString()
+      }
+    };
+
+    nock(client.apiHostname)
+      .post(`/user/${client.appKey}/login`, { username: username, password: password })
+      .reply(200, reply);
+
+    return User.login(username, password);
+  });
+
   afterEach(() => {
     const sync = new SyncManager(collection);
     return sync.clear();
@@ -192,7 +232,7 @@ describe('Sync', () => {
       const sync = new SyncManager(collection);
 
       // Kinvey API Response
-      nock(this.client.apiHostname)
+      nock(client.apiHostname)
         .get(sync.backendPathname, () => true)
         .query(true)
         .reply(200, [entity]);

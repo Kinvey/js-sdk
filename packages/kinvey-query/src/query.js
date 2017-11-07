@@ -196,6 +196,10 @@ exports.Query = class Query {
       if (supported) {
         const value = this.filter[key];
         return UNSUPPORTED_CONDITIONS.some((unsupportedConditions) => {
+          if (!value) {
+            return true;
+          }
+
           return !Object.keys(value).some((condition) => {
             return condition === unsupportedConditions;
           });

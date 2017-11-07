@@ -24,7 +24,7 @@ module.exports = {
   MissingRequestParameterError: require('./src/missingRequestParameter'),
   MobileIdentityConnectError: require('./src/mobileIdentityConnect'),
   NetworkConnectionError: require('./src/networkConnection'),
-  NoActiveUserError: require('./src/noActiveuser'),
+  NoActiveUserError: require('./src/noActiveUser'),
   NoResponseError: require('./src/noResponse'),
   NotFoundError: require('./src/notFound'),
   ParameterValueOutOfRangeError: require('./src/parameterValueOutOfRange'),

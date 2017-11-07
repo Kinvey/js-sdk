@@ -51,7 +51,10 @@ describe('CacheStore', () => {
 
   afterEach(() => {
     const store = new CacheStore(collection);
-    return store.clear();
+    return store.clear()
+      .then(() => {
+        return store.clearSync();
+      });
   });
 
   describe('pathname', () => {
