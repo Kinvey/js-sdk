@@ -1,2 +1,7 @@
-export * from './stream';
-export * from './stream-acl';
+const { Stream } = require('./stream');
+const { StreamACL } = require('./stream-acl');
+
+module.exports = {
+  Stream: Stream,
+  StreamACL: StreamACL
+};

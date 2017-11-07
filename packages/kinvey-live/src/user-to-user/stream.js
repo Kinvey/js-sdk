@@ -1,9 +1,9 @@
-import { KinveyError } from 'kinvey-errors';
-import { Client } from 'kinvey-client';
-import { isNonemptyString } from 'kinvey-utils';
-import { getLiveService } from '../live-service';
-import { KinveyRequest, RequestMethod, StatusCode } from 'kinvey-request';
-import { StreamACL } from './stream-acl';
+const { KinveyError } = require('kinvey-errors');
+const { Client } = require('kinvey-client');
+const { isNonemptyString } = require('kinvey-utils/string');
+const { getLiveService } = require('../live-service');
+const { KinveyRequest, RequestMethod, StatusCode } = require('kinvey-request');
+const { StreamACL } = require('./stream-acl');
 
 /**
  * @typedef MessageReceiver
@@ -16,7 +16,7 @@ import { StreamACL } from './stream-acl';
  * A Stream, created in the backend
  * @class Stream
  */
-export class Stream {
+exports.Stream = class Stream {
   constructor(name) {
     this.name = name;
     this._client = Client.sharedInstance();

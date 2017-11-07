@@ -1,12 +1,11 @@
-import PubNub from 'pubnub';
-import isFunction from 'lodash/isFunction';
-import extend from 'lodash/extend';
-
-import { Client } from 'kinvey-client';
-import { KinveyRequest, RequestMethod, Response } from 'kinvey-request';
-import { KinveyError, ActiveUserError } from 'kinvey-errors';
-import { isNonemptyString } from 'kinvey-utils';
-import { PubNubListener } from './pubnub-listener';
+const PubNub = require('pubnub');
+const isFunction = require('lodash/isFunction');
+const extend = require('lodash/extend');
+const { Client } = require('kinvey-client');
+const { KinveyRequest, RequestMethod, Response } = require('kinvey-request');
+const { KinveyError, ActiveUserError } = require('kinvey-errors');
+const { isNonemptyString } = require('kinvey-utils/string');
+const { PubNubListener } = require('./pubnub-listener');
 
 /**
  * @typedef LiveServiceReceiver
@@ -19,7 +18,7 @@ import { PubNubListener } from './pubnub-listener';
  * @param {Object} obj
  * @returns {Boolean}
  */
-function isValidReceiver(obj) {
+exports.isValidReceiver = function isValidReceiver(obj) {
   if (!obj) {
     return false;
   }
@@ -27,7 +26,7 @@ function isValidReceiver(obj) {
   return isFunction(onMessage) || isFunction(onError) || isFunction(onStatus);
 }
 
-function isValidChannelName(str) {
+exports.isValidChannelName = function isValidChannelName(str) {
   return isNonemptyString(str);
 }
 
@@ -375,14 +374,9 @@ let liveServiceInstance;
  * @param {Client} client
  * @returns {LiveService}
  */
-export function getLiveService(client) {
+exports.getLiveService = function getLiveService(client) {
   if (!liveServiceInstance) {
     liveServiceInstance = new LiveService(client);
   }
   return liveServiceInstance;
 }
-
-export {
-  isValidChannelName,
-  isValidReceiver
-};

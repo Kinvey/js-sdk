@@ -1,1 +1,1 @@
-export * from './user';
+module.exports = require('./user');

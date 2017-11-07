@@ -1,14 +1,9 @@
-import { Client } from 'kinvey-client';
-import { KinveyError } from 'kinvey-errors';
-import { KinveyRequest, RequestMethod } from 'kinvey-request';
+const { Client } = require('kinvey-client');
+const { KinveyError } = require('kinvey-errors');
+const { KinveyRequest, RequestMethod } = require('kinvey-request');
+const { getLiveService, isValidReceiver, isValidChannelName } = require('../live-service');
 
-import {
-  getLiveService,
-  isValidReceiver,
-  isValidChannelName
-} from '../live-service';
-
-export class LiveCollectionManager {
+exports.LiveCollectionManager = class LiveCollectionManager {
   /**
    * @param {Client} client
    */
@@ -73,7 +68,7 @@ let managerInstance;
 /**
  * @param {Client} client
  */
-export function getLiveCollectionManager(client) {
+exports.getLiveCollectionManager = function getLiveCollectionManager(client) {
   if (!managerInstance) {
     managerInstance = new LiveCollectionManager(client);
   }

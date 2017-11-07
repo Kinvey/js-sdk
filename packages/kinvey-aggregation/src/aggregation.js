@@ -5,13 +5,10 @@ const isObject = require('lodash/isObject');
 const isFunction = require('lodash/isFunction');
 const cloneDeep = require('lodash/cloneDeep');
 const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils');
+const { isDefined } = require('kinvey-utils/object');
 const { Query } = require('kinvey-query');
 
-/**
- * @private
- */
-exports.Aggregation = class {
+exports.Aggregation = class Aggregation {
   constructor(options) {
     options = assign({
       query: null,

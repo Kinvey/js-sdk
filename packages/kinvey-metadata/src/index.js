@@ -1,1 +1,1 @@
-export * from './metadata';
+module.exports = require('./metadata');

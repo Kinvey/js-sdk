@@ -1,6 +1,6 @@
 const { Promise } = require('es6-promise');
 const { KinveyErorr } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils');
+const { isDefined } = require('kinvey-utils/object');
 const { Client } = require('kinvey-client');
 const { User } = require('kinvey-user');
 const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');

@@ -3,7 +3,8 @@ const { CacheRequest, RequestMethod } = require('kinvey-request');
 const { KinveyError } = require('kinvey-errors');
 const { Query } = require('kinvey-query');
 const { Aggregation } = require('kinvey-aggregation');
-const { KinveyObservable, isDefined } = require('kinvey-utils');
+const { isDefined } = require('kinvey-utils/object');
+const { KinveyObservable } = require('kinvey-observable');
 const { CacheStore } = require('./cachestore');
 
 /**

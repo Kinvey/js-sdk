@@ -1,1 +1,1 @@
-export * from './live-collection-manager';
+module.exports = require('./live-collection-manager');

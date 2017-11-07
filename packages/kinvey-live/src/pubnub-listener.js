@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+const { EventEmitter } = require('events');
 
 /**
  * @typedef PubNubMessage
@@ -34,7 +34,7 @@ import { EventEmitter } from 'events';
 const statusPrefix = 'status:';
 const unclassifiedEvents = 'pubNubEventsNotRouted';
 
-export class PubNubListener extends EventEmitter {
+exports.PubNubListener = class PubNubListener extends EventEmitter {
 
   static get statusPrefix() {
     return statusPrefix;

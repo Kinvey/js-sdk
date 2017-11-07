@@ -1,8 +1,7 @@
-import isArray from 'lodash/isArray';
-import every from 'lodash/every';
-
-import { KinveyError } from 'kinvey-errors';
-import { isNonemptyString } from 'kinvey-utils';
+const isArray = require('lodash/isArray');
+const every = require('lodash/every');
+const { KinveyError } = require('kinvey-errors');
+const { isNonemptyString } = require('kinvey-utils/string');
 
 const invalidValueMsg = 'Invalid ACL object value';
 
@@ -13,7 +12,7 @@ const invalidValueMsg = 'Invalid ACL object value';
  * @property {{publish?: string[], subscribe?: string[]}} [groups]
  */
 
-export class StreamACL {
+exports.StreamACL = class StreamACL {
   constructor(obj) {
     this.publishers = [];
     this.subscribers = [];

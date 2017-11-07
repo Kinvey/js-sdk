@@ -2,7 +2,7 @@
   "private": true,
   "version": "3.9.2",
   "name": "kinvey-acl",
-  "main": "index.js",
+  "main": "src/index.js",
   "dependencies": {
     "kinvey-errors": "3.9.2",
     "kinvey-utils": "3.9.2",

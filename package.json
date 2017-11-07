@@ -2,19 +2,13 @@
   "private": true,
   "license": "Apache-2.0",
   "author": "Kinvey, Inc.",
+  "scripts": {
+    "test": "lerna run --parallel test"
+  },
   "workspaces": [
     "packages/*"
   ],
-  "scripts": {
-    "test": "mocha -s 250 packages/**/*.spec.js"
-  },
-  "devDependencies": {
-    "babel-preset-env": "1.6.0",
-    "babel-register": "6.26.0",
-    "chai": "4.1.2",
-    "chai-as-promised": "7.1.1",
-    "mocha": "4.0.1",
-    "sinon": "4.0.1",
-    "sinon-chai": "2.14.0"
+  "dependencies": {
+    "lerna": "^2.5.1"
   }
 }

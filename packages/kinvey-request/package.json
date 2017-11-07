@@ -11,6 +11,7 @@
     "kinvey-utils": "3.9.2",
     "kinvey-aggregation": "3.9.2",
     "kinvey-query": "3.9.2",
+    "kinvey-promise-queue": "3.9.2",
     "lodash": "4.17.4",
     "qs": "6.5.1"
   }

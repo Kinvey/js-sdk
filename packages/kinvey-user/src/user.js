@@ -1,26 +1,25 @@
-import Promise from 'es6-promise';
-import assign from 'lodash/assign';
-import isString from 'lodash/isString';
-import isObject from 'lodash/isObject';
-import isEmpty from 'lodash/isEmpty';
-import url from 'url';
-
-import { Client } from 'kinvey-client';
-import { AuthType, RequestMethod, KinveyRequest } from 'kinvey-request';
-import { KinveyError, NotFoundError, ActiveUserError } from 'kinvey-errors';
-import { DataStore } from 'kinvey-datastore';
-import { MobileIdentityConnect } from 'kinvey-identity';
-import { Log, isDefined } from 'kinvey-utils';
-import { Acl } from 'kinvey-acl';
-import { Metadata } from 'kinvey-metadata';
-import { getLiveService } from 'kinvey-live';
-import { UserStore } from './userstore';
+const Promise = require('es6-promise');
+const assign = require('lodash/assign');
+const isString = require('lodash/isString');
+const isObject = require('lodash/isObject');
+const isEmpty = require('lodash/isEmpty');
+const url = require('url');
+const { Client } = require('kinvey-client');
+const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
+const { KinveyError, NotFoundError, ActiveUserError } = require('kinvey-errors');
+const { DataStore } = require('kinvey-datastore');
+const { Log } = require('kinvey-log');
+const { isDefined } = require('kinvey-utils/object');
+const { Acl } = require('kinvey-acl');
+const { Metadata } = require('kinvey-metadata');
+const { getLiveService } = require('kinvey-live');
+const { UserStore } = require('./userstore');
 
 /**
  * The User class is used to represent a single user on the Kinvey platform.
  * Use the user class to manage the active user lifecycle and perform user operations.
  */
-export class User {
+exports.User = class User {
   /**
    * Create a new instance of a User.
    *

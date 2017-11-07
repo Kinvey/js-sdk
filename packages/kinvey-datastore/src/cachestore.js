@@ -7,12 +7,13 @@ const isArray = require('lodash/isArray');
 const reduce = require('lodash/reduce');
 const map = require('lodash/map');
 const url = require('url');
-const { CacheRequest, AuthType, RequesMethod } = require('kinvey-request');
+const { CacheRequest, AuthType, RequestMethod } = require('kinvey-request');
 const { KinveyError, NotFoundError } = require('kinvey-errors');
 const { Query } = require('kinvey-query');
 const { Aggregation } = require('kinvey-aggregation');
 const { Metadata } = require('kinvey-metadata');
-const { KinveyObservable, isDefined } = require('kinvey-utils');
+const { isDefined } = require('kinvey-utils/object');
+const { KinveyObservable } = require('kinvey-observable');
 const { NetworkStore } = require('./networkstore');
 const { SyncManager } = require('./sync');
 
@@ -765,18 +766,10 @@ exports.CacheStore = class CacheStore extends NetworkStore {
           return Promise.all(map(entities, (entity) => {
             return Promise.resolve(entity)
               .then((entity) => {
-                const metadata = new Metadata(entity);
-
-                // Clear any pending sync items if the entity
-                // was created locally
-                if (metadata.isLocal()) {
-                  const query = new Query();
-                  query.equalTo('_id', entity._id);
-                  return this.clearSync(query, options)
-                    .then(() => entity);
-                }
-
-                return entity;
+                const query = new Query();
+                query.equalTo('_id', entity._id);
+                return this.clearSync(query, options)
+                  .then(() => entity);
               })
               .then((entity) => {
                 // Remove from cache

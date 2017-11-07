@@ -1,43 +1,40 @@
-import CacheRequest from './src/cache';
-import DeltaFetchRequest from './src/deltafetch';
-import Headers from './src/headers';
-import NetworkRequest, { AuthType, KinveyRequest, Properties } from './src/network';
-import Request, { RequestMethod } from './src/request';
-import Response, { KinveyResponse, StatusCode } from './src/response';
-import Rack, { CacheRack, NetworkRack } from './src/rack';
-import Middleware, {
-  CacheMiddleware,
-  HttpMiddleware,
-  MemoryAdapter,
-  ParseMiddleware,
-  SerializeMiddleware,
-  Storage
-} from './src/middleware';
-
-// Export
-export {
-  AuthType,
-  CacheMiddleware,
-  CacheRack,
-  CacheRequest,
-  DeltaFetchRequest,
-  Headers,
-  HttpMiddleware,
-  KinveyRequest,
-  KinveyResponse,
-  MemoryAdapter,
+const { CacheRequest } = require('./cache');
+const { DeltaFetchRequest } = require('./deltafetch');
+const { Headers } = require('./headers');
+const { NetworkRequest, AuthType, KinveyRequest, Properties } = require('./network');
+const { Request, RequestMethod } = require('./request');
+const { Response, KinveyResponse, StatusCode } = require('./response');
+const { Rack, CacheRack, NetworkRack } = require('./rack');
+const {
   Middleware,
-  NetworkRack,
-  NetworkRequest,
+  CacheMiddleware,
+  HttpMiddleware,
+  MemoryAdapter,
   ParseMiddleware,
-  Properties,
-  Rack,
-  RequestMethod,
-  Response,
   SerializeMiddleware,
-  StatusCode,
   Storage
-};
+} = require('./middleware');
 
-// Export default
-export default Request;
+module.exports = {
+  AuthType: AuthType,
+  CacheMiddleware: CacheMiddleware,
+  CacheRack: CacheRack,
+  CacheRequest: CacheRequest,
+  DeltaFetchRequest: DeltaFetchRequest,
+  Headers: Headers,
+  HttpMiddleware: HttpMiddleware,
+  KinveyRequest: KinveyRequest,
+  KinveyResponse: KinveyResponse,
+  MemoryAdapter: MemoryAdapter,
+  Middleware: Middleware,
+  NetworkRack: NetworkRack,
+  NetworkRequest: NetworkRequest,
+  ParseMiddleware: ParseMiddleware,
+  Properties: Properties,
+  Rack: Rack,
+  RequestMethod: RequestMethod,
+  Response: Response,
+  SerializeMiddleware: SerializeMiddleware,
+  StatusCode: StatusCode,
+  Storage: Storage
+};

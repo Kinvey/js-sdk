@@ -6,7 +6,7 @@ const isString = require('lodash/isString');
 const url = require('url');
 const { KinveyRequest, RequestMethod, AuthType, CacheRequest, DeltaFetchRequest } = require('kinvey-request');
 const { SyncError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils');
+const { isDefined } = require('kinvey-utils/object');
 const { Client } = require('kinvey-client');
 const { Query } = require('kinvey-query');
 

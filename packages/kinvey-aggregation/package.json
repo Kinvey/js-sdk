@@ -2,11 +2,21 @@
   "private": true,
   "version": "3.9.2",
   "name": "kinvey-aggregation",
-  "main": "index.js",
+  "main": "src/index.js",
   "dependencies": {
     "kinvey-errors": "3.9.2",
     "kinvey-utils": "3.9.2",
     "kinvey-query": "3.9.2",
     "lodash": "4.17.4"
+  },
+  "devDependencies": {
+    "chai": "4.1.2",
+    "chai-as-promised": "7.1.1",
+    "mocha": "4.0.1",
+    "sinon": "4.0.1",
+    "sinon-chai": "2.14.0"
+  },
+  "scripts": {
+    "test": "mocha -s 250 test/**/*.spec.js"
   }
 }
