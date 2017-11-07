@@ -1,4 +1,4 @@
-const isPlainObject = require('lodash/isPLainObject');
+const isPlainObject = require('lodash/isPlainObject');
 const { KinveyError } = require('kinvey-errors');
 const { isDefined } = require('kinvey-utils/object');
 
