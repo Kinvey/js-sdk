@@ -1,178 +1,349 @@
-import { Acl, Metadata, User } from 'src/entity';
-import { UserMock } from 'test/unit/mocks';
-import { randomString } from 'src/utils';
-import { ActiveUserError, InvalidCredentialsError, KinveyError } from 'src/errors';
-import { CacheStore, SyncStore } from 'src/datastore';
-import Client from 'src/client';
-import Query from 'src/query';
-import expect from 'expect';
-import nock from 'nock';
-import assign from 'lodash/assign';
-import localStorage from 'local-storage';
-import { getLiveService } from 'src/live';
+const { Acl } = require('kinvey-acl');
+const { Metadata } = require('kinvey-metadata');
+const { User } = require('../src');
+const { randomString } = require('kinvey-utils/string');
+const { ActiveUserError, InvalidCredentialsError, KinveyError } = require('kinvey-errors');
+const { CacheStore, SyncStore } = require('kinvey-datastore');
+const { Client } = require('kinvey-client');
+const { Query } = require('kinvey-query');
+const { NetworkRack } = require('kinvey-request');
+const { Kinvey } = require('kinvey');
+const { HttpMiddleware } = require('./http');
+const expect = require('expect');
+const nock = require('nock');
+const assign = require('lodash/assign');
+const localStorage = require('local-storage');
+const { getLiveService } = require('kinvey-live');
 const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
 
-describe('User', function () {
-  describe('constructor', function () {
-    it('should create a user', function () {
+describe('User', () => {
+  let client;
+
+  class UserMock extends User {
+    static getActiveUser(client) {
+      const activeUser = super.getActiveUser(client);
+
+      if (activeUser) {
+        return new UserMock(activeUser.data);
+      }
+
+      return null;
+    }
+
+    login(username, password, options) {
+      const reply = {
+        _id: randomString(),
+        _kmd: {
+          lmt: new Date().toISOString(),
+          ect: new Date().toISOString(),
+          authtoken: randomString()
+        },
+        username: username,
+        _acl: {
+          creator: randomString()
+        }
+      };
+
+      // Setup nock response
+      nock(this.client.apiHostname, { encodedQueryParams: true })
+        .post(`${this.pathname}/login`, { username: username, password: password })
+        .reply(200, reply, {
+          'content-type': 'application/json; charset=utf-8'
+        });
+
+      // Login
+      return super.login(username, password, options);
+    }
+
+    static login(username, password, options) {
+      const user = new UserMock({}, options);
+      return user.login(username, password, options);
+    }
+
+    loginWithMIC(redirectUri, authorizationGrant, options) {
+      return super.logout(options)
+        .then(() => {
+          const tempLoginUriParts = url.parse('https://auth.kinvey.com/oauth/authenticate/f2cb888e651f400e8c05f8da6160bf12');
+          const code = randomString();
+          const token = {
+            access_token: randomString(),
+            token_type: 'bearer',
+            expires_in: 3599,
+            refresh_token: randomString()
+          };
+
+          // API Response
+          nock(this.client.micHostname, { encodedQueryParams: true })
+            .post(
+            '/oauth/auth',
+            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`
+            )
+            .reply(200, {
+              temp_login_uri: tempLoginUriParts.href
+            });
+
+          nock(`${tempLoginUriParts.protocol}//${tempLoginUriParts.host}`, { encodedQueryParams: true })
+            .post(
+            tempLoginUriParts.pathname,
+            `client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&username=${options.username}&password=${options.password}`
+            )
+            .reply(302, null, {
+              Location: `${redirectUri}/?code=${code}`
+            });
+
+          nock(this.client.micHostname, { encodedQueryParams: true })
+            .post(
+            '/oauth/token',
+            `grant_type=authorization_code&client_id=${this.client.appKey}&redirect_uri=${encodeURIComponent(redirectUri)}&code=${code}`
+            )
+            .reply(200, token);
+
+          nock(this.client.apiHostname, { encodedQueryParams: true })
+            .post(`${this.pathname}/login`, { _socialIdentity: { kinveyAuth: token } })
+            .reply(200, {
+              _id: randomString(),
+              _kmd: {
+                lmt: new Date().toISOString(),
+                ect: new Date().toISOString(),
+                authtoken: randomString()
+              },
+              _acl: {
+                creator: randomString()
+              },
+              _socialIdentity: {
+                kinveyAuth: token
+              }
+            });
+
+          return super.loginWithMIC(redirectUri, authorizationGrant, options);
+        });
+    }
+
+    logout(options) {
+      // Setup nock response
+      nock(this.client.apiHostname, { encodedQueryParams: true })
+        .post(`${this.pathname}/_logout`)
+        .reply(204);
+
+      // Logout
+      return super.logout(options);
+    }
+
+    static logout(options = {}) {
+      const user = UserMock.getActiveUser(options.client);
+
+      if (user) {
+        return user.logout(options);
+      }
+
+      return Promise.resolve(null);
+    }
+
+    signup(data, options) {
+      let userData = data;
+
+      if (userData instanceof User) {
+        userData = data.data;
+      }
+
+      const reply = {
+        _id: randomString(),
+        _kmd: {
+          lmt: new Date().toISOString(),
+          ect: new Date().toISOString(),
+          authtoken: randomString()
+        },
+        username: userData ? userData.username : undefined,
+        _acl: {
+          creator: randomString()
+        }
+      };
+
+      // Setup nock response
+      nock(this.client.apiHostname, { encodedQueryParams: true })
+        .post(this.pathname, () => true)
+        .reply(201, reply);
+
+      return super.signup(data, options);
+    }
+
+    static signup(data, options) {
+      const user = new UserMock({}, options);
+      return user.signup(data, options);
+    }
+  }
+
+  before(() => {
+    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+  });
+
+  before(() => {
+    client = Kinvey.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+  });
+
+
+  describe('constructor', () => {
+    it('should create a user', () => {
       const user = new User();
       expect(user).toBeA(User);
     });
 
-    it('should set data', function () {
+    it('should set data', () => {
       const data = { prop: randomString() };
       const user = new User(data);
       expect(user.data).toEqual(data);
     });
 
-    it('should set the client', function () {
+    it('should set the client', () => {
       const client = new Client();
       const user = new User({}, { client: client });
       expect(user.client).toEqual(client);
     });
 
-    it('should set the client to the shared instance if one is not provided', function () {
+    it('should set the client to the shared instance if one is not provided', () => {
       const user = new User();
       expect(user.client).toEqual(Client.sharedInstance());
     });
   });
 
-  describe('_id', function () {
-    it('should return the _id', function () {
+  describe('_id', () => {
+    it('should return the _id', () => {
       const data = { _id: randomString() };
       const user = new User(data);
       expect(user._id).toEqual(data._id);
     });
   });
 
-  describe('_acl', function () {
-    it('should return the _acl', function () {
+  describe('_acl', () => {
+    it('should return the _acl', () => {
       const data = { _acl: { authtoken: randomString() } };
       const user = new User(data);
       expect(user._acl).toEqual(new Acl(data));
     });
 
-    it('should not be able to set the _acl', function () {
-      expect(function () {
-        const user = new User();
-        const data = { _acl: { creator: randomString() } };
-        user._acl = new Acl(data);
-      }).toThrow();
+    it('should not be able to set the _acl', () => {
+      const user = new User();
+      const acl = user._acl;
+      const data = { _acl: { creator: randomString() } };
+      user._acl = new Acl(data);
+      expect(user._acl).toEqual(acl);
     });
   });
 
-  describe('metadata', function () {
-    it('should return the metadata', function () {
+  describe('metadata', () => {
+    it('should return the metadata', () => {
       const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
       const user = new User(data);
       expect(user.metadata).toEqual(new Metadata(data));
     });
 
-    it('should not be able to set the metadata', function () {
-      expect(function () {
-        const user = new User();
-        const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
-        user.metadata = new Metadata(data);
-      }).toThrow();
+    it('should not be able to set the metadata', () => {
+      const user = new User();
+      const metadata = user.metadata;
+      const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+      user.metadata = new Metadata(data);
+      expect(user.metadata).toEqual(metadata);
     });
   });
 
-  describe('_kmd', function () {
-    it('should return the metadata', function () {
+  describe('_kmd', () => {
+    it('should return the metadata', () => {
       const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
       const user = new User(data);
       expect(user._kmd).toEqual(new Metadata(data));
     });
 
-    it('should not be able to set the _kmd', function () {
-      expect(function () {
-        const user = new User();
-        const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
-        user._kmd = new Metadata(data);
-      }).toThrow();
+    it('should not be able to set the _kmd', () => {
+      const user = new User();
+      const kmd = user._kmd;
+      const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+      user._kmd = new Metadata(data);
+      expect(user._kmd).toEqual(kmd);
     });
   });
 
-  describe('_socialIdentity', function () {
-    it('should return the metadata', function () {
+  describe('_socialIdentity', () => {
+    it('should return the metadata', () => {
       const data = { _socialIdentity: { kinvey: {} } };
       const user = new User(data);
       expect(user._socialIdentity).toEqual(data._socialIdentity);
     });
 
-    it('should not be able to set the _socialIdentity', function () {
-      expect(function () {
-        const user = new User();
-        const data = { _socialIdentity: { kinvey: {} } };
-        user._socialIdentity = data._socialIdentity;
-      }).toThrow();
+    it('should not be able to set the _socialIdentity', () => {
+      const user = new User();
+      const socialIdentity = user._socialIdentity;
+      const data = { _socialIdentity: { kinvey: {} } };
+      user._socialIdentity = data._socialIdentity;
+      expect(user._socialIdentity).toEqual(socialIdentity);
     });
   });
 
-  describe('authtoken', function () {
-    it('should return the authtoken', function () {
+  describe('authtoken', () => {
+    it('should return the authtoken', () => {
       const data = { _kmd: { authtoken: randomString() } };
       const user = new User(data);
       expect(user.authtoken).toEqual(new Metadata(data).authtoken);
     });
 
-    it('should not be able to set the authtoken', function () {
-      expect(function () {
-        const user = new User();
-        const data = { _kmd: { authtoken: randomString() } };
-        user.authtoken = new Metadata(data).authtoken;
-      }).toThrow();
+    it('should not be able to set the authtoken', () => {
+      const user = new User();
+      const authtoken = user.authtoken;
+      const data = { _kmd: { authtoken: randomString() } };
+      user.authtoken = new Metadata(data).authtoken;
+      expect(user.authtoken).toEqual(authtoken);
     });
   });
 
-  describe('username', function () {
-    it('should return the username', function () {
+  describe('username', () => {
+    it('should return the username', () => {
       const data = { username: randomString() };
       const user = new User(data);
       expect(user.username).toEqual(data.username);
     });
 
-    it('should not be able to set the username', function () {
-      expect(function () {
-        const user = new User();
-        const data = { username: randomString() };
-        user.username = data.username;
-      }).toThrow();
+    it('should not be able to set the username', () => {
+      const user = new User();
+      const username = user.username;
+      const data = { username: randomString() };
+      user.username = data.username;
+      expect(user.username).toEqual(username);
     });
   });
 
-  describe('email', function () {
-    it('should return the email', function () {
+  describe('email', () => {
+    it('should return the email', () => {
       const data = { email: randomString() };
       const user = new User(data);
       expect(user.email).toEqual(data.email);
     });
 
-    it('should not be able to set the email', function () {
-      expect(function () {
-        const user = new User();
-        const data = { email: randomString() };
-        user.email = data.email;
-      }).toThrow();
+    it('should not be able to set the email', () => {
+      const user = new User();
+      const email = user.email;
+      const data = { email: randomString() };
+      user.email = data.email;
+      expect(user.email).toEqual(email);
     });
   });
 
-  describe('pathname', function () {
-    it('should return the pathname', function () {
+  describe('pathname', () => {
+    it('should return the pathname', () => {
       const user = new User();
       expect(user.pathname).toEqual(`/user/${user.client.appKey}`);
     });
 
-    it('should not be able to set the pathname', function () {
-      expect(function () {
-        const user = new User();
-        user.pathname = 'user';
-      }).toThrow();
+    it('should not be able to set the pathname', () => {
+      const user = new User();
+      user.pathname = 'user';
+      expect(user.pathname).toEqual(`/user/${user.client.appKey}`);
     });
   });
 
-  describe('isActive()', function () {
-    it('should return true', function () {
+  describe('isActive()', () => {
+    it('should return true', () => {
       return UserMock.logout()
         .then(() => {
           return UserMock.login('test', 'test');
@@ -182,32 +353,32 @@ describe('User', function () {
         });
     });
 
-    it('should return false', function () {
+    it('should return false', () => {
       const user = new User();
       expect(user.isActive()).toEqual(false);
     });
   });
 
-  describe('isEmailVerified()', function () {
-    it('should return true', function () {
+  describe('isEmailVerified()', () => {
+    it('should return true', () => {
       const data = { _kmd: { emailVerification: { status: 'confirmed' } } };
       const user = new User(data);
       expect(user.isEmailVerified()).toEqual(true);
     });
 
-    it('should return false', function () {
+    it('should return false', () => {
       const data = { _kmd: { emailVerification: { status: 'unconfirmed' } } };
       const user = new User(data);
       expect(user.isEmailVerified()).toEqual(false);
     });
   });
 
-  describe('login()', function () {
-    beforeEach(function () {
+  describe('login()', () => {
+    beforeEach(() => {
       return UserMock.logout();
     });
 
-    it('should throw an error if an active user already exists', function () {
+    it('should throw an error if an active user already exists', () => {
       return UserMock.login(randomString(), randomString())
         .then(() => {
           return User.login(randomString(), randomString());
@@ -217,7 +388,7 @@ describe('User', function () {
         });
     });
 
-    it('should throw an error if a username is not provided', async function () {
+    it('should throw an error if a username is not provided', async () => {
       try {
         await User.login(null, randomString());
       } catch (error) {
@@ -225,7 +396,7 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if the username is an empty string', async function () {
+    it('should throw an error if the username is an empty string', async () => {
       try {
         await User.login(' ', randomString());
       } catch (error) {
@@ -233,7 +404,7 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if a password is not provided', async function () {
+    it('should throw an error if a password is not provided', async () => {
       try {
         await User.login(randomString());
       } catch (error) {
@@ -241,7 +412,7 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if the password is an empty string', async function () {
+    it('should throw an error if the password is an empty string', async () => {
       try {
         await User.login(randomString(), ' ');
       } catch (error) {
@@ -249,13 +420,13 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if the username and/or password is invalid', function () {
+    it('should throw an error if the username and/or password is invalid', () => {
       const user = new User();
       const username = randomString();
       const password = randomString();
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
+      nock(client.apiHostname, { encodedQueryParams: true })
         .post(`${user.pathname}/login`, { username: username, password: password })
         .reply(401, {
           name: 'InvalidCredentials',
@@ -270,7 +441,7 @@ describe('User', function () {
         });
     });
 
-    it('should login a user', function () {
+    it('should login a user', () => {
       const user = new User();
       const username = randomString();
       const password = randomString();
@@ -289,7 +460,7 @@ describe('User', function () {
       };
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
+      nock(client.apiHostname, { encodedQueryParams: true })
         .post(`${user.pathname}/login`, { username: username, password: password })
         .reply(200, reply, {
           'content-type': 'application/json; charset=utf-8'
@@ -307,12 +478,12 @@ describe('User', function () {
           expect(user.data.password).toEqual(undefined);
           expect(user.isActive()).toEqual(true);
 
-          const storedUser = this.client.getActiveUser();
+          const storedUser = client.getActiveUser();
           expect(storedUser.password).toEqual(undefined);
         });
     });
 
-    it('should login a user by providing credentials as an object', async function () {
+    it('should login a user by providing credentials as an object', async () => {
       let user = new User();
       const username = randomString();
       const password = randomString();
@@ -330,7 +501,7 @@ describe('User', function () {
       };
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
+      nock(client.apiHostname, { encodedQueryParams: true })
         .post(`${user.pathname}/login`, { username: username, password: password })
         .reply(200, reply, {
           'content-type': 'application/json; charset=utf-8'
@@ -354,7 +525,7 @@ describe('User', function () {
       expect(isActive).toEqual(true);
     });
 
-    it('should login a user with _socialIdentity', async function () {
+    it('should login a user with _socialIdentity', async () => {
       const socialIdentity = { foo: { baz: randomString() }, faa: randomString() };
       let user = new User();
       const reply = {
@@ -376,7 +547,7 @@ describe('User', function () {
       };
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
+      nock(client.apiHostname, { encodedQueryParams: true })
         .post(`${user.pathname}/login`, { _socialIdentity: socialIdentity })
         .reply(200, reply, {
           'content-type': 'application/json; charset=utf-8'
@@ -403,15 +574,15 @@ describe('User', function () {
     });
   });
 
-  describe('logout()', function () {
-    beforeEach(function () {
+  describe('logout()', () => {
+    beforeEach(() => {
       return UserMock.logout()
         .then(() => {
           return UserMock.login(randomString(), randomString());
         });
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
       const entity1 = {
         _id: randomString(),
         title: 'Opela',
@@ -442,8 +613,8 @@ describe('User', function () {
       };
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/foo`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/foo`)
         .reply(200, [entity1, entity2], {
           'content-type': 'application/json'
         });
@@ -456,7 +627,7 @@ describe('User', function () {
         });
     });
 
-    afterEach(function () {
+    afterEach(() => {
       const store = new SyncStore('foo');
       return store.find().toPromise()
         .then((entities) => {
@@ -464,7 +635,7 @@ describe('User', function () {
         });
     });
 
-    afterEach(function () {
+    afterEach(() => {
       const store = new SyncStore('kinvey_sync');
       return store.find().toPromise()
         .then((entities) => {
@@ -472,19 +643,19 @@ describe('User', function () {
         });
     });
 
-    afterEach(function () {
-      const user = localStorage.get(`${this.client.appKey}kinvey_user`);
+    afterEach(() => {
+      const user = localStorage.get(`${client.appKey}kinvey_user`);
       expect(user).toEqual(null);
     });
 
-    it('should logout the active user', function () {
+    it('should logout the active user', () => {
       return UserMock.logout()
         .then(() => {
           expect(User.getActiveUser()).toEqual(null);
         });
     });
 
-    it('should logout when there is not an active user', function () {
+    it('should logout when there is not an active user', () => {
       return UserMock.logout()
         .then(() => {
           expect(User.getActiveUser()).toEqual(null);
@@ -508,82 +679,82 @@ describe('User', function () {
     });
   });
 
-  describe('live service registration management', () => {
-    let activeUser;
-    let liveService;
+  // describe('live service registration management', () => {
+  //   let activeUser;
+  //   let liveService;
 
+  //   beforeEach(() => {
+  //     activeUser = User.getActiveUser();
+  //     liveService = getLiveService(Client.sharedInstance());
+  //   });
+
+  //   afterEach(() => expect.restoreSpies());
+
+  //   describe('registerForLiveService', () => {
+  //     it('should do nothing, if already registered', () => {
+  //       const spy = expect.spyOn(liveService, 'fullInitialization');
+  //       expect.spyOn(liveService, 'isInitialized')
+  //         .andReturn(true);
+
+  //       return activeUser.registerForLiveService()
+  //         .then(() => {
+  //           expect(spy).toNotHaveBeenCalled();
+  //         });
+  //     });
+
+  //     it('should call LiveService\'s fullInitialization() method, if not registered', () => {
+  //       const spy = expect.spyOn(liveService, 'fullInitialization')
+  //         .andReturn(Promise.resolve());
+  //       expect.spyOn(liveService, 'isInitialized')
+  //         .andReturn(false);
+
+  //       return activeUser.registerForLiveService()
+  //         .then(() => {
+  //           expect(spy).toHaveBeenCalledWith(activeUser);
+  //         });
+  //     });
+  //   });
+
+  //   describe('unregisterFromLiveService', () => {
+  //     let activeUser;
+  //     let liveService;
+
+  //     beforeEach(() => {
+  //       activeUser = User.getActiveUser();
+  //       liveService = getLiveService(Client.sharedInstance());
+  //     });
+
+  //     it('should do nothing, if not registered', () => {
+  //       const spy = expect.spyOn(liveService, 'fullUninitialization');
+  //       expect.spyOn(liveService, 'isInitialized')
+  //         .andReturn(false);
+
+  //       return activeUser.unregisterFromLiveService()
+  //         .then(() => {
+  //           expect(spy).toNotHaveBeenCalled();
+  //         });
+  //     });
+
+  //     it('should call LiveService\'s fullUninitialization() method, if registered', () => {
+  //       const spy = expect.spyOn(liveService, 'fullUninitialization')
+  //         .andReturn(Promise.resolve());
+  //       expect.spyOn(liveService, 'isInitialized')
+  //         .andReturn(true);
+
+  //       return activeUser.unregisterFromLiveService()
+  //         .then(() => {
+  //           expect(spy).toHaveBeenCalled();
+  //         });
+  //     });
+  //   });
+  // });
+
+  describe('signup', () => {
     beforeEach(() => {
-      activeUser = User.getActiveUser();
-      liveService = getLiveService(Client.sharedInstance());
-    });
-
-    afterEach(() => expect.restoreSpies());
-
-    describe('registerForLiveService', () => {
-      it('should do nothing, if already registered', () => {
-        const spy = expect.spyOn(liveService, 'fullInitialization');
-        expect.spyOn(liveService, 'isInitialized')
-          .andReturn(true);
-
-        return activeUser.registerForLiveService()
-          .then(() => {
-            expect(spy).toNotHaveBeenCalled();
-          });
-      });
-
-      it('should call LiveService\'s fullInitialization() method, if not registered', () => {
-        const spy = expect.spyOn(liveService, 'fullInitialization')
-          .andReturn(Promise.resolve());
-        expect.spyOn(liveService, 'isInitialized')
-          .andReturn(false);
-
-        return activeUser.registerForLiveService()
-          .then(() => {
-            expect(spy).toHaveBeenCalledWith(activeUser);
-          });
-      });
-    });
-
-    describe('unregisterFromLiveService', () => {
-      let activeUser;
-      let liveService;
-
-      beforeEach(() => {
-        activeUser = User.getActiveUser();
-        liveService = getLiveService(Client.sharedInstance());
-      });
-
-      it('should do nothing, if not registered', () => {
-        const spy = expect.spyOn(liveService, 'fullUninitialization');
-        expect.spyOn(liveService, 'isInitialized')
-          .andReturn(false);
-
-        return activeUser.unregisterFromLiveService()
-          .then(() => {
-            expect(spy).toNotHaveBeenCalled();
-          });
-      });
-
-      it('should call LiveService\'s fullUninitialization() method, if registered', () => {
-        const spy = expect.spyOn(liveService, 'fullUninitialization')
-          .andReturn(Promise.resolve());
-        expect.spyOn(liveService, 'isInitialized')
-          .andReturn(true);
-
-        return activeUser.unregisterFromLiveService()
-          .then(() => {
-            expect(spy).toHaveBeenCalled();
-          });
-      });
-    });
-  });
-
-  describe('signup', function () {
-    beforeEach(function () {
       return UserMock.logout();
     });
 
-    it('should signup and set the user as the active user', function () {
+    it('should signup and set the user as the active user', () => {
       return UserMock.signup({ username: randomString(), password: randomString() })
         .then((user) => {
           expect(user.isActive()).toEqual(true);
@@ -591,7 +762,7 @@ describe('User', function () {
         });
     });
 
-    it('should signup with a user and set the user as the active user', function () {
+    it('should signup with a user and set the user as the active user', () => {
       const user = new UserMock({ username: randomString(), password: randomString() });
       return UserMock.signup(user)
         .then((user) => {
@@ -600,7 +771,7 @@ describe('User', function () {
         });
     });
 
-    it('should signup user and not set the user as the active user', function () {
+    it('should signup user and not set the user as the active user', () => {
       return UserMock.signup({ username: randomString(), password: randomString() }, { state: false })
         .then((user) => {
           expect(user.isActive()).toEqual(false);
@@ -608,7 +779,7 @@ describe('User', function () {
         });
     });
 
-    it('should signup an implicit user and set the user as the active user', function () {
+    it('should signup an implicit user and set the user as the active user', () => {
       return UserMock.signup()
         .then((user) => {
           expect(user.isActive()).toEqual(true);
@@ -616,7 +787,7 @@ describe('User', function () {
         });
     });
 
-    it('should merge the signup data and set the user as the active user', function () {
+    it('should merge the signup data and set the user as the active user', () => {
       const user = new UserMock({ username: randomString(), password: randomString() });
       const username = 'foo';
       return user.signup({ username: username })
@@ -627,7 +798,7 @@ describe('User', function () {
         });
     });
 
-    it('should throw an error if an active user already exists', function () {
+    it('should throw an error if an active user already exists', () => {
       return UserMock.login(randomString(), randomString())
         .then(() => {
           return UserMock.signup({ username: randomString(), password: randomString() });
@@ -637,7 +808,7 @@ describe('User', function () {
         });
     });
 
-    it('should not throw an error with an active user and options.state set to false', function () {
+    it('should not throw an error with an active user and options.state set to false', () => {
       return UserMock.login(randomString(), randomString())
         .then(() => {
           return UserMock.signup({ username: randomString(), password: randomString() }, { state: false });
@@ -649,8 +820,8 @@ describe('User', function () {
     });
   });
 
-  describe('update()', function () {
-    it('should throw an error if the user does not have an _id', function () {
+  describe('update()', () => {
+    it('should throw an error if the user does not have an _id', () => {
       const user = new User({ email: randomString() });
       return user.update({ email: randomString })
         .catch((error) => {
@@ -659,7 +830,7 @@ describe('User', function () {
         });
     });
 
-    it('should update the active user', function () {
+    it('should update the active user', () => {
       return UserMock.logout()
         .then(() => {
           return UserMock.login(randomString(), randomString());
@@ -670,7 +841,7 @@ describe('User', function () {
           const responseData = assign(requestData, { _kmd: { authtoken: randomString() } });
 
           // Kinvey API response
-          nock(this.client.apiHostname, { encodedQueryParams: true })
+          nock(client.apiHostname, { encodedQueryParams: true })
             .put(`${user.pathname}/${user._id}`, requestData)
             .reply(200, responseData);
 
@@ -682,7 +853,7 @@ describe('User', function () {
         });
     });
 
-    it('should update a user and not the active user', function () {
+    it('should update a user and not the active user', () => {
       return UserMock.logout()
         .then(() => {
           return UserMock.login(randomString(), randomString());
@@ -694,7 +865,7 @@ describe('User', function () {
           const responseData = assign(requestData, { _kmd: { authtoken: randomString() } });
 
           // Kinvey API response
-          nock(this.client.apiHostname, { encodedQueryParams: true })
+          nock(client.apiHostname, { encodedQueryParams: true })
             .put(`${user.pathname}/${user._id}`, requestData)
             .reply(200, responseData);
 
@@ -709,8 +880,8 @@ describe('User', function () {
     });
   });
 
-  describe('me()', function () {
-    it('should refresh the users data', function () {
+  describe('me()', () => {
+    it('should refresh the users data', () => {
       const user = new User({ _id: randomString() });
       const reply = {
         _id: user._id,
@@ -728,7 +899,7 @@ describe('User', function () {
         });
     });
 
-    it('should remove any sensitive data', function () {
+    it('should remove any sensitive data', () => {
       const user = new User({ _id: randomString() });
       const reply = {
         _id: user._id,
@@ -748,7 +919,7 @@ describe('User', function () {
         });
     });
 
-    it('should set authtoken if one was not provided and user is active user', function () {
+    it('should set authtoken if one was not provided and user is active user', () => {
       const activeUser = User.getActiveUser();
       const reply = {
         _id: activeUser._id,
@@ -767,7 +938,7 @@ describe('User', function () {
         });
     });
 
-    it('should not set authtoken if one was not provided and user is not active user', function () {
+    it('should not set authtoken if one was not provided and user is not active user', () => {
       const user = new User({ _id: randomString() });
       const reply = {
         _id: user._id,
@@ -786,7 +957,7 @@ describe('User', function () {
         });
     });
 
-    it('should update active user', function () {
+    it('should update active user', () => {
       const user = User.getActiveUser();
       const reply = {
         _id: user._id,
@@ -804,7 +975,7 @@ describe('User', function () {
         });
     });
 
-    it('should not update active user if not active user', function () {
+    it('should not update active user if not active user', () => {
       const user = new User({ _id: randomString() });
       const reply = {
         _id: user._id,
@@ -823,8 +994,8 @@ describe('User', function () {
     });
   });
 
-  describe('getActiveUser()', function () {
-    it('should return the active user', function () {
+  describe('getActiveUser()', () => {
+    it('should return the active user', () => {
       return UserMock.logout()
         .then(() => {
           return UserMock.login(randomString(), randomString());
@@ -834,7 +1005,7 @@ describe('User', function () {
         });
     });
 
-    it('should return null', function () {
+    it('should return null', () => {
       return UserMock.logout()
         .then(() => {
           expect(UserMock.getActiveUser()).toEqual(null);
@@ -842,8 +1013,8 @@ describe('User', function () {
     });
   });
 
-  describe('verifyEmail()', function () {
-    it('should throw an error if a username is not provided', async function () {
+  describe('verifyEmail()', () => {
+    it('should throw an error if a username is not provided', async () => {
       try {
         await User.verifyEmail();
       } catch (error) {
@@ -851,7 +1022,7 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if the provided username is not a string', async function () {
+    it('should throw an error if the provided username is not a string', async () => {
       try {
         await User.verifyEmail({});
       } catch (error) {
@@ -859,12 +1030,12 @@ describe('User', function () {
       }
     });
 
-    it('should verify an email for a user', async function () {
+    it('should verify an email for a user', async () => {
       const username = 'test';
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .post(`/${rpcNamespace}/${this.client.appKey}/${username}/user-email-verification-initiate`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .post(`/${rpcNamespace}/${client.appKey}/${username}/user-email-verification-initiate`)
         .reply(200, {}, {
           'content-type': 'application/json; charset=utf-8'
         });
@@ -874,8 +1045,8 @@ describe('User', function () {
     });
   });
 
-  describe('forgotUsername()', function () {
-    it('should throw an error if an email is not provided', async function () {
+  describe('forgotUsername()', () => {
+    it('should throw an error if an email is not provided', async () => {
       try {
         await User.forgotUsername();
       } catch (error) {
@@ -883,7 +1054,7 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if the provided email is not a string', async function () {
+    it('should throw an error if the provided email is not a string', async () => {
       try {
         await User.forgotUsername({});
       } catch (error) {
@@ -891,12 +1062,12 @@ describe('User', function () {
       }
     });
 
-    it('should retrieve a username for a user', async function () {
+    it('should retrieve a username for a user', async () => {
       const email = 'test@test.com';
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .post(`/${rpcNamespace}/${this.client.appKey}/user-forgot-username`, { email: email })
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .post(`/${rpcNamespace}/${client.appKey}/user-forgot-username`, { email: email })
         .reply(200, {}, {
           'content-type': 'application/json; charset=utf-8'
         });
@@ -906,8 +1077,8 @@ describe('User', function () {
     });
   });
 
-  describe('resetPassword()', function () {
-    it('should throw an error if a username is not provided', async function () {
+  describe('resetPassword()', () => {
+    it('should throw an error if a username is not provided', async () => {
       try {
         await User.resetPassword();
       } catch (error) {
@@ -915,7 +1086,7 @@ describe('User', function () {
       }
     });
 
-    it('should throw an error if the provided username is not a string', async function () {
+    it('should throw an error if the provided username is not a string', async () => {
       try {
         await User.resetPassword({});
       } catch (error) {
@@ -923,12 +1094,12 @@ describe('User', function () {
       }
     });
 
-    it('should reset the password for a user', async function () {
+    it('should reset the password for a user', async () => {
       const username = 'test';
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .post(`/${rpcNamespace}/${this.client.appKey}/${username}/user-password-reset-initiate`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .post(`/${rpcNamespace}/${client.appKey}/${username}/user-password-reset-initiate`)
         .reply(200, {}, {
           'content-type': 'application/json; charset=utf-8'
         });
@@ -938,8 +1109,12 @@ describe('User', function () {
     });
   });
 
-  describe('lookup()', function () {
-    it('should throw an error if the query argument is not an instance of the Query class', function () {
+  describe('lookup()', () => {
+    before(() => {
+      return UserMock.login(randomString(), randomString());
+    });
+
+    it('should throw an error if the query argument is not an instance of the Query class', () => {
       return User.lookup({}, { discover: true })
         .toPromise()
         .catch((error) => {
@@ -947,7 +1122,7 @@ describe('User', function () {
         });
     });
 
-    it('should return an array of users', function () {
+    it('should return an array of users', () => {
       const USERS = [{
         _id: randomString(),
         username: randomString(),
@@ -971,8 +1146,8 @@ describe('User', function () {
       }];
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .post(`/user/${this.client.appKey}/_lookup`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .post(`/user/${client.appKey}/_lookup`)
         .reply(200, USERS);
 
       return User.lookup()
@@ -982,7 +1157,7 @@ describe('User', function () {
         });
     });
 
-    it('should return an array of users matching the query', function () {
+    it('should return an array of users matching the query', () => {
       const USERS = [{
         _id: randomString(),
         username: 'foo',
@@ -1008,8 +1183,8 @@ describe('User', function () {
       query.equalTo('username', 'foo');
 
       // Kinvey API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .post(`/user/${this.client.appKey}/_lookup`, query.toPlainObject().filter)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .post(`/user/${client.appKey}/_lookup`, query.toPlainObject().filter)
         .reply(200, USERS);
 
       return User.lookup(query)
@@ -1024,26 +1199,30 @@ describe('User', function () {
     });
   });
 
-  describe('remove()', function () {
-    it('should throw a KinveyError if an id is not provided', function () {
+  describe('remove()', () => {
+    before(() => {
+      nock.cleanAll();
+    });
+
+    it('should throw a KinveyError if an id is not provided', () => {
       return User.remove()
         .catch((error) => {
           expect(error).toBeA(KinveyError);
         });
     });
 
-    it('should throw a KinveyError if an id is not a string', function () {
+    it('should throw a KinveyError if an id is not a string', () => {
       return User.remove(1)
         .catch((error) => {
           expect(error).toBeA(KinveyError);
         });
     });
 
-    it('should remove the user that matches the id argument', function () {
+    it('should remove the user that matches the id argument', () => {
       // Remove the user
       const user = new User({ _id: randomString(), email: randomString() });
 
-      nock(this.client.apiHostname)
+      nock(client.apiHostname)
         .delete(`${user.pathname}/${user._id}`)
         .reply(204);
 
@@ -1053,11 +1232,11 @@ describe('User', function () {
         });
     });
 
-    it('should remove the user that matches the id argument permanently', function () {
+    it('should remove the user that matches the id argument permanently', () => {
       // Remove the user
       const user = new User({ _id: randomString(), email: randomString() });
 
-      nock(this.client.apiHostname, { encodedQueryParams: true })
+      nock(client.apiHostname, { encodedQueryParams: true })
         .delete(`${user.pathname}/${user._id}`)
         .query({ hard: true })
         .reply(204);
