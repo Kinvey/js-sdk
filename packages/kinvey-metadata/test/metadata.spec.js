@@ -1,25 +1,25 @@
-import { Metadata } from 'src/entity';
-import { randomString } from 'src/utils';
-import { KinveyError } from 'src/errors';
-import expect from 'expect';
+const { Metadata } = require('../src');
+const { randomString } = require('kinvey-utils/string');
+const { KinveyError } = require('kinvey-errors');
+const expect = require('expect');
 
-describe('Metadata', function() {
-  describe('constructor', function() {
-    it('should throw an error if an entity is not provided', function() {
+describe('Metadata', () => {
+  describe('constructor', () => {
+    it('should throw an error if an entity is not provided', () => {
       expect(() => {
         const metadata = new Metadata();
         return metadata;
       }).toThrow(KinveyError, /entity argument must be an object/);
     });
 
-    it('should create an empty metadata when the entity does not contain an _kmd property', function() {
+    it('should create an empty metadata when the entity does not contain an _kmd property', () => {
       const entity = {};
       const metadata = new Metadata(entity);
       expect(metadata.toPlainObject()).toEqual({});
       expect(entity._kmd).toEqual({});
     });
 
-    it('should use the _kmd property on the entity', function() {
+    it('should use the _kmd property on the entity', () => {
       const kmdProp = { lmt: randomString() };
       const entity = { _kmd: kmdProp };
       const metadata = new Metadata(entity);
@@ -28,13 +28,13 @@ describe('Metadata', function() {
     });
   });
 
-  describe('createdAt', function() {
-    it('should return undefined for entity create time', function() {
+  describe('createdAt', () => {
+    it('should return undefined for entity create time', () => {
       const metadata = new Metadata({ _kmd: {} });
       expect(metadata.createdAt).toEqual(undefined);
     });
 
-    it('should return a Date for entity create time', function() {
+    it('should return a Date for entity create time', () => {
       const ect = new Date().toISOString();
       const metadata = new Metadata({ _kmd: { ect: ect } });
       expect(metadata.createdAt).toBeA(Date);
@@ -42,13 +42,13 @@ describe('Metadata', function() {
     });
   });
 
-  describe('ect', function() {
-    it('should return undefined for entity create time', function() {
+  describe('ect', () => {
+    it('should return undefined for entity create time', () => {
       const metadata = new Metadata({ _kmd: {} });
       expect(metadata.ect).toEqual(undefined);
     });
 
-    it('should return a Date for entity create time', function() {
+    it('should return a Date for entity create time', () => {
       const ect = new Date().toISOString();
       const metadata = new Metadata({ _kmd: { ect: ect } });
       expect(metadata.ect).toBeA(Date);
@@ -56,26 +56,26 @@ describe('Metadata', function() {
     });
   });
 
-  describe('emailVerification', function() {
-    it('should return undefined', function() {
+  describe('emailVerification', () => {
+    it('should return undefined', () => {
       const metadata = new Metadata({ _kmd: {} });
       expect(metadata.emailVerification).toEqual(undefined);
     });
 
-    it('should return emailVerification.status value', function() {
+    it('should return emailVerification.status value', () => {
       const emailVerificationStatus = 'Verified';
       const metadata = new Metadata({ _kmd: { emailVerification: { status: emailVerificationStatus } } });
       expect(metadata.emailVerification).toEqual(emailVerificationStatus);
     });
   });
 
-  describe('lastModified', function() {
-    it('should return undefined for entity create time', function() {
+  describe('lastModified', () => {
+    it('should return undefined for entity create time', () => {
       const metadata = new Metadata({ _kmd: {} });
       expect(metadata.lastModified).toEqual(undefined);
     });
 
-    it('should return a Date for entity create time', function() {
+    it('should return a Date for entity create time', () => {
       const lmt = new Date().toISOString();
       const metadata = new Metadata({ _kmd: { lmt: lmt } });
       expect(metadata.lastModified).toBeA(Date);
@@ -83,13 +83,13 @@ describe('Metadata', function() {
     });
   });
 
-  describe('lmt', function() {
-    it('should return undefined for entity create time', function() {
+  describe('lmt', () => {
+    it('should return undefined for entity create time', () => {
       const metadata = new Metadata({ _kmd: {} });
       expect(metadata.lmt).toEqual(undefined);
     });
 
-    it('should return a Date for entity create time', function() {
+    it('should return a Date for entity create time', () => {
       const lmt = new Date().toISOString();
       const metadata = new Metadata({ _kmd: { lmt: lmt } });
       expect(metadata.lmt).toBeA(Date);
@@ -97,33 +97,33 @@ describe('Metadata', function() {
     });
   });
 
-  describe('authtoken', function() {
-    it('should return undefined', function() {
+  describe('authtoken', () => {
+    it('should return undefined', () => {
       const metadata = new Metadata({ _kmd: {} });
       expect(metadata.authtoken).toEqual(undefined);
     });
 
-    it('should return authtoken value', function() {
+    it('should return authtoken value', () => {
       const authtoken = randomString();
       const metadata = new Metadata({ _kmd: { authtoken: authtoken } });
       expect(metadata.authtoken).toEqual(authtoken);
     });
   });
 
-  describe('isLocal()', function() {
-    it('should return false', function() {
+  describe('isLocal()', () => {
+    it('should return false', () => {
       const metadata = new Metadata({ _kmd: { local: false } });
       expect(metadata.isLocal()).toEqual(false);
     });
 
-    it('should return true', function() {
+    it('should return true', () => {
       const metadata = new Metadata({ _kmd: { local: true } });
       expect(metadata.isLocal()).toEqual(true);
     });
   });
 
-  describe('toPlainObject()', function() {
-    it('should return object', function() {
+  describe('toPlainObject()', () => {
+    it('should return object', () => {
       const kmd = {
         local: false,
         authtoken: randomString(),

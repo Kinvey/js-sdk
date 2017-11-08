@@ -7,5 +7,12 @@
     "kinvey-errors": "3.9.2",
     "kinvey-utils": "3.9.2",
     "lodash": "4.17.4"
+  },
+  "devDependencies": {
+    "expect": "1.20.2",
+    "mocha": "4.0.1"
+  },
+  "scripts": {
+    "test": "mocha -s 250 test/**/*.spec.js"
   }
 }
