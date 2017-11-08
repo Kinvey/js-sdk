@@ -6,7 +6,9 @@ const isNumber = require('lodash/isNumber');
 const url = require('url');
 const { NetworkRequest, KinveyRequest, AuthType, RequestMethod, Headers } = require('kinvey-request');
 const { KinveyError } = require('kinvey-errors');
-const { KinveyObservable, Log, isDefined } = require('kinvey-utils');
+const { KinveyObservable } = require('kinvey-observable');
+const { Log } = require('kinvey-log');
+const { isDefined } = require('kinvey-utils/object');
 const { Query } = require('kinvey-query');
 const { NetworkStore } = require('kinvey-datastore');
 
@@ -23,7 +25,7 @@ function getStartIndex(rangeHeader, max) {
 /**
  * The FileStore class is used to find, save, update, remove, count and group files.
  */
-exports.FileStore = class FileStore extends NetworkStore {
+class FileStore extends NetworkStore {
   /**
    * @private
    * The pathname for the store.

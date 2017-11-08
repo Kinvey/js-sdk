@@ -1,52 +1,86 @@
-import fs from 'fs';
-import path from 'path';
-import nock from 'nock';
-import expect from 'expect';
-import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-import { FileStore } from 'src/datastore';
-import { KinveyError, NotFoundError, ServerError } from 'src/errors';
-import { randomString } from 'src/utils';
-import Query from 'src/query';
+const fs = require('fs');
+const path = require('path');
+const nock = require('nock');
+const expect = require('expect');
+const chai = require('chai');
+const { Files } = require('../src');
+const { KinveyError, NotFoundError, ServerError } = require('kinvey-errors');
+const { randomString } = require('kinvey-utils/string');
+const { Query } = require('kinvey-query');
+const { NetworkRack } = require('kinvey-request');
+const { User } = require('kinvey-user');
+const { Kinvey } = require('kinvey');
+const { HttpMiddleware } = require('./http');
 
-chai.use(chaiAsPromised);
+chai.use(require('chai-as-promised'));
 chai.should();
 
-describe('FileStore', function() {
-  describe('pathname', function() {
-    it('should equal /blob/<appkey>', function() {
-      const store = new FileStore();
-      expect(store.pathname).toEqual(`/blob/${store.client.appKey}`);
-    });
+describe('FileStore', () => {
+  let client;
 
-    it('should not be able to be changed', function() {
-      expect(() => {
-        const store = new FileStore();
-        store.pathname = '/foo';
-      }).toThrow();
+  before(() => {
+    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+  });
+
+  before(() => {
+    client = Kinvey.init({
+      appKey: randomString(),
+      appSecret: randomString()
     });
   });
 
-  describe('find()', function() {
-    it('should find the files', function() {
-      const store = new FileStore();
+  before(() => {
+    const username = randomString();
+    const password = randomString();
+    const reply = {
+      _id: randomString(),
+      _kmd: {
+        lmt: new Date().toISOString(),
+        ect: new Date().toISOString(),
+        authtoken: randomString()
+      },
+      username: username,
+      _acl: {
+        creator: randomString()
+      }
+    };
+
+    nock(client.apiHostname)
+      .post(`/user/${client.appKey}/login`, { username: username, password: password })
+      .reply(200, reply);
+
+    return User.login(username, password);
+  });
+
+  describe('pathname', () => {
+    it('should equal /blob/<appkey>', () => {
+      expect(Files.pathname).toEqual(`/blob/${Files.client.appKey}`);
+    });
+
+    it('should not be able to be changed', () => {
+      Files.pathname = '/foo';
+      expect(Files.pathname).toEqual(`/blob/${Files.client.appKey}`);
+    });
+  });
+
+  describe('find()', () => {
+    it('should find the files', () => {
       const file1 = { _id: randomString() };
       const file2 = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true })
         .reply(200, [file1, file2]);
 
-      return store.find()
+      return Files.find()
         .then((files) => {
           expect(files).toEqual([file1, file2]);
         });
     });
 
-    it('should throw an error if the query argument is not an instance of the Query class', function() {
-      const store = new FileStore();
-      store.find({})
+    it('should throw an error if the query argument is not an instance of the Query class', () => {
+      Files.find({})
         .catch((error) => {
           expect(error).toBeA(KinveyError);
           expect(error.message).toEqual('Invalid query. It must be an instance of the Query class.');
@@ -56,126 +90,118 @@ describe('FileStore', function() {
         });
     });
 
-    it('should find the files that match the query', function() {
-      const store = new FileStore();
+    it('should find the files that match the query', () => {
       const file = { _id: randomString() };
       const query = new Query();
       query.equalTo('_id', file._id);
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true, query: JSON.stringify({ _id: file._id }) })
         .reply(200, [file]);
 
-      return store.find(query)
+      return Files.find(query)
         .then((files) => {
           expect(files).toEqual([file]);
         });
     });
 
-    it('should set tls to true by default', function() {
-      const store = new FileStore();
+    it('should set tls to true by default', () => {
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true })
         .reply(200, [file]);
 
-      return store.find()
+      return Files.find()
         .then((files) => {
           expect(files).toEqual([file]);
         });
     });
 
-    it('should set tls to false', function() {
-      const store = new FileStore();
+    it('should set tls to false', () => {
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: false })
         .reply(200, [file]);
 
-      return store.find(null, { tls: false })
+      return Files.find(null, { tls: false })
         .then((files) => {
           expect(files).toEqual([file]);
         });
     });
 
-    it('should not set ttl if it is not a number', function() {
-      const store = new FileStore();
+    it('should not set ttl if it is not a number', () => {
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true })
         .reply(200, [file]);
 
-      return store.find(null, { ttl: {} })
+      return Files.find(null, { ttl: {} })
         .then((files) => {
           expect(files).toEqual([file]);
         });
     });
 
-    it('should set ttl to 10 seconds', function() {
-      const store = new FileStore();
+    it('should set ttl to 10 seconds', () => {
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true, ttl_in_seconds: 10 })
         .reply(200, [file]);
 
-      return store.find(null, { ttl: 10 })
+      return Files.find(null, { ttl: 10 })
         .then((files) => {
           expect(files).toEqual([file]);
         });
     });
 
-    it('should parse ttl to an int', function() {
-      const store = new FileStore();
+    it('should parse ttl to an int', () => {
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true, ttl_in_seconds: 10 })
         .reply(200, [file]);
 
-      return store.find(null, { ttl: 10.5 })
+      return Files.find(null, { ttl: 10.5 })
         .then((files) => {
           expect(files).toEqual([file]);
         });
     });
 
-    it('should download the files', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'downloadByUrl');
+    it('should download the files', () => {
+      const spy = expect.spyOn(Files, 'downloadByUrl');
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true })
         .reply(200, [file]);
 
-      return store.find(null, { download: true })
+      return Files.find(null, { download: true })
         .then(() => {
           expect(spy).toHaveBeenCalled();
           expect.restoreSpies();
         });
     });
 
-    it('should not download the files', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'downloadByUrl');
+    it('should not download the files', () => {
+      const spy = expect.spyOn(Files, 'downloadByUrl');
       const file = { _id: randomString() };
 
-      nock(this.client.apiHostname)
-        .get(store.pathname)
+      nock(client.apiHostname)
+        .get(Files.pathname)
         .query({ tls: true })
         .reply(200, [file]);
 
-      return store.find(null, { download: false })
+      return Files.find(null, { download: false })
         .then(() => {
           expect(spy).toNotHaveBeenCalled();
           expect.restoreSpies();
@@ -183,14 +209,13 @@ describe('FileStore', function() {
     });
   });
 
-  describe('download()', function() {
-    it('should set tls to true by default', function() {
-      const store = new FileStore();
+  describe('download()', () => {
+    it('should set tls to true by default', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: true })
         .reply(200, fileEntity);
 
@@ -198,19 +223,18 @@ describe('FileStore', function() {
         .get('/')
         .reply(200, file);
 
-      return store.download(fileEntity._id)
+      return Files.download(fileEntity._id)
         .then((response) => {
           expect(response).toEqual(file);
         });
     });
 
-    it('should set tls to false', function() {
-      const store = new FileStore();
+    it('should set tls to false', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: false })
         .reply(200, fileEntity);
 
@@ -218,19 +242,18 @@ describe('FileStore', function() {
         .get('/')
         .reply(200, file);
 
-      return store.download(fileEntity._id, { tls: false })
+      return Files.download(fileEntity._id, { tls: false })
         .then((response) => {
           expect(response).toEqual(file);
         });
     });
 
-    it('should not set ttl if it is not a number', function() {
-      const store = new FileStore();
+    it('should not set ttl if it is not a number', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: true })
         .reply(200, fileEntity);
 
@@ -238,19 +261,18 @@ describe('FileStore', function() {
         .get('/')
         .reply(200, file);
 
-      return store.download(fileEntity._id, { ttl: {} })
+      return Files.download(fileEntity._id, { ttl: {} })
         .then((response) => {
           expect(response).toEqual(file);
         });
     });
 
-    it('should set ttl to 10 seconds', function() {
-      const store = new FileStore();
+    it('should set ttl to 10 seconds', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: true, ttl_in_seconds: 10 })
         .reply(200, fileEntity);
 
@@ -258,19 +280,18 @@ describe('FileStore', function() {
         .get('/')
         .reply(200, file);
 
-      return store.download(fileEntity._id, { ttl: 10 })
+      return Files.download(fileEntity._id, { ttl: 10 })
         .then((response) => {
           expect(response).toEqual(file);
         });
     });
 
-    it('should parse ttl to an int', function() {
-      const store = new FileStore();
+    it('should parse ttl to an int', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: true, ttl_in_seconds: 10 })
         .reply(200, fileEntity);
 
@@ -278,34 +299,32 @@ describe('FileStore', function() {
         .get('/')
         .reply(200, file);
 
-      return store.download(fileEntity._id, { ttl: 10.5 })
+      return Files.download(fileEntity._id, { ttl: 10.5 })
         .then((response) => {
           expect(response).toEqual(file);
         });
     });
 
-    it('should steam the file', function() {
-      const store = new FileStore();
+    it('should steam the file', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: true })
         .reply(200, fileEntity);
 
-      return store.download(fileEntity._id, { stream: true })
+      return Files.download(fileEntity._id, { stream: true })
         .then((entity) => {
           expect(entity).toEqual(fileEntity);
         });
     });
 
-    it('should not stream the file', function() {
-      const store = new FileStore();
+    it('should not stream the file', () => {
       const fileEntity = { _id: randomString(), _downloadURL: 'http://tests.com' };
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
 
-      nock(this.client.apiHostname)
-        .get(`${store.pathname}/${fileEntity._id}`)
+      nock(client.apiHostname)
+        .get(`${Files.pathname}/${fileEntity._id}`)
         .query({ tls: true })
         .reply(200, fileEntity);
 
@@ -313,71 +332,64 @@ describe('FileStore', function() {
         .get('/')
         .reply(200, file);
 
-      return store.download(fileEntity._id, { stream: false })
+      return Files.download(fileEntity._id, { stream: false })
         .then((response) => {
           expect(response).toEqual(file);
         });
     });
   });
 
-  describe('findById()', function() {
-    it('should call download()', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'download');
-      store.findById();
+  describe('findById()', () => {
+    it('should call download()', () => {
+      const spy = expect.spyOn(Files, 'download');
+      Files.findById();
       expect(spy).toHaveBeenCalled();
     });
 
-    it('should call download() with id', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'download');
+    it('should call download() with id', () => {
+      const spy = expect.spyOn(Files, 'download');
       const id = randomString();
-      store.findById(id);
+      Files.findById(id);
       expect(spy).toHaveBeenCalledWith(id, undefined);
     });
 
-    it('should call download() with options', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'download');
+    it('should call download() with options', () => {
+      const spy = expect.spyOn(Files, 'download');
       const options = { foo: randomString() };
-      store.findById(null, options);
+      Files.findById(null, options);
       expect(spy).toHaveBeenCalledWith(null, options);
     });
   });
 
-  describe('stream()', function() {
-    it('should call download()', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'download');
-      store.stream();
+  describe('stream()', () => {
+    it('should call download()', () => {
+      const spy = expect.spyOn(Files, 'download');
+      Files.stream();
       expect(spy).toHaveBeenCalled();
     });
 
-    it('should call download() with id', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'download');
+    it('should call download() with id', () => {
+      const spy = expect.spyOn(Files, 'download');
       const id = randomString();
-      store.stream(id);
+      Files.stream(id);
       expect(spy).toHaveBeenCalledWith(id, { stream: true });
     });
 
-    it('should call download() with options.stream = true if it was set to false', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'download');
-      store.stream(null, { stream: false });
+    it('should call download() with options.stream = true if it was set to false', () => {
+      const spy = expect.spyOn(Files, 'download');
+      Files.stream(null, { stream: false });
       expect(spy).toHaveBeenCalledWith(null, { stream: true });
     });
   });
 
-  describe('upload()', function() {
-    it('should upload a file', function() {
-      const store = new FileStore();
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+  describe('upload()', () => {
+    it('should upload a file', () => {
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
       const fileSize = file.size || file.length;
 
       // Kinvey API response
-      nock(store.client.apiHostname, { encodedQueryParams: true })
-        .post(store.pathname, {
+      nock(Files.client.apiHostname, { encodedQueryParams: true })
+        .post(Files.pathname, {
           _filename: 'kinvey.png',
           _public: true,
           size: fileSize,
@@ -478,7 +490,7 @@ describe('FileStore', function() {
           'content-length': '2503'
         });
 
-      const promise = store.upload(file, {
+      const promise = Files.upload(file, {
         filename: 'kinvey.png',
         public: true,
         mimeType: 'image/png'
@@ -491,14 +503,13 @@ describe('FileStore', function() {
       return promise.should.be.fulfilled;
     });
 
-    it('should resume a file upload when a 308 status code is received', function() {
-      const store = new FileStore();
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+    it('should resume a file upload when a 308 status code is received', () => {
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
       const fileSize = file.size || file.length;
 
       // Kinvey API response
-      nock(store.client.apiHostname, { encodedQueryParams: true })
-        .post(store.pathname, {
+      nock(Files.client.apiHostname, { encodedQueryParams: true })
+        .post(Files.pathname, {
           _filename: 'kinvey.png',
           _public: true,
           size: fileSize,
@@ -619,7 +630,7 @@ describe('FileStore', function() {
           'content-length': '2503'
         });
 
-      const promise = store.upload(file, {
+      const promise = Files.upload(file, {
         filename: 'kinvey.png',
         public: true,
         mimeType: 'image/png'
@@ -631,14 +642,13 @@ describe('FileStore', function() {
       return promise.should.be.fulfilled;
     });
 
-    it('should resume a file upload when a 5xx status code is received', function() {
-      const store = new FileStore();
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+    it('should resume a file upload when a 5xx status code is received', () => {
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
       const fileSize = file.size || file.length;
 
       // Kinvey API response
-      nock(store.client.apiHostname, { encodedQueryParams: true })
-        .post(store.pathname, {
+      nock(Files.client.apiHostname, { encodedQueryParams: true })
+        .post(Files.pathname, {
           _filename: 'kinvey.png',
           _public: true,
           size: fileSize,
@@ -773,7 +783,7 @@ describe('FileStore', function() {
           'content-length': '2503'
         });
 
-      const promise = store.upload(file, {
+      const promise = Files.upload(file, {
         filename: 'kinvey.png',
         public: true,
         mimeType: 'image/png'
@@ -785,17 +795,13 @@ describe('FileStore', function() {
       return promise.should.be.fulfilled;
     });
 
-    it('should fail to upload a file when a 5xx status code is received mutiple times', function() {
-      const store = new FileStore();
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+    it('should fail to upload a file when a 5xx status code is received mutiple times', () => {
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
       const fileSize = file.size || file.length;
 
-      // Disable timeout for this test
-      this.timeout(0);
-
       // Kinvey API response
-      nock(store.client.apiHostname, { encodedQueryParams: true })
-        .post(store.pathname, {
+      nock(Files.client.apiHostname, { encodedQueryParams: true })
+        .post(Files.pathname, {
           _filename: 'kinvey.png',
           _public: true,
           size: fileSize,
@@ -871,7 +877,7 @@ describe('FileStore', function() {
           'x-guploader-uploadid': 'AEnB2UrINxWGypPdSCcTkbOIa7WQOnXKJjsuNvR7uiwsLM_nYqU4BkwjhN3CVZM2Ix7ATZt-cf0oRGhE6e8yd0Dd7YaZKFsK7Q'
         });
 
-      const promise = store.upload(file, {
+      const promise = Files.upload(file, {
         filename: 'kinvey.png',
         public: true,
         mimeType: 'image/png'
@@ -886,14 +892,13 @@ describe('FileStore', function() {
       return promise.should.be.rejected;
     });
 
-    it('should fail to upload a file when a 4xx status code is received', function() {
-      const store = new FileStore();
-      const file = fs.readFileSync(path.resolve(__dirname, '../fixtures/test.png'), 'utf8');
+    it('should fail to upload a file when a 4xx status code is received', () => {
+      const file = fs.readFileSync(path.resolve(__dirname, './test.png'), 'utf8');
       const fileSize = file.size || file.length;
 
       // Kinvey API response
-      nock(store.client.apiHostname, { encodedQueryParams: true })
-        .post(store.pathname, {
+      nock(Files.client.apiHostname, { encodedQueryParams: true })
+        .post(Files.pathname, {
           _filename: 'kinvey.png',
           _public: true,
           size: fileSize,
@@ -968,7 +973,7 @@ describe('FileStore', function() {
           'x-guploader-uploadid': 'AEnB2UrINxWGypPdSCcTkbOIa7WQOnXKJjsuNvR7uiwsLM_nYqU4BkwjhN3CVZM2Ix7ATZt-cf0oRGhE6e8yd0Dd7YaZKFsK7Q'
         });
 
-      const promise = store.upload(file, {
+      const promise = Files.upload(file, {
         filename: 'kinvey.png',
         public: true,
         mimeType: 'image/png'
@@ -984,106 +989,95 @@ describe('FileStore', function() {
     });
   });
 
-  describe('create()', function() {
-    it('should call upload()', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
-      store.create();
+  describe('create()', () => {
+    it('should call upload()', () => {
+      const spy = expect.spyOn(Files, 'upload');
+      Files.create();
       expect(spy).toHaveBeenCalled();
     });
 
-    it('should call upload() with file', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
+    it('should call upload() with file', () => {
+      const spy = expect.spyOn(Files, 'upload');
       const file = randomString();
-      store.create(file);
+      Files.create(file);
       expect(spy).toHaveBeenCalledWith(file, undefined, undefined);
     });
 
-    it('should call upload() with metadata', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
+    it('should call upload() with metadata', () => {
+      const spy = expect.spyOn(Files, 'upload');
       const metadata = randomString();
-      store.create(null, metadata);
+      Files.create(null, metadata);
       expect(spy).toHaveBeenCalledWith(null, metadata, undefined);
     });
 
-    it('should call upload() with options', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
+    it('should call upload() with options', () => {
+      const spy = expect.spyOn(Files, 'upload');
       const options = randomString();
-      store.create(null, null, options);
+      Files.create(null, null, options);
       expect(spy).toHaveBeenCalledWith(null, null, options);
     });
   });
 
-  describe('update()', function() {
-    it('should call upload()', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
-      store.update();
+  describe('update()', () => {
+    it('should call upload()', () => {
+      const spy = expect.spyOn(Files, 'upload');
+      Files.update();
       expect(spy).toHaveBeenCalled();
     });
 
-    it('should call upload() with file', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
+    it('should call upload() with file', () => {
+      const spy = expect.spyOn(Files, 'upload');
       const file = randomString();
-      store.update(file);
+      Files.update(file);
       expect(spy).toHaveBeenCalledWith(file, undefined, undefined);
     });
 
-    it('should call upload() with metadata', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
+    it('should call upload() with metadata', () => {
+      const spy = expect.spyOn(Files, 'upload');
       const metadata = randomString();
-      store.update(null, metadata);
+      Files.update(null, metadata);
       expect(spy).toHaveBeenCalledWith(null, metadata, undefined);
     });
 
-    it('should call upload() with options', function() {
-      const store = new FileStore();
-      const spy = expect.spyOn(store, 'upload');
+    it('should call upload() with options', () => {
+      const spy = expect.spyOn(Files, 'upload');
       const options = randomString();
-      store.update(null, null, options);
+      Files.update(null, null, options);
       expect(spy).toHaveBeenCalledWith(null, null, options);
     });
   });
 
-  describe('remove()', function() {
-    it('should throw an error', function() {
+  describe('remove()', () => {
+    it('should throw an error', () => {
       expect(() => {
-        const store = new FileStore();
-        store.remove();
+        Files.remove();
       }).toThrow();
     });
   });
 
-  describe('removeById()', function() {
-    it('should throw a NotFoundError if the id argument does not exist', function() {
-      const store = new FileStore();
+  describe('removeById()', () => {
+    it('should throw a NotFoundError if the id argument does not exist', () => {
       const _id = randomString();
 
-      nock(this.client.apiHostname)
-        .delete(`${store.pathname}/${_id}`)
+      nock(client.apiHostname)
+        .delete(`${Files.pathname}/${_id}`)
         .reply(404);
 
-      return store.removeById(_id)
+      return Files.removeById(_id)
         .catch((error) => {
           expect(error).toBeA(NotFoundError);
         });
     });
 
-    it('should remove the entity that matches the id argument', function() {
-      const store = new FileStore();
+    it('should remove the entity that matches the id argument', () => {
       const _id = randomString();
       const reply = { count: 1 };
 
-      nock(this.client.apiHostname)
-        .delete(`${store.pathname}/${_id}`)
+      nock(client.apiHostname)
+        .delete(`${Files.pathname}/${_id}`)
         .reply(200, reply);
 
-      return store.removeById(_id)
+      return Files.removeById(_id)
         .then((response) => {
           expect(response).toEqual(reply);
         });
