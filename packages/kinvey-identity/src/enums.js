@@ -7,4 +7,4 @@ const SocialIdentity = {
   MobileIdentityConnect: 'kinveyAuth',
 };
 Object.freeze(SocialIdentity);
-export { SocialIdentity };
+exports.SocialIdentity = SocialIdentity;

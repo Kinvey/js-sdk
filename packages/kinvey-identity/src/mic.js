@@ -1,14 +1,13 @@
-import Promise from 'es6-promise';
-import isString from 'lodash/isString';
-import url from 'url';
-import urljoin from 'url-join';
-
-import { AuthType, RequestMethod, KinveyRequest } from 'kinvey-request';
-import { KinveyError, MobileIdentityConnectError } from 'kinvey-errors';
-import { isDefined } from 'kinvey-utils';
-import CorePopup from './popup';
-import Identity from './identity';
-import { SocialIdentity } from './enums';
+const Promise = require('es6-promise');
+const isString = require('lodash/isString');
+const url = require('url');
+const urljoin = require('url-join');
+const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
+const { KinveyError, MobileIdentityConnectError } = require('kinvey-errors');
+const { isDefined } = require('kinvey-utils/object');
+const { CorePopup } = require('./popup');
+const { Identity } = require('./identity');
+const { SocialIdentity } = require('./enums');
 
 let Popup = CorePopup;
 
@@ -22,12 +21,9 @@ const AuthorizationGrant = {
   AuthorizationCodeAPI: 'AuthorizationCodeAPI'
 };
 Object.freeze(AuthorizationGrant);
-export { AuthorizationGrant };
+exports.AuthorizationGrant = AuthorizationGrant;
 
-/**
- * @private
- */
-export class MobileIdentityConnect extends Identity {
+exports.MobileIdentityConnect = class MobileIdentityConnect extends Identity {
   get identity() {
     return SocialIdentity.MobileIdentityConnect;
   }

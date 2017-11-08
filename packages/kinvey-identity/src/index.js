@@ -1,8 +1,8 @@
-import { SocialIdentity } from './enums';
-import { AuthorizationGrant, MobileIdentityConnect } from './mic';
+const { SocialIdentity } = require('./enums');
+const { AuthorizationGrant, MobileIdentityConnect } = require('./mic');
 
-export {
-  AuthorizationGrant,
-  MobileIdentityConnect,
-  SocialIdentity
+module.exports = {
+  SocialIdentity: SocialIdentity,
+  AuthorizationGrant: AuthorizationGrant,
+  MobileIdentityConnect: MobileIdentityConnect
 };

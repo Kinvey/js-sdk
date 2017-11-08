@@ -9,5 +9,16 @@
     "kinvey-errors": "3.9.2",
     "lodash": "4.17.4",
     "url-join": "2.0.2"
+  },
+  "devDependencies": {
+    "expect": "1.20.2",
+    "kinvey": "3.9.2",
+    "kinvey-request": "3.9.2",
+    "kinvey-user": "3.9.2",
+    "mocha": "4.0.1",
+    "nock": "9.0.28"
+  },
+  "scripts": {
+    "test": "mocha -s 250 test/**/*.spec.js"
   }
 }
