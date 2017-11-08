@@ -1,9 +1,10 @@
 const isNull = require('lodash/isNull');
 const isUndefined = require('lodash/isUndefined');
 
-exports.isDefined = function isDefined(obj) {
+function isDefined(obj) {
   return isUndefined(obj) === false && isNull(obj) === false;
 }
+exports.isDefined = isDefined;
 
 exports.isNumber = function isNumber(num) {
   return !Number.isNaN(parseFloat(num)) && Number.isFinite(num);
