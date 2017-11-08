@@ -1,4 +1,4 @@
-import {
+const {
   APIVersionNotAvailableError,
   APIVersionNotImplementedError,
   AppProblemError,
@@ -26,13 +26,13 @@ import {
   StaleRequestError,
   UserAlreadyExistsError,
   WritesToCollectionDisallowedError
-} from 'src/errors';
-import { KinveyResponse, Response } from 'src/request';
-import expect from 'expect';
+} = require('kinvey-errors');
+const { KinveyResponse, Response } = require('../src');
+const expect = require('expect');
 
-describe('Response', function() {
-  describe('error', function() {
-    it('should return null when the response is a success', function() {
+describe('Response', () => {
+  describe('error', () => {
+    it('should return null when the response is a success', () => {
       const response = new Response({
         statusCode: 200,
         data: {}
@@ -42,7 +42,7 @@ describe('Response', function() {
       expect(error).toEqual(null);
     });
 
-    it('should throw an InsufficientCredentialsError', function() {
+    it('should throw an InsufficientCredentialsError', () => {
       const apiError = {
         name: 'InsufficientCredentialsError',
         message: 'Insufficient Credentials'
@@ -59,7 +59,7 @@ describe('Response', function() {
       expect(error.code).toEqual(401);
     });
 
-    it('should throw a NotFoundError', function() {
+    it('should throw a NotFoundError', () => {
       const apiError = {
         name: 'NotFound',
         message: 'Not Found'
@@ -76,7 +76,7 @@ describe('Response', function() {
       expect(error.code).toEqual(404);
     });
 
-    it('should throw a ServerError', function() {
+    it('should throw a ServerError', () => {
       const apiError = {
         name: 'ServerErrpr',
         message: 'Server Error'
@@ -93,7 +93,7 @@ describe('Response', function() {
       expect(error.code).toEqual(500);
     });
 
-    it('should throw a KinveyError', function() {
+    it('should throw a KinveyError', () => {
       const apiError = {
         name: 'Error',
         message: 'An error occurred.'
@@ -112,9 +112,9 @@ describe('Response', function() {
   });
 });
 
-describe('KinveyResponse', function() {
-  describe('error', function() {
-    it('should return null when the response is a success', function() {
+describe('KinveyResponse', () => {
+  describe('error', () => {
+    it('should return null when the response is a success', () => {
       const response = new KinveyResponse({
         statusCode: 200,
         data: {}
@@ -124,7 +124,7 @@ describe('KinveyResponse', function() {
       expect(error).toEqual(null);
     });
 
-    it('should throw an APIVersionNotAvailableError', function() {
+    it('should throw an APIVersionNotAvailableError', () => {
       const apiError = {
         name: 'APIVersionNotAvailable',
         message: 'This API version is not available for your app. Please retry your request with a supported API version'
@@ -141,7 +141,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw an APIVersionNotImplementedError', function() {
+    it('should throw an APIVersionNotImplementedError', () => {
       const apiError = {
         name: 'APIVersionNotImplemented',
         message: 'This API version is not implemented. Please retry your request with a supported API version'
@@ -158,7 +158,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(501);
     });
 
-    it('should throw an AppProblemError', function() {
+    it('should throw an AppProblemError', () => {
       const apiError = {
         name: 'AppProblem',
         message: 'There is a problem with this app backend that prevents execution of this operation. Please contact support@kinvey.com for assistance'
@@ -175,7 +175,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(403);
     });
 
-    it('should throw a BadRequestError', function() {
+    it('should throw a BadRequestError', () => {
       const apiError = {
         name: 'BadRequest',
         message: 'Unable to understand request'
@@ -192,7 +192,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a BLError', function() {
+    it('should throw a BLError', () => {
       const apiError = {
         name: 'BLRuntimeError',
         message: 'The Business Logic script has a runtime error. See debug message for details',
@@ -211,7 +211,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a BLError', function() {
+    it('should throw a BLError', () => {
       const apiError = {
         name: 'BLSyntaxError',
         message: 'The Business Logic script has a syntax error(s). See debug message for details',
@@ -230,7 +230,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(550);
     });
 
-    it('should throw a BLError', function() {
+    it('should throw a BLError', () => {
       const apiError = {
         name: 'BLTimeoutError',
         message: 'The Business Logic script did not complete in time. See debug message for details',
@@ -249,7 +249,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(550);
     });
 
-    it('should throw a BLError', function() {
+    it('should throw a BLError', () => {
       const apiError = {
         name: 'BLViolationError',
         message: 'The Business Logic script violated a constraint. See debug message for details',
@@ -268,7 +268,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(550);
     });
 
-    it('should throw a BLError', function() {
+    it('should throw a BLError', () => {
       const apiError = {
         name: 'BLInternalError',
         message: 'The Business Logic script did not complete. See debug message for details',
@@ -287,7 +287,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(550);
     });
 
-    it('should throw a CORSDisabledError', function() {
+    it('should throw a CORSDisabledError', () => {
       const apiError = {
         name: 'CORSDisabled',
         message: 'Cross Origin Support is disabled for this application'
@@ -304,7 +304,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a DuplicateEndUsersError', function() {
+    it('should throw a DuplicateEndUsersError', () => {
       const apiError = {
         name: 'DuplicateEndUsers',
         message: 'More than one user registered with this username for this application. Please contact support@kinvey.com for assistance'
@@ -321,7 +321,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(500);
     });
 
-    it('should throw a FeatureUnavailableError', function() {
+    it('should throw a FeatureUnavailableError', () => {
       const apiError = {
         name: 'FeatureUnavailable',
         message: 'Requested functionality is unavailable in this API version'
@@ -338,7 +338,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw an IncompleteRequestBodyError', function() {
+    it('should throw an IncompleteRequestBodyError', () => {
       const apiError = {
         name: 'IncompleteRequestBody',
         message: 'The request body is either missing or incomplete'
@@ -355,7 +355,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw an IndirectCollectionAccessDisallowedError', function() {
+    it('should throw an IndirectCollectionAccessDisallowedError', () => {
       const apiError = {
         name: 'IndirectCollectionAccessDisallowed',
         message: 'Please use the appropriate API to access this collection for this app backend'
@@ -372,7 +372,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(403);
     });
 
-    it('should throw an InsufficientCredentialsError', function() {
+    it('should throw an InsufficientCredentialsError', () => {
       const apiError = {
         name: 'InsufficientCredentials',
         message: 'The credentials used to authenticate this request are not authorized to run this operation. Please retry your request with appropriate credentials'
@@ -389,7 +389,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(401);
     });
 
-    it('should throw an InvalidCredentialsError', function() {
+    it('should throw an InvalidCredentialsError', () => {
       const apiError = {
         name: 'InvalidCredentials',
         message: 'Invalid credentials. Please retry your request with correct credentials'
@@ -406,7 +406,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(401);
     });
 
-    it('should throw an InvalidIdentifierError', function() {
+    it('should throw an InvalidIdentifierError', () => {
       const apiError = {
         name: 'InvalidIdentifier',
         message: 'One of more identifier names in the request has an invalid format'
@@ -423,7 +423,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw an InvalidQuerySyntaxError', function() {
+    it('should throw an InvalidQuerySyntaxError', () => {
       const apiError = {
         name: 'InvalidQuerySyntax',
         message: 'The query string in the request has an invalid syntax'
@@ -440,7 +440,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a JSONParseError', function() {
+    it('should throw a JSONParseError', () => {
       const apiError = {
         name: 'JSONParseError',
         message: 'Unable to parse the JSON in the request'
@@ -457,7 +457,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a KinveyInternalErrorRetry', function() {
+    it('should throw a KinveyInternalErrorRetry', () => {
       const apiError = {
         name: 'KinveyInternalErrorRetry',
         message: 'The Kinvey server encountered an unexpected error. Please retry your request'
@@ -474,7 +474,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(500);
     });
 
-    it('should throw a KinveyInternalErrorStop', function() {
+    it('should throw a KinveyInternalErrorStop', () => {
       const apiError = {
         name: 'KinveyInternalErrorStop',
         message: 'The Kinvey server encountered an unexpected error. Please contact support@kinvey.com for assistance'
@@ -491,7 +491,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(500);
     });
 
-    it('should throw a MissingQueryError', function() {
+    it('should throw a MissingQueryError', () => {
       const apiError = {
         name: 'MissingQuery',
         message: 'The request is missing a query string'
@@ -508,7 +508,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a MissingRequestHeaderError', function() {
+    it('should throw a MissingRequestHeaderError', () => {
       const apiError = {
         name: 'MissingRequestHeader',
         message: 'The request is missing a required header'
@@ -525,7 +525,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a MissingRequestParameterError', function() {
+    it('should throw a MissingRequestParameterError', () => {
       const apiError = {
         name: 'MissingRequestParameter',
         message: 'A required parameter is missing from the request'
@@ -542,7 +542,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a NotFoundError', function() {
+    it('should throw a NotFoundError', () => {
       const apiError = {
         name: 'EntityNotFound',
         message: 'This entity not found in the collection'
@@ -559,7 +559,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(404);
     });
 
-    it('should throw a NotFoundError', function() {
+    it('should throw a NotFoundError', () => {
       const apiError = {
         name: 'CollectionNotFound',
         message: 'This collection not found for this app backend'
@@ -576,7 +576,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(404);
     });
 
-    it('should throw a NotFoundError', function() {
+    it('should throw a NotFoundError', () => {
       const apiError = {
         name: 'AppNotFound',
         message: 'This app backend not found'
@@ -593,7 +593,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(404);
     });
 
-    it('should throw a NotFoundError', function() {
+    it('should throw a NotFoundError', () => {
       const apiError = {
         name: 'UserNotFound',
         message: 'This user does not exist for this app backend'
@@ -610,7 +610,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(404);
     });
 
-    it('should throw a NotFoundError', function() {
+    it('should throw a NotFoundError', () => {
       const apiError = {
         name: 'BlobNotFound',
         message: 'This blob not found for this app backend'
@@ -627,7 +627,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(404);
     });
 
-    it('should throw a ParameterValueOutOfRangeError', function() {
+    it('should throw a ParameterValueOutOfRangeError', () => {
       const apiError = {
         name: 'ParameterValueOutOfRange',
         message: 'The value specified for one of the request parameters is out of range'
@@ -644,7 +644,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(400);
     });
 
-    it('should throw a StaleRequestError', function() {
+    it('should throw a StaleRequestError', () => {
       const apiError = {
         name: 'StaleRequest',
         message: 'The time window for this request has expired'
@@ -661,7 +661,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(409);
     });
 
-    it('should throw a UserAlreadyExistsError', function() {
+    it('should throw a UserAlreadyExistsError', () => {
       const apiError = {
         name: 'UserAlreadyExists',
         message: 'This username is already taken. Please retry your request with a different username'
@@ -678,7 +678,7 @@ describe('KinveyResponse', function() {
       expect(error.code).toEqual(409);
     });
 
-    it('should throw a WritesToCollectionDisallowedError', function() {
+    it('should throw a WritesToCollectionDisallowedError', () => {
       const apiError = {
         name: 'WritesToCollectionDisallowed',
         message: 'This collection is configured to disallow any modifications to an existing entity or creation of new entities'

@@ -32,6 +32,7 @@ module.exports = {
   ParseMiddleware: ParseMiddleware,
   Properties: Properties,
   Rack: Rack,
+  Request: Request,
   RequestMethod: RequestMethod,
   Response: Response,
   SerializeMiddleware: SerializeMiddleware,

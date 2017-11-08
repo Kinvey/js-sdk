@@ -1,50 +1,89 @@
-import { AuthType, DeltaFetchRequest, RequestMethod } from 'src/request';
-import { KinveyError } from 'src/errors';
-import { SyncStore } from 'src/datastore';
-import { randomString } from 'src/utils';
-import Query from 'src/query';
-import nock from 'nock';
-import expect from 'expect';
+const { AuthType, DeltaFetchRequest, RequestMethod, NetworkRack } = require('../src');
+const { KinveyError } = require('kinvey-errors');
+const { SyncStore } = require('kinvey-datastore');
+const { randomString } = require('kinvey-utils/string');
+const { Query } = require('kinvey-query');
+const { Kinvey } = require('kinvey');
+const { User } = require('kinvey-user');
+const { HttpMiddleware } = require('./http');
+const nock = require('nock');
+const expect = require('expect');
 const collection = 'books';
 
-describe('DeltaFetchRequest', function() {
-  describe('method', function() {
-    it('should not be able to be set to POST', function() {
+describe('DeltaFetchRequest', () => {
+  let client;
+
+  before(() => {
+    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+  });
+
+  before(() => {
+    client = Kinvey.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+  });
+
+  before(() => {
+    const username = randomString();
+    const password = randomString();
+    const reply = {
+      _id: randomString(),
+      _kmd: {
+        lmt: new Date().toISOString(),
+        ect: new Date().toISOString(),
+        authtoken: randomString()
+      },
+      username: username,
+      _acl: {
+        creator: randomString()
+      }
+    };
+
+    nock(client.apiHostname)
+      .post(`/user/${client.appKey}/login`, { username: username, password: password })
+      .reply(200, reply);
+
+    return User.login(username, password);
+  });
+
+  describe('method', () => {
+    it('should not be able to be set to POST', () => {
       expect(() => {
         const request = new DeltaFetchRequest();
         request.method = RequestMethod.POST;
       }).toThrow(KinveyError, /Invalid request Method. Only RequestMethod.GET is allowed./);
     });
 
-    it('should not be able to be set to PATCH', function() {
+    it('should not be able to be set to PATCH', () => {
       expect(() => {
         const request = new DeltaFetchRequest();
         request.method = RequestMethod.PATCH;
       }).toThrow(KinveyError, /Invalid request Method. Only RequestMethod.GET is allowed./);
     });
 
-    it('should not be able to be set to PUT', function() {
+    it('should not be able to be set to PUT', () => {
       expect(() => {
         const request = new DeltaFetchRequest();
         request.method = RequestMethod.PUT;
       }).toThrow(KinveyError, /Invalid request Method. Only RequestMethod.GET is allowed./);
     });
 
-    it('should not be able to be set to DELETE', function() {
+    it('should not be able to be set to DELETE', () => {
       expect(() => {
         const request = new DeltaFetchRequest();
         request.method = RequestMethod.DELETE;
       }).toThrow(KinveyError, /Invalid request Method. Only RequestMethod.GET is allowed./);
     });
 
-    it('should be able to be set to GET', function() {
+    it('should be able to be set to GET', () => {
       const request = new DeltaFetchRequest();
       request.method = RequestMethod.GET;
       expect(request.method).toEqual(RequestMethod.GET);
     });
   });
 
-  describe('execute()', function() {
+  describe('execute()', () => {
     const entity1 = {
       _id: randomString(),
       _acl: {
@@ -68,10 +107,10 @@ describe('DeltaFetchRequest', function() {
       title: 'entity2'
     };
 
-    beforeEach(function() {
+    beforeEach(() => {
       // API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .reply(200, [entity1, entity2], {
           'Content-Type': 'application/json'
         });
@@ -84,7 +123,7 @@ describe('DeltaFetchRequest', function() {
         });
     });
 
-    afterEach(function() {
+    afterEach(() => {
       const store = new SyncStore(collection);
       return store.clear()
         .then(() => {
@@ -95,17 +134,17 @@ describe('DeltaFetchRequest', function() {
         });
     });
 
-    it('should not fetch any entities from the network when delta set is empty', function() {
+    it('should not fetch any entities from the network when delta set is empty', () => {
       const request = new DeltaFetchRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
-        url: `${this.client.apiHostname}/appdata/${this.client.appKey}/${collection}`,
-        client: this.client
+        url: `${client.apiHostname}/appdata/${client.appKey}/${collection}`,
+        client: client
       });
 
       // API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .query({
           fields: '_id,_kmd.lmt'
         })
@@ -121,17 +160,17 @@ describe('DeltaFetchRequest', function() {
         });
     });
 
-    it('should not fetch any entities from the network when delta set is equal to the cache', function() {
+    it('should not fetch any entities from the network when delta set is equal to the cache', () => {
       const request = new DeltaFetchRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
-        url: `${this.client.apiHostname}/appdata/${this.client.appKey}/${collection}`,
-        client: this.client
+        url: `${client.apiHostname}/appdata/${client.appKey}/${collection}`,
+        client: client
       });
 
       // API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .query({
           fields: '_id,_kmd.lmt'
         })
@@ -153,17 +192,17 @@ describe('DeltaFetchRequest', function() {
         });
     });
 
-    it('should fetch only the updated entities from the network', function() {
+    it('should fetch only the updated entities from the network', () => {
       const request = new DeltaFetchRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
-        url: `${this.client.apiHostname}/appdata/${this.client.appKey}/${collection}`,
-        client: this.client
+        url: `${client.apiHostname}/appdata/${client.appKey}/${collection}`,
+        client: client
       });
 
       // API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .query({
           fields: '_id,_kmd.lmt'
         })
@@ -180,8 +219,8 @@ describe('DeltaFetchRequest', function() {
           'Content-Type': 'application/json'
         });
 
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .query({
           query: `{"_id":{"$in":["${entity2._id}"]}}`
         })
@@ -197,20 +236,20 @@ describe('DeltaFetchRequest', function() {
         });
     });
 
-    it('should fetch only the updated entities from the network matching the query', function() {
+    it('should fetch only the updated entities from the network matching the query', () => {
       const query = new Query();
       query.equalTo('_id', entity1._id);
       const request = new DeltaFetchRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
-        url: `${this.client.apiHostname}/appdata/${this.client.appKey}/${collection}`,
+        url: `${client.apiHostname}/appdata/${client.appKey}/${collection}`,
         query: query,
-        client: this.client
+        client: client
       });
 
       // API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .query({
           fields: '_id,_kmd.lmt',
           query: `{"_id":"${entity1._id}"}`
@@ -225,8 +264,8 @@ describe('DeltaFetchRequest', function() {
           'Content-Type': 'application/json'
         });
 
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .query({
           query: `{"_id":{"$in":["${entity1._id}"]}}`
         })
@@ -242,18 +281,18 @@ describe('DeltaFetchRequest', function() {
         });
     });
 
-    it('should fetch the data from the network if there is not any data in the cache', function() {
+    it('should fetch the data from the network if there is not any data in the cache', () => {
       const store = new SyncStore(collection);
       const request = new DeltaFetchRequest({
         method: RequestMethod.GET,
         authType: AuthType.Default,
-        url: `${this.client.apiHostname}/appdata/${this.client.appKey}/${collection}`,
-        client: this.client
+        url: `${client.apiHostname}/appdata/${client.appKey}/${collection}`,
+        client: client
       });
 
       // API response
-      nock(this.client.apiHostname, { encodedQueryParams: true })
-        .get(`/appdata/${this.client.appKey}/${collection}`)
+      nock(client.apiHostname, { encodedQueryParams: true })
+        .get(`/appdata/${client.appKey}/${collection}`)
         .reply(200, [], {
           'Content-Type': 'application/json'
         });

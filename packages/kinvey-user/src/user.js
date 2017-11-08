@@ -8,6 +8,7 @@ const { Client } = require('kinvey-client');
 const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
 const { KinveyError, NotFoundError, ActiveUserError } = require('kinvey-errors');
 const { DataStore } = require('kinvey-datastore');
+const { MobileIdentityConnect } = require('kinvey-identity');
 const { Log } = require('kinvey-log');
 const { isDefined } = require('kinvey-utils/object');
 const { Acl } = require('kinvey-acl');
