@@ -1,4 +1,4 @@
-const { Kinvey } = require('../src');
+const { init, ping } = require('../src');
 const { randomString } = require('kinvey-utils/string');
 const { Client } = require('kinvey-client');
 const { NetworkRack } = require('kinvey-request');
@@ -16,7 +16,7 @@ describe('Kinvey', () => {
   describe('init()', () => {
     it('should throw an error if an appKey is not provided', () => {
       expect(() => {
-        Kinvey.init({
+        init({
           appSecret: randomString()
         });
       }).to.throw();
@@ -24,7 +24,7 @@ describe('Kinvey', () => {
 
     it('should throw an error if an appSecret or masterSecret is not provided', () => {
       expect(() => {
-        Kinvey.init({
+        init({
           appKey: randomString()
         });
       }).to.throw();
@@ -33,7 +33,7 @@ describe('Kinvey', () => {
     it('should return a client', () => {
       const appKey = randomString();
       const appSecret = randomString();
-      const client = Kinvey.init({
+      const client = init({
         appKey: appKey,
         appSecret: appSecret
       });
@@ -41,7 +41,7 @@ describe('Kinvey', () => {
     });
 
     it('should set default MIC host name when a custom one is not provided', () => {
-      const client = Kinvey.init({
+      const client = init({
         appKey: randomString(),
         appSecret: randomString()
       });
@@ -50,7 +50,7 @@ describe('Kinvey', () => {
 
     it('should set a custom MIC host name when one is provided', () => {
       const micHostname = 'https://auth.example.com';
-      const client = Kinvey.init({
+      const client = init({
         appKey: randomString(),
         appSecret: randomString(),
         micHostname: micHostname
@@ -67,7 +67,7 @@ describe('Kinvey', () => {
         appName: 'tests',
         environmentName: 'development'
       };
-      const client = Kinvey.init({
+      const client = init({
         appKey: randomString(),
         appSecret: randomString()
       });
@@ -76,7 +76,7 @@ describe('Kinvey', () => {
         .get(`/${appdataNamespace}/${client.appKey}`)
         .reply(200, reply);
 
-      return Kinvey.ping()
+      return ping()
         .then((response) => {
           expect(response).to.deep.equal(reply);
         });

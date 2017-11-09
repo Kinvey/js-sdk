@@ -1,5 +1,5 @@
 const { CacheStore, SyncStore, SyncOperation } = require('../src');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { Query } = require('kinvey-query');
 const { Aggregation } = require('kinvey-aggregation');
 const { KinveyError, NotFoundError, ServerError } = require('kinvey-errors');
@@ -20,7 +20,7 @@ describe('CacheStore', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

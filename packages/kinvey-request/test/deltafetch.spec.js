@@ -3,7 +3,7 @@ const { KinveyError } = require('kinvey-errors');
 const { SyncStore } = require('kinvey-datastore');
 const { randomString } = require('kinvey-utils/string');
 const { Query } = require('kinvey-query');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { User } = require('kinvey-user');
 const { HttpMiddleware } = require('./http');
 const nock = require('nock');
@@ -18,7 +18,7 @@ describe('DeltaFetchRequest', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

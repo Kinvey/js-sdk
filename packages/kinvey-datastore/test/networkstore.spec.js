@@ -6,7 +6,7 @@ const { NetworkStore, SyncStore } = require('../src');
 const { mockRequiresIn } = require('./require-helper');
 const { NetworkRack } = require('kinvey-request');
 const { User } = require('kinvey-user');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { HttpMiddleware } = require('./http');
 const nock = require('nock');
 const expect = require('expect');
@@ -21,7 +21,7 @@ describe('NetworkStore', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

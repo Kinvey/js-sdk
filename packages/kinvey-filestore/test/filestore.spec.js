@@ -9,7 +9,7 @@ const { randomString } = require('kinvey-utils/string');
 const { Query } = require('kinvey-query');
 const { NetworkRack } = require('kinvey-request');
 const { User } = require('kinvey-user');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { HttpMiddleware } = require('./http');
 
 chai.use(require('chai-as-promised'));
@@ -23,7 +23,7 @@ describe('FileStore', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

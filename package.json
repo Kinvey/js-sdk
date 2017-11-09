@@ -3,6 +3,7 @@
   "license": "Apache-2.0",
   "author": "Kinvey, Inc.",
   "scripts": {
+    "build": "lerna run build",
     "test": "lerna run --parallel test"
   },
   "workspaces": [

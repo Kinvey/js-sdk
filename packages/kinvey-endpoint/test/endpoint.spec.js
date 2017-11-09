@@ -3,7 +3,7 @@ const { Client } = require('kinvey-client');
 const { KinveyError, NotFoundError } = require('kinvey-errors');
 const { NetworkRack } = require('kinvey-request');
 const { User } = require('kinvey-user');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { randomString } = require('kinvey-utils/string');
 const { HttpMiddleware } = require('./http');
 const nock = require('nock');
@@ -17,7 +17,7 @@ describe('Endpoint', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

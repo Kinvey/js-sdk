@@ -16,7 +16,7 @@ const { StreamACL } = require('./stream-acl');
  * A Stream, created in the backend
  * @class Stream
  */
-exports.Stream = class Stream {
+class Stream {
   constructor(name) {
     this.name = name;
     this._client = Client.sharedInstance();
@@ -262,3 +262,4 @@ exports.Stream = class Stream {
     }, this._client);
   }
 }
+exports.Stream = Stream;

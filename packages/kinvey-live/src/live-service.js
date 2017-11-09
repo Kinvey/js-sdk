@@ -18,17 +18,19 @@ const { PubNubListener } = require('./pubnub-listener');
  * @param {Object} obj
  * @returns {Boolean}
  */
-exports.isValidReceiver = function isValidReceiver(obj) {
+function isValidReceiver(obj) {
   if (!obj) {
     return false;
   }
   const { onMessage, onError, onStatus } = obj;
   return isFunction(onMessage) || isFunction(onError) || isFunction(onStatus);
 }
+exports.isValidReceiver = isValidReceiver;
 
-exports.isValidChannelName = function isValidChannelName(str) {
+function isValidChannelName(str) {
   return isNonemptyString(str);
 }
+exports.isValidChannelName = isValidChannelName;
 
 class LiveService {
   /**
@@ -374,9 +376,10 @@ let liveServiceInstance;
  * @param {Client} client
  * @returns {LiveService}
  */
-exports.getLiveService = function getLiveService(client) {
+function getLiveService(client) {
   if (!liveServiceInstance) {
     liveServiceInstance = new LiveService(client);
   }
   return liveServiceInstance;
 }
+exports.getLiveService = getLiveService;

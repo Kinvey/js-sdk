@@ -10,6 +10,6 @@
     "kinvey-errors": "3.9.2",
     "kinvey-utils": "3.9.2",
     "lodash": "4.17.4",
-    "pubnub": "github:thomasconner/javascript#add_nativescript_support"
+    "pubnub": "4.17.0"
   }
 }

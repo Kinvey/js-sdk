@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "version": "3.9.2",
+  "name": "kinvey-html5-popup",
+  "main": "src/index.js"
+}

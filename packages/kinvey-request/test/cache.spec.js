@@ -1,5 +1,5 @@
 const expect = require('expect');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { randomString } = require('kinvey-utils/string');
 const { CacheRequest, Request } = require('../src');
 
@@ -7,7 +7,7 @@ describe('CacheRequest', () => {
   let client;
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

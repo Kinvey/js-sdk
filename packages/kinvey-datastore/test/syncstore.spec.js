@@ -5,7 +5,7 @@ const { KinveyError, NotFoundError } = require('kinvey-errors');
 const { randomString } = require('kinvey-utils/string');
 const { NetworkRack } = require('kinvey-request');
 const { User } = require('kinvey-user');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { HttpMiddleware } = require('./http');
 const nock = require('nock');
 const expect = require('expect');
@@ -19,7 +19,7 @@ describe('SyncStore', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

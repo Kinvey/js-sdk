@@ -12,7 +12,7 @@ const invalidValueMsg = 'Invalid ACL object value';
  * @property {{publish?: string[], subscribe?: string[]}} [groups]
  */
 
-exports.StreamACL = class StreamACL {
+class StreamACL {
   constructor(obj) {
     this.publishers = [];
     this.subscribers = [];
@@ -251,3 +251,4 @@ exports.StreamACL = class StreamACL {
     return (o && o._id) ? o._id : o;
   }
 }
+exports.StreamACL = StreamACL;

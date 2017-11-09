@@ -34,7 +34,7 @@ const { EventEmitter } = require('events');
 const statusPrefix = 'status:';
 const unclassifiedEvents = 'pubNubEventsNotRouted';
 
-exports.PubNubListener = class PubNubListener extends EventEmitter {
+class PubNubListener extends EventEmitter {
 
   static get statusPrefix() {
     return statusPrefix;
@@ -72,3 +72,4 @@ exports.PubNubListener = class PubNubListener extends EventEmitter {
     return channels.concat(groups);
   }
 }
+exports.PubNubListener = PubNubListener;

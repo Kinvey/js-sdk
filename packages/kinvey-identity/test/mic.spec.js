@@ -4,7 +4,7 @@ const { Client } = require('kinvey-client');
 const { randomString } = require('kinvey-utils/string');
 const { NetworkRack } = require('kinvey-request');
 const { User } = require('kinvey-user');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { HttpMiddleware } = require('./http');
 const assign = require('lodash/assign');
 const expect = require('expect');
@@ -20,7 +20,7 @@ describe('MobileIdentityConnect', () => {
   });
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });

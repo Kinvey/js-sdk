@@ -2,7 +2,7 @@ const { Request, KinveyRequest } = require('../src');
 const { InvalidCredentialsError, ServerError, TimeoutError } = require('kinvey-errors');
 const { randomString } = require('kinvey-utils/string');
 const { AuthorizationGrant } = require('kinvey-identity');
-const { Kinvey } = require('kinvey');
+const { init } = require('kinvey');
 const { User } = require('kinvey-user');
 const url = require('url');
 const nock = require('nock');
@@ -75,7 +75,7 @@ describe('KinveyRequest', () => {
   }
 
   before(() => {
-    client = Kinvey.init({
+    client = init({
       appKey: randomString(),
       appSecret: randomString()
     });
