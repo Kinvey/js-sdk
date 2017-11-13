@@ -1,8 +1,0 @@
-{
-  "only": [
-    "./packages/node_modules/",
-    "./test/unit/"
-  ],
-  "presets": ["env"],
-  "sourceMaps": true
-}

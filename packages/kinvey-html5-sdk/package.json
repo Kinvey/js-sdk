@@ -34,6 +34,11 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js",
-    "postbuild": "node scripts/postbuild"
-  }
+    "postbuild": "node scripts/copyfiles",
+    "release": "yarn build && ./scripts/push.sh"
+  },
+  "files": [
+    "kinvey-html5-sdk.min.js",
+    "kinvey-html5-sdk.min.js.map"
+  ]
 }

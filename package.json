@@ -3,8 +3,10 @@
   "license": "Apache-2.0",
   "author": "Kinvey, Inc.",
   "scripts": {
-    "build": "lerna run build",
-    "test": "lerna run --parallel test"
+    "build": "lerna run build --parallel",
+    "publish": "lerna publish --skip-npm --preid=beta",
+    "release": "lerna run release --parallel",
+    "test": "lerna run test --parallel"
   },
   "workspaces": [
     "packages/*"
