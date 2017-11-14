@@ -10,8 +10,7 @@ git clone https://${GITHUB_ACCESS_TOKEN}@github.com/Kinvey/html5-sdk.git $tmp > 
 git -C $tmp remote add origin https://${GITHUB_ACCESS_TOKEN}@github.com/Kinvey/html5-sdk.git > /dev/null 2>&1
 git -C $tmp fetch origin
 git -C $tmp checkout master
-shopt -s dotglob
-cp $dist/* $tmp
+cp $dist/. $tmp
 git -C $tmp add .
 git -C $tmp commit -m "Travis Build: $TRAVIS_BUILD_NUMBER"
 git -C $tmp tag $TRAVIS_TAG
