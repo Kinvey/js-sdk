@@ -1,12 +1,12 @@
 {
   "private": true,
-  "version": "3.9.3-rc.2",
+  "version": "3.9.3-rc.3",
   "name": "kinvey-client",
   "main": "src/index.js",
   "dependencies": {
     "fast-memory-cache": "2.0.4",
-    "kinvey-errors": "^3.9.3-rc.2",
-    "kinvey-utils": "^3.9.3-rc.2",
+    "kinvey-errors": "^3.9.3-rc.3",
+    "kinvey-utils": "^3.9.3-rc.3",
     "lodash": "4.17.4"
   },
   "devDependencies": {
