@@ -1,11 +1,11 @@
 {
   "private": true,
-  "version": "3.9.3-rc.6",
+  "version": "3.9.3-rc.7",
   "name": "kinvey-acl",
   "main": "src/index.js",
   "dependencies": {
-    "kinvey-errors": "^3.9.3-rc.6",
-    "kinvey-utils": "^3.9.3-rc.6",
+    "kinvey-errors": "^3.9.3-rc.7",
+    "kinvey-utils": "^3.9.3-rc.7",
     "lodash": "4.17.4"
   },
   "devDependencies": {
