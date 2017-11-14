@@ -1,11 +1,11 @@
 {
   "private": true,
-  "version": "3.9.3-rc.3",
+  "version": "3.9.3-rc.4",
   "name": "kinvey-observable",
   "main": "src/index.js",
   "dependencies": {
     "es6-promise": "4.1.1",
-    "kinvey-utils": "^3.9.3-rc.3",
+    "kinvey-utils": "^3.9.3-rc.4",
     "lodash": "4.17.4",
     "rxjs": "5.4.3"
   }
