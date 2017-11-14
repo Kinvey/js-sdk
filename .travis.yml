@@ -19,7 +19,7 @@ jobs:
       node_js: '9'
       deploy:
         provider: script
-        script: npm run release
+        script: ./node_modules/.bin/lerna run release --parallel
         skip_cleanup: true
         on:
           all_branches: true
