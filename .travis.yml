@@ -15,7 +15,7 @@ install:
 
 jobs:
   include:
-    - stage: unit tests
+    - stage: test
       script: npm run test
     - stage: deploy
       skip_cleanup: true
