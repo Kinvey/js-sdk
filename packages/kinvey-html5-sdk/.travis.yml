@@ -4,7 +4,8 @@ node_js:
 
 jobs:
   include:
-    - stage: deploy npm stable
+    if: tag =~ ^((?!-\w).)*$
+    - stage: deploy
       deploy:
         provider: npm
         email: thomas.conner@me.com
@@ -13,7 +14,10 @@ jobs:
         on:
           all_branches: true
           tags: true
-          condition: "$TRAVIS_TAG =~ ^((?!-\w).)*$"
+
+jobs:
+  inlcude:
+    if: tag =~ ^([0-9])*\.[0-9]*\.[0-9]*-\w+$
     - stage: deploy npm prerelease
       deploy:
         provider: npm
@@ -24,4 +28,3 @@ jobs:
         on:
           all_branches: true
           tags: true
-          condition: "$TRAVIS_TAG =~ ^([0-9])*\.[0-9]*\.[0-9]*-\w+$"
