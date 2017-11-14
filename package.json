@@ -4,7 +4,7 @@
   "author": "Kinvey, Inc.",
   "scripts": {
     "build": "lerna run build --parallel",
-    "publish": "lerna publish --skip-npm",
+    "publish": "lerna publish --skip-npm --preid=rc",
     "release": "lerna run release --parallel",
     "test": "lerna run test --parallel"
   },
