@@ -22,6 +22,7 @@ jobs:
       deploy:
         provider: script
         script: npm run release
+        skip_cleanup: true
         on:
           all_branches: true
           tags: true
