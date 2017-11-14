@@ -13,17 +13,18 @@ before_install:
 install:
 - yarn install
 
+script: npm run test
+
 jobs:
   include:
-    - stage: test
-      script: npm run test
     - stage: deploy
-      skip_cleanup: true
-      provider: script
-      script: npm run release
       node_js: '9'
-      on:
-        tags: true
+      deploy:
+        provider: script
+        script: npm run release
+        on:
+          all_branches: true
+          tags: true
 
 notifications:
   email:
