@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.9.3-rc.4",
+  "version": "3.9.3-rc.5",
   "name": "kinvey-promise-queue",
   "main": "src/index.js",
   "dependencies": {
