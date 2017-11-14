@@ -1,15 +1,15 @@
 {
   "private": true,
-  "version": "3.9.3-next.0",
+  "version": "3.9.3-rc.1",
   "name": "kinvey",
   "main": "src/index.js",
   "dependencies": {
     "es6-promise": "4.1.1",
-    "kinvey-client": "^3.9.3-next.0",
-    "kinvey-errors": "^3.9.3-next.0",
-    "kinvey-request": "^3.9.3-next.0",
-    "kinvey-user": "^3.9.3-next.0",
-    "kinvey-utils": "^3.9.3-next.0"
+    "kinvey-client": "^3.9.3-rc.1",
+    "kinvey-errors": "^3.9.3-rc.1",
+    "kinvey-request": "^3.9.3-rc.1",
+    "kinvey-user": "^3.9.3-rc.1",
+    "kinvey-utils": "^3.9.3-rc.1"
   },
   "devDependencies": {
     "chai": "4.1.2",

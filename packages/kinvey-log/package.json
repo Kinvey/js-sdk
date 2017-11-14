@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.9.3-next.0",
+  "version": "3.9.3-rc.1",
   "name": "kinvey-log",
   "main": "src/index.js",
   "dependencies": {
