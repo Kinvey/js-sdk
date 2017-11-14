@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.9.3-rc.1",
+  "version": "3.9.3-rc.2",
   "name": "kinvey-errors",
   "main": "index.js"
 }
