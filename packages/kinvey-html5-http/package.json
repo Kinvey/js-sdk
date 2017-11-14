@@ -1,13 +1,13 @@
 {
   "private": true,
-  "version": "3.9.3-rc.5",
+  "version": "3.9.3-rc.6",
   "name": "kinvey-html5-http",
   "main": "src/index.js",
   "dependencies": {
     "es6-promise": "4.1.1",
-    "kinvey-errors": "^3.9.3-rc.5",
-    "kinvey-request": "^3.9.3-rc.5",
-    "kinvey-utils": "^3.9.3-rc.5",
+    "kinvey-errors": "^3.9.3-rc.6",
+    "kinvey-request": "^3.9.3-rc.6",
+    "kinvey-utils": "^3.9.3-rc.6",
     "xhr": "2.4.0"
   }
 }
