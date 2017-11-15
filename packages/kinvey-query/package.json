@@ -1,11 +1,11 @@
 {
   "private": true,
-  "version": "3.9.3-rc.13",
+  "version": "3.9.3-rc.14",
   "name": "kinvey-query",
   "main": "src/index.js",
   "dependencies": {
-    "kinvey-errors": "^3.9.3-rc.13",
-    "kinvey-utils": "^3.9.3-rc.13",
+    "kinvey-errors": "^3.9.3-rc.14",
+    "kinvey-utils": "^3.9.3-rc.14",
     "lodash": "4.17.4",
     "sift": "5.0.0"
   },
