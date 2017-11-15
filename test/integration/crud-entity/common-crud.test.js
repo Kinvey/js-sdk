@@ -15,9 +15,9 @@ function testFunc() {
       let networkStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
-      const entity1 = getSingleEntity(randomString());
-      const entity2 = getSingleEntity(randomString());
-      const entity3 = getSingleEntity(randomString());
+      const entity1 = common.getSingleEntity(common.randomString());
+      const entity2 = common.getSingleEntity(common.randomString());
+      const entity3 = common.getSingleEntity(common.randomString());
       const createdUserIds = [];
 
       before((done) => {
@@ -34,7 +34,7 @@ function testFunc() {
             networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return cleanUpCollectionData(collectionName, done)
+            return common.cleanUpCollectionData(collectionName, done)
           })
           .then(() => {
             return networkStore.save(entity1)
@@ -56,7 +56,7 @@ function testFunc() {
       });
 
       after((done) => {
-        deleteUsers(createdUserIds)
+        common.deleteUsers(createdUserIds)
           .then(() => {
             return Kinvey.User.logout()
           })
@@ -82,7 +82,7 @@ function testFunc() {
           return storeToTest.count()
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, 2, 3);
+                common.validateReadResult(dataStoreType, onNextSpy, 2, 3);
                 done();
               } catch (error) {
                 done(error);
@@ -97,7 +97,7 @@ function testFunc() {
           return storeToTest.count(query)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, 1, 1);
+                common.validateReadResult(dataStoreType, onNextSpy, 1, 1);
                 done();
               } catch (error) {
                 done(error);
@@ -125,11 +125,11 @@ function testFunc() {
           return storeToTest.find()
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3], true)
-                return retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, entity3)
+                common.validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3], true)
+                return common.retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, entity3)
                   .then((result) => {
                     if (result) {
-                      result = deleteEntityMetadata(result);
+                      result = common.deleteEntityMetadata(result);
                     }
                     expect(result).to.deep.equal(dataStoreType === Kinvey.DataStoreType.Cache ? entity3 : undefined);
                     done();
@@ -147,7 +147,7 @@ function testFunc() {
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, [entity2], [entity2])
+                common.validateReadResult(dataStoreType, onNextSpy, [entity2], [entity2])
                 done();
               } catch (error) {
                 done(error);
@@ -158,7 +158,7 @@ function testFunc() {
 
       describe('findById()', function () {
         it('should throw a NotFoundError if the id argument does not exist', (done) => {
-          const entityId = randomString();
+          const entityId = common.randomString();
           return storeToTest.findById(entityId).toPromise()
             .catch((error) => {
               expect(error.name).to.contain(notFoundErrorName);
@@ -179,7 +179,7 @@ function testFunc() {
           return storeToTest.findById(entity2._id)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, entity2, entity2)
+                common.validateReadResult(dataStoreType, onNextSpy, entity2, entity2)
                 done();
               } catch (error) {
                 done(error);
@@ -195,12 +195,12 @@ function testFunc() {
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
-            entities.push(getSingleEntity());
+            entities.push(common.getSingleEntity());
           }
 
-          cleanUpCollectionData(collectionName, done)
+          common.cleanUpCollectionData(collectionName, done)
             .then(() => {
-              return createData(collectionName, entities)
+              return common.createData(collectionName, entities)
             })
             .then((result) => {
               entities = result;
@@ -217,7 +217,7 @@ function testFunc() {
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                 done();
               } catch (error) {
                 done(error);
@@ -234,7 +234,7 @@ function testFunc() {
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                 done();
               } catch (error) {
                 done(error);
@@ -252,7 +252,7 @@ function testFunc() {
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
+                common.validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
                 done();
               } catch (error) {
                 done(error);
@@ -270,7 +270,7 @@ function testFunc() {
           return storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
-                validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
+                common.validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
                 done();
               } catch (error) {
                 done(error);
@@ -292,7 +292,7 @@ function testFunc() {
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
-            entities.push(getSingleEntity(null, `test_${i}`, i, [`test_${i % 5}`, `second_test_${i % 5}`, `third_test_${i % 5}`]));
+            entities.push(common.getSingleEntity(null, `test_${i}`, i, [`test_${i % 5}`, `second_test_${i % 5}`, `third_test_${i % 5}`]));
           }
 
           const textArray = ['aaa', 'aaB', 'aac']
@@ -306,9 +306,9 @@ function testFunc() {
           entities[dataCount - 1][arrayFieldName] = [];
           entities[dataCount - 2][arrayFieldName] = [{}, {}];
 
-          cleanUpCollectionData(collectionName, done)
+          common.cleanUpCollectionData(collectionName, done)
             .then(() => {
-              return createData(collectionName, entities)
+              return common.createData(collectionName, entities)
             })
             .then((result) => {
               entities = _.sortBy(result, numberFieldName);
@@ -330,7 +330,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -344,7 +344,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -358,7 +358,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
@@ -373,7 +373,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
@@ -387,7 +387,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -401,7 +401,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
@@ -415,7 +415,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
@@ -429,7 +429,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
@@ -443,7 +443,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
@@ -457,7 +457,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -472,7 +472,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -486,7 +486,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -501,7 +501,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                   done();
                 } catch (error) {
                   done(error);
@@ -520,7 +520,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -534,7 +534,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -548,7 +548,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                     done();
                   } catch (error) {
                     done(error);
@@ -563,7 +563,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -577,7 +577,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -594,7 +594,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -608,7 +608,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -624,7 +624,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                     done();
                   } catch (error) {
                     done(error);
@@ -639,7 +639,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -656,7 +656,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                     done();
                   } catch (error) {
                     done(error);
@@ -670,7 +670,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                     done();
                   } catch (error) {
                     done(error);
@@ -684,7 +684,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                     done();
                   } catch (error) {
                     done(error);
@@ -699,7 +699,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -716,7 +716,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                     done();
                   } catch (error) {
                     done(error);
@@ -730,7 +730,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -745,7 +745,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -778,7 +778,7 @@ function testFunc() {
                 .subscribe(onNextSpy, done, () => {
                   try {
                     //when MLIBZ-2156 is fixed, expectedAscendingCache should be replaced with expectedAscendingServer
-                    validateReadResult(dataStoreType, onNextSpy, expectedAscendingCache, expectedAscendingServer);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedAscendingCache, expectedAscendingServer);
                     done();
                   } catch (error) {
                     done(error);
@@ -791,7 +791,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedDescending, expectedDescending);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedDescending, expectedDescending);
                     done();
                   } catch (error) {
                     done(error);
@@ -808,7 +808,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -823,7 +823,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -838,7 +838,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -854,7 +854,7 @@ function testFunc() {
               return storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                    common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
                     done();
                   } catch (error) {
                     done(error);
@@ -889,7 +889,7 @@ function testFunc() {
 
         it('should create a new entity without _id', (done) => {
           let newEntity = {
-            textField: randomString()
+            textField: common.randomString()
           };
           return storeToTest.save(newEntity)
             .then((createdEntity) => {
@@ -899,13 +899,13 @@ function testFunc() {
                 expect(createdEntity._kmd.local).to.be.true;
               }
               else {
-                assertEntityMetadata(createdEntity);
+                common.assertEntityMetadata(createdEntity);
               }
               newEntity._id = createdEntity._id;
-              return validateEntity(dataStoreType, collectionName, newEntity);
+              return common.validateEntity(dataStoreType, collectionName, newEntity);
             })
             .then(() => {
-              validatePendingSyncCount(dataStoreType, collectionName, 1, done)
+              common.validatePendingSyncCount(dataStoreType, collectionName, 1, done)
             }).catch((err) => {
               done(err);
             });
@@ -913,14 +913,14 @@ function testFunc() {
 
         it('should create a new entity using its _id', (done) => {
           const newEntity = {
-            _id: randomString(),
-            textField: randomString()
+            _id: common.randomString(),
+            textField: common.randomString()
           };
           return storeToTest.save(newEntity)
             .then((createdEntity) => {
               expect(createdEntity._id).to.equal(newEntity._id);
               expect(createdEntity.textField).to.equal(newEntity.textField);
-              return validateEntity(dataStoreType, collectionName, newEntity);
+              return common.validateEntity(dataStoreType, collectionName, newEntity);
             })
             .then(() => {
               done();
@@ -933,16 +933,16 @@ function testFunc() {
           const entityToUpdate = {
             _id: entity1._id,
             textField: entity1.textField,
-            newProperty: randomString()
+            newProperty: common.randomString()
           };
           return storeToTest.save(entityToUpdate)
             .then((updatedEntity) => {
               expect(updatedEntity._id).to.equal(entity1._id);
               expect(updatedEntity.newProperty).to.equal(entityToUpdate.newProperty);
-              return validateEntity(dataStoreType, collectionName, entityToUpdate, 'newProperty')
+              return common.validateEntity(dataStoreType, collectionName, entityToUpdate, 'newProperty')
             })
             .then(() => {
-              validatePendingSyncCount(dataStoreType, collectionName, 1, done)
+              common.validatePendingSyncCount(dataStoreType, collectionName, 1, done)
             }).catch(done);
 
         });
@@ -950,7 +950,7 @@ function testFunc() {
 
       describe('removeById()', function () {
         it('should throw an error if the id argument does not exist', (done) => {
-          return storeToTest.removeById(randomString())
+          return storeToTest.removeById(common.randomString())
             .catch((error) => {
               if (dataStoreType === Kinvey.DataStoreType.Network) {
                 expect(error.name).to.contain(notFoundErrorName);
@@ -964,7 +964,7 @@ function testFunc() {
 
         it('should remove only the entity that matches the id argument', (done) => {
           const newEntity = {
-            _id: randomString()
+            _id: common.randomString()
           };
           let remainingCount;
 
@@ -984,7 +984,7 @@ function testFunc() {
               return storeToTest.count(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, 0, 0)
+                    common.validateReadResult(dataStoreType, onNextSpy, 0, 0)
                     return storeToTest.count().toPromise()
                       .then((count) => {
                         expect(count).to.equal(remainingCount);
@@ -1021,11 +1021,11 @@ function testFunc() {
         });
 
         it('should remove all entities that match the query', (done) => {
-          const newEntity = getSingleEntity();
+          const newEntity = common.getSingleEntity();
           const query = new Kinvey.Query();
           query.equalTo('textField', newEntity.textField);
           let initialCount;
-          createData(collectionName, [newEntity, newEntity])
+          common.createData(collectionName, [newEntity, newEntity])
             .then(() => {
               return storeToTest.count().toPromise()
             })
@@ -1039,7 +1039,7 @@ function testFunc() {
               return storeToTest.count(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
-                    validateReadResult(dataStoreType, onNextSpy, 0, 0)
+                    common.validateReadResult(dataStoreType, onNextSpy, 0, 0)
                     return storeToTest.count().toPromise()
                       .then((count) => {
                         expect(count).to.equal(initialCount - 2);
@@ -1054,7 +1054,7 @@ function testFunc() {
 
         it('should return a { count: 0 } when no entities are removed', (done) => {
           const query = new Kinvey.Query();
-          query.equalTo('_id', randomString());
+          query.equalTo('_id', common.randomString());
           return storeToTest.remove(query)
             .then((result) => {
               expect(result.count).to.equal(0);
