@@ -53,6 +53,7 @@ const { MobileIdentityConnect } = require('kinvey-identity');
 const { CacheMiddleware } = require('kinvey-html5-cache');
 const { HttpMiddleware } = require('kinvey-html5-http');
 const { Popup } = require('kinvey-phonegap-popup');
+const { Push } = require('kinvey-phonegap-push');
 const pkg = require('../package.json');
 
 // Setup racks
@@ -82,6 +83,8 @@ module.exports = {
   Metadata,
   Query,
   User,
+  Push,
+
   ActiveUserError,
   APIVersionNotAvailableError,
   APIVersionNotImplementedError,

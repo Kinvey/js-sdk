@@ -20,6 +20,7 @@
     "kinvey-html5-cache": "^3.9.3-beta.0",
     "kinvey-html5-http": "^3.9.3-beta.0",
     "kinvey-phonegap-popup": "^3.9.3-beta.0",
+    "kinvey-phonegap-push": "^3.9.3-beta.0",
     "kinvey-identity": "^3.9.3-beta.0",
     "kinvey-live": "^3.9.3-beta.0",
     "kinvey-log": "^3.9.3-beta.0",
