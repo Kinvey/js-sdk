@@ -1,6 +1,9 @@
 language: node_js
 node_js:
 - '9'
+
+script: echo "No tests to run"
+
 deploy:
   provider: npm
   tag: rc
