@@ -4,31 +4,28 @@
 
 ## Getting Started
 
-Install and save the Kinvey HTML5 SDK:
+Install and save the Kinvey PhoneGap SDK:
 
 ```javascript
-npm install --save kinvey-html5-sdk
+npm install --save kinvey-phonegap-sdk
 ```
 
-Import the Kinvey HTML5 SDK:
+Import the Kinvey PhoneGap SDK:
 
 ```javascript
 const Kinvey = require('kinvey-html5-sdk');
 ```
 
-## Browser Compatibility
+## Mobile OS Compatibility
 
-The Kinvey HTML5 SDK supports the following browsers:
+The Kinvey PhoneGap SDK supports the following mobile OS versions:
 
-- Safari 10+
-- Chrome 56+
-- Firefox 50+
-- IE 11+
-- Edge
+- iOS: 10.0+
+- Android: 2.3.3+
 
 ## Documentation
 
-For more detailed documentation, see [Kinvey DevCenter](http://devcenter.kinvey.com/html5).
+For more detailed documentation, see [Kinvey DevCenter](http://devcenter.kinvey.com/phonegap).
 
 ## License
 
