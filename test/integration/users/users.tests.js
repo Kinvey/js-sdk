@@ -2,7 +2,7 @@ runner.run(testFunc);
 
 function testFunc() {
 
-  const assertUserData = (user, expectedUsername) => {
+  const assertUserData = (user, expectedUsername, shouldReturnPassword) => {
     expect(user.data._id).to.exist;
     expect(user._kmd.authtoken).to.exist;
     expect(user._kmd.lmt).to.exist;
@@ -13,7 +13,9 @@ function testFunc() {
     } else {
       expect(user.data.username).to.exist;
     }
-    expect(user.data.password).to.equal(undefined);
+    if (shouldReturnPassword) {
+      expect(user.data.password).to.exist;
+    }
     expect(user.isActive()).to.equal(true);
     expect(user).to.deep.equal(Kinvey.User.getActiveUser());
   }
@@ -25,7 +27,7 @@ function testFunc() {
     const createdUserIds = [];
 
     before((done) => {
-      Kinvey.initialize({
+      Kinvey.init({
         appKey: externalConfig.appKey,
         appSecret: externalConfig.appSecret
       });
@@ -220,7 +222,7 @@ function testFunc() {
         })
           .then((user) => {
             createdUserIds.push(user.data._id);
-            assertUserData(user, username);
+            assertUserData(user, username, true);
             done();
           }).catch(done);
       });
@@ -234,7 +236,7 @@ function testFunc() {
         return Kinvey.User.signup(user)
           .then((user) => {
             createdUserIds.push(user.data._id);
-            assertUserData(user, username);
+            assertUserData(user, username, true);
             done();
           }).catch(done);
       });
@@ -249,7 +251,7 @@ function testFunc() {
         return Kinvey.User.signup(data)
           .then((user) => {
             createdUserIds.push(user.data._id);
-            assertUserData(user, data.username);
+            assertUserData(user, data.username, true);
             expect(user.data.email).to.equal(data.email);
             expect(user.data.additionalField).to.equal(data.additionalField);
             done();
@@ -275,7 +277,7 @@ function testFunc() {
         return Kinvey.User.signup()
           .then((user) => {
             createdUserIds.push(user.data._id);
-            assertUserData(user)
+            assertUserData(user, null, true)
             done();
           }).catch(done);
       });
