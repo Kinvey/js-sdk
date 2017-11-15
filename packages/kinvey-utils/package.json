@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.9.3-rc.16",
+  "version": "3.9.3-beta.0",
   "name": "kinvey-utils",
   "main": "index.js",
   "dependencies": {
