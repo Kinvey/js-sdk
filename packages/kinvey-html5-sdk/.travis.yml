@@ -1,35 +1,12 @@
 language: node_js
 node_js:
 - '9'
-
-stages:
-  - deploy
-
-script: echo "Running tests against $(node -v) ..."
-
-jobs:
-  include:
-    - if: tag =~ ^((?!-\w).)*$
-    - stage: deploy
-      deploy:
-        provider: npm
-        email: thomas.conner@me.com
-        api_key:
-          secure: MPchktUtI7gAyUr8fyDi4vyEDqiaTAQa+4YKnhxrdC9QMEsBCLrV94tjlg07HXjHQnWwZ0JM0OUlyS/LseaG6OMqUx3JmRrgw4Z1eEq5s3r5SuQA+5Xx8Bjmhok0uZ+BrdCI3Rg4dCfHVskfH5M9AM9IATldb+UZF5dBfgP13EhWYzkvMLTFZS0jGhWmlAnaAedtOsVIUfbJpA99WlErs0OIjUh0UvA7vHSEVTKrfp86TDkJpmN70ruO9UbN3majhSPRp2Vo1LX3vE0E1rIQiBb0Ydt6BKm/P/cmyej6VndJSa5QaoXTVyzksi7JiCh0kQALx18nReDvaETzt595Z/xXLYBXaQfkrikfVQuGuVlqXF7d7efGQ4dU8q8U/xi2kwGyMcYSDbDyAkQ8YvrjRH0PekidPS3yiJT2PX2j4omN2D+qw5Ak5qIEH7LO2vUDDlwXaxiT9xTDNhRkrEhg+U9dY13bkk+yIcie3QpycKZHLuz4T7WnbuNF0x/YMJfdVON/Lm6IkDPQTJ77+5H3l56tig7JWPcybE0YlTnJw34Mk4RqTJ5l6SzdSmw1X+bbohBtXHErxP+N36p6k2WRcsw/x7Dwh0+lLOIl+Ka2ozsx4PRmJf4XZ/wqK4hqziAPkZM+/5ZCQLB4a7CKEtKn03enKvIAA1f7WHx8nMLgUcA=
-        on:
-          all_branches: true
-          tags: true
-
-jobs:
-  inlcude:
-    - if: tag =~ ^([0-9])*\.[0-9]*\.[0-9]*-\w+$
-    - stage: deploy
-      deploy:
-        provider: npm
-        tag: rc
-        email: thomas.conner@me.com
-        api_key:
-          secure: MPchktUtI7gAyUr8fyDi4vyEDqiaTAQa+4YKnhxrdC9QMEsBCLrV94tjlg07HXjHQnWwZ0JM0OUlyS/LseaG6OMqUx3JmRrgw4Z1eEq5s3r5SuQA+5Xx8Bjmhok0uZ+BrdCI3Rg4dCfHVskfH5M9AM9IATldb+UZF5dBfgP13EhWYzkvMLTFZS0jGhWmlAnaAedtOsVIUfbJpA99WlErs0OIjUh0UvA7vHSEVTKrfp86TDkJpmN70ruO9UbN3majhSPRp2Vo1LX3vE0E1rIQiBb0Ydt6BKm/P/cmyej6VndJSa5QaoXTVyzksi7JiCh0kQALx18nReDvaETzt595Z/xXLYBXaQfkrikfVQuGuVlqXF7d7efGQ4dU8q8U/xi2kwGyMcYSDbDyAkQ8YvrjRH0PekidPS3yiJT2PX2j4omN2D+qw5Ak5qIEH7LO2vUDDlwXaxiT9xTDNhRkrEhg+U9dY13bkk+yIcie3QpycKZHLuz4T7WnbuNF0x/YMJfdVON/Lm6IkDPQTJ77+5H3l56tig7JWPcybE0YlTnJw34Mk4RqTJ5l6SzdSmw1X+bbohBtXHErxP+N36p6k2WRcsw/x7Dwh0+lLOIl+Ka2ozsx4PRmJf4XZ/wqK4hqziAPkZM+/5ZCQLB4a7CKEtKn03enKvIAA1f7WHx8nMLgUcA=
-        on:
-          all_branches: true
-          tags: true
+deploy:
+  provider: npm
+  tag: rc
+  email: thomas.conner@me.com
+  api_key:
+    secure: LWLKDWIKJ87sJOnNjOCARduChbtjWYLtU3RpyeCsdaOxowdW0yxhQy6TS6cISyD0AD9AvO0nPkz1NGIHFRf/FQZUo5yoBYWR2aPnqU0EUaaQOwkqfK2EgfgRN9n1Jg1eqP7efME44psQH2lDjV3YLN2wY3wSkJ2GeWvyd0nonJJNhvmHHxFoUA+6u6G/OFAtaCuB+fDDYxV4wA06QjVVvZHGDDh5HreQufoixAB6DeXi3oSUVqljHyIN1tq/8i/ZQy9ENR6kJ4NWtHl+xNYgb/BI9pKSMQd6i/CB8KTZ/0Dtt2z2tYG4nEfDW2/PaI+FPOHVdTKDGvXkqg18R5vQYeEuzHv/TLndyOZDtEEZXL3gvhueQJTtj4cxJwBqIFdU4FBrQun51ZkE77Ed1LM7EYIpI2EROzDIMqVBOPYWS0uQmkem1ZmCkPjiKL7i+ZYpG/U4BqmWCVo+EOQ/aCQ7KSoXTYhhOgmxaNfLezJT3KKFO32gQUrakANfeun2SUFAb+DOyNMHVDqmgA8jG1e0iX2Ai7Ypkm7Q+4iR8mvr9cUJhhglFY3QvSztxzH94x/BSMZ5upTdNckqgyihJUlq5lJj/S90YvKdXEM2KeNZMjSK7M5UNEWbNcTuVDJAIvJQsM9JLkxlXee000uS3rOO4sanNf57BWGBZGgoCLijtdY=
+  on:
+    all_branches: true
+    tags: true
