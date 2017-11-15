@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "version": "3.9.3-beta.0",
+  "name": "kinvey-phonegap-popup",
+  "main": "src/index.js",
+  "dependencies": {
+    "kinvey-phonegap-device": "^3.9.3-beta.0",
+    "kinvey-html5-popup": "^3.9.3-beta.0"
+  }
+}

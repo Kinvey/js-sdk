@@ -52,7 +52,7 @@ const { CacheRack, NetworkRack } = require('kinvey-request');
 const { MobileIdentityConnect } = require('kinvey-identity');
 const { CacheMiddleware } = require('kinvey-html5-cache');
 const { HttpMiddleware } = require('kinvey-html5-http');
-const { Popup } = require('kinvey-html5-popup');
+const { Popup } = require('kinvey-phonegap-popup');
 const pkg = require('../package.json');
 
 // Setup racks
