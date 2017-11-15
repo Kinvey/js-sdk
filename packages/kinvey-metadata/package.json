@@ -1,11 +1,11 @@
 {
   "private": true,
-  "version": "3.9.3-rc.15",
+  "version": "3.9.3-rc.16",
   "name": "kinvey-metadata",
   "main": "src/index.js",
   "dependencies": {
-    "kinvey-errors": "^3.9.3-rc.15",
-    "kinvey-utils": "^3.9.3-rc.15",
+    "kinvey-errors": "^3.9.3-rc.16",
+    "kinvey-utils": "^3.9.3-rc.16",
     "lodash": "4.17.4"
   },
   "devDependencies": {
