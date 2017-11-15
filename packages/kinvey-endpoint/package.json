@@ -1,20 +1,20 @@
 {
   "private": true,
-  "version": "3.9.3-beta.0",
+  "version": "3.9.3-beta.1",
   "name": "kinvey-endpoint",
   "main": "src/index.js",
   "dependencies": {
     "es6-promise": "4.1.1",
-    "kinvey-client": "^3.9.3-beta.0",
-    "kinvey-errors": "^3.9.3-beta.0",
-    "kinvey-request": "^3.9.3-beta.0",
+    "kinvey-client": "^3.9.3-beta.1",
+    "kinvey-errors": "^3.9.3-beta.1",
+    "kinvey-request": "^3.9.3-beta.1",
     "lodash": "4.17.4"
   },
   "devDependencies": {
     "expect": "1.20.2",
-    "kinvey": "^3.9.3-beta.0",
-    "kinvey-user": "^3.9.3-beta.0",
-    "kinvey-utils": "^3.9.3-beta.0",
+    "kinvey": "^3.9.3-beta.1",
+    "kinvey-user": "^3.9.3-beta.1",
+    "kinvey-utils": "^3.9.3-beta.1",
     "mocha": "4.0.1",
     "nock": "9.0.28"
   },

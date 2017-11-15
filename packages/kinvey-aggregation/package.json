@@ -1,12 +1,12 @@
 {
   "private": true,
-  "version": "3.9.3-beta.0",
+  "version": "3.9.3-beta.1",
   "name": "kinvey-aggregation",
   "main": "src/index.js",
   "dependencies": {
-    "kinvey-errors": "^3.9.3-beta.0",
-    "kinvey-query": "^3.9.3-beta.0",
-    "kinvey-utils": "^3.9.3-beta.0",
+    "kinvey-errors": "^3.9.3-beta.1",
+    "kinvey-query": "^3.9.3-beta.1",
+    "kinvey-utils": "^3.9.3-beta.1",
     "lodash": "4.17.4"
   },
   "devDependencies": {
