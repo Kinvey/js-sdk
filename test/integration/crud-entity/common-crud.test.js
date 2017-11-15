@@ -22,7 +22,7 @@ function testFunc() {
 
       before((done) => {
 
-        Kinvey.initialize({
+        Kinvey.init({
           appKey: appKey,
           appSecret: appSecret
         });
