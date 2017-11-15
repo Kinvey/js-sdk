@@ -457,7 +457,7 @@ function testFunc() {
             return storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
-                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
+                  common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
                   done();
                 } catch (error) {
                   done(error);
