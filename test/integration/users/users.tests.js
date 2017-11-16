@@ -380,13 +380,13 @@ function testFunc() {
     });
 
     describe('lookup()', () => {
-      const firstName = common.randomString();
+      const username = common.randomString();
 
       before((done) => {
         Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup({
-              first_name: firstName
+              username: username
             })
           })
           .then((user) => {
@@ -406,7 +406,7 @@ function testFunc() {
 
       it('should return an array of users matching the query', (done) => {
         const query = new Kinvey.Query();
-        query.equalTo('first_name', firstName);
+        query.equalTo('username', username);
         Kinvey.User.lookup(query)
           .toPromise()
           .then((users) => {
@@ -414,8 +414,7 @@ function testFunc() {
             expect(users.length).to.equal(1);
             const user = users[0];
             expect(user._id).to.exist;
-            expect(user.first_name).to.equal(firstName);
-            expect(user.username).to.exist;
+            expect(user.username).to.equal(username);
             done();
           }).catch(done);
       });
@@ -428,13 +427,13 @@ function testFunc() {
       let username2 = common.randomString();
 
       before((done) => {
-        username = common.randomString();
-        return Kinvey.User.logout()
+        Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup({
-              username: username1,
-              password: common.randomString()
-            })
+              username: username1
+            }, {
+                state: false
+              })
           })
           .then((user) => {
             userToRemoveId1 = user.data._id;
@@ -442,20 +441,26 @@ function testFunc() {
           })
           .then(() => {
             return Kinvey.User.signup({
-              username: username2,
-              password: common.randomString()
+              username: username2
             }, {
                 state: false
               })
-              .then((user) => {
-                userToRemoveId2 = user.data._id;
-                done();
-              })
-          }).catch(done);
+          })
+          .then((user) => {
+            userToRemoveId2 = user.data._id;
+          })
+          .then(() => {
+            return Kinvey.User.signup()
+          })
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            done();
+          })
+          .catch(done);
       });
 
       it('should throw a KinveyError if an id is not provided', (done) => {
-        return Kinvey.User.remove()
+        Kinvey.User.remove()
           .catch((error) => {
             expect(error.message).to.equal('An id was not provided.');
             done();
@@ -463,25 +468,23 @@ function testFunc() {
       });
 
       it('should throw a KinveyError if an id is not a string', (done) => {
-        return Kinvey.User.remove(1)
+        Kinvey.User.remove(1)
           .catch((error) => {
             expect(error.message).to.equal('The id provided is not a string.');
             done();
           }).catch(done);
       });
 
+      it('should return the error from the server if the id does not exist', (done) => {
+        Kinvey.User.remove(common.randomString())
+          .catch((error) => {
+            expect(error.message).to.equal('This user does not exist for this app backend');
+            done();
+          }).catch(done);
+      });
+
       it('should remove the user that matches the id argument, but the user should remain in the Backend', (done) => {
-        return Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({
-              username: common.randomString(),
-              password: common.randomString()
-            })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            return Kinvey.User.remove(userToRemoveId1)
-          })
+        Kinvey.User.remove(userToRemoveId1)
           .then(() => {
             return Kinvey.User.exists(username1)
           })
@@ -498,7 +501,7 @@ function testFunc() {
       });
 
       it('should remove the user that matches the id argument permanently', (done) => {
-        return Kinvey.User.remove(userToRemoveId2, {
+        Kinvey.User.remove(userToRemoveId2, {
           hard: true
         })
           .then(() => {
