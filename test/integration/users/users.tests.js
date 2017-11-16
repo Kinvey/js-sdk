@@ -35,7 +35,14 @@ function testFunc() {
     });
 
     after((done) => {
-      common.deleteUsers(createdUserIds)
+      Kinvey.User.logout()
+        .then(() => {
+          return Kinvey.User.signup()
+        })
+        .then((user) => {
+          createdUserIds.push(user.data._id);
+          return common.deleteUsers(createdUserIds)
+        })
         .then(() => done())
         .catch(done)
     });
@@ -519,11 +526,10 @@ function testFunc() {
 
       before((done) => {
         username = common.randomString();
-        return Kinvey.User.logout()
+        Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup({
-              username: username,
-              password: common.randomString()
+              username: username
             })
           })
           .then((user) => {
@@ -533,7 +539,7 @@ function testFunc() {
       });
 
       it('should return true if the user exists in the Backend', (done) => {
-        return Kinvey.User.exists(username)
+        Kinvey.User.exists(username)
           .then((result) => {
             expect(result).to.be.true
             done();
@@ -541,7 +547,7 @@ function testFunc() {
       });
 
       it('should return false if the user does not exist in the Backend', (done) => {
-        return Kinvey.User.exists('not_existing_username')
+        Kinvey.User.exists(common.randomString())
           .then((result) => {
             expect(result).to.be.false
             done();
