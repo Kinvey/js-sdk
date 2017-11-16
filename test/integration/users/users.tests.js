@@ -43,17 +43,14 @@ function testFunc() {
     describe('login()', () => {
 
       beforeEach((done) => {
-        return Kinvey.User.logout()
+        Kinvey.User.logout()
           .then(() => {
             done();
           })
       });
 
       it('should throw an error if an active user already exists', (done) => {
-        return Kinvey.User.signup({
-          username: common.randomString(),
-          password: common.randomString()
-        })
+        Kinvey.User.signup()
           .then((user) => {
             createdUserIds.push(user.data._id);
             return Kinvey.User.login(common.randomString(), common.randomString());
@@ -65,7 +62,7 @@ function testFunc() {
       });
 
       it('should throw an error if a username is not provided', (done) => {
-        return Kinvey.User.login(null, common.randomString())
+        Kinvey.User.login(null, common.randomString())
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -73,7 +70,7 @@ function testFunc() {
       });
 
       it('should throw an error if the username is an empty string', (done) => {
-        return Kinvey.User.login(' ', common.randomString())
+        Kinvey.User.login(' ', common.randomString())
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -81,7 +78,7 @@ function testFunc() {
       });
 
       it('should throw an error if a password is not provided', (done) => {
-        return Kinvey.User.login(common.randomString())
+        Kinvey.User.login(common.randomString())
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -89,7 +86,7 @@ function testFunc() {
       });
 
       it('should throw an error if the password is an empty string', (done) => {
-        return Kinvey.User.login(common.randomString(), ' ')
+        Kinvey.User.login(common.randomString(), ' ')
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -98,9 +95,9 @@ function testFunc() {
 
       it('should throw an error if the username and/or password is invalid', (done) => {
         const user = new Kinvey.User();
-        return user.login(common.randomString(), common.randomString())
+        user.login(common.randomString(), common.randomString())
           .catch((error) => {
-            expect(error.message).to.contain('Invalid credentials. Please retry your request with correct credentials');
+            expect(error.message).to.contain('Invalid credentials.');
             done();
           }).catch(done);
       });
