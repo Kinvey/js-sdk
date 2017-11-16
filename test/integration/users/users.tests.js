@@ -634,5 +634,43 @@ function testFunc() {
           }).catch(done);
       });
     });
+
+    describe('resetPassword()', () => {
+      const username = common.randomString();
+      before((done) => {
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup({ username: username, email: common.randomEmailAddress() })
+          })
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            done();
+          }).catch(done);
+      });
+
+      it('should start the reset password procedure', (done) => {
+        Kinvey.User.resetPassword(username)
+          .then((result) => {
+            expect(result).to.be.null;
+            done();
+          }).catch(done);
+      });
+
+      it('should throw an error if a username is not provided', (done) => {
+        Kinvey.User.resetPassword()
+          .catch((error) => {
+            expect(error.message).to.equal('A username was not provided.');
+            done();
+          }).catch(done);
+      });
+
+      it('should throw an error if the provided username is not a string', (done) => {
+        Kinvey.User.resetPassword(1)
+          .catch((error) => {
+            expect(error.message).to.equal('The provided username is not a string.');
+            done();
+          }).catch(done);
+      });
+    });
   });
 }
