@@ -554,5 +554,47 @@ function testFunc() {
           }).catch(done);
       });
     });
+
+    describe('verifyEmail()', () => {
+      const username = common.randomString();
+      before((done) => {
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup({ username: username, email: 'test@test.com' })
+          })
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            done();
+          }).catch(done);
+      });
+
+      it('should start the email verification and User.me should get the updated user from the server', (done) => {
+        Kinvey.User.verifyEmail(username)
+          .then(() => {
+            // Kinvey.User.me() is used to get the created emailVerification field from the server
+            return Kinvey.User.me()
+          })
+          .then((user) => {
+            expect(user.data._kmd.emailVerification).to.exist;
+            done();
+          }).catch(done);
+      });
+
+      it('should throw an error if a username is not provided', (done) => {
+        Kinvey.User.verifyEmail()
+          .catch((error) => {
+            expect(error.message).to.equal('A username was not provided.');
+            done();
+          }).catch(done);
+      });
+
+      it('should throw an error if the provided username is not a string', (done) => {
+        Kinvey.User.verifyEmail(1)
+          .catch((error) => {
+            expect(error.message).to.equal('The provided username is not a string.');
+            done();
+          }).catch(done);
+      });
+    });
   });
 }
