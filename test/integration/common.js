@@ -13,6 +13,9 @@ common = {
   randomString: (size = 18, prefix = '') => {
     return `${prefix}${common.uid(size)}`;
   },
+  randomEmailAddress: () => {
+    return `${common.randomString()}@test.com`;
+  },
   getSingleEntity: (_id, textValue, numberValue, array) => {
     let entity = {
       textField: textValue || common.randomString(),

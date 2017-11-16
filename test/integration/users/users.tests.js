@@ -249,7 +249,7 @@ function testFunc() {
         const data = {
           username: common.randomString(),
           password: common.randomString(),
-          email: 'testEmail@test.com',
+          email: common.randomEmailAddress(),
           additionalField: 'test'
         }
         Kinvey.User.signup(data)
@@ -560,7 +560,7 @@ function testFunc() {
       before((done) => {
         Kinvey.User.logout()
           .then(() => {
-            return Kinvey.User.signup({ username: username, email: 'test@test.com' })
+            return Kinvey.User.signup({ username: username, email: common.randomEmailAddress() })
           })
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -575,7 +575,7 @@ function testFunc() {
             return Kinvey.User.me()
           })
           .then((user) => {
-            expect(user.data._kmd.emailVerification).to.exist;
+            expect(user.metadata.emailVerification).to.exist;
             done();
           }).catch(done);
       });
@@ -592,6 +592,44 @@ function testFunc() {
         Kinvey.User.verifyEmail(1)
           .catch((error) => {
             expect(error.message).to.equal('The provided username is not a string.');
+            done();
+          }).catch(done);
+      });
+    });
+
+    describe('forgotUsername()', () => {
+      const email = common.randomEmailAddress();
+      before((done) => {
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup({ email: email })
+          })
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            done();
+          }).catch(done);
+      });
+
+      it('should initiate the email sending process', (done) => {
+        Kinvey.User.forgotUsername(email)
+          .then((result) => {
+            expect(result).to.be.null;
+            done();
+          }).catch(done);
+      });
+
+      it('should throw an error if an email is not provided', (done) => {
+        Kinvey.User.forgotUsername()
+          .catch((error) => {
+            expect(error.message).to.equal('An email was not provided.');
+            done();
+          }).catch(done);
+      });
+
+      it('should throw an error if the provided email is not a string', (done) => {
+        Kinvey.User.forgotUsername(1)
+          .catch((error) => {
+            expect(error.message).to.equal('The provided email is not a string.');
             done();
           }).catch(done);
       });
