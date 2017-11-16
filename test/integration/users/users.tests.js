@@ -335,7 +335,7 @@ function testFunc() {
     describe('update()', () => {
 
       before((done) => {
-        return Kinvey.User.logout()
+        Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup()
           })
@@ -347,26 +347,29 @@ function testFunc() {
 
       it('should update the active user', (done) => {
         const email = common.randomString();
-        return Kinvey.User.update({
-          email: email
+        const customProperty = common.randomString();
+        Kinvey.User.update({
+          email: email,
+          customProperty: customProperty
         })
-          .then(() => {
-            const activeUser = Kinvey.User.getActiveUser();
-            expect(activeUser.data.email).to.equal(email);
+          .then((user) => {
+            expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+            expect(user.data.email).to.equal(email);
+            expect(user.data.customProperty).to.equal(customProperty);
             const query = new Kinvey.Query();
             query.equalTo('email', email);
             return Kinvey.User.lookup(query).toPromise()
           })
           .then((users) => {
             expect(users.length).to.equal(1);
+            expect(users[0].email).to.equal(email);
             done();
           }).catch(done);
       });
 
       it('should throw an error if the user does not have an _id', (done) => {
         const user = new Kinvey.User();
-
-        return user.update({
+        user.update({
           email: common.randomString()
         })
           .catch((error) => {
@@ -380,31 +383,20 @@ function testFunc() {
       const firstName = common.randomString();
 
       before((done) => {
-        return Kinvey.User.logout()
+        Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup({
-              username: common.randomString(),
-              first_name: firstName,
-              password: common.randomString()
+              first_name: firstName
             })
           })
           .then((user) => {
-            createdUserIds.push(user.data._id);
-            return Kinvey.User.signup({
-              username: common.randomString(),
-              first_name: firstName,
-              password: common.randomString()
-            }, {
-                state: false
-              })
-          }).then((user) => {
             createdUserIds.push(user.data._id);
             done();
           })
       });
 
       it('should throw an error if the query argument is not an instance of the Query class', (done) => {
-        return Kinvey.User.lookup({})
+        Kinvey.User.lookup({})
           .toPromise()
           .catch((error) => {
             expect(error.message).to.equal('Invalid query. It must be an instance of the Query class.');
@@ -415,16 +407,15 @@ function testFunc() {
       it('should return an array of users matching the query', (done) => {
         const query = new Kinvey.Query();
         query.equalTo('first_name', firstName);
-        return Kinvey.User.lookup(query)
+        Kinvey.User.lookup(query)
           .toPromise()
           .then((users) => {
             expect(users).to.be.an('array');
-            expect(users.length).to.equal(2);
-            users.forEach((user) => {
-              expect(user._id).to.exist;
-              expect(user.first_name).to.equal(firstName);
-              expect(user.username).to.exist;
-            })
+            expect(users.length).to.equal(1);
+            const user = users[0];
+            expect(user._id).to.exist;
+            expect(user.first_name).to.equal(firstName);
+            expect(user.username).to.exist;
             done();
           }).catch(done);
       });
