@@ -1,17 +1,17 @@
 {
   "private": true,
-  "version": "3.9.3-beta.4",
+  "version": "3.9.3-beta.5",
   "name": "kinvey-html5",
   "main": "src/index.js",
   "dependencies": {
     "es6-promise": "4.1.1",
-    "kinvey": "^3.9.3-beta.4",
-    "kinvey-client": "^3.9.3-beta.4",
-    "kinvey-errors": "^3.9.3-beta.4",
-    "kinvey-log": "^3.9.3-beta.4",
-    "kinvey-request": "^3.9.3-beta.4",
-    "kinvey-user": "^3.9.3-beta.4",
-    "kinvey-utils": "^3.9.3-beta.4",
+    "kinvey": "^3.9.3-beta.5",
+    "kinvey-client": "^3.9.3-beta.5",
+    "kinvey-errors": "^3.9.3-beta.5",
+    "kinvey-log": "^3.9.3-beta.5",
+    "kinvey-request": "^3.9.3-beta.5",
+    "kinvey-user": "^3.9.3-beta.5",
+    "kinvey-utils": "^3.9.3-beta.5",
     "local-storage-fallback": "4.0.0",
     "lodash": "4.17.4"
   }
