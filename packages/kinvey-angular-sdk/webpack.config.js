@@ -10,7 +10,7 @@ module.exports = {
   },
   externals: {
     angular: 'angular'
-  }
+  },
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js',
