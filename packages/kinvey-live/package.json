@@ -1,14 +1,14 @@
 {
   "private": true,
-  "version": "3.9.3-beta.3",
+  "version": "3.9.3-beta.5",
   "name": "kinvey-live",
   "main": "src/index.js",
   "dependencies": {
     "es6-promise": "4.1.1",
-    "kinvey-client": "^3.9.3-beta.3",
-    "kinvey-errors": "^3.9.3-beta.3",
-    "kinvey-request": "^3.9.3-beta.3",
-    "kinvey-utils": "^3.9.3-beta.3",
+    "kinvey-client": "^3.9.3-beta.5",
+    "kinvey-errors": "^3.9.3-beta.5",
+    "kinvey-request": "^3.9.3-beta.5",
+    "kinvey-utils": "^3.9.3-beta.5",
     "lodash": "4.17.4",
     "pubnub": "4.17.0"
   }

@@ -13,7 +13,7 @@ npm install --save kinvey-angular2-sdk
 Import the Kinvey Angular2 SDK:
 
 ```javascript
-import { Kinvey } from 'kinvey-angular2-sdk';
+import * as Kinvey from 'kinvey-angular2-sdk';
 ```
 
 A [TypeScript](https://www.typescriptlang.org/) type definition file is included in the distribution and will automatically be picked up by the TypeScript compiler.

@@ -1,26 +1,34 @@
 {
   "private": true,
   "version": "3.9.3-beta.5",
-  "name": "kinvey-js-sdk",
-  "description": "Kinvey JavaScript SDK for developing JavaScript applications.",
+  "name": "kinvey-angular2-sdk",
+  "description": "Kinvey JavaScript SDK for Angular 2+/Ionic 2+ applications.",
   "author": "Kinvey, Inc.",
   "homepage": "http://www.kinvey.com",
   "license": "Apache-2.0",
-  "main": "kinvey-js-sdk.min.js",
+  "main": "kinvey-angular2-sdk.min.js",
+  "typings": "kinvey.d.ts",
   "dependencies": {
+    "rxjs": "5.4.3"
+  },
+  "devDependencies": {
     "fs-extra": "4.0.2",
     "json-loader": "^0.5.4",
-    "kinvey": "^3.9.3-beta.5",
     "kinvey-acl": "^3.9.3-beta.5",
     "kinvey-aggregation": "^3.9.3-beta.5",
     "kinvey-datastore": "^3.9.3-beta.5",
     "kinvey-endpoint": "^3.9.3-beta.5",
     "kinvey-errors": "^3.9.3-beta.5",
     "kinvey-filestore": "^3.9.3-beta.5",
+    "kinvey-html5": "^3.9.3-beta.5",
+    "kinvey-html5-cache": "^3.9.3-beta.5",
+    "kinvey-html5-http": "^3.9.3-beta.5",
     "kinvey-identity": "^3.9.3-beta.5",
     "kinvey-live": "^3.9.3-beta.5",
     "kinvey-log": "^3.9.3-beta.5",
     "kinvey-metadata": "^3.9.3-beta.5",
+    "kinvey-phonegap-popup": "^3.9.3-beta.5",
+    "kinvey-phonegap-push": "^3.9.3-beta.5",
     "kinvey-query": "^3.9.3-beta.5",
     "kinvey-request": "^3.9.3-beta.5",
     "kinvey-user": "^3.9.3-beta.5",
@@ -31,6 +39,13 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js",
-    "postbuild": "node scripts/postbuild"
-  }
+    "postbuild": "node scripts/copyfiles",
+    "release": "npm run build && ./scripts/push.sh",
+    "postrelease": "rimraf tmp"
+  },
+  "files": [
+    "kinvey-angular2-sdk.min.js",
+    "kinvey-angular2-sdk.min.js.map",
+    "kinvey.d.ts"
+  ]
 }
