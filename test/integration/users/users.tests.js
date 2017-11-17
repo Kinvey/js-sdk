@@ -352,11 +352,12 @@ function testFunc() {
     });
 
     describe('update()', () => {
+      const username = common.randomString();
 
       before((done) => {
         Kinvey.User.logout()
           .then(() => {
-            return Kinvey.User.signup()
+            return Kinvey.User.signup({ username: username })
           })
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -365,25 +366,31 @@ function testFunc() {
       });
 
       it('should update the active user', (done) => {
-        const email = common.randomString();
-        const customProperty = common.randomString();
+        const newEmail = common.randomString();
+        const newPassword = common.randomString();
         Kinvey.User.update({
-          email: email,
-          customProperty: customProperty
+          email: newEmail,
+          password: newPassword
         })
           .then((user) => {
             expect(user).to.deep.equal(Kinvey.User.getActiveUser());
-            expect(user.data.email).to.equal(email);
-            expect(user.data.customProperty).to.equal(customProperty);
+            expect(user.data.email).to.equal(newEmail);
             const query = new Kinvey.Query();
-            query.equalTo('email', email);
+            query.equalTo('email', newEmail);
             return Kinvey.User.lookup(query).toPromise()
           })
           .then((users) => {
             expect(users.length).to.equal(1);
-            expect(users[0].email).to.equal(email);
+            expect(users[0].email).to.equal(newEmail);
+            return Kinvey.User.logout()
+          })
+          .then(() => {
+            return Kinvey.User.login(username, newPassword)
+          })
+          .then(() => {
             done();
-          }).catch(done);
+          })
+          .catch(done);
       });
 
       it('should throw an error if the user does not have an _id', (done) => {
