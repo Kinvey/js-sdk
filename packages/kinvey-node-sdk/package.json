@@ -7,8 +7,11 @@
   "homepage": "http://www.kinvey.com",
   "license": "Apache-2.0",
   "main": "kinvey-node-sdk.min.js",
-  "devDependencies": {
+  "dependencies": {
     "es6-promise": "4.1.1",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {
     "fs-extra": "4.0.2",
     "json-loader": "^0.5.4",
     "kinvey": "^3.9.3-beta.6",
@@ -25,7 +28,6 @@
     "kinvey-query": "^3.9.3-beta.6",
     "kinvey-request": "^3.9.3-beta.6",
     "kinvey-user": "^3.9.3-beta.6",
-    "request": "^2.81.0",
     "rimraf": "2.6.2",
     "uglifyjs-webpack-plugin": "1.0.1",
     "webpack": "^2.5.1"
