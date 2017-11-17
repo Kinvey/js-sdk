@@ -5,8 +5,13 @@ const fs = require('fs');
 const pkg = require('./package.json');
 
 module.exports = {
+  target: 'node',
   entry: {
     'kinvey-node-sdk.min': './src/index.js',
+  },
+  externals: {
+    'es6-promise': 'es6-promise',
+    request: 'request'
   },
   output: {
     path: path.join(__dirname, 'dist'),
