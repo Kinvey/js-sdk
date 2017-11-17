@@ -20,6 +20,18 @@ function testFunc() {
     expect(user).to.deep.equal(Kinvey.User.getActiveUser());
   }
 
+  const getMissingUsernameErrorMessage = () => {
+    return `A username was not provided.`;
+  }
+
+  const getMissingEmailErrorMessage = () => {
+    return `An email was not provided.`;
+  }
+
+  const getNotAStringErrorMessage = (parameter) => {
+    return `The provided ${parameter} is not a string.`;
+  }
+
   describe('User tests', () => {
 
     const collectionName = externalConfig.collectionName;
@@ -555,54 +567,14 @@ function testFunc() {
       });
     });
 
-    describe('verifyEmail()', () => {
+    describe('email sending operations', () => {
       const username = common.randomString();
-      before((done) => {
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({ username: username, email: common.randomEmailAddress() })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            done();
-          }).catch(done);
-      });
-
-      it('should start the email verification and User.me should get the updated user from the server', (done) => {
-        Kinvey.User.verifyEmail(username)
-          .then(() => {
-            // Kinvey.User.me() is used to get the created emailVerification field from the server
-            return Kinvey.User.me()
-          })
-          .then((user) => {
-            expect(user.metadata.emailVerification).to.exist;
-            done();
-          }).catch(done);
-      });
-
-      it('should throw an error if a username is not provided', (done) => {
-        Kinvey.User.verifyEmail()
-          .catch((error) => {
-            expect(error.message).to.equal('A username was not provided.');
-            done();
-          }).catch(done);
-      });
-
-      it('should throw an error if the provided username is not a string', (done) => {
-        Kinvey.User.verifyEmail(1)
-          .catch((error) => {
-            expect(error.message).to.equal('The provided username is not a string.');
-            done();
-          }).catch(done);
-      });
-    });
-
-    describe('forgotUsername()', () => {
       const email = common.randomEmailAddress();
+
       before((done) => {
         Kinvey.User.logout()
           .then(() => {
-            return Kinvey.User.signup({ email: email })
+            return Kinvey.User.signup({ username: username, email: email })
           })
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -610,66 +582,89 @@ function testFunc() {
           }).catch(done);
       });
 
-      it('should initiate the email sending process', (done) => {
-        Kinvey.User.forgotUsername(email)
-          .then((result) => {
-            expect(result).to.be.null;
-            done();
-          }).catch(done);
+      describe('verifyEmail()', () => {
+
+        it('should start the email verification and User.me should get the updated user from the server', (done) => {
+          Kinvey.User.verifyEmail(username)
+            .then(() => {
+              // Kinvey.User.me() is used to get the created emailVerification field from the server
+              return Kinvey.User.me()
+            })
+            .then((user) => {
+              expect(user.metadata.emailVerification).to.exist;
+              done();
+            }).catch(done);
+        });
+
+        it('should throw an error if a username is not provided', (done) => {
+          Kinvey.User.verifyEmail()
+            .catch((error) => {
+              expect(error.message).to.equal(getMissingUsernameErrorMessage());
+              done();
+            }).catch(done);
+        });
+
+        it('should throw an error if the provided username is not a string', (done) => {
+          Kinvey.User.verifyEmail(1)
+            .catch((error) => {
+              expect(error.message).to.equal(getNotAStringErrorMessage('username'));
+              done();
+            }).catch(done);
+        });
       });
 
-      it('should throw an error if an email is not provided', (done) => {
-        Kinvey.User.forgotUsername()
-          .catch((error) => {
-            expect(error.message).to.equal('An email was not provided.');
-            done();
-          }).catch(done);
+      describe('forgotUsername()', () => {
+
+        it('should start the email sending process on the server', (done) => {
+          Kinvey.User.forgotUsername(email)
+            .then((result) => {
+              expect(result).to.be.null;
+              done();
+            }).catch(done);
+        });
+
+        it('should throw an error if an email is not provided', (done) => {
+          Kinvey.User.forgotUsername()
+            .catch((error) => {
+              expect(error.message).to.equal(getMissingEmailErrorMessage());
+              done();
+            }).catch(done);
+        });
+
+        it('should throw an error if the provided email is not a string', (done) => {
+          Kinvey.User.forgotUsername(1)
+            .catch((error) => {
+              expect(error.message).to.equal(getNotAStringErrorMessage('email'));
+              done();
+            }).catch(done);
+        });
       });
 
-      it('should throw an error if the provided email is not a string', (done) => {
-        Kinvey.User.forgotUsername(1)
-          .catch((error) => {
-            expect(error.message).to.equal('The provided email is not a string.');
-            done();
-          }).catch(done);
-      });
-    });
+      describe('resetPassword()', () => {
 
-    describe('resetPassword()', () => {
-      const username = common.randomString();
-      before((done) => {
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({ username: username, email: common.randomEmailAddress() })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            done();
-          }).catch(done);
-      });
+        it('should start the reset password procedure on the server', (done) => {
+          Kinvey.User.resetPassword(username)
+            .then((result) => {
+              expect(result).to.be.null;
+              done();
+            }).catch(done);
+        });
 
-      it('should start the reset password procedure', (done) => {
-        Kinvey.User.resetPassword(username)
-          .then((result) => {
-            expect(result).to.be.null;
-            done();
-          }).catch(done);
-      });
+        it('should throw an error if a username is not provided', (done) => {
+          Kinvey.User.resetPassword()
+            .catch((error) => {
+              expect(error.message).to.equal(getMissingUsernameErrorMessage());
+              done();
+            }).catch(done);
+        });
 
-      it('should throw an error if a username is not provided', (done) => {
-        Kinvey.User.resetPassword()
-          .catch((error) => {
-            expect(error.message).to.equal('A username was not provided.');
-            done();
-          }).catch(done);
-      });
-
-      it('should throw an error if the provided username is not a string', (done) => {
-        Kinvey.User.resetPassword(1)
-          .catch((error) => {
-            expect(error.message).to.equal('The provided username is not a string.');
-            done();
-          }).catch(done);
+        it('should throw an error if the provided username is not a string', (done) => {
+          Kinvey.User.resetPassword(1)
+            .catch((error) => {
+              expect(error.message).to.equal(getNotAStringErrorMessage('username'));
+              done();
+            }).catch(done);
+        });
       });
     });
   });
