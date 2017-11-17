@@ -15,9 +15,6 @@ try {
   delete pkg.scripts;
   fs.writeFileSync(path.join(__dirname, '../dist/package.json'), JSON.stringify(pkg, null, 2));
 
-  // Copy bower.json
-  fs.copySync(path.join(__dirname, '../bower.json'), path.join(__dirname, '../dist/bower.json'));
-
   // Copy LICENSE
   fs.copySync(path.join(__dirname, '../LICENSE'), path.join(__dirname, '../dist/LICENSE'));
 
