@@ -13,7 +13,7 @@ npm install --save kinvey-angular-sdk
 Import the Kinvey Angular SDK:
 
 ```javascript
-import 'kinvey-phonegap-sdk';
+require('kinvey-phonegap-sdk');
 ```
 
 You will then need to inlcude `kinvey` as a dependency for your app.

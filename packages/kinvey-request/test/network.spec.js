@@ -110,10 +110,17 @@ describe('KinveyRequest', () => {
 
     it('should redirect', () => {
       // Setup API response
-      nock(client.apiHostname, { encodedQueryParams: true })
+      nock(client.apiHostname)
         .get('/foo')
         .reply(307, {}, {
-          Location: 'http://echo.jsontest.com/key/value/one/two'
+          Location: 'http://test.com'
+        });
+
+      nock('http://test.com')
+        .get('/')
+        .reply(200, {
+          one: 'two',
+          key: 'value'
         });
 
       const request = new KinveyRequest({
@@ -134,7 +141,7 @@ describe('KinveyRequest', () => {
       nock(client.apiHostname, { encodedQueryParams: true })
         .get('/foo')
         .reply(307, {}, {
-          Location: 'http://echo.jsontest.com/key/value/one/two'
+          Location: 'http://test.com'
         });
 
       const request = new KinveyRequest({
@@ -145,7 +152,7 @@ describe('KinveyRequest', () => {
         .then((response) => {
           expect(response.statusCode).toEqual(307);
           expect(response.data).toEqual({});
-          expect(response.headers.get('Location')).toEqual('http://echo.jsontest.com/key/value/one/two');
+          expect(response.headers.get('Location')).toEqual('http://test.com');
         });
     });
 
