@@ -4,9 +4,9 @@ function testFunc() {
 
   const assertUserData = (user, expectedUsername, shouldReturnPassword) => {
     expect(user.data._id).to.exist;
-    expect(user._kmd.authtoken).to.exist;
-    expect(user._kmd.lmt).to.exist;
-    expect(user._kmd.ect).to.exist;
+    expect(user.metadata.authtoken).to.exist;
+    expect(user.metadata.lmt).to.exist;
+    expect(user.metadata.ect).to.exist;
     expect(user._acl.creator).to.exist;
     if (expectedUsername) {
       expect(user.data.username).to.equal(expectedUsername);
