@@ -1,11 +1,10 @@
-import HttpRequest from 'request';
-import { Promise } from 'es6-promise';
-import { Middleware } from '../../core/request';
-import { NetworkConnectionError, TimeoutError } from '../../core/errors';
-import { isDefined } from '../../core/utils';
-import pkg from '../../../package.json';
+const HttpRequest = require('request');
+const Promise = require('es6-promise');
+const { Middleware } = require('kinvey-request');
+const { NetworkConnectionError, TimeoutError } = require('kinvey-errors');
+const { isDefined } = require('kinvey-utils/object');
 
-function deviceInformation() {
+function deviceInformation(pkg) {
   const platform = process.title;
   const { version } = process;
   const manufacturer = process.platform;
@@ -22,9 +21,10 @@ function deviceInformation() {
   }).join(' ');
 }
 
-export class HttpMiddleware extends Middleware {
-  constructor(name = 'Http Middleware') {
-    super(name);
+class HttpMiddleware extends Middleware {
+  constructor(pkg) {
+    super();
+    this.pkg = pkg
   }
 
   handle(request) {
@@ -39,7 +39,7 @@ export class HttpMiddleware extends Middleware {
       } = request;
 
       // Add the X-Kinvey-Device-Information header
-      headers['X-Kinvey-Device-Information'] = deviceInformation();
+      headers['X-Kinvey-Device-Information'] = deviceInformation(this.pkg);
 
       this.httpRequest = HttpRequest({
         method: method,
@@ -77,3 +77,4 @@ export class HttpMiddleware extends Middleware {
     return Promise.resolve();
   }
 }
+exports.HttpMiddleware = HttpMiddleware;

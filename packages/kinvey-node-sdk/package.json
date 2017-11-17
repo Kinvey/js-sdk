@@ -1,25 +1,26 @@
 {
   "private": true,
   "version": "3.9.3-beta.7",
-  "name": "kinvey-html5-sdk",
-  "description": "Kinvey JavaScript SDK for HTML5 applications.",
+  "name": "kinvey-node-sdk",
+  "description": "Kinvey JavaScript SDK for Node.js applications.",
   "author": "Kinvey, Inc.",
   "homepage": "http://www.kinvey.com",
   "license": "Apache-2.0",
-  "main": "kinvey-html5-sdk.min.js",
+  "main": "kinvey-node-sdk.min.js",
   "dependencies": {
+    "es6-promise": "4.1.1",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {
     "fs-extra": "4.0.2",
     "json-loader": "^0.5.4",
+    "kinvey": "^3.9.3-beta.7",
     "kinvey-acl": "^3.9.3-beta.7",
     "kinvey-aggregation": "^3.9.3-beta.7",
     "kinvey-datastore": "^3.9.3-beta.7",
     "kinvey-endpoint": "^3.9.3-beta.7",
     "kinvey-errors": "^3.9.3-beta.7",
     "kinvey-filestore": "^3.9.3-beta.7",
-    "kinvey-html5": "^3.9.3-beta.7",
-    "kinvey-html5-cache": "^3.9.3-beta.7",
-    "kinvey-html5-http": "^3.9.3-beta.7",
-    "kinvey-html5-popup": "^3.9.3-beta.7",
     "kinvey-identity": "^3.9.3-beta.7",
     "kinvey-live": "^3.9.3-beta.7",
     "kinvey-log": "^3.9.3-beta.7",
@@ -39,7 +40,7 @@
     "postrelease": "rimraf tmp"
   },
   "files": [
-    "kinvey-html5-sdk.min.js",
-    "kinvey-html5-sdk.min.js.map"
+    "kinvey-node-sdk.min.js",
+    "kinvey-node-sdk.min.js.map"
   ]
 }

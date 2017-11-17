@@ -13,7 +13,7 @@ npm install --save kinvey-node-sdk
 Import the Kinvey Node SDK:
 
 ```javascript
-import { Kinvey } from 'kinvey-node-sdk';
+const Kinvey = require('kinvey-node-sdk');
 ```
 
 ## NodeJS Compatibility
