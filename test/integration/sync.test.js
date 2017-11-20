@@ -206,14 +206,19 @@ function testFunc() {
                   }
                 })
                 return networkStore.find().toPromise()
-                  .then((result) => {
-                    expect(result.length).to.equal(3);
-                    expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.not.exist;
-                    expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity.newProperty; })).to.exist;
-                    expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
-                    done();
-                  })
-              }).catch(done);
+              })
+              .then((result) => {
+                expect(result.length).to.equal(3);
+                expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.not.exist;
+                expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity.newProperty; })).to.exist;
+                expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
+                return storeToTest.pendingSyncCount()
+              })
+              .then((count) => {
+                expect(count).to.equal(0);
+                done();
+              })
+              .catch(done);
           });
 
           it('should push to the backend only the entities matching the query', (done) => {
