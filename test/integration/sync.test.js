@@ -211,7 +211,9 @@ function testFunc() {
                 expect(result.length).to.equal(3);
                 expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.not.exist;
                 expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity.newProperty; })).to.exist;
-                expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
+                let createdOnServer = _.find(result, (entity) => { return entity._id === entity1._id; });
+                common.deleteEntityMetadata(createdOnServer);
+                expect(createdOnServer).to.deep.equal(entity1);
                 return storeToTest.pendingSyncCount()
               })
               .then((count) => {
