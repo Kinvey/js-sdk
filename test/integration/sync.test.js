@@ -157,30 +157,37 @@ function testFunc() {
       });
 
       describe('Sync operations', () => {
-        let updatedEntity;
-        beforeEach((done) => {
-          updatedEntity = Object.assign({ newProperty: common.randomString() }, entity2);
-          common.cleanUpCollectionData(collectionName)
-            .then(() => {
-              return syncStore.save(entity1)
-            })
-            .then(() => {
-              return cacheStore.save(entity2)
-            })
-            .then(() => {
-              return cacheStore.save(entity3)
-            })
-            .then(() => {
-              return syncStore.save(updatedEntity)
-            })
-            .then(() => {
-              return syncStore.removeById(entity3._id)
-            })
-            .then(() => done())
-            .catch(done)
-        });
 
         describe('push()', () => {
+
+          let updatedEntity;
+          beforeEach((done) => {
+            updatedEntity = Object.assign({ newProperty: common.randomString() }, entity2);
+            //adding three items, eligible for sync
+            common.cleanUpCollectionData(collectionName)
+              .then(() => {
+                return syncStore.save(entity1)
+              })
+              .then(() => {
+                return cacheStore.save(entity2)
+              })
+              .then(() => {
+                return cacheStore.save(entity3)
+              })
+              .then(() => {
+                return syncStore.save(updatedEntity)
+              })
+              .then(() => {
+                return syncStore.removeById(entity3._id)
+              })
+              .then(() => {
+                //adding one item not eligible for sync
+                return cacheStore.save({})
+              })
+              .then(() => done())
+              .catch(done)
+          });
+
           it('should push created/updated/deleted locally entities to the backend', (done) => {
             storeToTest.push()
               .then((result) => {
@@ -200,7 +207,7 @@ function testFunc() {
                 })
                 return networkStore.find().toPromise()
                   .then((result) => {
-                    expect(result.length).to.equal(2);
+                    expect(result.length).to.equal(3);
                     expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.not.exist;
                     expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity.newProperty; })).to.exist;
                     expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
