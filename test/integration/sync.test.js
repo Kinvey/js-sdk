@@ -42,21 +42,6 @@ function testFunc() {
           });
       });
 
-      beforeEach((done) => {
-        common.cleanUpCollectionData(collectionName)
-          .then(() => {
-            return syncStore.save(entity1)
-          })
-          .then(() => {
-            return syncStore.save(entity2)
-          })
-          .then(() => {
-            return cacheStore.save(entity3)
-          })
-          .then(() => done())
-          .catch(done)
-      });
-
       after((done) => {
         Kinvey.User.logout()
           .then(() => {
@@ -75,7 +60,22 @@ function testFunc() {
           .catch(done)
       });
 
-      describe('Pending sync queue', () => {
+      describe('Pending sync queue operations', () => {
+
+        beforeEach((done) => {
+          common.cleanUpCollectionData(collectionName)
+            .then(() => {
+              return syncStore.save(entity1)
+            })
+            .then(() => {
+              return syncStore.save(entity2)
+            })
+            .then(() => {
+              return cacheStore.save(entity3)
+            })
+            .then(() => done())
+            .catch(done)
+        });
 
         it('pendingSyncCount() should return the count of the entities waiting to be synced', (done) => {
           storeToTest.pendingSyncCount()
@@ -153,6 +153,61 @@ function testFunc() {
               expect(entities).to.be.an.empty.array;
               done();
             }).catch(done);
+        });
+      });
+
+      describe('Sync operations', () => {
+        let updatedEntity;
+        beforeEach((done) => {
+          updatedEntity = Object.assign({ newProperty: common.randomString() }, entity2);
+          common.cleanUpCollectionData(collectionName)
+            .then(() => {
+              return syncStore.save(entity1)
+            })
+            .then(() => {
+              return cacheStore.save(entity2)
+            })
+            .then(() => {
+              return cacheStore.save(entity3)
+            })
+            .then(() => {
+              return syncStore.save(updatedEntity)
+            })
+            .then(() => {
+              return syncStore.removeById(entity3._id)
+            })
+            .then(() => done())
+            .catch(done)
+        });
+
+        describe('push()', () => {
+          it('should push created/updated/deleted locally entities to the backend', (done) => {
+            storeToTest.push()
+              .then((result) => {
+                expect(result.length).to.equal(3);
+
+                result.forEach((record) => {
+                  expect(record.operation).to.equal(record._id === entity3._id ? 'DELETE' : 'PUT');
+                  expect([entity1._id, entity2._id, entity3._id]).to.include(record._id);
+                  if (record.operation !== 'DELETE') {
+                    common.assertEntityMetadata(record.entity);
+                    common.deleteEntityMetadata(record.entity);
+                    expect(record.entity).to.deep.equal(record._id === entity1._id ? entity1 : updatedEntity);
+                  }
+                  else {
+                    expect(record.entity).to.not.exist;
+                  }
+                })
+                return networkStore.find().toPromise()
+                  .then((result) => {
+                    expect(result.length).to.equal(2);
+                    expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.not.exist;
+                    expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity.newProperty; })).to.exist;
+                    expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
+                    done();
+                  })
+              }).catch(done);
+          });
         });
       });
     });
