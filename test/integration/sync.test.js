@@ -240,6 +240,57 @@ function testFunc() {
               }).catch(done);
           });
         });
+
+        describe('pull()', () => {
+
+          beforeEach((done) => {
+            common.cleanUpCollectionData(collectionName)
+              .then(() => {
+                return networkStore.save(entity1)
+              })
+              .then(() => {
+                return networkStore.save(entity2)
+              })
+              .then(() => done())
+              .catch(done)
+          });
+
+          it('should save the entities from the backend in the cache', (done) => {
+            storeToTest.pull()
+              .then((result) => {
+                expect(result.length).to.equal(2);
+                expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
+                expect(_.find(result, (entity) => { return entity._id === entity2._id; })).to.exist;
+                return syncStore.find().toPromise()
+              })
+              .then((result) => {
+                expect(result.length).to.equal(2);
+                const cachedEntity1 = _.find(result, (entity) => { return entity._id === entity1._id; });
+                const cachedEntity2 = _.find(result, (entity) => { return entity._id === entity2._id; });
+                expect(common.deleteEntityMetadata(cachedEntity1)).to.deep.equal(entity1);
+                expect(common.deleteEntityMetadata(cachedEntity2)).to.deep.equal(entity2);
+                done()
+              })
+              .catch(done);
+          });
+
+          it('should pull only the entities matching the query', (done) => {
+            const query = new Kinvey.Query();
+            query.equalTo('_id', entity1._id);
+            storeToTest.pull(query)
+              .then((result) => {
+                expect(result.length).to.equal(1);
+                expect(result[0]._id).to.equal(entity1._id);
+                return syncStore.find().toPromise()
+              })
+              .then((result) => {
+                expect(result.length).to.equal(1);
+                expect(common.deleteEntityMetadata(result[0])).to.deep.equal(entity1);
+                done()
+              })
+              .catch(done);
+          });
+        });
       });
     });
   });
