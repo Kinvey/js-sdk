@@ -96,7 +96,21 @@ function testFunc() {
             }).catch(done);
         });
 
-        it('pendingSyncEntities() should return only of the entities waiting to be synced', (done) => {
+        it('clearSync() should clear only the items, matching the query from the pending sync queue', (done) => {
+          const query = new Kinvey.Query();
+          query.equalTo('_id', entity1._id);
+          syncStore.clearSync(query)
+            .then(() => {
+              return storeToTest.pendingSyncEntities()
+            })
+            .then((result) => {
+              expect(result.length).to.equal(1);
+              expect(result[0].entityId).to.equal(entity2._id);
+              done();
+            }).catch(done);
+        });
+
+        it('pendingSyncEntities() should return only the entities waiting to be synced', (done) => {
           storeToTest.pendingSyncEntities()
             .then((entities) => {
               expect(entities.length).to.equal(2);
@@ -109,7 +123,7 @@ function testFunc() {
             }).catch(done);
         });
 
-        it('pendingSyncEntities() should return 0 if there are no entities waiting to be synced', (done) => {
+        it('pendingSyncEntities() should return an empty array if there are no entities waiting to be synced', (done) => {
           syncStore.clearSync()
             .then(() => {
               return storeToTest.pendingSyncEntities()
