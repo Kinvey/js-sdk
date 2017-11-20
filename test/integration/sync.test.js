@@ -208,6 +208,23 @@ function testFunc() {
                   })
               }).catch(done);
           });
+
+          it('should push to the backend only the entities matching the query', (done) => {
+            const query = new Kinvey.Query();
+            query.equalTo('_id', entity1._id);
+            storeToTest.push(query)
+              .then((result) => {
+                expect(result.length).to.equal(1);
+                expect(result[0]._id).to.equal(entity1._id);
+
+                return networkStore.find().toPromise()
+                  .then((result) => {
+                    expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
+                    expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.exist;
+                    done();
+                  })
+              }).catch(done);
+          });
         });
       });
     });
