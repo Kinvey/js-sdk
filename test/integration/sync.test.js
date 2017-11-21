@@ -11,6 +11,7 @@ function testFunc() {
   let syncStore;
   let cacheStore;
   let storeToTest;
+  const notFoundErrorName = 'NotFoundError';
 
   //validates Push operation result for 1 created, 1 modified and 1 deleted locally items
   const validatePushOperation = (result, createdItem, modifiedItem, deletedItem, expectedServerItemsCount) => {
@@ -34,8 +35,7 @@ function testFunc() {
           expect(_.find(result, (entity) => { return entity._id === deletedItem._id; })).to.not.exist;
           expect(_.find(result, (entity) => { return entity.newProperty === modifiedItem.newProperty; })).to.exist;
           let createdOnServer = _.find(result, (entity) => { return entity._id === createdItem._id; });
-          common.deleteEntityMetadata(createdOnServer);
-          expect(createdOnServer).to.deep.equal(createdItem);
+          expect(common.deleteEntityMetadata(createdOnServer)).to.deep.equal(createdItem);
           return storeToTest.pendingSyncCount()
         })
         .then((count) => {
@@ -264,6 +264,28 @@ function testFunc() {
                     expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.exist;
                     done();
                   })
+              }).catch(done);
+          });
+
+          it('should log an error, finish the push and not clear the sync queue if an item push fails', (done) => {
+            networkStore.removeById(entity3._id)
+              .then(() => {
+                return storeToTest.push()
+              })
+              .then((result) => {
+                expect(result.length).to.equal(3);
+                const errorRecord = _.find(result, (entity) => { return entity._id === entity3._id; });
+                expect(errorRecord.error.name).to.equal(notFoundErrorName);
+                return networkStore.find().toPromise()
+              })
+              .then((result) => {
+                expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity2.newProperty; })).to.exist;
+                expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
+                return storeToTest.pendingSyncCount()
+              })
+              .then((count) => {
+                expect(count).to.equal(1);
+                done()
               }).catch(done);
           });
         });
