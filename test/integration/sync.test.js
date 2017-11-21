@@ -7,14 +7,68 @@ function testFunc() {
 
   const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
 
+  let networkStore;
+  let syncStore;
+  let cacheStore;
+  let storeToTest;
+
+  //validates Push operation result for 1 created, 1 modified and 1 deleted locally items
+  const validatePushOperation = (result, createdItem, modifiedItem, deletedItem, expectedServerItemsCount) => {
+    return new Promise((resolve, reject) => {
+      expect(result.length).to.equal(3);
+      result.forEach((record) => {
+        expect(record.operation).to.equal(record._id === deletedItem._id ? 'DELETE' : 'PUT');
+        expect([createdItem._id, modifiedItem._id, deletedItem._id]).to.include(record._id);
+        if (record.operation !== 'DELETE') {
+          common.assertEntityMetadata(record.entity);
+          common.deleteEntityMetadata(record.entity);
+          expect(record.entity).to.deep.equal(record._id === createdItem._id ? createdItem : modifiedItem);
+        }
+        else {
+          expect(record.entity).to.not.exist;
+        }
+      })
+      networkStore.find().toPromise()
+        .then((result) => {
+          expect(result.length).to.equal(expectedServerItemsCount);
+          expect(_.find(result, (entity) => { return entity._id === deletedItem._id; })).to.not.exist;
+          expect(_.find(result, (entity) => { return entity.newProperty === modifiedItem.newProperty; })).to.exist;
+          let createdOnServer = _.find(result, (entity) => { return entity._id === createdItem._id; });
+          common.deleteEntityMetadata(createdOnServer);
+          expect(createdOnServer).to.deep.equal(createdItem);
+          return storeToTest.pendingSyncCount()
+        })
+        .then((count) => {
+          expect(count).to.equal(0);
+          resolve();
+        }).catch(reject);
+    });
+  }
+  //validates Pull operation result
+  const validatePullOperation = (result, expectedItems, expectedCacheItemsCount) => {
+    return new Promise((resolve, reject) => {
+      expect(result.length).to.equal(expectedItems.length);
+      expectedItems.forEach((entity) => {
+        const resultEntity = _.find(result, (record) => { return record._id === entity._id; });
+        expect(common.deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
+      })
+
+      return syncStore.find().toPromise()
+        .then((result) => {
+          expect(result.length).to.equal(expectedCacheItemsCount);
+          expectedItems.forEach((entity) => {
+            const cachedEntity = _.find(result, (record) => { return record._id === entity._id; });
+            expect(common.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
+          })
+          resolve();
+        })
+        .catch(reject);
+    });
+  }
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`${currentDataStoreType} Sync Tests`, () => {
 
-      let networkStore;
-      let syncStore;
-      let cacheStore;
-      let storeToTest;
       const dataStoreType = currentDataStoreType;
       const entity1 = common.getSingleEntity(common.randomString());
       const entity2 = common.getSingleEntity(common.randomString());
@@ -160,9 +214,9 @@ function testFunc() {
 
         describe('push()', () => {
 
-          let updatedEntity;
+          let updatedEntity2;
           beforeEach((done) => {
-            updatedEntity = Object.assign({ newProperty: common.randomString() }, entity2);
+            updatedEntity2 = Object.assign({ newProperty: common.randomString() }, entity2);
             //adding three items, eligible for sync
             common.cleanUpCollectionData(collectionName)
               .then(() => {
@@ -175,7 +229,7 @@ function testFunc() {
                 return cacheStore.save(entity3)
               })
               .then(() => {
-                return syncStore.save(updatedEntity)
+                return syncStore.save(updatedEntity2)
               })
               .then(() => {
                 return syncStore.removeById(entity3._id)
@@ -191,35 +245,9 @@ function testFunc() {
           it('should push created/updated/deleted locally entities to the backend', (done) => {
             storeToTest.push()
               .then((result) => {
-                expect(result.length).to.equal(3);
-
-                result.forEach((record) => {
-                  expect(record.operation).to.equal(record._id === entity3._id ? 'DELETE' : 'PUT');
-                  expect([entity1._id, entity2._id, entity3._id]).to.include(record._id);
-                  if (record.operation !== 'DELETE') {
-                    common.assertEntityMetadata(record.entity);
-                    common.deleteEntityMetadata(record.entity);
-                    expect(record.entity).to.deep.equal(record._id === entity1._id ? entity1 : updatedEntity);
-                  }
-                  else {
-                    expect(record.entity).to.not.exist;
-                  }
-                })
-                return networkStore.find().toPromise()
+                return validatePushOperation(result, entity1, updatedEntity2, entity3, 3)
               })
-              .then((result) => {
-                expect(result.length).to.equal(3);
-                expect(_.find(result, (entity) => { return entity._id === entity3._id; })).to.not.exist;
-                expect(_.find(result, (entity) => { return entity.newProperty === updatedEntity.newProperty; })).to.exist;
-                let createdOnServer = _.find(result, (entity) => { return entity._id === entity1._id; });
-                common.deleteEntityMetadata(createdOnServer);
-                expect(createdOnServer).to.deep.equal(entity1);
-                return storeToTest.pendingSyncCount()
-              })
-              .then((count) => {
-                expect(count).to.equal(0);
-                done();
-              })
+              .then(done)
               .catch(done);
           });
 
@@ -258,36 +286,20 @@ function testFunc() {
           it('should save the entities from the backend in the cache', (done) => {
             storeToTest.pull()
               .then((result) => {
-                expect(result.length).to.equal(2);
-                expect(_.find(result, (entity) => { return entity._id === entity1._id; })).to.exist;
-                expect(_.find(result, (entity) => { return entity._id === entity2._id; })).to.exist;
-                return syncStore.find().toPromise()
+                return validatePullOperation(result, [entity1, entity2], 2)
               })
-              .then((result) => {
-                expect(result.length).to.equal(2);
-                const cachedEntity1 = _.find(result, (entity) => { return entity._id === entity1._id; });
-                const cachedEntity2 = _.find(result, (entity) => { return entity._id === entity2._id; });
-                expect(common.deleteEntityMetadata(cachedEntity1)).to.deep.equal(entity1);
-                expect(common.deleteEntityMetadata(cachedEntity2)).to.deep.equal(entity2);
-                done()
-              })
+              .then(() => done())
               .catch(done);
           });
 
-          it('should pull only the entities matching the query', (done) => {
+          it('should pull only the entities, matching the query', (done) => {
             const query = new Kinvey.Query();
             query.equalTo('_id', entity1._id);
             storeToTest.pull(query)
               .then((result) => {
-                expect(result.length).to.equal(1);
-                expect(result[0]._id).to.equal(entity1._id);
-                return syncStore.find().toPromise()
+                return validatePullOperation(result, [entity1], 1)
               })
-              .then((result) => {
-                expect(result.length).to.equal(1);
-                expect(common.deleteEntityMetadata(result[0])).to.deep.equal(entity1);
-                done()
-              })
+              .then(() => done())
               .catch(done);
           });
         });
