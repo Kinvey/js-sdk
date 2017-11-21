@@ -154,9 +154,7 @@ common = {
             expect(entityFromBackend).to.deep.equal(expectedEntity);
           }
           resolve();
-        }).catch((err) => {
-          reject(err);
-        });
+        }).catch(reject);
     });
   },
   cleanUpCollectionData: (collectionName, done) => {

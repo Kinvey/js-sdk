@@ -45,9 +45,9 @@ function testFunc() {
     });
   }
   //validates Pull operation result
-  const validatePullOperation = (result, expectedItems, expectedCacheItemsCount) => {
+  const validatePullOperation = (result, expectedItems, expectedPulledItemsCount) => {
     return new Promise((resolve, reject) => {
-      expect(result.length).to.equal(expectedItems.length);
+      expect(result.length).to.equal(expectedPulledItemsCount || expectedItems.length);
       expectedItems.forEach((entity) => {
         const resultEntity = _.find(result, (record) => { return record._id === entity._id; });
         expect(common.deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
@@ -55,7 +55,6 @@ function testFunc() {
 
       return syncStore.find().toPromise()
         .then((result) => {
-          expect(result.length).to.equal(expectedCacheItemsCount);
           expectedItems.forEach((entity) => {
             const cachedEntity = _.find(result, (record) => { return record._id === entity._id; });
             expect(common.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
@@ -212,35 +211,35 @@ function testFunc() {
 
       describe('Sync operations', () => {
 
-        describe('push()', () => {
+        let updatedEntity2;
 
-          let updatedEntity2;
-          beforeEach((done) => {
-            updatedEntity2 = Object.assign({ newProperty: common.randomString() }, entity2);
-            //adding three items, eligible for sync
-            common.cleanUpCollectionData(collectionName)
-              .then(() => {
-                return syncStore.save(entity1)
-              })
-              .then(() => {
-                return cacheStore.save(entity2)
-              })
-              .then(() => {
-                return cacheStore.save(entity3)
-              })
-              .then(() => {
-                return syncStore.save(updatedEntity2)
-              })
-              .then(() => {
-                return syncStore.removeById(entity3._id)
-              })
-              .then(() => {
-                //adding one item not eligible for sync
-                return cacheStore.save({})
-              })
-              .then(() => done())
-              .catch(done)
-          });
+        beforeEach((done) => {
+          updatedEntity2 = Object.assign({ newProperty: common.randomString() }, entity2);
+          //adding three items, eligible for sync and one item, which should not be synced
+          common.cleanUpCollectionData(collectionName)
+            .then(() => {
+              return syncStore.save(entity1)
+            })
+            .then(() => {
+              return cacheStore.save(entity2)
+            })
+            .then(() => {
+              return cacheStore.save(entity3)
+            })
+            .then(() => {
+              return syncStore.save(updatedEntity2)
+            })
+            .then(() => {
+              return syncStore.removeById(entity3._id)
+            })
+            .then(() => {
+              return cacheStore.save({})
+            })
+            .then(() => done())
+            .catch(done)
+        });
+
+        describe('push()', () => {
 
           it('should push created/updated/deleted locally entities to the backend', (done) => {
             storeToTest.push()
@@ -286,7 +285,7 @@ function testFunc() {
           it('should save the entities from the backend in the cache', (done) => {
             storeToTest.pull()
               .then((result) => {
-                return validatePullOperation(result, [entity1, entity2], 2)
+                return validatePullOperation(result, [entity1, entity2])
               })
               .then(() => done())
               .catch(done);
@@ -297,7 +296,59 @@ function testFunc() {
             query.equalTo('_id', entity1._id);
             storeToTest.pull(query)
               .then((result) => {
-                return validatePullOperation(result, [entity1], 1)
+                return validatePullOperation(result, [entity1])
+              })
+              .then(() => done())
+              .catch(done);
+          });
+        });
+
+        describe('sync()', () => {
+
+          let serverEntity1;
+          let serverEntity2;
+
+          beforeEach((done) => {
+            //creating two server items - three items, eligible for sync are already created in cache
+            serverEntity1 = common.getSingleEntity(common.randomString());
+            serverEntity2 = common.getSingleEntity(common.randomString());
+            networkStore.save(serverEntity1)
+              .then(() => {
+                return networkStore.save(serverEntity2)
+              })
+              .then(() => done())
+              .catch(done)
+          });
+
+          it('should push and then pull the entities from the backend in the cache', (done) => {
+            let syncResult;
+            storeToTest.sync()
+              .then((result) => {
+                syncResult = result;
+                return validatePushOperation(syncResult.push, entity1, updatedEntity2, entity3, 5)
+              })
+              .then(() => {
+                return validatePullOperation(syncResult.pull, [serverEntity1, serverEntity2, updatedEntity2], 5)
+              })
+              .then(() => done())
+              .catch(done);
+          });
+
+          //TODO: Discuss if the query should be applied to both push and pull - this is the current behaviour
+          it('should push and then pull only the entities, matching the query', (done) => {
+            let syncResult;
+            const query = new Kinvey.Query();
+            query.equalTo('_id', updatedEntity2._id);
+            storeToTest.sync(query)
+              .then((result) => {
+                syncResult = result
+                expect(syncResult.push.length).to.equal(1);
+                expect(syncResult.push[0]._id).to.equal(updatedEntity2._id);
+                return networkStore.find().toPromise()
+              })
+              .then((result) => {
+                expect(_.find(result, (entity) => { return entity._id === updatedEntity2._id; })).to.exist;
+                return validatePullOperation(syncResult.pull, [updatedEntity2])
               })
               .then(() => done())
               .catch(done);
