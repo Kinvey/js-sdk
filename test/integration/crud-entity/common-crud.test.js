@@ -27,7 +27,10 @@ function testFunc() {
           appSecret: appSecret
         });
 
-        Kinvey.User.signup()
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup()
+          })
           .then((user) => {
             createdUserIds.push(user.data._id);
             //store for setup
@@ -56,7 +59,16 @@ function testFunc() {
       });
 
       after((done) => {
-        common.deleteUsers(createdUserIds)
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup()
+          })
+          .then(() => {
+            return common.deleteUsers(createdUserIds)
+          })
+          .then(() => {
+            return common.cleanUpCollectionData(collectionName)
+          })
           .then(() => {
             return Kinvey.User.logout()
           })
@@ -64,7 +76,7 @@ function testFunc() {
           .catch(done)
       });
 
-      describe('count()', function () {
+      describe('count()', () => {
         it('should throw an error for an invalid query', (done) => {
           storeToTest.count({})
             .subscribe(null, (error) => {
@@ -79,7 +91,7 @@ function testFunc() {
 
         it('should return the count for the collection', (done) => {
           const onNextSpy = sinon.spy();
-          return storeToTest.count()
+          storeToTest.count()
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, 2, 3);
@@ -94,7 +106,7 @@ function testFunc() {
           const query = new Kinvey.Query();
           query.equalTo('_id', entity2._id);
           const onNextSpy = sinon.spy();
-          return storeToTest.count(query)
+          storeToTest.count(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, 1, 1);
@@ -107,22 +119,21 @@ function testFunc() {
       });
 
       describe('find()', function () {
-
-        it('should throw an error if the query argument is not an instance of the Query class', function (done) {
+        it('should throw an error if the query argument is not an instance of the Query class', (done) => {
           storeToTest.find({})
             .subscribe(null, (error) => {
               try {
                 expect(error.message).to.equal(invalidQueryMessage);
                 done();
-              } catch (e) {
-                done(e);
+              } catch (error) {
+                done(error);
               }
             });
         });
 
         it('should return all the entities', (done) => {
           const onNextSpy = sinon.spy();
-          return storeToTest.find()
+          storeToTest.find()
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3], true)
@@ -144,7 +155,7 @@ function testFunc() {
           const onNextSpy = sinon.spy();
           const query = new Kinvey.Query();
           query.equalTo('_id', entity2._id);
-          return storeToTest.find(query)
+          storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, [entity2], [entity2])
@@ -156,10 +167,10 @@ function testFunc() {
         });
       });
 
-      describe('findById()', function () {
+      describe('findById()', () => {
         it('should throw a NotFoundError if the id argument does not exist', (done) => {
           const entityId = common.randomString();
-          return storeToTest.findById(entityId).toPromise()
+          storeToTest.findById(entityId).toPromise()
             .catch((error) => {
               expect(error.name).to.contain(notFoundErrorName);
               done();
@@ -167,7 +178,7 @@ function testFunc() {
         });
 
         it('should return undefined if an id is not provided', (done) => {
-          return storeToTest.findById().toPromise()
+          storeToTest.findById().toPromise()
             .then((result) => {
               expect(result).to.be.undefined;
               done();
@@ -176,7 +187,7 @@ function testFunc() {
 
         it('should return the entity that matches the id argument', (done) => {
           const onNextSpy = sinon.spy();
-          return storeToTest.findById(entity2._id)
+          storeToTest.findById(entity2._id)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, entity2, entity2)
@@ -189,7 +200,7 @@ function testFunc() {
       });
       // These are smoke tests and will not be executed for now.
       // If we decide to execute 'Modifiers' describe only for Sync data store, these tests will be added back
-      describe.skip('find with modifiers', function () {
+      describe.skip('find with modifiers', () => {
         let entities = [];
         const dataCount = 10;
         before((done) => {
@@ -214,7 +225,7 @@ function testFunc() {
           query.skip = dataCount - 2;
           query.ascending('_id');
           const expectedEntities = [entities[dataCount - 2], entities[dataCount - 1]];
-          return storeToTest.find(query)
+          storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -231,7 +242,7 @@ function testFunc() {
           query.limit = 2;
           query.descending('_id');
           const expectedEntities = [entities[dataCount - 1], entities[dataCount - 2]];
-          return storeToTest.find(query)
+          storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -249,7 +260,7 @@ function testFunc() {
           query.skip = dataCount - 2;
           query.ascending('_id');
           const expectedEntity = entities[dataCount - 2];
-          return storeToTest.find(query)
+          storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
@@ -267,7 +278,7 @@ function testFunc() {
           query.fields = ['textField']
           query.ascending('_id');
           const expectedEntity = { 'textField': entities[dataCount - 2].textField };
-          return storeToTest.find(query)
+          storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 common.validateReadResult(dataStoreType, onNextSpy, [expectedEntity], [expectedEntity]);
@@ -279,7 +290,7 @@ function testFunc() {
         });
       });
 
-      describe('Querying', function () {
+      describe('Querying', () => {
         let entities = [];
         const dataCount = 10;
         const textFieldName = 'textField';
@@ -327,7 +338,7 @@ function testFunc() {
           it('query.equalTo', (done) => {
             query.equalTo(textFieldName, entities[5][textFieldName]);
             const expectedEntities = [entities[5]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -341,7 +352,7 @@ function testFunc() {
           it('query.equalTo with null', (done) => {
             query.equalTo(textFieldName, null);
             const expectedEntities = [entities[dataCount - 1]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -355,7 +366,7 @@ function testFunc() {
           it('query.notEqualTo', (done) => {
             query.notEqualTo(textFieldName, entities[5][textFieldName]);
             const expectedEntities = entities.filter(entity => entity != entities[5]);
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -365,12 +376,12 @@ function testFunc() {
                 }
               });
           });
-          
+
           //should be added back for execution when MLIBZ-2157 is fixed
           it.skip('query.notEqualTo with null', (done) => {
             query.notEqualTo(textFieldName, null);
             const expectedEntities = entities.filter(entity => entity[textFieldName] != null);
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -384,7 +395,7 @@ function testFunc() {
           it('query.greaterThan', (done) => {
             query.greaterThan(numberFieldName, entities[dataCount - 3][numberFieldName]);
             const expectedEntities = [entities[dataCount - 2]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -398,7 +409,7 @@ function testFunc() {
           it('query.greaterThanOrEqualTo', (done) => {
             query.greaterThanOrEqualTo(numberFieldName, entities[dataCount - 3][numberFieldName]);
             const expectedEntities = [entities[dataCount - 3], entities[dataCount - 2]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -412,7 +423,7 @@ function testFunc() {
           it('query.lessThan', (done) => {
             query.lessThan(numberFieldName, entities[2][numberFieldName]);
             const expectedEntities = [entities[0], entities[1]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -426,7 +437,7 @@ function testFunc() {
           it('query.lessThanOrEqualTo', (done) => {
             query.lessThanOrEqualTo(numberFieldName, entities[1][numberFieldName]);
             const expectedEntities = [entities[0], entities[1]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -440,7 +451,7 @@ function testFunc() {
           it('query.exists', (done) => {
             query.exists(numberFieldName);
             const expectedEntities = entities.filter(entity => entity != entities[dataCount - 1]);
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -454,7 +465,7 @@ function testFunc() {
           it('query.mod', (done) => {
             query.mod(numberFieldName, 4, 2);
             const expectedEntities = entities.filter(entity => entity[numberFieldName] % 4 === 2);
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -469,7 +480,7 @@ function testFunc() {
           it('query.matches - with RegExp literal', (done) => {
             query.matches(textFieldName, /^test_5/);
             const expectedEntities = [entities[5]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -483,7 +494,7 @@ function testFunc() {
           it('query.matches - with RegExp object', (done) => {
             query.matches(textFieldName, new RegExp('^test_5'));
             const expectedEntities = [entities[5]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -498,7 +509,7 @@ function testFunc() {
             query.lessThan(numberFieldName, entities[2][numberFieldName])
               .greaterThan(numberFieldName, entities[0][numberFieldName]);
             const expectedEntities = [entities[1]];
-            return storeToTest.find(query)
+            storeToTest.find(query)
               .subscribe(onNextSpy, done, () => {
                 try {
                   common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -517,7 +528,7 @@ function testFunc() {
             it('with single value', (done) => {
               query.contains(textFieldName, entities[5][textFieldName]);
               const expectedEntities = [entities[5]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -531,7 +542,7 @@ function testFunc() {
             it('string field with an array of values', (done) => {
               query.contains(textFieldName, entities[0][arrayFieldName]);
               const expectedEntities = [entities[0]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -545,7 +556,7 @@ function testFunc() {
             it('array field with an array of values', (done) => {
               query.contains(arrayFieldName, entities[0][arrayFieldName]);
               const expectedEntities = [entities[0], entities[5]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -560,7 +571,7 @@ function testFunc() {
               query.notEqualTo(numberFieldName, entities[1][numberFieldName]);
               query.contains(textFieldName, [entities[0][textFieldName], entities[1][textFieldName]]);
               const expectedEntities = [entities[0]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -574,7 +585,7 @@ function testFunc() {
             it('with null value', (done) => {
               query.contains(textFieldName, [null]);
               const expectedEntities = [entities[dataCount - 1]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -591,7 +602,7 @@ function testFunc() {
             it('with single value', (done) => {
               query.containsAll(textFieldName, entities[5][textFieldName]);
               const expectedEntities = [entities[5]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -605,7 +616,7 @@ function testFunc() {
             it('string field with an array of values', (done) => {
               query.containsAll(textFieldName, [entities[5][textFieldName]]);
               const expectedEntities = [entities[5]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -621,7 +632,7 @@ function testFunc() {
               const filteredArray = arrayFieldValue.filter(entity => entity != arrayFieldValue[2]);
               query.containsAll(arrayFieldName, filteredArray);
               const expectedEntities = [entities[0], entities[5]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -636,7 +647,7 @@ function testFunc() {
               query.notEqualTo(numberFieldName, entities[0][numberFieldName]);
               query.containsAll(arrayFieldName, entities[5][arrayFieldName]);
               const expectedEntities = [entities[5]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -653,7 +664,7 @@ function testFunc() {
             it('with single value', (done) => {
               query.notContainedIn(textFieldName, entities[5][textFieldName]);
               const expectedEntities = entities.filter(entity => entity != entities[5]);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -667,7 +678,7 @@ function testFunc() {
             it('string property with an array of values', (done) => {
               query.notContainedIn(textFieldName, entities[0][arrayFieldName]);
               const expectedEntities = entities.filter(entity => entity != entities[0]);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -681,7 +692,7 @@ function testFunc() {
             it('array field with an array of values', (done) => {
               query.notContainedIn(arrayFieldName, entities[0][arrayFieldName]);
               const expectedEntities = entities.filter(entity => entity != entities[0] && entity != entities[5]);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -696,7 +707,7 @@ function testFunc() {
               query.lessThanOrEqualTo(numberFieldName, entities[1][numberFieldName]);
               query.notContainedIn(textFieldName, entities[0][arrayFieldName]);
               const expectedEntities = [entities[1]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -713,7 +724,7 @@ function testFunc() {
             it('should return the elements with an array field, having the submitted size', (done) => {
               query.size(arrayFieldName, 3);
               const expectedEntities = entities.filter(entity => entity != entities[dataCount - 1] && entity != entities[dataCount - 2]);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities, true);
@@ -727,7 +738,7 @@ function testFunc() {
             it('should return the elements with an empty array field, if the submitted size = 0', (done) => {
               query.size(arrayFieldName, 0);
               const expectedEntities = [entities[dataCount - 1]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -742,7 +753,7 @@ function testFunc() {
               query.greaterThanOrEqualTo(numberFieldName, entities[dataCount - 3][numberFieldName]);
               query.size(arrayFieldName, 3);
               const expectedEntities = [entities[dataCount - 3]];
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -774,7 +785,7 @@ function testFunc() {
 
             it('should sort ascending', (done) => {
               query.ascending(numberFieldName);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     //when MLIBZ-2156 is fixed, expectedAscendingCache should be replaced with expectedAscendingServer
@@ -788,7 +799,7 @@ function testFunc() {
 
             it('should sort descending', (done) => {
               query.descending(numberFieldName);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedDescending, expectedDescending);
@@ -805,7 +816,7 @@ function testFunc() {
               query.notEqualTo('_id', entities[dataCount - 1]._id);
               const sortedEntities = _.orderBy(entities, [secondSortField, numberFieldName], ['asc', 'desc'])
               const expectedEntities = sortedEntities.filter(entity => entity != entities[dataCount - 1])
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -820,7 +831,7 @@ function testFunc() {
               query.skip = dataCount - 3;
               query.descending(numberFieldName);
               const expectedEntities = expectedDescending.slice(dataCount - 3, dataCount);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -835,7 +846,7 @@ function testFunc() {
               query.limit = 2;
               query.descending(numberFieldName);
               const expectedEntities = expectedDescending.slice(0, 2);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -851,7 +862,7 @@ function testFunc() {
               query.skip = 3
               query.descending(numberFieldName);
               const expectedEntities = expectedDescending.slice(3, 5);
-              return storeToTest.find(query)
+              storeToTest.find(query)
                 .subscribe(onNextSpy, done, () => {
                   try {
                     common.validateReadResult(dataStoreType, onNextSpy, expectedEntities, expectedEntities);
@@ -865,14 +876,12 @@ function testFunc() {
         });
       });
 
-      describe('save()', function () {
+      describe('save()', () => {
 
         beforeEach((done) => {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
-              .then(() => {
-                done()
-              });
+              .then(() => done());
           }
           else {
             done();
@@ -880,7 +889,7 @@ function testFunc() {
         });
 
         it('should throw an error when trying to save an array of entities', (done) => {
-          return storeToTest.save([entity1, entity2])
+          storeToTest.save([entity1, entity2])
             .catch((error) => {
               expect(error.message).to.equal('Unable to create an array of entities.');
               done();
@@ -891,7 +900,7 @@ function testFunc() {
           let newEntity = {
             textField: common.randomString()
           };
-          return storeToTest.save(newEntity)
+          storeToTest.save(newEntity)
             .then((createdEntity) => {
               expect(createdEntity._id).to.exist;
               expect(createdEntity.textField).to.equal(newEntity.textField);
@@ -916,7 +925,7 @@ function testFunc() {
             _id: common.randomString(),
             textField: common.randomString()
           };
-          return storeToTest.save(newEntity)
+          storeToTest.save(newEntity)
             .then((createdEntity) => {
               expect(createdEntity._id).to.equal(newEntity._id);
               expect(createdEntity.textField).to.equal(newEntity.textField);
@@ -935,7 +944,7 @@ function testFunc() {
             textField: entity1.textField,
             newProperty: common.randomString()
           };
-          return storeToTest.save(entityToUpdate)
+          storeToTest.save(entityToUpdate)
             .then((updatedEntity) => {
               expect(updatedEntity._id).to.equal(entity1._id);
               expect(updatedEntity.newProperty).to.equal(entityToUpdate.newProperty);
@@ -944,13 +953,12 @@ function testFunc() {
             .then(() => {
               common.validatePendingSyncCount(dataStoreType, collectionName, 1, done)
             }).catch(done);
-
         });
       });
 
-      describe('removeById()', function () {
+      describe('removeById()', () => {
         it('should throw an error if the id argument does not exist', (done) => {
-          return storeToTest.removeById(common.randomString())
+          storeToTest.removeById(common.randomString())
             .catch((error) => {
               if (dataStoreType === Kinvey.DataStoreType.Network) {
                 expect(error.name).to.contain(notFoundErrorName);
@@ -968,7 +976,7 @@ function testFunc() {
           };
           let remainingCount;
 
-          return storeToTest.count().toPromise()
+          storeToTest.count().toPromise()
             .then((count) => {
               remainingCount = count;
               return storeToTest.save(newEntity)
@@ -998,14 +1006,12 @@ function testFunc() {
         });
       });
 
-      describe('remove()', function () {
+      describe('remove()', () => {
 
         before((done) => {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
-              .then(() => {
-                done()
-              })
+              .then(() => done());
           }
           else {
             done();
@@ -1055,7 +1061,7 @@ function testFunc() {
         it('should return a { count: 0 } when no entities are removed', (done) => {
           const query = new Kinvey.Query();
           query.equalTo('_id', common.randomString());
-          return storeToTest.remove(query)
+          storeToTest.remove(query)
             .then((result) => {
               expect(result.count).to.equal(0);
               done()
