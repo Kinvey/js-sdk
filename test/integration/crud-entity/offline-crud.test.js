@@ -25,8 +25,10 @@ function testFunc() {
           appKey: appKey,
           appSecret: appSecret
         });
-
-        Kinvey.User.signup()
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup()
+          })
           .then((user) => {
             createdUserIds.push(user.data._id);
             //store for setup
@@ -50,7 +52,16 @@ function testFunc() {
       });
 
       after((done) => {
-        common.deleteUsers(createdUserIds)
+        Kinvey.User.logout()
+          .then(() => {
+            return Kinvey.User.signup()
+          })
+          .then(() => {
+            return common.deleteUsers(createdUserIds)
+          })
+          .then(() => {
+            return common.cleanUpCollectionData(collectionName)
+          })
           .then(() => {
             return Kinvey.User.logout()
           })
@@ -142,7 +153,7 @@ function testFunc() {
       describe('clear()', () => {
 
         it('should remove the entities from the cache, which match the query', (done) => {
-          const entity = common.randomString();
+          const randomId = common.randomString();
           cacheStore.save({ '_id': randomId })
             .then(() => {
               const query = new Kinvey.Query();
