@@ -17,18 +17,10 @@ function testFunc() {
       let cacheStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
-      const entity1 = {
-        _id: common.randomString(),
-        customProperty: common.randomString()
-      };
-      const entity2 = {
-        _id: common.randomString(),
-        customProperty: common.randomString()
-      };
+      const entity1 = common.getSingleEntity(common.randomString());
       const createdUserIds = [];
 
       before((done) => {
-
         Kinvey.init({
           appKey: appKey,
           appSecret: appSecret
@@ -43,20 +35,18 @@ function testFunc() {
             cacheStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return common.cleanUpCollectionData(collectionName)
-          })
-          .then(() => {
-            return networkStore.save(entity1)
-          })
-          .then(() => {
-            return networkStore.save(entity2)
-          })
-          .then(() => {
-            return storeToTest.pull()
-          })
-          .then(() => {
             done();
           })
+          .catch(done)
+      });
+
+      beforeEach((done) => {
+        common.cleanUpCollectionData(collectionName)
+          .then(() => {
+            return cacheStore.save(entity1)
+          })
+          .then(() => done())
+          .catch(done)
       });
 
       after((done) => {
@@ -71,8 +61,8 @@ function testFunc() {
       if (dataStoreType === Kinvey.DataStoreType.Cache) {
         describe('local cache removal', () => {
 
-          it('find() should remove entities that no longer exist on the backend from the cache', (done) => {
-            const entity = { '_id': common.randomString() };
+          it('find() should remove entities that no longer exist in the backend from the cache', (done) => {
+            const entity = common.getSingleEntity(common.randomString());
             return storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
@@ -84,13 +74,13 @@ function testFunc() {
                 return syncStore.findById(entity._id).toPromise()
               })
               .then(() => {
-                done(new Error(shouldNotBeCalledErrorMessage));
+                return done(new Error(shouldNotBeCalledErrorMessage));
               })
               .catch((error) => {
                 expect(error.name).to.equal(notFoundErrorName);
                 return syncStore.count().toPromise()
                   .then((count) => {
-                    expect(count).to.equal(2);
+                    expect(count).to.equal(1);
                     done();
                   })
               })
@@ -98,8 +88,8 @@ function testFunc() {
           });
 
           it.skip('findById() should remove entities that no longer exist on the backend from the cache', (done) => {
-            const entity = { '_id': common.randomString() };
-            return storeToTest.save(entity)
+            const entity = common.getSingleEntity(common.randomString());
+            storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
               })
@@ -117,7 +107,7 @@ function testFunc() {
                 expect(error.name).to.equal(notFoundErrorName);
                 return syncStore.count().toPromise()
                   .then((count) => {
-                    expect(count).to.be.above(0);
+                    expect(count).to.equal(1);
                     done();
                   })
               })
@@ -125,8 +115,8 @@ function testFunc() {
           });
 
           it('removeById should remove the entity from cache even if the entity is not found on the backend', (done) => {
-            const entity = { '_id': common.randomString() };
-            return storeToTest.save(entity)
+            const entity = common.getSingleEntity(common.randomString());
+            storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
               })
@@ -138,7 +128,7 @@ function testFunc() {
                 return syncStore.findById(entity._id).toPromise()
               })
               .then(() => {
-                done(new Error(shouldNotBeCalledErrorMessage));
+                return done(new Error(shouldNotBeCalledErrorMessage));
               })
               .catch((error) => {
                 expect(error.name).to.equal(notFoundErrorName);
@@ -150,53 +140,36 @@ function testFunc() {
       }
 
       describe('clear()', () => {
-        let initialCacheCount;
-        let initialBackendCount;
-
-        beforeEach((done) => {
-          return syncStore.count().toPromise()
-            .then((count) => {
-              initialCacheCount = count;
-              return networkStore.count().toPromise()
-            })
-            .then((count) => {
-              initialBackendCount = count;
-              done();
-            });
-        })
 
         it('should remove the entities from the cache, which match the query', (done) => {
-          let fieldValue = common.randomString();
-          return cacheStore.save({ 'customProperty': fieldValue })
-            .then(() => {
-              return cacheStore.save({ 'customProperty': fieldValue })
-            })
+          const entity = common.randomString();
+          cacheStore.save({ '_id': randomId })
             .then(() => {
               const query = new Kinvey.Query();
-              query.equalTo('customProperty', fieldValue);
+              query.equalTo('_id', randomId);
               return storeToTest.clear(query)
             })
             .then((result) => {
-              expect(result.count).to.equal(2);
+              expect(result.count).to.equal(1);
               return syncStore.count().toPromise()
             })
             .then((count) => {
-              expect(count).to.equal(initialCacheCount);
+              expect(count).to.equal(1);
               return networkStore.count().toPromise()
             })
             .then((count) => {
-              expect(count).to.equal(initialBackendCount + 2);
+              expect(count).to.equal(2);
               done();
             }).catch(done);
         });
 
         it('should remove all entities only from the cache', (done) => {
-          return syncStore.save({ '_id': common.randomString() })
+          cacheStore.save({})
             .then(() => {
               return storeToTest.clear()
             })
             .then((result) => {
-              expect(result.count).to.equal(initialCacheCount + 1);
+              expect(result.count).to.equal(2);
               return syncStore.count().toPromise()
             })
             .then((count) => {
@@ -204,7 +177,7 @@ function testFunc() {
               return networkStore.count().toPromise()
             })
             .then((count) => {
-              expect(count).to.equal(initialBackendCount);
+              expect(count).to.equal(2);
               done();
             }).catch(done);
         });
