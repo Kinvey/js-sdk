@@ -882,7 +882,7 @@ function testFunc() {
         beforeEach((done) => {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
-              .then(() => done());
+              .then(() => done())
           }
           else {
             done();
@@ -1012,7 +1012,7 @@ function testFunc() {
         before((done) => {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
-              .then(() => done());
+              .then(() => done())
           }
           else {
             done();

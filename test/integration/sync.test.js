@@ -92,9 +92,11 @@ function testFunc() {
             cacheStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            done();
-          }).catch(done)
-      });
+            return common.cleanUpCollectionData(collectionName)
+          })
+          .then(() => done())
+          .catch(done)
+      })
 
       after((done) => {
         Kinvey.User.logout()
@@ -358,7 +360,6 @@ function testFunc() {
               .catch(done);
           });
 
-          //TODO: Discuss if the query should be applied to both push and pull - this is the current behaviour
           it('should push and then pull only the entities, matching the query', (done) => {
             let syncResult;
             const query = new Kinvey.Query();
