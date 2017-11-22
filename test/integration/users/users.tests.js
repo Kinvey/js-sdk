@@ -579,6 +579,7 @@ function testFunc() {
       const email = common.randomEmailAddress();
 
       before((done) => {
+
         Kinvey.User.logout()
           .then(() => {
             return Kinvey.User.signup({ username: username, email: email })

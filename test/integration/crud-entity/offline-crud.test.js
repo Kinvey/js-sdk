@@ -56,7 +56,8 @@ function testFunc() {
           .then(() => {
             return Kinvey.User.signup()
           })
-          .then(() => {
+          .then((user) => {
+            createdUserIds.push(user.data._id);
             return common.deleteUsers(createdUserIds)
           })
           .then(() => {

@@ -35,6 +35,7 @@ function testFunc() {
           expect(_.find(result, (entity) => { return entity._id === deletedItem._id; })).to.not.exist;
           expect(_.find(result, (entity) => { return entity.newProperty === modifiedItem.newProperty; })).to.exist;
           let createdOnServer = _.find(result, (entity) => { return entity._id === createdItem._id; });
+
           expect(common.deleteEntityMetadata(createdOnServer)).to.deep.equal(createdItem);
           return storeToTest.pendingSyncCount()
         })
@@ -92,7 +93,7 @@ function testFunc() {
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
             done();
-          });
+          }).catch(done)
       });
 
       after((done) => {
@@ -100,7 +101,8 @@ function testFunc() {
           .then(() => {
             return Kinvey.User.signup()
           })
-          .then(() => {
+          .then((user) => {
+            createdUserIds.push(user.data._id);
             return common.deleteUsers(createdUserIds)
           })
           .then(() => {
