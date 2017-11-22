@@ -58,10 +58,10 @@ function testFunc() {
           })
           .then((user) => {
             createdUserIds.push(user.data._id);
-            return common.deleteUsers(createdUserIds)
+            return common.cleanUpCollectionData(collectionName)
           })
           .then(() => {
-            return common.cleanUpCollectionData(collectionName)
+            return common.deleteUsers(createdUserIds)
           })
           .then(() => {
             return Kinvey.User.logout()
