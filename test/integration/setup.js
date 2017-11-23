@@ -1,4 +1,4 @@
-before((done) => {
+before(() => {
   collectionName = externalConfig.collectionName;
   appKey = externalConfig.appKey;
   appSecret = externalConfig.appSecret;
@@ -7,7 +7,4 @@ before((done) => {
     appKey: appKey,
     appSecret: appSecret
   });
-  done();
 })
-
-
