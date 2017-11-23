@@ -32,6 +32,22 @@ function testFunc() {
     return `The provided ${parameter} is not a string.`;
   }
 
+  const safelySignUpUser = (username, password, state, createdUserIds) => {
+    return Kinvey.User.logout()
+      .then(() => {
+        return Kinvey.User.signup({
+          username: username,
+          password: password
+        }, {
+            state: state
+          })
+      })
+      .then((user) => {
+        createdUserIds.push(user.data._id);
+        return user;
+      })
+  }
+
   describe('User tests', () => {
 
     const missingCredentialsError = 'Username and/or password missing';
@@ -53,9 +69,7 @@ function testFunc() {
 
       beforeEach((done) => {
         Kinvey.User.logout()
-          .then(() => {
-            done();
-          })
+          .then(() => done())
       });
 
       it('should throw an error if an active user already exists', (done) => {
@@ -162,15 +176,8 @@ function testFunc() {
 
       before((done) => {
         syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
-        Kinvey.User.logout()
+        safelySignUpUser(username, password, true, createdUserIds)
           .then(() => {
-            return Kinvey.User.signup({
-              username: username,
-              password: password
-            })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
             return syncDataStore.save({
               field: 'value'
             })
@@ -214,9 +221,7 @@ function testFunc() {
     describe('signup', () => {
       beforeEach((done) => {
         Kinvey.User.logout()
-          .then(() => {
-            done();
-          })
+          .then(() => done())
       });
 
       it('should signup and set the user as the active user', (done) => {
@@ -345,14 +350,9 @@ function testFunc() {
       const username = common.randomString();
 
       before((done) => {
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({ username: username })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            done();
-          }).catch(done);
+        safelySignUpUser(username, null, true, createdUserIds)
+          .then(() => done())
+          .catch(done);
       });
 
       it('should update the active user', (done) => {
@@ -399,16 +399,9 @@ function testFunc() {
       const username = common.randomString();
 
       before((done) => {
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({
-              username: username
-            })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            done();
-          })
+        safelySignUpUser(username, null, true, createdUserIds)
+          .then(() => done())
+          .catch(done);
       });
 
       it('should throw an error if the query argument is not an instance of the Query class', (done) => {
@@ -443,24 +436,12 @@ function testFunc() {
       let username2 = common.randomString();
 
       before((done) => {
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({
-              username: username1
-            }, {
-                state: false
-              })
-          })
+        safelySignUpUser(username1, null, false, createdUserIds)
           .then((user) => {
             userToRemoveId1 = user.data._id;
-            createdUserIds.push(userToRemoveId1);
           })
           .then(() => {
-            return Kinvey.User.signup({
-              username: username2
-            }, {
-                state: false
-              })
+            return Kinvey.User.signup({ username: username2 }, { state: false })
           })
           .then((user) => {
             userToRemoveId2 = user.data._id;
@@ -531,20 +512,12 @@ function testFunc() {
     });
 
     describe('exists()', () => {
-      let username;
+      const username = common.randomString();
 
       before((done) => {
-        username = common.randomString();
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({
-              username: username
-            })
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            done();
-          })
+        safelySignUpUser(username, null, true, createdUserIds)
+          .then(() => done())
+          .catch(done);
       });
 
       it('should return true if the user exists in the Backend', (done) => {
