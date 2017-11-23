@@ -37,7 +37,8 @@ function testFunc() {
       .then(() => {
         return Kinvey.User.signup({
           username: username,
-          password: password
+          password: password,
+          email: common.randomEmailAddress()
         }, {
             state: state
           })
@@ -128,10 +129,7 @@ function testFunc() {
       it('should login a user', (done) => {
         const username = common.randomString();
         const password = common.randomString();
-        Kinvey.User.signup({
-          username: username,
-          password: password
-        })
+        Kinvey.User.signup({ username: username, password: password })
           .then((user) => {
             createdUserIds.push(user.data._id);
             return Kinvey.User.logout()
@@ -148,19 +146,13 @@ function testFunc() {
       it('should login a user by providing credentials as an object', (done) => {
         const username = common.randomString();
         const password = common.randomString();
-        Kinvey.User.signup({
-          username: username,
-          password: password
-        })
+        Kinvey.User.signup({ username: username, password: password })
           .then((user) => {
             createdUserIds.push(user.data._id);
             return Kinvey.User.logout()
           })
           .then(() => {
-            return Kinvey.User.login({
-              username: username,
-              password: password
-            })
+            return Kinvey.User.login({ username: username, password: password })
           })
           .then((user) => {
             assertUserData(user, username);
@@ -178,9 +170,7 @@ function testFunc() {
         syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
         safelySignUpUser(username, password, true, createdUserIds)
           .then(() => {
-            return syncDataStore.save({
-              field: 'value'
-            })
+            return syncDataStore.save({ field: 'value' })
           })
           .then(() => done())
           .catch(done);
@@ -227,10 +217,7 @@ function testFunc() {
       it('should signup and set the user as the active user', (done) => {
         const newUser = new Kinvey.User();
         const username = common.randomString();
-        newUser.signup({
-          username: username,
-          password: common.randomString()
-        })
+        newUser.signup({ username: username, password: common.randomString() })
           .then((user) => {
             createdUserIds.push(user.data._id);
             assertUserData(user, username, true);
@@ -240,10 +227,7 @@ function testFunc() {
 
       it('should signup with a user and set the user as the active user', (done) => {
         const username = common.randomString();
-        const newUser = new Kinvey.User({
-          username: username,
-          password: common.randomString()
-        });
+        const newUser = new Kinvey.User({ username: username, password: common.randomString() });
         Kinvey.User.signup(newUser)
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -270,12 +254,7 @@ function testFunc() {
       });
 
       it('should signup user and not set the user as the active user if options.state = false', (done) => {
-        Kinvey.User.signup({
-          username: common.randomString(),
-          password: common.randomString()
-        }, {
-            state: false
-          })
+        Kinvey.User.signup({ username: common.randomString(), password: common.randomString() }, { state: false })
           .then((user) => {
             createdUserIds.push(user.data._id);
             expect(user.isActive()).to.equal(false);
@@ -301,9 +280,7 @@ function testFunc() {
           password: password
         });
 
-        newUser.signup({
-          username: username
-        })
+        newUser.signup({ username: username })
           .then((user) => {
             createdUserIds.push(user.data._id);
             expect(user.isActive()).to.equal(true);
@@ -498,9 +475,7 @@ function testFunc() {
       });
 
       it('should remove the user that matches the id argument permanently', (done) => {
-        Kinvey.User.remove(userToRemoveId2, {
-          hard: true
-        })
+        Kinvey.User.remove(userToRemoveId2, { hard: true })
           .then(() => {
             return Kinvey.User.exists(username2)
           })
@@ -539,18 +514,15 @@ function testFunc() {
 
     describe('email sending operations', () => {
       const username = common.randomString();
-      const email = common.randomEmailAddress();
+      let email;
 
       before((done) => {
-
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup({ username: username, email: email })
-          })
+        safelySignUpUser(username, null, true, createdUserIds)
           .then((user) => {
-            createdUserIds.push(user.data._id);
+            email = user.data.email;
             done();
-          }).catch(done);
+          })
+          .catch(done);
       });
 
       describe('verifyEmail()', () => {
