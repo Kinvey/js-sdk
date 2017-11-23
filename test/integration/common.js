@@ -40,7 +40,10 @@ common = {
       return Promise.all(userIds.map(userId => {
         return Kinvey.User.remove(userId, {
           hard: true
-        });
+        })
+          .then(() => {
+            userIds.length = 0
+          })
       }));
     },
     assertEntityMetadata: (arrayOfEntities) => {
@@ -157,7 +160,7 @@ common = {
           }).catch(reject);
       });
     },
-    cleanUpCollectionData: (collectionName, done) => {
+    cleanUpCollectionData: (collectionName) => {
       const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
       const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
       return networkStore.find().toPromise()
@@ -173,7 +176,23 @@ common = {
         })
         .then(() => {
           return syncStore.clear()
-        }).catch(done);
+        })
+    },
+    cleanUpAppData: (collectionName, createdUserIds) => {
+      return Kinvey.User.logout()
+        .then(() => {
+          return Kinvey.User.signup()
+        })
+        .then((user) => {
+          createdUserIds.push(user.data._id);
+          return common.cleanUpCollectionData(collectionName)
+        })
+        .then(() => {
+          return common.deleteUsers(createdUserIds)
+        })
+        .then(() => {
+          return Kinvey.User.logout()
+        })
     }
   }
   
