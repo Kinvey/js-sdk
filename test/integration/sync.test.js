@@ -1,12 +1,8 @@
 runner.run(testFunc);
 
 function testFunc() {
-  const collectionName = externalConfig.collectionName;
-  const appKey = externalConfig.appKey;
-  const appSecret = externalConfig.appSecret;
 
   const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
-
   let networkStore;
   let syncStore;
   let cacheStore;
@@ -73,14 +69,10 @@ function testFunc() {
       const entity1 = common.getSingleEntity(common.randomString());
       const entity2 = common.getSingleEntity(common.randomString());
       const entity3 = common.getSingleEntity(common.randomString());
-      const createdUserIds = [];
+      let createdUserIds = [];
 
       before((done) => {
-        Kinvey.init({
-          appKey: appKey,
-          appSecret: appSecret
-        });
-        Kinvey.User.logout()
+        common.cleanUpAppData(collectionName, createdUserIds)
           .then(() => {
             return Kinvey.User.signup()
           })
@@ -92,27 +84,13 @@ function testFunc() {
             cacheStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return common.cleanUpCollectionData(collectionName)
+            done();
           })
-          .then(() => done())
           .catch(done)
       })
 
       after((done) => {
-        Kinvey.User.logout()
-          .then(() => {
-            return Kinvey.User.signup()
-          })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            return common.cleanUpCollectionData(collectionName)
-          })
-          .then(() => {
-            return common.deleteUsers(createdUserIds)
-          })
-          .then(() => {
-            return Kinvey.User.logout()
-          })
+        common.cleanUpAppData(collectionName, createdUserIds)
           .then(() => done())
           .catch(done)
       });

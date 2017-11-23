@@ -34,27 +34,17 @@ function testFunc() {
 
   describe('User tests', () => {
 
-    const collectionName = externalConfig.collectionName;
     const missingCredentialsError = 'Username and/or password missing';
-    const createdUserIds = [];
+    let createdUserIds = [];
 
     before((done) => {
-      Kinvey.init({
-        appKey: externalConfig.appKey,
-        appSecret: externalConfig.appSecret
-      });
-      done();
+      common.cleanUpAppData(collectionName, createdUserIds)
+        .then(() => done())
+        .catch(done)
     });
 
     after((done) => {
-      Kinvey.User.logout()
-        .then(() => {
-          return Kinvey.User.signup()
-        })
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return common.deleteUsers(createdUserIds)
-        })
+      common.cleanUpAppData(collectionName, createdUserIds)
         .then(() => done())
         .catch(done)
     });
