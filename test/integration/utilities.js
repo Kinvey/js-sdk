@@ -129,8 +129,8 @@
   }
 
   function validatePendingSyncCount(dataStoreType, collectionName, itemsForSyncCount) {
-    return new Promise((resolve, reject) => {
-      if (dataStoreType !== Kinvey.DataStoreType.Network) {
+    if (dataStoreType !== Kinvey.DataStoreType.Network) {
+      return new Promise((resolve, reject) => {
         let expectedCount = 0;
         if (dataStoreType === Kinvey.DataStoreType.Sync) {
           expectedCount = itemsForSyncCount;
@@ -141,8 +141,8 @@
             expect(syncCount).to.equal(expectedCount);
             resolve();
           }).catch(reject);
-      }
-    });
+      });
+    }
   }
 
   function validateEntity(dataStoreType, collectionName, expectedEntity, searchField) {
