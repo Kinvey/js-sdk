@@ -19,7 +19,7 @@ randomEmailAddress = () => {
 }
 
 getSingleEntity = (_id, textValue, numberValue, array) => {
-  let entity = {
+  const entity = {
     textField: textValue || randomString(),
     numberField: numberValue || numberValue === 0 ? numberValue : Math.random(),
     arrayField: array || [randomString(), randomString()]
@@ -30,10 +30,10 @@ getSingleEntity = (_id, textValue, numberValue, array) => {
   return entity;
 }
 
-createData = (collectionName, arrayOfEntities) => {
+saveEntities = (collectionName, entities) => {
   const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
   const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
-  return Promise.all(arrayOfEntities.map(entity => {
+  return Promise.all(entities.map(entity => {
     return networkStore.save(entity)
   }))
     .then(() => syncStore.pull())
@@ -213,7 +213,7 @@ if (typeof module === 'object') {
     randomString,
     randomEmailAddress,
     getSingleEntity,
-    createData,
+    saveEntities,
     deleteUsers,
     assertEntityMetadata,
     deleteEntityMetadata,

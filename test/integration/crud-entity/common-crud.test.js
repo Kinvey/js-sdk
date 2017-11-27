@@ -186,7 +186,7 @@ function testFunc() {
 
           cleanUpCollectionData(collectionName)
             .then(() => {
-              return createData(collectionName, entities)
+              return saveEntities(collectionName, entities)
             })
             .then((result) => {
               entities = result;
@@ -294,7 +294,7 @@ function testFunc() {
 
           cleanUpCollectionData(collectionName)
             .then(() => {
-              return createData(collectionName, entities)
+              return saveEntities(collectionName, entities)
             })
             .then((result) => {
               entities = _.sortBy(result, numberFieldName);
@@ -1006,7 +1006,7 @@ function testFunc() {
           const query = new Kinvey.Query();
           query.equalTo('textField', newEntity.textField);
           let initialCount;
-          createData(collectionName, [newEntity, newEntity])
+          saveEntities(collectionName, [newEntity, newEntity])
             .then(() => {
               return storeToTest.count().toPromise()
             })
