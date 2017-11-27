@@ -31,6 +31,7 @@
     return entity;
   }
 
+  //saves an array of entities and returns the result sorted by _id for an easier usage in 'find with modifiers' tests
   function saveEntities(collectionName, entities) {
     const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
     const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
@@ -47,7 +48,7 @@
         hard: true
       })
         .then(() => {
-          userIds.length = 0
+          userIds.length = 0;
         })
     }));
   }
