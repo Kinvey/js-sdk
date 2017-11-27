@@ -52,27 +52,26 @@
     }));
   }
 
-  function assertEntityMetadata(arrayOfEntities) {
-    const entities = [].concat(arrayOfEntities);
-    entities.forEach((entity) => {
+  function ensureArray(entities) {
+    return [].concat(entities);
+  }
+
+  function assertEntityMetadata(entities) {
+    ensureArray(entities).forEach((entity) => {
       expect(entity._kmd.lmt).to.exist;
       expect(entity._kmd.ect).to.exist;
       expect(entity._acl.creator).to.exist;
     });
   }
 
-  function deleteEntityMetadata(arrayOfEntities) {
-    if (arrayOfEntities instanceof Array) {
-      arrayOfEntities.forEach((entity) => {
-        delete entity['_kmd'];
-        delete entity['_acl'];
-      });
-    }
-    else {
-      delete arrayOfEntities['_kmd'];
-      delete arrayOfEntities['_acl'];
-    }
-    return arrayOfEntities;
+  function deleteEntityMetadata(entities) {
+    const newArray = ensureArray(entities);
+    newArray.forEach((entity) => {
+      delete entity['_kmd'];
+      delete entity['_acl'];
+    });
+    entities = newArray.length > 1 ? newArray : newArray[0];
+    return entities;
   }
 
   function validateReadResult(dataStoreType, spy, cacheExpectedEntities, backendExpectedEntities, sortBeforeCompare) {
@@ -215,6 +214,7 @@
     getEntity,
     saveEntities,
     deleteUsers,
+    ensureArray,
     assertEntityMetadata,
     deleteEntityMetadata,
     validateReadResult,
