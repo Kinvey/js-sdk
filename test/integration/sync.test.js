@@ -17,8 +17,8 @@ function testFunc() {
         expect(record.operation).to.equal(record._id === deletedItem._id ? 'DELETE' : 'PUT');
         expect([createdItem._id, modifiedItem._id, deletedItem._id]).to.include(record._id);
         if (record.operation !== 'DELETE') {
-          common.assertEntityMetadata(record.entity);
-          common.deleteEntityMetadata(record.entity);
+          assertEntityMetadata(record.entity);
+          deleteEntityMetadata(record.entity);
           expect(record.entity).to.deep.equal(record._id === createdItem._id ? createdItem : modifiedItem);
         }
         else {
@@ -32,7 +32,7 @@ function testFunc() {
           expect(_.find(result, (entity) => { return entity.newProperty === modifiedItem.newProperty; })).to.exist;
           let createdOnServer = _.find(result, (entity) => { return entity._id === createdItem._id; });
 
-          expect(common.deleteEntityMetadata(createdOnServer)).to.deep.equal(createdItem);
+          expect(deleteEntityMetadata(createdOnServer)).to.deep.equal(createdItem);
           return storeToTest.pendingSyncCount()
         })
         .then((count) => {
@@ -47,14 +47,14 @@ function testFunc() {
       expect(result.length).to.equal(expectedPulledItemsCount || expectedItems.length);
       expectedItems.forEach((entity) => {
         const resultEntity = _.find(result, (record) => { return record._id === entity._id; });
-        expect(common.deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
+        expect(deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
       })
 
       return syncStore.find().toPromise()
         .then((result) => {
           expectedItems.forEach((entity) => {
             const cachedEntity = _.find(result, (record) => { return record._id === entity._id; });
-            expect(common.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
+            expect(deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
           })
           resolve();
         })
@@ -66,13 +66,13 @@ function testFunc() {
     describe(`${currentDataStoreType} Sync Tests`, () => {
 
       const dataStoreType = currentDataStoreType;
-      const entity1 = common.getSingleEntity(common.randomString());
-      const entity2 = common.getSingleEntity(common.randomString());
-      const entity3 = common.getSingleEntity(common.randomString());
+      const entity1 = getSingleEntity(randomString());
+      const entity2 = getSingleEntity(randomString());
+      const entity3 = getSingleEntity(randomString());
       let createdUserIds = [];
 
       before((done) => {
-        common.cleanUpAppData(collectionName, createdUserIds)
+        cleanUpAppData(collectionName, createdUserIds)
           .then(() => {
             return Kinvey.User.signup()
           })
@@ -90,7 +90,7 @@ function testFunc() {
       })
 
       after((done) => {
-        common.cleanUpAppData(collectionName, createdUserIds)
+        cleanUpAppData(collectionName, createdUserIds)
           .then(() => done())
           .catch(done)
       });
@@ -98,7 +98,7 @@ function testFunc() {
       describe('Pending sync queue operations', () => {
 
         beforeEach((done) => {
-          common.cleanUpCollectionData(collectionName)
+          cleanUpCollectionData(collectionName)
             .then(() => {
               return syncStore.save(entity1)
             })
@@ -196,9 +196,9 @@ function testFunc() {
         let updatedEntity2;
 
         beforeEach((done) => {
-          updatedEntity2 = Object.assign({ newProperty: common.randomString() }, entity2);
+          updatedEntity2 = Object.assign({ newProperty: randomString() }, entity2);
           //adding three items, eligible for sync and one item, which should not be synced
-          common.cleanUpCollectionData(collectionName)
+          cleanUpCollectionData(collectionName)
             .then(() => {
               return syncStore.save(entity1)
             })
@@ -275,7 +275,7 @@ function testFunc() {
         describe('pull()', () => {
 
           beforeEach((done) => {
-            common.cleanUpCollectionData(collectionName)
+            cleanUpCollectionData(collectionName)
               .then(() => {
                 return networkStore.save(entity1)
               })
@@ -314,8 +314,8 @@ function testFunc() {
 
           beforeEach((done) => {
             //creating two server items - three items, eligible for sync are already created in cache
-            serverEntity1 = common.getSingleEntity(common.randomString());
-            serverEntity2 = common.getSingleEntity(common.randomString());
+            serverEntity1 = getSingleEntity(randomString());
+            serverEntity2 = getSingleEntity(randomString());
             networkStore.save(serverEntity1)
               .then(() => {
                 return networkStore.save(serverEntity2)

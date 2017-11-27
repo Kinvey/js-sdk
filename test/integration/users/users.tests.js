@@ -38,7 +38,7 @@ function testFunc() {
         return Kinvey.User.signup({
           username: username,
           password: password,
-          email: common.randomEmailAddress()
+          email: randomEmailAddress()
         }, {
             state: state
           })
@@ -55,13 +55,14 @@ function testFunc() {
     let createdUserIds = [];
 
     before((done) => {
-      common.cleanUpAppData(collectionName, createdUserIds)
+      debugger
+      cleanUpAppData(collectionName, createdUserIds)
         .then(() => done())
         .catch(done)
     });
 
     after((done) => {
-      common.cleanUpAppData(collectionName, createdUserIds)
+      cleanUpAppData(collectionName, createdUserIds)
         .then(() => done())
         .catch(done)
     });
@@ -77,7 +78,7 @@ function testFunc() {
         Kinvey.User.signup()
           .then((user) => {
             createdUserIds.push(user.data._id);
-            return Kinvey.User.login(common.randomString(), common.randomString());
+            return Kinvey.User.login(randomString(), randomString());
           })
           .catch((error) => {
             expect(error.message).to.contain('An active user already exists.');
@@ -86,7 +87,7 @@ function testFunc() {
       });
 
       it('should throw an error if a username is not provided', (done) => {
-        Kinvey.User.login(null, common.randomString())
+        Kinvey.User.login(null, randomString())
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -94,7 +95,7 @@ function testFunc() {
       });
 
       it('should throw an error if the username is an empty string', (done) => {
-        Kinvey.User.login(' ', common.randomString())
+        Kinvey.User.login(' ', randomString())
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -102,7 +103,7 @@ function testFunc() {
       });
 
       it('should throw an error if a password is not provided', (done) => {
-        Kinvey.User.login(common.randomString())
+        Kinvey.User.login(randomString())
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -110,7 +111,7 @@ function testFunc() {
       });
 
       it('should throw an error if the password is an empty string', (done) => {
-        Kinvey.User.login(common.randomString(), ' ')
+        Kinvey.User.login(randomString(), ' ')
           .catch((error) => {
             expect(error.message).to.contain(missingCredentialsError);
             done();
@@ -119,7 +120,7 @@ function testFunc() {
 
       it('should throw an error if the username and/or password is invalid', (done) => {
         const user = new Kinvey.User();
-        user.login(common.randomString(), common.randomString())
+        user.login(randomString(), randomString())
           .catch((error) => {
             expect(error.message).to.contain('Invalid credentials.');
             done();
@@ -127,8 +128,8 @@ function testFunc() {
       });
 
       it('should login a user', (done) => {
-        const username = common.randomString();
-        const password = common.randomString();
+        const username = randomString();
+        const password = randomString();
         Kinvey.User.signup({ username: username, password: password })
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -144,8 +145,8 @@ function testFunc() {
       });
 
       it('should login a user by providing credentials as an object', (done) => {
-        const username = common.randomString();
-        const password = common.randomString();
+        const username = randomString();
+        const password = randomString();
         Kinvey.User.signup({ username: username, password: password })
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -163,8 +164,8 @@ function testFunc() {
 
     describe('logout()', () => {
       let syncDataStore;
-      const username = common.randomString();
-      const password = common.randomString();
+      const username = randomString();
+      const password = randomString();
 
       before((done) => {
         syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
@@ -216,8 +217,8 @@ function testFunc() {
 
       it('should signup and set the user as the active user', (done) => {
         const newUser = new Kinvey.User();
-        const username = common.randomString();
-        newUser.signup({ username: username, password: common.randomString() })
+        const username = randomString();
+        newUser.signup({ username: username, password: randomString() })
           .then((user) => {
             createdUserIds.push(user.data._id);
             assertUserData(user, username, true);
@@ -226,8 +227,8 @@ function testFunc() {
       });
 
       it('should signup with a user and set the user as the active user', (done) => {
-        const username = common.randomString();
-        const newUser = new Kinvey.User({ username: username, password: common.randomString() });
+        const username = randomString();
+        const newUser = new Kinvey.User({ username: username, password: randomString() });
         Kinvey.User.signup(newUser)
           .then((user) => {
             createdUserIds.push(user.data._id);
@@ -238,9 +239,9 @@ function testFunc() {
 
       it('should signup with attributes and store them correctly', (done) => {
         const data = {
-          username: common.randomString(),
-          password: common.randomString(),
-          email: common.randomEmailAddress(),
+          username: randomString(),
+          password: randomString(),
+          email: randomEmailAddress(),
           additionalField: 'test'
         }
         Kinvey.User.signup(data)
@@ -254,7 +255,7 @@ function testFunc() {
       });
 
       it('should signup user and not set the user as the active user if options.state = false', (done) => {
-        Kinvey.User.signup({ username: common.randomString(), password: common.randomString() }, { state: false })
+        Kinvey.User.signup({ username: randomString(), password: randomString() }, { state: false })
           .then((user) => {
             createdUserIds.push(user.data._id);
             expect(user.isActive()).to.equal(false);
@@ -272,11 +273,11 @@ function testFunc() {
       });
 
       it('should merge the signup data and set the user as the active user', (done) => {
-        const username = common.randomString();
-        const password = common.randomString();
+        const username = randomString();
+        const password = randomString();
 
         const newUser = new Kinvey.User({
-          username: common.randomString(),
+          username: randomString(),
           password: password
         });
 
@@ -308,8 +309,8 @@ function testFunc() {
           .then((user) => {
             createdUserIds.push(user.data._id);
             return Kinvey.User.signup({
-              username: common.randomString(),
-              password: common.randomString()
+              username: randomString(),
+              password: randomString()
             }, {
                 state: false
               })
@@ -324,7 +325,7 @@ function testFunc() {
     });
 
     describe('update()', () => {
-      const username = common.randomString();
+      const username = randomString();
 
       before((done) => {
         safelySignUpUser(username, null, true, createdUserIds)
@@ -333,8 +334,8 @@ function testFunc() {
       });
 
       it('should update the active user', (done) => {
-        const newEmail = common.randomString();
-        const newPassword = common.randomString();
+        const newEmail = randomString();
+        const newPassword = randomString();
         Kinvey.User.update({
           email: newEmail,
           password: newPassword
@@ -363,7 +364,7 @@ function testFunc() {
       it('should throw an error if the user does not have an _id', (done) => {
         const user = new Kinvey.User();
         user.update({
-          email: common.randomString()
+          email: randomString()
         })
           .catch((error) => {
             expect(error.message).to.equal('User must have an _id.');
@@ -373,7 +374,7 @@ function testFunc() {
     });
 
     describe('lookup()', () => {
-      const username = common.randomString();
+      const username = randomString();
 
       before((done) => {
         safelySignUpUser(username, null, true, createdUserIds)
@@ -409,8 +410,8 @@ function testFunc() {
     describe('remove()', () => {
       let userToRemoveId1;
       let userToRemoveId2;
-      let username1 = common.randomString();
-      let username2 = common.randomString();
+      let username1 = randomString();
+      let username2 = randomString();
 
       before((done) => {
         safelySignUpUser(username1, null, false, createdUserIds)
@@ -450,7 +451,7 @@ function testFunc() {
       });
 
       it('should return the error from the server if the id does not exist', (done) => {
-        Kinvey.User.remove(common.randomString())
+        Kinvey.User.remove(randomString())
           .catch((error) => {
             expect(error.message).to.equal('This user does not exist for this app backend');
             done();
@@ -487,7 +488,7 @@ function testFunc() {
     });
 
     describe('exists()', () => {
-      const username = common.randomString();
+      const username = randomString();
 
       before((done) => {
         safelySignUpUser(username, null, true, createdUserIds)
@@ -504,7 +505,7 @@ function testFunc() {
       });
 
       it('should return false if the user does not exist in the Backend', (done) => {
-        Kinvey.User.exists(common.randomString())
+        Kinvey.User.exists(randomString())
           .then((result) => {
             expect(result).to.be.false
             done();
@@ -513,7 +514,7 @@ function testFunc() {
     });
 
     describe('email sending operations', () => {
-      const username = common.randomString();
+      const username = randomString();
       let email;
 
       before((done) => {

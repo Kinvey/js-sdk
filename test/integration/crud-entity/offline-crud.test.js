@@ -14,11 +14,11 @@ function testFunc() {
       let cacheStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
-      const entity1 = common.getSingleEntity(common.randomString());
+      const entity1 = getSingleEntity(randomString());
       let createdUserIds = [];
 
       before((done) => {
-        common.cleanUpAppData(collectionName, createdUserIds)
+        cleanUpAppData(collectionName, createdUserIds)
           .then(() => {
             return Kinvey.User.signup()
           })
@@ -36,7 +36,7 @@ function testFunc() {
       });
 
       beforeEach((done) => {
-        common.cleanUpCollectionData(collectionName)
+        cleanUpCollectionData(collectionName)
           .then(() => {
             return cacheStore.save(entity1)
           })
@@ -45,7 +45,7 @@ function testFunc() {
       });
 
       after((done) => {
-        common.cleanUpAppData(collectionName, createdUserIds)
+        cleanUpAppData(collectionName, createdUserIds)
           .then(() => done())
           .catch(done)
       });
@@ -54,7 +54,7 @@ function testFunc() {
         describe('local cache removal', () => {
 
           it('find() should remove entities that no longer exist in the backend from the cache', (done) => {
-            const entity = common.getSingleEntity(common.randomString());
+            const entity = getSingleEntity(randomString());
             return storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
@@ -80,7 +80,7 @@ function testFunc() {
           });
 
           it.skip('findById() should remove entities that no longer exist on the backend from the cache', (done) => {
-            const entity = common.getSingleEntity(common.randomString());
+            const entity = getSingleEntity(randomString());
             storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
@@ -107,7 +107,7 @@ function testFunc() {
           });
 
           it('removeById should remove the entity from cache even if the entity is not found on the backend', (done) => {
-            const entity = common.getSingleEntity(common.randomString());
+            const entity = getSingleEntity(randomString());
             storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
@@ -134,7 +134,7 @@ function testFunc() {
       describe('clear()', () => {
 
         it('should remove the entities from the cache, which match the query', (done) => {
-          const randomId = common.randomString();
+          const randomId = randomString();
           cacheStore.save({ '_id': randomId })
             .then(() => {
               const query = new Kinvey.Query();
