@@ -14,7 +14,7 @@ function testFunc() {
       let cacheStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
-      const entity1 = getSingleEntity(randomString());
+      const entity1 = getEntity(randomString());
       let createdUserIds = [];
 
       before((done) => {
@@ -54,7 +54,7 @@ function testFunc() {
         describe('local cache removal', () => {
 
           it('find() should remove entities that no longer exist in the backend from the cache', (done) => {
-            const entity = getSingleEntity(randomString());
+            const entity = getEntity(randomString());
             return storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
@@ -80,7 +80,7 @@ function testFunc() {
           });
 
           it.skip('findById() should remove entities that no longer exist on the backend from the cache', (done) => {
-            const entity = getSingleEntity(randomString());
+            const entity = getEntity(randomString());
             storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
@@ -107,7 +107,7 @@ function testFunc() {
           });
 
           it('removeById should remove the entity from cache even if the entity is not found on the backend', (done) => {
-            const entity = getSingleEntity(randomString());
+            const entity = getEntity(randomString());
             storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)

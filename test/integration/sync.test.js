@@ -66,9 +66,9 @@ function testFunc() {
     describe(`${currentDataStoreType} Sync Tests`, () => {
 
       const dataStoreType = currentDataStoreType;
-      const entity1 = getSingleEntity(randomString());
-      const entity2 = getSingleEntity(randomString());
-      const entity3 = getSingleEntity(randomString());
+      const entity1 = getEntity(randomString());
+      const entity2 = getEntity(randomString());
+      const entity3 = getEntity(randomString());
       let createdUserIds = [];
 
       before((done) => {
@@ -314,8 +314,8 @@ function testFunc() {
 
           beforeEach((done) => {
             //creating two server items - three items, eligible for sync are already created in cache
-            serverEntity1 = getSingleEntity(randomString());
-            serverEntity2 = getSingleEntity(randomString());
+            serverEntity1 = getEntity(randomString());
+            serverEntity2 = getEntity(randomString());
             networkStore.save(serverEntity1)
               .then(() => {
                 return networkStore.save(serverEntity2)

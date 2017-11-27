@@ -12,9 +12,9 @@ function testFunc() {
       let networkStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
-      const entity1 = getSingleEntity(randomString());
-      const entity2 = getSingleEntity(randomString());
-      const entity3 = getSingleEntity(randomString());
+      const entity1 = getEntity(randomString());
+      const entity2 = getEntity(randomString());
+      const entity3 = getEntity(randomString());
       let createdUserIds = [];
 
       before((done) => {
@@ -181,7 +181,7 @@ function testFunc() {
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
-            entities.push(getSingleEntity());
+            entities.push(getEntity());
           }
 
           cleanUpCollectionData(collectionName)
@@ -278,7 +278,7 @@ function testFunc() {
         before((done) => {
 
           for (let i = 0; i < dataCount; i++) {
-            entities.push(getSingleEntity(null, `test_${i}`, i, [`test_${i % 5}`, `second_test_${i % 5}`, `third_test_${i % 5}`]));
+            entities.push(getEntity(null, `test_${i}`, i, [`test_${i % 5}`, `second_test_${i % 5}`, `third_test_${i % 5}`]));
           }
 
           const textArray = ['aaa', 'aaB', 'aac']
@@ -1002,7 +1002,7 @@ function testFunc() {
         });
 
         it('should remove all entities that match the query', (done) => {
-          const newEntity = getSingleEntity();
+          const newEntity = getEntity();
           const query = new Kinvey.Query();
           query.equalTo('textField', newEntity.textField);
           let initialCount;
