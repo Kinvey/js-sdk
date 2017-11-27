@@ -18,7 +18,7 @@ randomEmailAddress = () => {
   return `${randomString()}@test.com`;
 }
 
-getSingleEntity = (_id, textValue, numberValue, array) => {
+getEntity = (_id, textValue, numberValue, array) => {
   const entity = {
     textField: textValue || randomString(),
     numberField: numberValue || numberValue === 0 ? numberValue : Math.random(),
