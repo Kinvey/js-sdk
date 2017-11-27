@@ -128,21 +128,21 @@
       .then(result => result[0])
   }
 
-  function validatePendingSyncCount(dataStoreType, collectionName, itemsForSyncCount, done) {
-    if (dataStoreType !== Kinvey.DataStoreType.Network) {
-      let expectedCount = 0;
-      if (dataStoreType === Kinvey.DataStoreType.Sync) {
-        expectedCount = itemsForSyncCount;
+  function validatePendingSyncCount(dataStoreType, collectionName, itemsForSyncCount) {
+    return new Promise((resolve, reject) => {
+      if (dataStoreType !== Kinvey.DataStoreType.Network) {
+        let expectedCount = 0;
+        if (dataStoreType === Kinvey.DataStoreType.Sync) {
+          expectedCount = itemsForSyncCount;
+        }
+        const store = Kinvey.DataStore.collection(collectionName, dataStoreType);
+        return store.pendingSyncCount()
+          .then((syncCount) => {
+            expect(syncCount).to.equal(expectedCount);
+            resolve();
+          }).catch(reject);
       }
-      const store = Kinvey.DataStore.collection(collectionName, dataStoreType);
-      return store.pendingSyncCount()
-        .then((syncCount) => {
-          expect(syncCount).to.equal(expectedCount);
-          done();
-        }).catch(done);
-    } else {
-      done();
-    }
+    });
   }
 
   function validateEntity(dataStoreType, collectionName, expectedEntity, searchField) {

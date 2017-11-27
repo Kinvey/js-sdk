@@ -887,10 +887,10 @@ function testFunc() {
               return utilities.validateEntity(dataStoreType, collectionName, newEntity);
             })
             .then(() => {
-              utilities.validatePendingSyncCount(dataStoreType, collectionName, 1, done)
-            }).catch((err) => {
-              done(err);
-            });
+              return utilities.validatePendingSyncCount(dataStoreType, collectionName, 1)
+            })
+            .then(() => done())
+            .catch(done);
         });
 
         it('should create a new entity using its _id', (done) => {
@@ -924,8 +924,10 @@ function testFunc() {
               return utilities.validateEntity(dataStoreType, collectionName, entityToUpdate, 'newProperty')
             })
             .then(() => {
-              utilities.validatePendingSyncCount(dataStoreType, collectionName, 1, done)
-            }).catch(done);
+              return utilities.validatePendingSyncCount(dataStoreType, collectionName, 1)
+            })
+            .then(() => done())
+            .catch(done);
         });
       });
 
