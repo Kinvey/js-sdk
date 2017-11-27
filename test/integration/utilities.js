@@ -108,12 +108,10 @@
     if (dataStoreType === Kinvey.DataStoreType.Network) {
       expect(spy.calledOnce).to.be.true;
       expect(firstCallArgs).to.deep.equal(backendExpectedEntities);
-    }
-    else if (dataStoreType === Kinvey.DataStoreType.Sync) {
+    } else if (dataStoreType === Kinvey.DataStoreType.Sync) {
       expect(spy.calledOnce).to.be.true;
       expect(firstCallArgs).to.deep.equal(cacheExpectedEntities);
-    }
-    else {
+    } else {
       expect(spy.calledTwice).to.be.true;
       expect(firstCallArgs).to.deep.equal(cacheExpectedEntities);
       expect(secondCallArgs).to.deep.equal(backendExpectedEntities);
@@ -142,8 +140,7 @@
           expect(syncCount).to.equal(expectedCount);
           done();
         }).catch(done);
-    }
-    else {
+    } else {
       done();
     }
   }
@@ -167,12 +164,10 @@
           if (dataStoreType === Kinvey.DataStoreType.Network) {
             expect(entityFromCache).to.be.undefined
             expect(entityFromBackend).to.deep.equal(expectedEntity);
-          }
-          else if (dataStoreType === Kinvey.DataStoreType.Sync) {
+          } else if (dataStoreType === Kinvey.DataStoreType.Sync) {
             expect(entityFromCache).to.deep.equal(expectedEntity);
             expect(entityFromBackend).to.be.undefined
-          }
-          else {
+          } else {
             expect(entityFromCache).to.deep.equal(expectedEntity);
             expect(entityFromBackend).to.deep.equal(expectedEntity);
           }

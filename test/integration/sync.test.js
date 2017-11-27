@@ -20,8 +20,7 @@ function testFunc() {
           utilities.assertEntityMetadata(record.entity);
           utilities.deleteEntityMetadata(record.entity);
           expect(record.entity).to.deep.equal(record._id === createdItem._id ? createdItem : modifiedItem);
-        }
-        else {
+        } else {
           expect(record.entity).to.not.exist;
         }
       })

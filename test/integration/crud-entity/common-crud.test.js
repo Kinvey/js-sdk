@@ -857,8 +857,7 @@ function testFunc() {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
               .then(() => done())
-          }
-          else {
+          } else {
             done();
           }
         });
@@ -881,8 +880,7 @@ function testFunc() {
               expect(createdEntity.textField).to.equal(newEntity.textField);
               if (dataStoreType === Kinvey.DataStoreType.Sync) {
                 expect(createdEntity._kmd.local).to.be.true;
-              }
-              else {
+              } else {
                 utilities.assertEntityMetadata(createdEntity);
               }
               newEntity._id = createdEntity._id;
@@ -937,8 +935,7 @@ function testFunc() {
             .catch((error) => {
               if (dataStoreType === Kinvey.DataStoreType.Network) {
                 expect(error.name).to.contain(notFoundErrorName);
-              }
-              else {
+              } else {
                 expect(error).to.exist
               }
               done();
@@ -987,8 +984,7 @@ function testFunc() {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
               .then(() => done())
-          }
-          else {
+          } else {
             done();
           }
         });
