@@ -1,5 +1,3 @@
-runner.run(testFunc);
-
 function testFunc() {
 
   const assertUserData = (user, expectedUsername, shouldReturnPassword) => {
@@ -612,3 +610,5 @@ function testFunc() {
     });
   });
 }
+
+runner.run(testFunc);

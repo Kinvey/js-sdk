@@ -1,5 +1,3 @@
-runner.run(testFunc);
-
 function testFunc() {
 
   const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
@@ -177,3 +175,5 @@ function testFunc() {
     });
   });
 }
+
+runner.run(testFunc);
