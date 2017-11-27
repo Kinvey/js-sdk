@@ -75,13 +75,21 @@
     return entities;
   }
 
+  //validates the result of a find() or a count() operation according to the DataStore type with an optional sorting
+  //works with a single entity, an array of entities or with numbers
   function validateReadResult(dataStoreType, spy, cacheExpectedEntities, backendExpectedEntities, sortBeforeCompare) {
     let firstCallArgs = spy.firstCall.args[0];
     let secondCallArgs;
     if (dataStoreType === Kinvey.DataStoreType.Cache) {
       secondCallArgs = spy.secondCall.args[0];
     }
-    if (!_.isNumber(cacheExpectedEntities) && [].concat(cacheExpectedEntities)[0].hasOwnProperty('_id')) {
+
+    const isComparingEntities = !_.isNumber(cacheExpectedEntities);
+    const isSavedEntity = _.first(ensureArray(cacheExpectedEntities)).hasOwnProperty('_id');
+    const shouldPrepareForComparison = isComparingEntities && isSavedEntity;
+
+    // if we have entities, which have an _id field, we remove the metadata in order to compare properly and sort by _id if needed
+    if (shouldPrepareForComparison) {
       deleteEntityMetadata(firstCallArgs);
       if (sortBeforeCompare) {
         firstCallArgs = _.sortBy(firstCallArgs, '_id');
@@ -96,6 +104,7 @@
       }
     }
 
+    //the actual comparison, according to the Data Store type 
     if (dataStoreType === Kinvey.DataStoreType.Network) {
       expect(spy.calledOnce).to.be.true;
       expect(firstCallArgs).to.deep.equal(backendExpectedEntities);
