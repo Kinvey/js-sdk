@@ -47,9 +47,6 @@
       return Kinvey.User.remove(userId, {
         hard: true
       })
-        .then(() => {
-          userIds.length = 0;
-        })
     }));
   }
 
@@ -66,12 +63,10 @@
   }
 
   function deleteEntityMetadata(entities) {
-    const newArray = ensureArray(entities);
-    newArray.forEach((entity) => {
+    ensureArray(entities).forEach((entity) => {
       delete entity['_kmd'];
       delete entity['_acl'];
     });
-    entities = newArray.length > 1 ? newArray : newArray[0];
     return entities;
   }
 
@@ -184,29 +179,26 @@
           return networkStore.remove(query)
         }
       })
-      .then(() => {
-        return syncStore.clearSync()
-      })
-      .then(() => {
-        return syncStore.clear()
-      })
+      .then(() => syncStore.clearSync())
+      .then(() => syncStore.clear());
   }
 
   function cleanUpAppData(collectionName, createdUserIds) {
     return Kinvey.User.logout()
       .then(() => {
-        return Kinvey.User.signup()
+        return Kinvey.User.signup();
       })
       .then((user) => {
         createdUserIds.push(user.data._id);
-        return cleanUpCollectionData(collectionName)
+        return cleanUpCollectionData(collectionName);
       })
       .then(() => {
-        return deleteUsers(createdUserIds)
+        return deleteUsers(createdUserIds);
       })
       .then(() => {
-        return Kinvey.User.logout()
-      })
+        createdUserIds.length = 0;
+        return Kinvey.User.logout();
+      });
   }
 
   const utilities = {
