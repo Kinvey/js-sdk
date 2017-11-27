@@ -1,5 +1,6 @@
-
-uid = (size = 10) => {
+(function () {
+  
+function uid(size = 10) {
   let text = '';
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -10,15 +11,15 @@ uid = (size = 10) => {
   return text;
 }
 
-randomString = (size = 18, prefix = '') => {
+function randomString(size = 18, prefix = '') {
   return `${prefix}${uid(size)}`;
 }
 
-randomEmailAddress = () => {
+function randomEmailAddress() {
   return `${randomString()}@test.com`;
 }
 
-getEntity = (_id, textValue, numberValue, array) => {
+function getEntity(_id, textValue, numberValue, array) {
   const entity = {
     textField: textValue || randomString(),
     numberField: numberValue || numberValue === 0 ? numberValue : Math.random(),
@@ -30,7 +31,7 @@ getEntity = (_id, textValue, numberValue, array) => {
   return entity;
 }
 
-saveEntities = (collectionName, entities) => {
+function saveEntities(collectionName, entities) {
   const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
   const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
   return Promise.all(entities.map(entity => {
@@ -40,7 +41,7 @@ saveEntities = (collectionName, entities) => {
     .then(result => _.sortBy(deleteEntityMetadata(result), '_id'));
 }
 
-deleteUsers = (userIds) => {
+function deleteUsers(userIds) {
   return Promise.all(userIds.map(userId => {
     return Kinvey.User.remove(userId, {
       hard: true
@@ -51,7 +52,7 @@ deleteUsers = (userIds) => {
   }));
 }
 
-assertEntityMetadata = (arrayOfEntities) => {
+function assertEntityMetadata(arrayOfEntities) {
   const entities = [].concat(arrayOfEntities);
   entities.forEach((entity) => {
     expect(entity._kmd.lmt).to.exist;
@@ -60,7 +61,7 @@ assertEntityMetadata = (arrayOfEntities) => {
   });
 }
 
-deleteEntityMetadata = (arrayOfEntities) => {
+function deleteEntityMetadata(arrayOfEntities) {
   if (arrayOfEntities instanceof Array) {
     arrayOfEntities.forEach((entity) => {
       delete entity['_kmd'];
@@ -74,7 +75,7 @@ deleteEntityMetadata = (arrayOfEntities) => {
   return arrayOfEntities;
 }
 
-validateReadResult = (dataStoreType, spy, cacheExpectedEntities, backendExpectedEntities, sortBeforeCompare) => {
+function validateReadResult(dataStoreType, spy, cacheExpectedEntities, backendExpectedEntities, sortBeforeCompare) {
   let firstCallArgs = spy.firstCall.args[0];
   let secondCallArgs;
   if (dataStoreType === Kinvey.DataStoreType.Cache) {
@@ -110,7 +111,7 @@ validateReadResult = (dataStoreType, spy, cacheExpectedEntities, backendExpected
   }
 }
 
-retrieveEntity = (collectionName, dataStoreType, entity, searchField) => {
+function retrieveEntity(collectionName, dataStoreType, entity, searchField) {
 
   const store = Kinvey.DataStore.collection(collectionName, dataStoreType);
   const query = new Kinvey.Query();
@@ -120,7 +121,7 @@ retrieveEntity = (collectionName, dataStoreType, entity, searchField) => {
     .then(result => result[0])
 }
 
-validatePendingSyncCount = (dataStoreType, collectionName, itemsForSyncCount, done) => {
+function validatePendingSyncCount(dataStoreType, collectionName, itemsForSyncCount, done) {
   if (dataStoreType !== Kinvey.DataStoreType.Network) {
     let expectedCount = 0;
     if (dataStoreType === Kinvey.DataStoreType.Sync) {
@@ -138,7 +139,7 @@ validatePendingSyncCount = (dataStoreType, collectionName, itemsForSyncCount, do
   }
 }
 
-validateEntity = (dataStoreType, collectionName, expectedEntity, searchField) => {
+function validateEntity(dataStoreType, collectionName, expectedEntity, searchField) {
   return new Promise((resolve, reject) => {
     let entityFromCache;
     let entityFromBackend;
@@ -171,7 +172,7 @@ validateEntity = (dataStoreType, collectionName, expectedEntity, searchField) =>
   });
 }
 
-cleanUpCollectionData = (collectionName) => {
+function cleanUpCollectionData(collectionName) {
   const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
   const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
   return networkStore.find().toPromise()
@@ -190,7 +191,7 @@ cleanUpCollectionData = (collectionName) => {
     })
 }
 
-cleanUpAppData = (collectionName, createdUserIds) => {
+function cleanUpAppData(collectionName, createdUserIds) {
   return Kinvey.User.logout()
     .then(() => {
       return Kinvey.User.signup()
@@ -207,21 +208,26 @@ cleanUpAppData = (collectionName, createdUserIds) => {
     })
 }
 
+const utilities = {
+  uid,
+  randomString,
+  randomEmailAddress,
+  getEntity,
+  saveEntities,
+  deleteUsers,
+  assertEntityMetadata,
+  deleteEntityMetadata,
+  validateReadResult,
+  retrieveEntity,
+  validatePendingSyncCount,
+  validateEntity,
+  cleanUpCollectionData,
+  cleanUpAppData
+};
+
 if (typeof module === 'object') {
-  module.exports = {
-    uid,
-    randomString,
-    randomEmailAddress,
-    getSingleEntity,
-    saveEntities,
-    deleteUsers,
-    assertEntityMetadata,
-    deleteEntityMetadata,
-    validateReadResult,
-    retrieveEntity,
-    validatePendingSyncCount,
-    validateEntity,
-    cleanUpCollectionData,
-    cleanUpAppData
-  };
+  module.exports = utilities;
+} else {
+  window.utilities = utilities;
 }
+})();
