@@ -146,34 +146,31 @@
   }
 
   function validateEntity(dataStoreType, collectionName, expectedEntity, searchField) {
-    return new Promise((resolve, reject) => {
-      let entityFromCache;
-      let entityFromBackend;
+    let entityFromCache;
+    let entityFromBackend;
 
-      return retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, expectedEntity, searchField)
-        .then((result) => {
-          if (result) {
-            entityFromCache = deleteEntityMetadata(result);
-          }
-          return retrieveEntity(collectionName, Kinvey.DataStoreType.Network, expectedEntity, searchField)
-        })
-        .then((result) => {
-          if (result) {
-            entityFromBackend = deleteEntityMetadata(result);
-          }
-          if (dataStoreType === Kinvey.DataStoreType.Network) {
-            expect(entityFromCache).to.be.undefined
-            expect(entityFromBackend).to.deep.equal(expectedEntity);
-          } else if (dataStoreType === Kinvey.DataStoreType.Sync) {
-            expect(entityFromCache).to.deep.equal(expectedEntity);
-            expect(entityFromBackend).to.be.undefined
-          } else {
-            expect(entityFromCache).to.deep.equal(expectedEntity);
-            expect(entityFromBackend).to.deep.equal(expectedEntity);
-          }
-          resolve();
-        }).catch(reject);
-    });
+    return retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, expectedEntity, searchField)
+      .then((result) => {
+        if (result) {
+          entityFromCache = deleteEntityMetadata(result);
+        }
+        return retrieveEntity(collectionName, Kinvey.DataStoreType.Network, expectedEntity, searchField)
+      })
+      .then((result) => {
+        if (result) {
+          entityFromBackend = deleteEntityMetadata(result);
+        }
+        if (dataStoreType === Kinvey.DataStoreType.Network) {
+          expect(entityFromCache).to.be.undefined
+          expect(entityFromBackend).to.deep.equal(expectedEntity);
+        } else if (dataStoreType === Kinvey.DataStoreType.Sync) {
+          expect(entityFromCache).to.deep.equal(expectedEntity);
+          expect(entityFromBackend).to.be.undefined
+        } else {
+          expect(entityFromCache).to.deep.equal(expectedEntity);
+          expect(entityFromBackend).to.deep.equal(expectedEntity);
+        }
+      })
   }
 
   function cleanUpCollectionData(collectionName) {
