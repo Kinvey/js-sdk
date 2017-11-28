@@ -18,13 +18,9 @@ function testFunc() {
     expect(user).to.deep.equal(Kinvey.User.getActiveUser());
   }
 
-  const getMissingUsernameErrorMessage = () => {
-    return `A username was not provided.`;
-  }
+  const getMissingUsernameErrorMessage = 'A username was not provided.';
 
-  const getMissingEmailErrorMessage = () => {
-    return `An email was not provided.`;
-  }
+  const getMissingEmailErrorMessage = 'An email was not provided.';
 
   const getNotAStringErrorMessage = (parameter) => {
     return `The provided ${parameter} is not a string.`;
@@ -540,7 +536,7 @@ function testFunc() {
         it('should throw an error if a username is not provided', (done) => {
           Kinvey.User.verifyEmail()
             .catch((error) => {
-              expect(error.message).to.equal(getMissingUsernameErrorMessage());
+              expect(error.message).to.equal(getMissingUsernameErrorMessage);
               done();
             }).catch(done);
         });
@@ -567,7 +563,7 @@ function testFunc() {
         it('should throw an error if an email is not provided', (done) => {
           Kinvey.User.forgotUsername()
             .catch((error) => {
-              expect(error.message).to.equal(getMissingEmailErrorMessage());
+              expect(error.message).to.equal(getMissingEmailErrorMessage);
               done();
             }).catch(done);
         });
@@ -594,7 +590,7 @@ function testFunc() {
         it('should throw an error if a username is not provided', (done) => {
           Kinvey.User.resetPassword()
             .catch((error) => {
-              expect(error.message).to.equal(getMissingUsernameErrorMessage());
+              expect(error.message).to.equal(getMissingUsernameErrorMessage);
               done();
             }).catch(done);
         });

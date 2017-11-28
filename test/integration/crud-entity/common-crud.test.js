@@ -869,7 +869,7 @@ function testFunc() {
         });
 
         it('should create a new entity without _id', (done) => {
-          let newEntity = {
+          const newEntity = {
             textField: utilities.randomString()
           };
           storeToTest.save(newEntity)

@@ -53,7 +53,7 @@ function testFunc() {
 
           it('find() should remove entities that no longer exist in the backend from the cache', (done) => {
             const entity = utilities.getEntity(utilities.randomString());
-            return storeToTest.save(entity)
+            storeToTest.save(entity)
               .then((entity) => {
                 return networkStore.removeById(entity._id)
               })
@@ -69,10 +69,10 @@ function testFunc() {
               .catch((error) => {
                 expect(error.name).to.equal(notFoundErrorName);
                 return syncStore.count().toPromise()
-                  .then((count) => {
-                    expect(count).to.equal(1);
-                    done();
-                  })
+              })
+              .then((count) => {
+                expect(count).to.equal(1);
+                done();
               })
               .catch(done);
           });
