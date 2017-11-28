@@ -1,5 +1,5 @@
 import isString from 'lodash/isString';
-import { Operation, OperationType } from '../operation';
+import { Operation, OperationType } from './operation';
 
 export const DataStoreType = {
   Cache: 'Cache',
@@ -10,7 +10,7 @@ Object.freeze(DataStoreType);
 
 export class DataStore {
   constructor(collection) {
-    if (collection && !isString(collection)) {
+    if (!isString(collection)) {
       throw new Error('Collection must be a string.');
     }
 
