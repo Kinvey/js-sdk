@@ -1,5 +1,6 @@
 function testFunc() {
 
+  const collectionName = externalConfig.collectionName;
   const assertUserData = (user, expectedUsername, shouldReturnPassword) => {
     expect(user.data._id).to.exist;
     expect(user.metadata.authtoken).to.exist;

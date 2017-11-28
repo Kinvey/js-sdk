@@ -3,7 +3,8 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
   const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
   const notFoundErrorName = 'NotFoundError';
-
+  const collectionName = externalConfig.collectionName;
+ 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
 

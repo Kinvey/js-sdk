@@ -6,6 +6,7 @@ function testFunc() {
   let cacheStore;
   let storeToTest;
   const notFoundErrorName = 'NotFoundError';
+  const collectionName = externalConfig.collectionName;
 
   //validates Push operation result for 1 created, 1 modified and 1 deleted locally items
   const validatePushOperation = (result, createdItem, modifiedItem, deletedItem, expectedServerItemsCount) => {

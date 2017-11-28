@@ -3,6 +3,7 @@ function testFunc() {
   const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
   const notFoundErrorName = 'NotFoundError';
   const shouldNotBeCalledErrorMessage = 'Should not be called';
+  const collectionName = externalConfig.collectionName;
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`${currentDataStoreType} Store CRUD Specific Tests`, () => {
