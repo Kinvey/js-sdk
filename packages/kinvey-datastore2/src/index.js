@@ -1,2 +1,2 @@
 export * from './datastore';
-export * from './operations';
+export * from './operation';
