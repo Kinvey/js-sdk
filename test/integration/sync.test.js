@@ -9,54 +9,47 @@ function testFunc() {
 
   //validates Push operation result for 1 created, 1 modified and 1 deleted locally items
   const validatePushOperation = (result, createdItem, modifiedItem, deletedItem, expectedServerItemsCount) => {
-    return new Promise((resolve, reject) => {
-      expect(result.length).to.equal(3);
-      result.forEach((record) => {
-        expect(record.operation).to.equal(record._id === deletedItem._id ? 'DELETE' : 'PUT');
-        expect([createdItem._id, modifiedItem._id, deletedItem._id]).to.include(record._id);
-        if (record.operation !== 'DELETE') {
-          utilities.assertEntityMetadata(record.entity);
-          utilities.deleteEntityMetadata(record.entity);
-          expect(record.entity).to.deep.equal(record._id === createdItem._id ? createdItem : modifiedItem);
-        } else {
-          expect(record.entity).to.not.exist;
-        }
-      })
-      networkStore.find().toPromise()
-        .then((result) => {
-          expect(result.length).to.equal(expectedServerItemsCount);
-          expect(_.find(result, (entity) => { return entity._id === deletedItem._id; })).to.not.exist;
-          expect(_.find(result, (entity) => { return entity.newProperty === modifiedItem.newProperty; })).to.exist;
-          let createdOnServer = _.find(result, (entity) => { return entity._id === createdItem._id; });
+    expect(result.length).to.equal(3);
+    result.forEach((record) => {
+      expect(record.operation).to.equal(record._id === deletedItem._id ? 'DELETE' : 'PUT');
+      expect([createdItem._id, modifiedItem._id, deletedItem._id]).to.include(record._id);
+      if (record.operation !== 'DELETE') {
+        utilities.assertEntityMetadata(record.entity);
+        utilities.deleteEntityMetadata(record.entity);
+        expect(record.entity).to.deep.equal(record._id === createdItem._id ? createdItem : modifiedItem);
+      } else {
+        expect(record.entity).to.not.exist;
+      }
+    })
+    networkStore.find().toPromise()
+      .then((result) => {
+        expect(result.length).to.equal(expectedServerItemsCount);
+        expect(_.find(result, e => e._id === deletedItem._id)).to.not.exist;
+        expect(_.find(result, e => e.newProperty === modifiedItem.newProperty)).to.exist;
+        const createdOnServer = _.find(result, e => e._id === createdItem._id);
 
-          expect(utilities.deleteEntityMetadata(createdOnServer)).to.deep.equal(createdItem);
-          return storeToTest.pendingSyncCount()
-        })
-        .then((count) => {
-          expect(count).to.equal(0);
-          resolve();
-        }).catch(reject);
-    });
+        expect(utilities.deleteEntityMetadata(createdOnServer)).to.deep.equal(createdItem);
+        return storeToTest.pendingSyncCount()
+      })
+      .then((count) => {
+        expect(count).to.equal(0);
+      });
   }
   //validates Pull operation result
   const validatePullOperation = (result, expectedItems, expectedPulledItemsCount) => {
-    return new Promise((resolve, reject) => {
-      expect(result.length).to.equal(expectedPulledItemsCount || expectedItems.length);
-      expectedItems.forEach((entity) => {
-        const resultEntity = _.find(result, (record) => { return record._id === entity._id; });
-        expect(utilities.deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
-      })
+    expect(result.length).to.equal(expectedPulledItemsCount || expectedItems.length);
+    expectedItems.forEach((entity) => {
+      const resultEntity = _.find(result, e => e._id === entity._id);
+      expect(utilities.deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
+    })
 
-      return syncStore.find().toPromise()
-        .then((result) => {
-          expectedItems.forEach((entity) => {
-            const cachedEntity = _.find(result, (record) => { return record._id === entity._id; });
-            expect(utilities.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
-          })
-          resolve();
+    return syncStore.find().toPromise()
+      .then((result) => {
+        expectedItems.forEach((entity) => {
+          const cachedEntity = _.find(result, e => e._id === entity._id);
+          expect(utilities.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
         })
-        .catch(reject);
-    });
+      });
   }
 
   dataStoreTypes.forEach((currentDataStoreType) => {
