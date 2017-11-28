@@ -6,4 +6,4 @@ exports.mockRequiresIn = function mockRequiresIn(fromPath, relativePath, mocks, 
   const path = join(fromPath, relativePath);
   const res = Proxyquire(path, mocks);
   return properyName ? res[properyName] : res;
-}
+};

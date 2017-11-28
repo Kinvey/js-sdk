@@ -1,19 +1,32 @@
-const url = require('url');
+import url from 'url';
+
+import CacheStore from './cachestore';
+import { OperationType } from '../operations';
+import { processorFactory } from '../processors';
+import { wrapInObservable } from '../utils';
+
+// import { CacheRequest, RequestMethod } from 'src/request';
 const { CacheRequest, RequestMethod } = require('kinvey-request');
+// import { KinveyError } from 'src/errors';
 const { KinveyError } = require('kinvey-errors');
+// import Query from 'src/query';
 const { Query } = require('kinvey-query');
+// import Aggregation from 'src/aggregation';
 const { Aggregation } = require('kinvey-aggregation');
+// import { KinveyObservable, isDefined } from 'src/utils';
 const { isDefined } = require('kinvey-utils/object');
 const { KinveyObservable } = require('kinvey-observable');
-const { CacheStore } = require('./cachestore');
+
+// TODO: refactor all datastores
 
 /**
  * The SyncStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-exports.SyncStore = class SyncStore extends CacheStore {
-  get syncAutomatically() {
-    return false;
+export default class SyncStore extends CacheStore {
+  constructor(collection, options = {}, processor) {
+    const proc = processor || processorFactory.getOfflineProcessor();
+    super(collection, options, proc);
   }
 
   /**
@@ -31,34 +44,36 @@ exports.SyncStore = class SyncStore extends CacheStore {
    * @return  {Observable}                                                Observable.
    */
   find(query, options = {}) {
+    // TODO: wrap in observable elsewhere
     const stream = KinveyObservable.create((observer) => {
       // Check that the query is valid
-      if (query && !(query instanceof Query)) {
-        return observer.error(new KinveyError('Invalid query. It must be an instance of the Query class.'));
+      if (isDefined(query) && !(query instanceof Query)) {
+        const err = new KinveyError('Invalid query. It must be an instance of the Query class.');
+        return observer.error(err);
       }
 
-      // Fetch the cache entities
-      const request = new CacheRequest({
-        method: RequestMethod.GET,
-        url: url.format({
-          protocol: this.client.apiProtocol,
-          host: this.client.apiHost,
-          pathname: this.pathname
-        }),
-        properties: options.properties,
-        query: query,
-        timeout: options.timeout
-      });
-
-      // Execute the request
-      return request.execute()
-        .then(response => response.data)
+      const operation = this._buildOperationObject(OperationType.Read, query);
+      return this._executeOperation(operation, options)
         .then(data => observer.next(data))
         .then(() => observer.complete())
         .catch(error => observer.error(error));
     });
 
     return stream;
+  }
+
+  create(entity, options) {
+    const operation = this._buildOperationObject(OperationType.Create, null, entity);
+    return this._executeOperation(operation, options);
+  }
+
+  update(entity, options) {
+    const operation = this._buildOperationObject(OperationType.Update, null, entity);
+    return this._executeOperation(operation, options);
+  }
+
+  get syncAutomatically() {
+    return false;
   }
 
   /**
@@ -73,36 +88,17 @@ exports.SyncStore = class SyncStore extends CacheStore {
    * @return  {Observable}                                             Observable.
    */
   findById(id, options = {}) {
-    const stream = KinveyObservable.create((observer) => {
-      try {
-        if (isDefined(id) === false) {
-          observer.next(undefined);
-          return observer.complete();
-        }
-
-        // Fetch from the cache
-        const request = new CacheRequest({
-          method: RequestMethod.GET,
-          url: url.format({
-            protocol: this.client.apiProtocol,
-            host: this.client.apiHost,
-            pathname: `${this.pathname}/${id}`
-          }),
-          properties: options.properties,
-          timeout: options.timeout
-        });
-
-        return request.execute()
-          .then(response => response.data)
-          .then(data => observer.next(data))
-          .then(() => observer.complete())
-          .catch(error => observer.error(error));
-      } catch (error) {
-        return observer.error(error);
-      }
+    if (!id || id === '') {
+      return wrapInObservable((observer) => {
+        observer.next();
+        observer.complete();
+      });
+    }
+    return wrapInObservable((observer) => {
+      const operation = this._buildOperationObject(OperationType.ReadById, null, null, id);
+      return this._executeOperation(operation, options)
+        .then(res => observer.next(res));
     });
-
-    return stream;
   }
 
   /**
@@ -159,35 +155,15 @@ exports.SyncStore = class SyncStore extends CacheStore {
    * @return  {Observable}                                             Observable.
    */
   count(query, options = {}) {
-    const stream = KinveyObservable.create((observer) => {
-      try {
-        if (query && !(query instanceof Query)) {
-          throw new KinveyError('Invalid query. It must be an instance of the Query class.');
-        }
+    const err = this._ensureValidQuery(query);
+    if (err) {
+      return err;
+    }
 
-        // Fetch the entities in the cache
-        const request = new CacheRequest({
-          method: RequestMethod.GET,
-          url: url.format({
-            protocol: this.client.apiProtocol,
-            host: this.client.apiHost,
-            pathname: this.pathname
-          }),
-          properties: options.properties,
-          query: query,
-          timeout: options.timeout
-        });
-
-        return request.execute()
-          .then(response => response.data)
-          .then(data => observer.next(data ? data.length : 0))
-          .then(() => observer.complete())
-          .catch(error => observer.error(error));
-      } catch (error) {
-        return observer.error(error);
-      }
+    return wrapInObservable((observer) => {
+      const operation = this._buildOperationObject(OperationType.Count, query, null, null);
+      return this._executeOperation(operation, options)
+        .then(res => observer.next(res));
     });
-
-    return stream;
   }
 }

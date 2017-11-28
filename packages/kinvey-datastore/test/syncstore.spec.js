@@ -11,7 +11,7 @@ const nock = require('nock');
 const expect = require('expect');
 const collection = 'Books';
 
-describe('SyncStore', () => {
+describe.only('SyncStore', () => {
   let client;
 
   before(() => {
@@ -295,7 +295,8 @@ describe('SyncStore', () => {
                 done(error);
               }
             });
-        });
+        })
+        .catch(done);
     });
   });
 

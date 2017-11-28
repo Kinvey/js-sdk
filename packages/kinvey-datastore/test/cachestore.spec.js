@@ -12,7 +12,7 @@ const expect = require('expect');
 
 const collection = 'Books';
 
-describe('CacheStore', () => {
+describe.only('CacheStore', () => {
   let client;
 
   before(() => {
@@ -752,12 +752,17 @@ describe('CacheStore', () => {
       return store.pull()
         .then(() => {
           nock(store.client.apiHostname)
-            .delete(`/appdata/${store.client.appKey}/${collection}/${entity1._id}`)
+            .delete(`/appdata/${store.client.appKey}/${collection}`)
+            .query(true)
             .reply(200);
 
-          nock(store.client.apiHostname)
-            .delete(`/appdata/${store.client.appKey}/${collection}/${entity2._id}`)
-            .reply(200);
+          // nock(store.client.apiHostname)
+          //   .delete(`/appdata/${store.client.appKey}/${collection}/${entity1._id}`)
+          //   .reply(200);
+
+          // nock(store.client.apiHostname)
+          //   .delete(`/appdata/${store.client.appKey}/${collection}/${entity2._id}`)
+          //   .reply(200);
 
           return store.remove();
         })
@@ -789,8 +794,13 @@ describe('CacheStore', () => {
           const query = new Query().equalTo('_id', entity1._id);
 
           nock(store.client.apiHostname)
-            .delete(`/appdata/${store.client.appKey}/${collection}/${entity1._id}`)
+            .delete(`/appdata/${store.client.appKey}/${collection}`)
+            .query(true)
             .reply(200);
+
+          // nock(store.client.apiHostname)
+          //   .delete(`/appdata/${store.client.appKey}/${collection}/${entity1._id}`)
+          //   .reply(200);
 
           return store.remove(query);
         })
@@ -822,8 +832,13 @@ describe('CacheStore', () => {
           const query = new Query().equalTo('_id', entity1._id);
 
           nock(store.client.apiHostname)
-            .delete(`/appdata/${store.client.appKey}/${collection}/${entity1._id}`)
+            .delete(`/appdata/${store.client.appKey}/${collection}`)
+            .query(true)
             .reply(500);
+
+          // nock(store.client.apiHostname)
+          //   .delete(`/appdata/${store.client.appKey}/${collection}/${entity1._id}`)
+          //   .reply(500);
 
           return store.remove(query);
         })
@@ -856,12 +871,16 @@ describe('CacheStore', () => {
         .then(() => syncStore.save(entity3))
         .then(() => {
           nock(store.client.apiHostname)
-            .delete(`${store.pathname}/${entity1._id}`)
+            .delete(`${store.pathname}`)
+            .query(true)
             .reply(200);
+          // nock(store.client.apiHostname)
+          //   .delete(`${store.pathname}/${entity1._id}`)
+          //   .reply(200);
 
-          nock(store.client.apiHostname)
-            .delete(`${store.pathname}/${entity2._id}`)
-            .reply(200);
+          // nock(store.client.apiHostname)
+          //   .delete(`${store.pathname}/${entity2._id}`)
+          //   .reply(200);
 
           return store.remove();
         })
@@ -997,7 +1016,7 @@ describe('CacheStore', () => {
         .get(`/appdata/${store.client.appKey}/${collection}`)
         .reply(200, [entity1, entity2]);
 
-      store.pull()
+      return store.pull()
         .then(() => {
           const query = new Query().equalTo('_id', entity1._id);
           return store.clear(query);
