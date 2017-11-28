@@ -556,7 +556,7 @@ function testFunc() {
         it('should start the email sending process on the server', (done) => {
           Kinvey.User.forgotUsername(email)
             .then((result) => {
-              expect(result).to.be.null;
+              expect(['', null]).to.include(result);
               done();
             }).catch(done);
         });
@@ -583,7 +583,7 @@ function testFunc() {
         it('should start the reset password procedure on the server', (done) => {
           Kinvey.User.resetPassword(username)
             .then((result) => {
-              expect(result).to.be.null;
+              expect(['', null]).to.include(result);
               done();
             }).catch(done);
         });
