@@ -4,7 +4,7 @@ function testFunc() {
   const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
   const notFoundErrorName = 'NotFoundError';
   const collectionName = externalConfig.collectionName;
- 
+
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
 
@@ -27,21 +27,9 @@ function testFunc() {
             networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
             //store to test
             storeToTest = Kinvey.DataStore.collection(collectionName, dataStoreType);
-            return networkStore.save(entity1)
+            done();
           })
-          .then(() => {
-            return networkStore.save(entity2)
-          })
-          .then(() => {
-            if (dataStoreType !== Kinvey.DataStoreType.Network) {
-              return storeToTest.pull()
-            }
-          })
-          .then(() => {
-            return networkStore.save(entity3)
-          })
-          .then(() => done())
-          .catch(done)
+          .catch(done);
       });
 
       after((done) => {
@@ -49,129 +37,149 @@ function testFunc() {
           .then(() => done())
           .catch(done)
       });
+      describe('find and count operations', () => {
 
-      describe('count()', () => {
-        it('should throw an error for an invalid query', (done) => {
-          storeToTest.count({})
-            .subscribe(null, (error) => {
-              try {
-                expect(error.message).to.equal(invalidQueryMessage);
-                done();
-              } catch (e) {
-                done(e);
+        before((done) => {
+          networkStore.save(entity1)
+            .then(() => {
+              return networkStore.save(entity2)
+            })
+            .then(() => {
+              if (dataStoreType !== Kinvey.DataStoreType.Network) {
+                return storeToTest.pull()
               }
-            });
+            })
+            .then(() => {
+              return networkStore.save(entity3)
+            })
+            .then(() => done())
+            .catch(done)
         });
 
-        it('should return the count for the collection', (done) => {
-          const onNextSpy = sinon.spy();
-          storeToTest.count()
-            .subscribe(onNextSpy, done, () => {
-              try {
-                utilities.validateReadResult(dataStoreType, onNextSpy, 2, 3);
-                done();
-              } catch (error) {
-                done(error);
-              }
-            });
+        describe('count()', () => {
+          it('should throw an error for an invalid query', (done) => {
+            storeToTest.count({})
+              .subscribe(null, (error) => {
+                try {
+                  expect(error.message).to.equal(invalidQueryMessage);
+                  done();
+                } catch (e) {
+                  done(e);
+                }
+              });
+          });
+
+          it('should return the count for the collection', (done) => {
+            const onNextSpy = sinon.spy();
+            storeToTest.count()
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  utilities.validateReadResult(dataStoreType, onNextSpy, 2, 3);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('should return the count of the entities that match the query', (done) => {
+            const query = new Kinvey.Query();
+            query.equalTo('_id', entity2._id);
+            const onNextSpy = sinon.spy();
+            storeToTest.count(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  utilities.validateReadResult(dataStoreType, onNextSpy, 1, 1);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
         });
 
-        it('should return the count of the entities that match the query', (done) => {
-          const query = new Kinvey.Query();
-          query.equalTo('_id', entity2._id);
-          const onNextSpy = sinon.spy();
-          storeToTest.count(query)
-            .subscribe(onNextSpy, done, () => {
-              try {
-                utilities.validateReadResult(dataStoreType, onNextSpy, 1, 1);
+        describe('find()', function () {
+          it('should throw an error if the query argument is not an instance of the Query class', (done) => {
+            storeToTest.find({})
+              .subscribe(null, (error) => {
+                try {
+                  expect(error.message).to.equal(invalidQueryMessage);
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('should return all the entities', (done) => {
+            const onNextSpy = sinon.spy();
+            storeToTest.find()
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  utilities.validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3], true)
+                  return utilities.retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, entity3)
+                    .then((result) => {
+                      if (result) {
+                        result = utilities.deleteEntityMetadata(result);
+                      }
+                      expect(result).to.deep.equal(dataStoreType === Kinvey.DataStoreType.Cache ? entity3 : undefined);
+                      done();
+                    }).catch(done);
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+
+          it('should find the entities that match the query', (done) => {
+            const onNextSpy = sinon.spy();
+            const query = new Kinvey.Query();
+            query.equalTo('_id', entity2._id);
+            storeToTest.find(query)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  utilities.validateReadResult(dataStoreType, onNextSpy, [entity2], [entity2])
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
+        });
+
+        describe('findById()', () => {
+          it('should throw a NotFoundError if the id argument does not exist', (done) => {
+            const entityId = utilities.randomString();
+            storeToTest.findById(entityId).toPromise()
+              .catch((error) => {
+                expect(error.name).to.contain(notFoundErrorName);
                 done();
-              } catch (error) {
-                done(error);
-              }
-            });
+              }).catch(done);
+          });
+
+          it('should return undefined if an id is not provided', (done) => {
+            storeToTest.findById().toPromise()
+              .then((result) => {
+                expect(result).to.be.undefined;
+                done();
+              }).catch(done);
+          });
+
+          it('should return the entity that matches the id argument', (done) => {
+            const onNextSpy = sinon.spy();
+            storeToTest.findById(entity2._id)
+              .subscribe(onNextSpy, done, () => {
+                try {
+                  utilities.validateReadResult(dataStoreType, onNextSpy, entity2, entity2)
+                  done();
+                } catch (error) {
+                  done(error);
+                }
+              });
+          });
         });
       });
 
-      describe('find()', function () {
-        it('should throw an error if the query argument is not an instance of the Query class', (done) => {
-          storeToTest.find({})
-            .subscribe(null, (error) => {
-              try {
-                expect(error.message).to.equal(invalidQueryMessage);
-                done();
-              } catch (error) {
-                done(error);
-              }
-            });
-        });
-
-        it('should return all the entities', (done) => {
-          const onNextSpy = sinon.spy();
-          storeToTest.find()
-            .subscribe(onNextSpy, done, () => {
-              try {
-                utilities.validateReadResult(dataStoreType, onNextSpy, [entity1, entity2], [entity1, entity2, entity3], true)
-                return utilities.retrieveEntity(collectionName, Kinvey.DataStoreType.Sync, entity3)
-                  .then((result) => {
-                    if (result) {
-                      result = utilities.deleteEntityMetadata(result);
-                    }
-                    expect(result).to.deep.equal(dataStoreType === Kinvey.DataStoreType.Cache ? entity3 : undefined);
-                    done();
-                  }).catch(done);
-              } catch (error) {
-                done(error);
-              }
-            });
-        });
-
-        it('should find the entities that match the query', (done) => {
-          const onNextSpy = sinon.spy();
-          const query = new Kinvey.Query();
-          query.equalTo('_id', entity2._id);
-          storeToTest.find(query)
-            .subscribe(onNextSpy, done, () => {
-              try {
-                utilities.validateReadResult(dataStoreType, onNextSpy, [entity2], [entity2])
-                done();
-              } catch (error) {
-                done(error);
-              }
-            });
-        });
-      });
-
-      describe('findById()', () => {
-        it('should throw a NotFoundError if the id argument does not exist', (done) => {
-          const entityId = utilities.randomString();
-          storeToTest.findById(entityId).toPromise()
-            .catch((error) => {
-              expect(error.name).to.contain(notFoundErrorName);
-              done();
-            }).catch(done);
-        });
-
-        it('should return undefined if an id is not provided', (done) => {
-          storeToTest.findById().toPromise()
-            .then((result) => {
-              expect(result).to.be.undefined;
-              done();
-            }).catch(done);
-        });
-
-        it('should return the entity that matches the id argument', (done) => {
-          const onNextSpy = sinon.spy();
-          storeToTest.findById(entity2._id)
-            .subscribe(onNextSpy, done, () => {
-              try {
-                utilities.validateReadResult(dataStoreType, onNextSpy, entity2, entity2)
-                done();
-              } catch (error) {
-                done(error);
-              }
-            });
-        });
-      });
       // These are smoke tests and will not be executed for now.
       // If we decide to execute 'Modifiers' describe only for Sync data store, these tests will be added back
       describe.skip('find with modifiers', () => {
@@ -740,7 +748,6 @@ function testFunc() {
           });
         });
 
-
         describe('Modifiers', () => {
 
           let expectedAscendingCache;
@@ -852,6 +859,15 @@ function testFunc() {
 
       describe('save()', () => {
 
+        before((done) => {
+          utilities.cleanUpCollectionData(collectionName)
+            .then(() => {
+              return utilities.saveEntities(collectionName, [entity1, entity2])
+            })
+            .then(() => done())
+            .catch(done);
+        });
+
         beforeEach((done) => {
           if (dataStoreType !== Kinvey.DataStoreType.Network) {
             return storeToTest.clearSync()
@@ -893,21 +909,18 @@ function testFunc() {
         });
 
         it('should create a new entity using its _id', (done) => {
-          const newEntity = {
-            _id: utilities.randomString(),
-            textField: utilities.randomString()
-          };
+          const entityId = utilities.randomString();
+          const entityTextField = utilities.randomString();
+          const newEntity = utilities.getEntity(entityId, entityTextField);
+
           storeToTest.save(newEntity)
             .then((createdEntity) => {
-              expect(createdEntity._id).to.equal(newEntity._id);
-              expect(createdEntity.textField).to.equal(newEntity.textField);
+              expect(createdEntity._id).to.equal(entityId);
+              expect(createdEntity.textField).to.equal(entityTextField);
               return utilities.validateEntity(dataStoreType, collectionName, newEntity);
             })
-            .then(() => {
-              done();
-            }).catch((err) => {
-              done(err);
-            });
+            .then(() => done())
+            .catch(done);
         });
 
         it('should update an existing entity', (done) => {
@@ -916,6 +929,7 @@ function testFunc() {
             textField: entity1.textField,
             newProperty: utilities.randomString()
           };
+
           storeToTest.save(entityToUpdate)
             .then((updatedEntity) => {
               expect(updatedEntity._id).to.equal(entity1._id);
@@ -930,114 +944,120 @@ function testFunc() {
         });
       });
 
-      describe('removeById()', () => {
-        it('should throw an error if the id argument does not exist', (done) => {
-          storeToTest.removeById(utilities.randomString())
-            .catch((error) => {
-              if (dataStoreType === Kinvey.DataStoreType.Network) {
-                expect(error.name).to.contain(notFoundErrorName);
-              } else {
-                expect(error).to.exist
-              }
-              done();
-            }).catch(done);
-        });
-
-        it('should remove only the entity that matches the id argument', (done) => {
-          const newEntity = {
-            _id: utilities.randomString()
-          };
-          let remainingCount;
-
-          storeToTest.count().toPromise()
-            .then((count) => {
-              remainingCount = count;
-              return storeToTest.save(newEntity)
-            })
-            .then(() => {
-              return storeToTest.removeById(newEntity._id)
-            })
-            .then((result) => {
-              expect(result.count).to.equal(1);
-              const onNextSpy = sinon.spy();
-              const query = new Kinvey.Query();
-              query.equalTo('_id', newEntity._id);
-              return storeToTest.count(query)
-                .subscribe(onNextSpy, done, () => {
-                  try {
-                    utilities.validateReadResult(dataStoreType, onNextSpy, 0, 0)
-                    return storeToTest.count().toPromise()
-                      .then((count) => {
-                        expect(count).to.equal(remainingCount);
-                        done();
-                      }).catch(done);
-                  } catch (error) {
-                    done(error);
-                  }
-                });
-            });
-        });
-      });
-
-      describe('remove()', () => {
+      describe('destroy operations', () => {
 
         before((done) => {
-          if (dataStoreType !== Kinvey.DataStoreType.Network) {
-            return storeToTest.clearSync()
-              .then(() => done())
-          } else {
-            done();
-          }
-        });
-
-        it('should throw an error for an invalid query', (done) => {
-          storeToTest.remove({})
-            .catch((error) => {
-              expect(error.message).to.equal(invalidQueryMessage);
-              done();
-            }).catch(done);
-        });
-
-        it('should remove all entities that match the query', (done) => {
-          const newEntity = utilities.getEntity();
-          const query = new Kinvey.Query();
-          query.equalTo('textField', newEntity.textField);
-          let initialCount;
-          utilities.saveEntities(collectionName, [newEntity, newEntity])
+          utilities.cleanUpCollectionData(collectionName)
             .then(() => {
-              return storeToTest.count().toPromise()
+              return utilities.saveEntities(collectionName, [entity1, entity2])
             })
-            .then((count) => {
-              initialCount = count;
-              return storeToTest.remove(query)
-            })
-            .then((result) => {
-              expect(result.count).to.equal(2);
-              const onNextSpy = sinon.spy();
-              return storeToTest.count(query)
-                .subscribe(onNextSpy, done, () => {
-                  try {
-                    utilities.validateReadResult(dataStoreType, onNextSpy, 0, 0)
-                    return storeToTest.count().toPromise()
-                      .then((count) => {
-                        expect(count).to.equal(initialCount - 2);
-                        done();
-                      }).catch(done);
-                  } catch (error) {
-                    done(error);
-                  }
-                });
-            }).catch(done);
+            .then(() => done())
+            .catch(done);
         });
 
-        it('should return a { count: 0 } when no entities are removed', (done) => {
-          const query = new Kinvey.Query();
-          query.equalTo('_id', utilities.randomString());
-          storeToTest.remove(query)
-            .then((result) => {
-              expect(result.count).to.equal(0);
-              done()
-            }).catch(done);
+        describe('removeById()', () => {
+          it('should throw an error if the id argument does not exist', (done) => {
+            storeToTest.removeById(utilities.randomString())
+              .catch((error) => {
+                if (dataStoreType === Kinvey.DataStoreType.Network) {
+                  expect(error.name).to.contain(notFoundErrorName);
+                } else {
+                  expect(error).to.exist
+                }
+                done();
+              }).catch(done);
+          });
+
+          it('should remove only the entity that matches the id argument', (done) => {
+            const newEntity = {
+              _id: utilities.randomString()
+            };
+            storeToTest.save(newEntity)
+              .then(() => {
+                return storeToTest.removeById(newEntity._id)
+              })
+              .then((result) => {
+                expect(result.count).to.equal(1);
+                const onNextSpy = sinon.spy();
+                const query = new Kinvey.Query();
+                query.equalTo('_id', newEntity._id);
+                return storeToTest.count(query)
+                  .subscribe(onNextSpy, done, () => {
+                    try {
+                      utilities.validateReadResult(dataStoreType, onNextSpy, 0, 0)
+                      return storeToTest.count().toPromise()
+                        .then((count) => {
+                          expect(count).to.equal(2);
+                          done();
+                        }).catch(done);
+                    } catch (error) {
+                      done(error);
+                    }
+                  });
+              });
+          });
+        });
+
+        describe('remove()', () => {
+
+          before((done) => {
+            if (dataStoreType !== Kinvey.DataStoreType.Network) {
+              return storeToTest.clearSync()
+                .then(() => done())
+            } else {
+              done();
+            }
+          });
+
+          it('should throw an error for an invalid query', (done) => {
+            storeToTest.remove({})
+              .catch((error) => {
+                expect(error.message).to.equal(invalidQueryMessage);
+                done();
+              }).catch(done);
+          });
+
+          it('should remove all entities that match the query', (done) => {
+            const newEntity = utilities.getEntity();
+            const query = new Kinvey.Query();
+            query.equalTo('textField', newEntity.textField);
+            let initialCount;
+            utilities.saveEntities(collectionName, [newEntity, newEntity])
+              .then(() => {
+                return storeToTest.count().toPromise()
+              })
+              .then((count) => {
+                initialCount = count;
+                return storeToTest.remove(query)
+              })
+              .then((result) => {
+                expect(result.count).to.equal(2);
+                const onNextSpy = sinon.spy();
+                return storeToTest.count(query)
+                  .subscribe(onNextSpy, done, () => {
+                    try {
+                      utilities.validateReadResult(dataStoreType, onNextSpy, 0, 0)
+                      return storeToTest.count().toPromise()
+                        .then((count) => {
+                          expect(count).to.equal(initialCount - 2);
+                          done();
+                        }).catch(done);
+                    } catch (error) {
+                      done(error);
+                    }
+                  });
+              }).catch(done);
+          });
+
+          it('should return a { count: 0 } when no entities are removed', (done) => {
+            const query = new Kinvey.Query();
+            query.equalTo('_id', utilities.randomString());
+            storeToTest.remove(query)
+              .then((result) => {
+                expect(result.count).to.equal(0);
+                done()
+              }).catch(done);
+          });
         });
       });
     });
