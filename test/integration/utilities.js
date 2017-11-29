@@ -21,10 +21,11 @@
 
   function getEntity(_id, textValue, numberValue, array) {
     const entity = {
-      textField: textValue || randomString(),
-      numberField: numberValue || numberValue === 0 ? numberValue : Math.random(),
-      arrayField: array || [randomString(), randomString()]
+      [Constants.TextFieldName]: textValue || randomString(),
+      [Constants.NumberFieldName]: numberValue || numberValue === 0 ? numberValue : Math.random(),
+      [Constants.ArrayFieldName]: array || [randomString(), randomString()]
     };
+
     if (_id) {
       entity._id = _id;
     }

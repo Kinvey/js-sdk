@@ -7,14 +7,18 @@ function testFunc() {
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`CRUD Entity - ${currentDataStoreType}`, () => {
+      const textFieldName = Constants.TextFieldName;
+      const numberFieldName = Constants.NumberFieldName;
+      const arrayFieldName = Constants.ArrayFieldName;
 
       let networkStore;
       let storeToTest;
       const dataStoreType = currentDataStoreType;
+      let createdUserIds = [];
+
       const entity1 = utilities.getEntity(utilities.randomString());
       const entity2 = utilities.getEntity(utilities.randomString());
       const entity3 = utilities.getEntity(utilities.randomString());
-      let createdUserIds = [];
 
       before((done) => {
         utilities.cleanUpAppData(collectionName, createdUserIds)
@@ -257,9 +261,9 @@ function testFunc() {
         it.skip('with fields should return only the specified fields', (done) => {
           const onNextSpy = sinon.spy();
           const query = new Kinvey.Query();
-          query.fields = ['textField']
+          query.fields = [[textFieldName]];
           query.ascending('_id');
-          const expectedEntity = { 'textField': entities[dataCount - 2].textField };
+          const expectedEntity = { [textFieldName]: entities[dataCount - 2][textFieldName] };
           storeToTest.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
@@ -275,9 +279,6 @@ function testFunc() {
       describe('Querying', () => {
         let entities = [];
         const dataCount = 10;
-        const textFieldName = 'textField';
-        const numberFieldName = 'numberField';
-        const arrayFieldName = 'arrayField';
         const secondSortField = 'secondSortField'
         let onNextSpy;
         let query;
@@ -887,12 +888,13 @@ function testFunc() {
 
         it('should create a new entity without _id', (done) => {
           const newEntity = {
-            textField: utilities.randomString()
+            [textFieldName]: utilities.randomString()
           };
+          
           storeToTest.save(newEntity)
             .then((createdEntity) => {
               expect(createdEntity._id).to.exist;
-              expect(createdEntity.textField).to.equal(newEntity.textField);
+              expect(createdEntity[textFieldName]).to.equal(newEntity[textFieldName]);
               if (dataStoreType === Kinvey.DataStoreType.Sync) {
                 expect(createdEntity._kmd.local).to.be.true;
               } else {
@@ -909,14 +911,14 @@ function testFunc() {
         });
 
         it('should create a new entity using its _id', (done) => {
-          const entityId = utilities.randomString();
-          const entityTextField = utilities.randomString();
-          const newEntity = utilities.getEntity(entityId, entityTextField);
+          const id = utilities.randomString();
+          const textFieldValue = utilities.randomString();
+          const newEntity = utilities.getEntity(id, textFieldValue);
 
           storeToTest.save(newEntity)
             .then((createdEntity) => {
-              expect(createdEntity._id).to.equal(entityId);
-              expect(createdEntity.textField).to.equal(entityTextField);
+              expect(createdEntity._id).to.equal(id);
+              expect(createdEntity[textFieldName]).to.equal(textFieldValue);
               return utilities.validateEntity(dataStoreType, collectionName, newEntity);
             })
             .then(() => done())
@@ -926,7 +928,7 @@ function testFunc() {
         it('should update an existing entity', (done) => {
           const entityToUpdate = {
             _id: entity1._id,
-            textField: entity1.textField,
+            [textFieldName]: entity1[textFieldName],
             newProperty: utilities.randomString()
           };
 
@@ -1020,7 +1022,7 @@ function testFunc() {
           it('should remove all entities that match the query', (done) => {
             const newEntity = utilities.getEntity();
             const query = new Kinvey.Query();
-            query.equalTo('textField', newEntity.textField);
+            query.equalTo(textFieldName, newEntity[textFieldName]);
             let initialCount;
             utilities.saveEntities(collectionName, [newEntity, newEntity])
               .then(() => {
