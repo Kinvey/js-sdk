@@ -454,5 +454,6 @@ class FileStore extends NetworkStore {
   }
 }
 
+exports.FileStore = FileStore;
 exports.Files = new FileStore();
 
