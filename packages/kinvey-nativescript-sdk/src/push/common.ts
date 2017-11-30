@@ -1,6 +1,6 @@
 import { Promise } from 'es6-promise';
 import { EventEmitter } from 'events';
-import { device as Device } from 'platform';
+import { device as Device } from 'tns-core-modules/platform';
 import { Client } from 'kinvey-client';
 import { KinveyError, NotFoundError } from 'kinvey-errors';
 import { isDefined } from 'kinvey-utils/object';

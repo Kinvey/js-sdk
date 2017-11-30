@@ -11,7 +11,6 @@ try {
   // Copy package.json
   const pkg = require('../package.json');
   delete pkg.private;
-  delete pkg.dependencies;
   delete pkg.devDependencies;
   delete pkg.scripts;
   fs.writeFileSync(path.join(__dirname, '../dist/package.json'), JSON.stringify(pkg, null, 2));
@@ -21,6 +20,9 @@ try {
 
   // Copy README
   fs.copySync(path.join(__dirname, '../README.md'), path.join(__dirname, '../dist/README.md'));
+
+  // Copy kinvey.d.ts
+  fs.copySync(path.join(__dirname, '../src/kinvey.d.ts'), path.join(__dirname, '../dist/kinvey.d.ts'));
 }
 catch (error) {
   console.error(error);

@@ -8,9 +8,13 @@
   "license": "Apache-2.0",
   "main": "kinvey-nativescript-sdk.min.js",
   "dependencies": {
+    "nativescript-sqlite": "~1.1.11"
+  },
+  "devDependencies": {
     "fs-extra": "4.0.2",
     "json-loader": "^0.5.4",
     "ts-loader": "^3.1.1",
+    "kinvey": "^3.9.3-beta.7",
     "kinvey-acl": "^3.9.3-beta.7",
     "kinvey-aggregation": "^3.9.3-beta.7",
     "kinvey-datastore": "^3.9.3-beta.7",
@@ -33,9 +37,6 @@
     "webpack": "^2.5.1",
     "es6-promise": "4.1.0",
     "events": "1.1.1",
-    "nativescript-sqlite": "1.1.7"
-  },
-  "devDependencies": {
     "tns-core-modules": "3.0.1",
     "tns-platform-declarations": "3.0.1",
     "tslint": "5.7.0",
@@ -44,7 +45,9 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "webpack --config webpack.config.js",
+    "build": "npm run build:android && npm run build:ios",
+    "build:android": "webpack --config webpack.config.js --env.android",
+    "build:ios": "webpack --config webpack.config.js --env.ios",
     "postbuild": "node scripts/copyfiles",
     "lint": "tslint **/*.ts --exclude **/node_modules/**/* --exclude **/*.d.ts",
     "release": "npm run build && ./scripts/push.sh",

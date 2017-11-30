@@ -1,6 +1,5 @@
 import { isDefined, isEmpty } from 'kinvey-utils/object';
-import { Middleware, RequestMethod, StatusCode } from 'kinvey-request';
-import { Storage as CoreStorage } from 'kinvey-request';
+import { Middleware, RequestMethod, StatusCode, Storage as CoreStorage } from 'kinvey-request';
 import { sqLite } from './sqlite';
 
 class Storage extends CoreStorage {

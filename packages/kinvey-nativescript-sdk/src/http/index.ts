@@ -1,9 +1,8 @@
-import { request as HttpRequest } from 'http';
-import { device } from 'platform';
+import { request as HttpRequest } from 'tns-core-modules/http';
+import { device } from 'tns-core-modules/platform';
 import { Middleware } from 'kinvey-request';
-const pkg = require('../../package.json');
 
-function deviceInformation() {
+function deviceInformation(pkg: any) {
   const platform = device.os;
   const version = device.osVersion;
   const manufacturer = device.manufacturer;
@@ -19,13 +18,16 @@ function deviceInformation() {
 }
 
 export class HttpMiddleware extends Middleware {
-  constructor(name = 'Http Middleware') {
-    super(name);
+  pkg: any;
+
+  constructor(pkg: any) {
+    super();
+    this.pkg = pkg;
   }
 
   handle(request: any): Promise<any> {
     const { url, method, headers, body, timeout, followRedirect } = request;
-    headers['X-Kinvey-Device-Information'] = deviceInformation();
+    headers['X-Kinvey-Device-Information'] = deviceInformation(this.pkg);
     const options = {
       method: method,
       headers: headers,
