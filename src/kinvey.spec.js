@@ -1,16 +1,15 @@
-const { init, ping } = require('../src');
-const { randomString } = require('kinvey-utils/string');
-const { Client } = require('kinvey-client');
-const { NetworkRack } = require('kinvey-request');
-const { HttpMiddleware } = require('./http');
-const { expect } = require('chai');
-const nock = require('nock');
+import { expect } from 'chai';
+import nock from 'nock';
+import { init, ping } from './kinvey';
+import { randomString } from './utils';
+import { Client } from './client';
+import { NetworkRack, NodeHttpMiddleware } from './request';
 
 const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 
 describe('Kinvey', () => {
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   describe('init()', () => {

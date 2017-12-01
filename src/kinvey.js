@@ -1,9 +1,9 @@
-const { Promise } = require('es6-promise');
-const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { Client } = require('kinvey-client');
-const { User } = require('kinvey-user');
-const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
+import { Promise } from 'es6-promise';
+import { KinveyError } from './errors';
+import { isDefined } from './utils';
+import { Client } from './client';
+import { User } from './user';
+import { AuthType, RequestMethod, KinveyRequest } from './request';
 
 /**
  * Returns the shared instance of the Client class used by the SDK.
@@ -18,7 +18,7 @@ const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
 function getClient() {
   return Client.sharedInstance();
 }
-exports.client = getClient;
+export { getClient as client };
 
 /**
  * The version of your app. It will sent with Kinvey API requests
@@ -29,7 +29,7 @@ exports.client = getClient;
  * @example
  * var appVersion = Kinvey.appVersion;
  */
-exports.getAppVersion = function getAppVersion() {
+export function getAppVersion() {
   const client = getClient();
 
   if (client) {
@@ -50,7 +50,7 @@ exports.getAppVersion = function getAppVersion() {
  * // or
  * Kinvey.appVersion = 'v1';
  */
-exports.setAppVersion = function setAppVersion(appVersion) {
+export function setAppVersion(appVersion) {
   const client = getClient();
 
   if (client) {
@@ -74,7 +74,7 @@ exports.setAppVersion = function setAppVersion(appVersion) {
  * @throws  {KinveyError}  If an `options.appKey` is not provided.
  * @throws  {KinveyError}  If neither an `options.appSecret` or `options.masterSecret` is provided.
  */
-function init(options = {}) {
+export function init(options = {}) {
   // Check that an appKey or appId was provided
   if (isDefined(options.appKey) === false) {
     throw new KinveyError('No App Key was provided.'
@@ -90,7 +90,6 @@ function init(options = {}) {
   // Initialize the client
   return Client.init(options);
 }
-exports.init = init;
 
 /**
  * Initializes the SDK with your app's information. The SDK is initialized when the returned
@@ -111,7 +110,7 @@ exports.init = init;
  *
  * @deprecated Please use Kinvey.init().
  */
-exports.initialize = function initialize(config) {
+export function initialize(config) {
   try {
     const client = init(config);
     return Promise.resolve(User.getActiveUser(client));
@@ -132,7 +131,7 @@ exports.initialize = function initialize(config) {
  *   console.log('Kinvey Ping Failed. Response: ' + error.description);
  * });
  */
-exports.ping = function ping() {
+export function ping() {
   const client = getClient();
   const request = new KinveyRequest({
     method: RequestMethod.GET,
