@@ -1,14 +1,14 @@
-const url = require('url');
-const cloneDeep = require('lodash/cloneDeep');
-const { KinveyError } = require('kinvey-errors');
-const { Query } = require('kinvey-query');
-const { Aggregation } = require('kinvey-aggregation');
-const { isDefined } = require('kinvey-utils/object');
-const { Request } = require('./request');
-const { KinveyResponse } = require('./response');
-const { CacheRack } = require('./rack');
+import  url from  'url';
+import  cloneDeep from  'lodash/cloneDeep';
+import  { KinveyError } from  'kinvey-errors';
+import  { Query } from  'kinvey-query';
+import  { Aggregation } from  'kinvey-aggregation';
+import  { isDefined } from  'kinvey-utils/object';
+import  { Request } from  './request';
+import  { KinveyResponse } from  './response';
+import  { CacheRack } from  './rack';
 
-exports.CacheRequest = class CacheRequest extends Request {
+export class CacheRequest extends Request {
   constructor(options = {}) {
     super(options);
     this.aggregation = options.aggregation;

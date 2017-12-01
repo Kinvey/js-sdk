@@ -1,9 +1,9 @@
-const forEach = require('lodash/forEach');
-const isString = require('lodash/isString');
-const isPlainObject = require('lodash/isPlainObject');
-const { isDefined } = require('kinvey-utils/object');
+import forEach from 'lodash/forEach';
+import isString from 'lodash/isString';
+import isPlainObject from 'lodash/isPlainObject';
+import { isDefined } from 'kinvey-utils/object';
 
-exports.Headers = class Headers {
+export class Headers {
   constructor(headers = {}) {
     this.headers = {};
     this.addAll(headers);

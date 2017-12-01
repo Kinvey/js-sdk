@@ -1,4 +1,4 @@
-const Promise = require('es6-promise');
+import Promise from 'es6-promise';
 
 const noop = function() {};
 
@@ -10,7 +10,7 @@ function resolveWith(value) {
   return Promise.resolve(value);
 }
 
-exports.Queue = class Queue {
+export class Queue {
   constructor(maxPendingPromises, maxQueuedPromises) {
     this.pendingPromises = 0;
     this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;

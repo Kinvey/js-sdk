@@ -1,8 +1,8 @@
-const Promise = require('es6-promise');
-const { isDefined } = require('kinvey-utils/object');
-const { Middleware } = require('./middleware');
+import Promise from 'es6-promise';
+import { isDefined } from '../../utils';
+import { Middleware } from './middleware';
 
-exports.SerializeMiddleware = class SerializeMiddleware extends Middleware {
+export class SerializeMiddleware extends Middleware {
   constructor(name = 'Serialize Middleware') {
     super(name);
   }

@@ -1,31 +1,30 @@
-const Promise = require('es6-promise');
-const { Buffer } = require('buffer');
-const qs = require('qs');
-const assign = require('lodash/assign');
-const defaults = require('lodash/defaults');
-const isEmpty = require('lodash/isEmpty');
-const url = require('url');
-const isString = require('lodash/isString');
-const { Client } = require('kinvey-client');
-const { Query } = require('kinvey-query');
-const { Aggregation } = require('kinvey-aggregation');
-const { isDefined } = require('kinvey-utils/object');
-const { appendQuery } = require('kinvey-utils/url');
-const { InvalidCredentialsError, NoActiveUserError, KinveyError } = require('kinvey-errors');
-const { Request, RequestMethod } = require('./request');
-const { Headers } = require('./headers');
-const { NetworkRack } = require('./rack');
-const { KinveyResponse } = require('./response');
+import Promise from 'es6-promise';
+import { Buffer } from 'buffer';
+import qs from 'qs';
+import assign from 'lodash/assign';
+import defaults from 'lodash/defaults';
+import isEmpty from 'lodash/isEmpty';
+import url from 'url';
+import isString from 'lodash/isString';
+import { Client } from 'kinvey-client';
+import { Query } from 'kinvey-query';
+import { Aggregation } from 'kinvey-aggregation';
+import { isDefined } from 'kinvey-utils/object';
+import { appendQuery } from 'kinvey-utils/url';
+import { InvalidCredentialsError, NoActiveUserError, KinveyError } from 'kinvey-errors';
+import { Request, RequestMethod } from './request';
+import { Headers } from './headers';
+import { NetworkRack } from './rack';
+import { KinveyResponse } from './response';
 
-class NetworkRequest extends Request {
+export class NetworkRequest extends Request {
   constructor(options = {}) {
     super(options);
     this.rack = NetworkRack;
   }
 }
-exports.NetworkRequest = NetworkRequest;
 
-const AuthType = {
+export const AuthType = {
   All: 'All',
   App: 'App',
   Basic: 'Basic',
@@ -35,7 +34,6 @@ const AuthType = {
   Session: 'Session'
 };
 Object.freeze(AuthType);
-exports.AuthType = AuthType;
 
 const Auth = {
   /**
@@ -146,10 +144,9 @@ function byteCount(str) {
   return 0;
 }
 
-class Properties extends Headers { }
-exports.Properties = Properties;
+export class Properties extends Headers { }
 
-exports.KinveyRequest = class KinveyRequest extends NetworkRequest {
+export class KinveyRequest extends NetworkRequest {
   constructor(options = {}) {
     super(options);
 

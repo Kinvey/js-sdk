@@ -1,25 +1,22 @@
-const Promise = require('es6-promise');
-const keyBy = require('lodash/keyBy');
-const reduce = require('lodash/reduce');
-const result = require('lodash/result');
-const values = require('lodash/values');
-const forEach = require('lodash/forEach');
-const isArray = require('lodash/isArray');
-const isString = require('lodash/isString');
-const { KinveyError, NotFoundError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { Query } = require('kinvey-query');
-const { RequestMethod } = require('./request');
-const { KinveyRequest } = require('./network');
-const { CacheRequest } = require('./cache');
-const { Response, StatusCode } = require('./response');
+import  Promise from 'es6-promise';
+import  keyBy from 'lodash/keyBy';
+import  reduce from 'lodash/reduce';
+import  result from 'lodash/result';
+import  values from 'lodash/values';
+import  forEach from 'lodash/forEach';
+import  isArray from 'lodash/isArray';
+import  isString from 'lodash/isString';
+import  { KinveyError, NotFoundError } from 'kinvey-errors';
+import  { isDefined } from 'kinvey-utils/object';
+import  { Query } from 'kinvey-query';
+import  { RequestMethod } from './request';
+import  { KinveyRequest } from './network';
+import  { CacheRequest } from './cache';
+import  { Response, StatusCode } from './response';
 
 const maxIdsPerRequest = 200;
 
-/**
- * @private
- */
-exports.DeltaFetchRequest = class DeltaFetchRequest extends KinveyRequest {
+export class DeltaFetchRequest extends KinveyRequest {
   get method() {
     return super.method;
   }

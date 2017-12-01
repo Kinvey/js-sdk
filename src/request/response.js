@@ -1,6 +1,6 @@
-const assign = require('lodash/assign');
-const { Headers } = require('./headers');
-const {
+import assign from 'lodash/assign';
+import { Headers } from './headers';
+import {
   APIVersionNotAvailableError,
   APIVersionNotImplementedError,
   AppProblemError,
@@ -28,9 +28,9 @@ const {
   StaleRequestError,
   UserAlreadyExistsError,
   WritesToCollectionDisallowedError
-} = require('kinvey-errors');
+} from '../errors';
 
-const StatusCode = {
+export const StatusCode = {
   Ok: 200,
   Created: 201,
   Empty: 204,
@@ -45,9 +45,8 @@ const StatusCode = {
   ServerError: 500
 };
 Object.freeze(StatusCode);
-exports.StatusCode = StatusCode;
 
-class Response {
+export class Response {
   constructor(options = {}) {
     options = assign({
       statusCode: StatusCode.Empty,
@@ -122,9 +121,8 @@ class Response {
     };
   }
 }
-exports.Response = Response;
 
-exports.KinveyResponse = class KinveyResponse extends Response {
+export class KinveyResponse extends Response {
   get error() {
     if (this.isSuccess()) {
       return null;

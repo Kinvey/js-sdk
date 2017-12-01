@@ -1,20 +1,23 @@
-const { AuthType, DeltaFetchRequest, RequestMethod, NetworkRack } = require('../src');
-const { KinveyError } = require('kinvey-errors');
-const { SyncStore } = require('kinvey-datastore');
-const { randomString } = require('kinvey-utils/string');
-const { Query } = require('kinvey-query');
-const { init } = require('kinvey');
-const { User } = require('kinvey-user');
-const { HttpMiddleware } = require('./http');
-const nock = require('nock');
-const expect = require('expect');
-const collection = 'books';
+import nock from 'nock';
+import expect from 'expect';
+import { AuthType } from './network';
+import { DeltaFetchRequest } from './deltafetch';
+import { RequestMethod } from './request';
+import { NetworkRack } from './rack';
+import { KinveyError } from '../errors');
+import { SyncStore } from '../datastore');
+import { randomString } from '../utils');
+import { Query } from '../query');
+import { init } from '../kinvey');
+import { User } from '../user');
+import { NodeHttpMiddleware } from './middleware');
+import collection = 'books';
 
 describe('DeltaFetchRequest', () => {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {

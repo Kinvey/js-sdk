@@ -20,7 +20,7 @@ function compose(node, end) {
   return `${ret}${c}${c1} ${node.value}`;
 }
 
-exports.AsciiTree = class AsciiTree {
+export class AsciiTree {
   static generate(tree = {}, end) {
     let result = compose(tree, end);
 
