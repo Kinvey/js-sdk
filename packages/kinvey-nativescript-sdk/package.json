@@ -7,10 +7,9 @@
   "homepage": "http://www.kinvey.com",
   "license": "Apache-2.0",
   "main": "kinvey-nativescript-sdk.min.js",
-  "dependencies": {
-    "nativescript-sqlite": "~1.1.11"
-  },
+  "typings": "kinvey.d.ts",
   "devDependencies": {
+    "copy-webpack-plugin": "^4.2.3",
     "fs-extra": "4.0.2",
     "json-loader": "^0.5.4",
     "ts-loader": "^3.1.1",
@@ -48,7 +47,6 @@
     "build": "npm run build:android && npm run build:ios",
     "build:android": "webpack --config webpack.config.js --env.android",
     "build:ios": "webpack --config webpack.config.js --env.ios",
-    "postbuild": "node scripts/copyfiles",
     "lint": "tslint **/*.ts --exclude **/node_modules/**/* --exclude **/*.d.ts",
     "release": "npm run build && ./scripts/push.sh",
     "postrelease": "rimraf tmp"
@@ -58,7 +56,9 @@
     "kinvey-nativescript-sdk.ios.min.js.map",
     "kinvey-nativescript-sdk.android.min.js",
     "kinvey-nativescript-sdk.android.min.js.map",
-    "kinvey.d.ts"
+    "kinvey.d.ts",
+    "platforms/android/include.gradle",
+    "platforms/ios/Podfile"
   ],
   "nativescript": {
     "platforms": {

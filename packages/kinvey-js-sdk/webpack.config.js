@@ -27,14 +27,14 @@ module.exports = {
     ]
   },
   plugins: [
-    new UglifyJSPlugin({
-      sourceMap: true,
-      uglifyOptions: {
-        output: {
-          comments: false
-        }
-      }
-    }),
+    // new UglifyJSPlugin({
+    //   sourceMap: true,
+    //   uglifyOptions: {
+    //     output: {
+    //       comments: false
+    //     }
+    //   }
+    // }),
     new webpack.BannerPlugin({
       banner: `
 /**

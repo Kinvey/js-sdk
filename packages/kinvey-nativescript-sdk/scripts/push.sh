@@ -6,8 +6,7 @@ dist="$(dirname "$0")/../dist"
 tmp="$(dirname "$0")/../tmp"
 git config user.name "Travis CI"
 git config user.email "travis@travis-ci.org"
-git clone https://${GITHUB_ACCESS_TOKEN}@github.com/Kinvey/html5-sdk.git $tmp > /dev/null 2>&1
-git -C $tmp remote add origin https://${GITHUB_ACCESS_TOKEN}@github.com/Kinvey/html5-sdk.git > /dev/null 2>&1
+git clone https://${GITHUB_ACCESS_TOKEN}@github.com/Kinvey/nativescript-sdk.git $tmp > /dev/null 2>&1
 git -C $tmp fetch origin
 git -C $tmp checkout master
 cp -r $dist/. $tmp
