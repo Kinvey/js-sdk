@@ -1,11 +1,11 @@
-const isPlainObject = require('lodash/isPlainObject');
-const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
+import isPlainObject from 'lodash/isPlainObject';
+import { KinveyError } from './errors';
+import { isDefined } from './utils';
 
 /**
  * The Metadata class is used to as a wrapper for accessing the `_kmd` properties of an entity.
  */
-exports.Metadata = class Metadata {
+export class Metadata {
   constructor(entity) {
     if (isPlainObject(entity) === false) {
       throw new KinveyError('entity argument must be an object');

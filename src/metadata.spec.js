@@ -1,7 +1,7 @@
-const { Metadata } = require('../src');
-const { randomString } = require('kinvey-utils/string');
-const { KinveyError } = require('kinvey-errors');
-const expect = require('expect');
+import expect from 'expect';
+import { Metadata } from './metadata';
+import { randomString } from './utils';
+import { KinveyError } from './errors';
 
 describe('Metadata', () => {
   describe('constructor', () => {
