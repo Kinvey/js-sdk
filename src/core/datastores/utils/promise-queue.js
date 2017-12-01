@@ -1,6 +1,7 @@
 import Promise from 'es6-promise';
 import { noop, wrapInPromise } from './utils';
 
+// TODO: merge with original promise queue
 export class PromiseQueue {
   constructor(maxPendingPromises = 1, maxQueuedPromises = Infinity) {
     this.pendingPromises = 0;
