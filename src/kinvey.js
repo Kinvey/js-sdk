@@ -1,4 +1,4 @@
-import { Promise } from 'es6-promise';
+import Promise from 'es6-promise';
 import { KinveyError } from './errors';
 import { isDefined } from './utils';
 import { Client } from './client';

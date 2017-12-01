@@ -7,8 +7,9 @@ const pkg = require('./package.json');
 
 module.exports = (env = {}) => {
   return {
+    target: 'node',
     entry: {
-      'kinvey-js-sdk': './index.js',
+      'kinvey-node-sdk': './index.js',
     },
     output: {
       filename: '[name].js',
@@ -16,6 +17,18 @@ module.exports = (env = {}) => {
       path: path.join(__dirname, 'dist'),
       libraryTarget: 'umd',
       library: 'Kinvey'
+    },
+    externals: {
+      'es6-promise': 'es6-promise',
+      'fast-memory-cache': 'fast-memory-cache',
+      lodash: 'lodash',
+      loglevel: 'loglevel',
+      pubnub: 'pubnub',
+      qs: 'qs',
+      request: 'request',
+      rxjs: 'rxjs',
+      sift: 'sift',
+      'url-join': 'url-join'
     },
     resolve: {
       extensions: ['.js', '.json']
@@ -32,7 +45,7 @@ function getRules() {
   return [
     {
       test: /\.js$/,
-      exclude: /node_modules/,
+      exclude: /(node_modules)/,
       use: {
         loader: 'babel-loader',
         options: {
@@ -63,6 +76,7 @@ function getPlugins(env) {
           return new Buffer(JSON.stringify(pkg, null, 2));
         }
       },
+      { from: '.travis.yml' },
       { from: 'LICENSE' },
       { from: 'README.md' }
     ])
