@@ -1,16 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const nock = require('nock');
-const expect = require('expect');
-const chai = require('chai');
-const { Files } = require('../src');
-const { KinveyError, NotFoundError, ServerError } = require('kinvey-errors');
-const { randomString } = require('kinvey-utils/string');
-const { Query } = require('kinvey-query');
-const { NetworkRack } = require('kinvey-request');
-const { User } = require('kinvey-user');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
+import fs from 'fs');
+import path from 'path');
+import nock from 'nock');
+import expect from 'expect');
+import chai from 'chai');
+import { Files } from './files');
+import { KinveyError, NotFoundError, ServerError } from './errors');
+import { randomString } from './utils');
+import { Query } from './query');
+import { NetworkRack, NodeHttpMiddleware } from './request');
+import { User } from './user');
+import { init } from './kinvey');
 
 chai.use(require('chai-as-promised'));
 chai.should();
@@ -19,7 +18,7 @@ describe('FileStore', () => {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {
@@ -535,8 +534,8 @@ describe('FileStore', () => {
         }, {
           'content-type': 'application/json; charset=utf-8',
           'content-length': '612',
-          'x-kinvey-request-id': 'def63a2d5ac246d69e3c9b90352b7772',
-          'x-kinvey-api-version': '4'
+          'x-./request-id': 'def63a2d5ac246d69e3c9b90352b7772',
+          'x-./api-version': '4'
         });
 
       // GCS status check response
@@ -674,8 +673,8 @@ describe('FileStore', () => {
         }, {
           'content-type': 'application/json; charset=utf-8',
           'content-length': '612',
-          'x-kinvey-request-id': 'def63a2d5ac246d69e3c9b90352b7772',
-          'x-kinvey-api-version': '4'
+          'x-./request-id': 'def63a2d5ac246d69e3c9b90352b7772',
+          'x-./api-version': '4'
         });
 
       // GCS status check response
@@ -827,8 +826,8 @@ describe('FileStore', () => {
         }, {
           'content-type': 'application/json; charset=utf-8',
           'content-length': '612',
-          'x-kinvey-request-id': 'def63a2d5ac246d69e3c9b90352b7772',
-          'x-kinvey-api-version': '4'
+          'x-./request-id': 'def63a2d5ac246d69e3c9b90352b7772',
+          'x-./api-version': '4'
         });
 
       // GCS status check response
@@ -924,8 +923,8 @@ describe('FileStore', () => {
         }, {
           'content-type': 'application/json; charset=utf-8',
           'content-length': '612',
-          'x-kinvey-request-id': 'def63a2d5ac246d69e3c9b90352b7772',
-          'x-kinvey-api-version': '4'
+          'x-./request-id': 'def63a2d5ac246d69e3c9b90352b7772',
+          'x-./api-version': '4'
         });
 
       // GCS status check response
