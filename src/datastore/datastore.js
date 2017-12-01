@@ -1,12 +1,12 @@
-const isString = require('lodash/isString');
-const url = require('url');
-const { CacheRequest, RequestMethod } = require('kinvey-request');
-const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { Client } = require('kinvey-client');
-const { NetworkStore } = require('./networkstore');
-const { CacheStore } = require('./cachestore');
-const { SyncStore } = require('./syncstore');
+import isString from 'lodash/isString';
+import url from 'url';
+import { CacheRequest, RequestMethod } from '../request';
+import { KinveyError } from '../errors';
+import { isDefined } from '../utils';
+import { Client } from '../client';
+import { NetworkStore } from './networkstore';
+import { CacheStore } from './cachestore';
+import { SyncStore } from './syncstore';
 
 /**
  * @typedef   {Object}    DataStoreType
@@ -14,18 +14,17 @@ const { SyncStore } = require('./syncstore');
  * @property  {string}    Network         Network datastore type
  * @property  {string}    Sync            Sync datastore type
  */
-const DataStoreType = {
+export const DataStoreType = {
   Cache: 'Cache',
   Network: 'Network',
   Sync: 'Sync'
 };
 Object.freeze(DataStoreType);
-exports.DataStoreType = DataStoreType;
 
 /**
  * The DataStore class is used to find, create, update, remove, count and group entities.
  */
-exports.DataStore = class DataStore {
+export class DataStore {
   constructor() {
     throw new KinveyError('Not allowed to construct a DataStore instance.'
       + ' Please use the collection() function to get an instance of a DataStore instance.');

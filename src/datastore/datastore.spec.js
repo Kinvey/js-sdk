@@ -1,6 +1,10 @@
-const { DataStore, DataStoreType, NetworkStore, CacheStore, SyncStore } = require('../src');
-const { KinveyError } = require('kinvey-errors');
-const expect = require('expect');
+
+import expect from 'expect';
+import { DataStore, DataStoreType } from './datastore';
+import { NetworkStore } from './networkstore';
+import { CacheStore } from './cachestore';
+import { SyncStore } from './syncstore';
+import { KinveyError } from '../errors';
 const collection = 'Books';
 
 describe('DataStore', () => {

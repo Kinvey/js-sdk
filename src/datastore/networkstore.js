@@ -1,19 +1,19 @@
-const isString = require('lodash/isString');
-const isArray = require('lodash/isArray');
-const url = require('url');
-const { DeltaFetchRequest, KinveyRequest, AuthType, RequestMethod } = require('kinvey-request');
-const { KinveyError } = require('kinvey-errors');
-const { Query } = require('kinvey-query');
-const { Client } = require('kinvey-client');
-const { isDefined } = require('kinvey-utils/object');
-const { KinveyObservable } = require('kinvey-observable');
-const { Aggregation } = require('kinvey-aggregation');
-const { getLiveCollectionManager } = require('kinvey-live');
+import isString from 'lodash/isString';
+import isArray from 'lodash/isArray';
+import url from 'url';
+import { DeltaFetchRequest, KinveyRequest, AuthType, RequestMethod } from '../request';
+import { KinveyError } from '../errors';
+import { Query } from '../query';
+import { Client } from '../client';
+import { isDefined } from '../utils';
+import { KinveyObservable } from '../observable';
+import { Aggregation } from '../aggregation';
+import { getLiveCollectionManager } from '../live';
 
 /**
  * The NetworkStore class is used to find, create, update, remove, count and group entities over the network.
  */
-exports.NetworkStore = class NetworkStore {
+export class NetworkStore {
   constructor(collection, options = {}) {
     if (collection && !isString(collection)) {
       throw new KinveyError('Collection must be a string.');

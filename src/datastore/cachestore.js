@@ -1,27 +1,27 @@
-const Promise = require('es6-promise');
-const differenceBy = require('lodash/differenceBy');
-const assign = require('lodash/assign');
-const keyBy = require('lodash/keyBy');
-const remove = require('lodash/remove');
-const isArray = require('lodash/isArray');
-const reduce = require('lodash/reduce');
-const map = require('lodash/map');
-const url = require('url');
-const { CacheRequest, AuthType, RequestMethod } = require('kinvey-request');
-const { KinveyError, NotFoundError } = require('kinvey-errors');
-const { Query } = require('kinvey-query');
-const { Aggregation } = require('kinvey-aggregation');
-const { Metadata } = require('kinvey-metadata');
-const { isDefined } = require('kinvey-utils/object');
-const { KinveyObservable } = require('kinvey-observable');
-const { NetworkStore } = require('./networkstore');
-const { SyncManager } = require('./sync');
+import Promise from 'es6-promise';
+import differenceBy from 'lodash/differenceBy';
+import assign from 'lodash/assign';
+import keyBy from 'lodash/keyBy';
+import remove from 'lodash/remove';
+import isArray from 'lodash/isArray';
+import reduce from 'lodash/reduce';
+import map from 'lodash/map';
+import url from 'url';
+import { CacheRequest, AuthType, RequestMethod } from '../request';
+import { KinveyError, NotFoundError } from '../errors';
+import { Query } from '../query';
+import { Aggregation } from '../aggregation';
+import { Metadata } from '../metadata';
+import { isDefined } from '../utils';
+import { KinveyObservable } from '../observable';
+import { NetworkStore } from './networkstore';
+import { SyncManager } from './sync';
 
 /**
  * The CacheStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-exports.CacheStore = class CacheStore extends NetworkStore {
+export class CacheStore extends NetworkStore {
   constructor(collection, options = {}) {
     super(collection, options);
 

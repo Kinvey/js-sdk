@@ -1,17 +1,17 @@
-const url = require('url');
-const { CacheRequest, RequestMethod } = require('kinvey-request');
-const { KinveyError } = require('kinvey-errors');
-const { Query } = require('kinvey-query');
-const { Aggregation } = require('kinvey-aggregation');
-const { isDefined } = require('kinvey-utils/object');
-const { KinveyObservable } = require('kinvey-observable');
-const { CacheStore } = require('./cachestore');
+import url from 'url';
+import { CacheRequest, RequestMethod } from '../request';
+import { KinveyError } from '../errors';
+import { Query } from '../query';
+import { Aggregation } from '../aggregation';
+import { isDefined } from '../utils';
+import { KinveyObservable } from '../observable';
+import { CacheStore } from './cachestore';
 
 /**
  * The SyncStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-exports.SyncStore = class SyncStore extends CacheStore {
+export class SyncStore extends CacheStore {
   get syncAutomatically() {
     return false;
   }

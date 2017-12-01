@@ -1,15 +1,15 @@
-const { Query } = require('kinvey-query');
-const { Aggregation } = require('kinvey-aggregation');
-const { KinveyError, NotFoundError, ServerError } = require('kinvey-errors');
-const { randomString } = require('kinvey-utils/string');
-const { NetworkStore, SyncStore } = require('../src');
-const { mockRequiresIn } = require('./require-helper');
-const { NetworkRack } = require('kinvey-request');
-const { User } = require('kinvey-user');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
-const nock = require('nock');
-const expect = require('expect');
+import nock from 'nock';
+import expect from 'expect';
+import { Query } from '../query';
+import { Aggregation } from '../aggregation';
+import { KinveyError, NotFoundError, ServerError } from '../errors';
+import { randomString } from '../utils';
+import { NetworkStore } from './networkstore';
+import { SyncStore } from './syncstore';
+import { mockRequiresIn } from './require-helper';
+import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { User } from '../user';
+import { init } from '../kinvey';
 
 const collection = 'Books';
 
@@ -17,7 +17,7 @@ describe('NetworkStore', () => {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {

@@ -1,16 +1,15 @@
-const { SyncManager, SyncOperation } = require('../src/sync');
-const { SyncStore } = require('../src/syncstore');
-const { SyncError } = require('kinvey-errors');
-const { randomString } = require('kinvey-utils/string');
-const { Query } = require('kinvey-query');
-const { NetworkRack } = require('kinvey-request');
-const { User } = require('kinvey-user');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
-const nock = require('nock');
-const expect = require('expect');
-const chai = require('chai');
-chai.use(require('chai-as-promised'));
+import nock from 'nock';
+import expect from 'expect';
+import chai from 'chai';
+import { SyncManager, SyncOperation } from './sync';
+import { SyncStore } from './syncstore';
+import { SyncError } from '../errors';
+import { randomString } from '../utils';
+import { Query } from '../query';
+import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { User } from '../user';
+import { init } from '../kinvey';
+chai.use(require('chai-as-promised');
 chai.should();
 const collection = 'Books';
 
@@ -18,7 +17,7 @@ describe('Sync', () => {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {

@@ -1,14 +1,14 @@
-const Promise = require('es6-promise');
-const map = require('lodash/map');
-const result = require('lodash/result');
-const isArray = require('lodash/isArray');
-const isString = require('lodash/isString');
-const url = require('url');
-const { KinveyRequest, RequestMethod, AuthType, CacheRequest, DeltaFetchRequest } = require('kinvey-request');
-const { SyncError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { Client } = require('kinvey-client');
-const { Query } = require('kinvey-query');
+import Promise from 'es6-promise';
+import map from 'lodash/map';
+import result from 'lodash/result';
+import isArray from 'lodash/isArray';
+import isString from 'lodash/isString';
+import url from 'url';
+import { KinveyRequest, RequestMethod, AuthType, CacheRequest, DeltaFetchRequest } from '../request';
+import { SyncError } from '../errors';
+import { isDefined } from '../utils';
+import { Client } from '../client';
+import { Query } from '../query';
 
 const pushInProgress = new Map();
 
@@ -16,18 +16,17 @@ const pushInProgress = new Map();
  * @private
  * Enum for Sync Operations.
  */
-const SyncOperation = {
+export const SyncOperation = {
   Create: RequestMethod.POST,
   Update: RequestMethod.PUT,
   Delete: RequestMethod.DELETE
 };
 Object.freeze(SyncOperation);
-exports.SyncOperation = SyncOperation;
 
 /**
  * @private
  */
-exports.SyncManager = class SyncManager {
+export class SyncManager {
   constructor(collection, options = {}) {
     if (!collection) {
       throw new SyncError('A collection is required.');
