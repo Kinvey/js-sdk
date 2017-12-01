@@ -1,4 +1,5 @@
-const {
+import expect from 'expect';
+import {
   APIVersionNotAvailableError,
   APIVersionNotImplementedError,
   AppProblemError,
@@ -26,9 +27,8 @@ const {
   StaleRequestError,
   UserAlreadyExistsError,
   WritesToCollectionDisallowedError
-} = require('kinvey-errors');
-const { KinveyResponse, Response } = require('../src');
-const expect = require('expect');
+} from '../errors';
+import { KinveyResponse, Response } from './response';
 
 describe('Response', () => {
   describe('error', () => {

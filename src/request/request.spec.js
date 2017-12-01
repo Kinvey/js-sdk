@@ -1,6 +1,6 @@
-const { Request } = require('../src');
-const { Client } = require('kinvey-client');
-const expect = require('expect');
+import expect from 'expect';
+import { Request } from './request';
+import { Client } from '../client';
 
 describe('Request', () => {
   describe('constructor', () => {

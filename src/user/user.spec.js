@@ -13,7 +13,8 @@ import { Query } from '../query';
 import { NetworkRack, NodeHttpMiddleware } from '../request';
 import { init } from '../kinvey';
 import { getLiveService } from '../live';
-import rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
+
+const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
 
 describe('User', () => {
   let client;

@@ -1,12 +1,13 @@
-const { Request, KinveyRequest } = require('../src');
-const { InvalidCredentialsError, ServerError, TimeoutError } = require('kinvey-errors');
-const { randomString } = require('kinvey-utils/string');
-const { AuthorizationGrant } = require('kinvey-identity');
-const { init } = require('kinvey');
-const { User } = require('kinvey-user');
-const url = require('url');
-const nock = require('nock');
-const expect = require('expect');
+import url from 'url';
+import nock from 'nock';
+import expect from 'expect';
+import { KinveyRequest } from './network';
+import { Request } from './request';
+import { InvalidCredentialsError, ServerError, TimeoutError } from '../errors';
+import { randomString } from '../utils';
+import { AuthorizationGrant } from '../identity';
+import { init } from '../kinvey';
+import { User } from '../user';
 
 describe('KinveyRequest', () => {
   let client;

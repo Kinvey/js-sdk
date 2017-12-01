@@ -4,14 +4,15 @@ import { AuthType } from './network';
 import { DeltaFetchRequest } from './deltafetch';
 import { RequestMethod } from './request';
 import { NetworkRack } from './rack';
-import { KinveyError } from '../errors');
-import { SyncStore } from '../datastore');
-import { randomString } from '../utils');
-import { Query } from '../query');
-import { init } from '../kinvey');
-import { User } from '../user');
-import { NodeHttpMiddleware } from './middleware');
-import collection = 'books';
+import { KinveyError } from '../errors';
+import { SyncStore } from '../datastore';
+import { randomString } from '../utils';
+import { Query } from '../query';
+import { init } from '../kinvey';
+import { User } from '../user';
+import { NodeHttpMiddleware } from './middleware';
+
+const collection = 'books';
 
 describe('DeltaFetchRequest', () => {
   let client;

@@ -1,15 +1,15 @@
-import fs from 'fs');
-import path from 'path');
-import nock from 'nock');
-import expect from 'expect');
-import chai from 'chai');
-import { Files } from './files');
-import { KinveyError, NotFoundError, ServerError } from './errors');
-import { randomString } from './utils');
-import { Query } from './query');
-import { NetworkRack, NodeHttpMiddleware } from './request');
-import { User } from './user');
-import { init } from './kinvey');
+import fs from 'fs';
+import path from 'path';
+import nock from 'nock';
+import expect from 'expect';
+import chai from 'chai';
+import { Files } from './files';
+import { KinveyError, NotFoundError, ServerError } from './errors';
+import { randomString } from './utils';
+import { Query } from './query';
+import { NetworkRack, NodeHttpMiddleware } from './request';
+import { User } from './user';
+import { init } from './kinvey';
 
 chai.use(require('chai-as-promised'));
 chai.should();

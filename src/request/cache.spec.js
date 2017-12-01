@@ -1,4 +1,4 @@
-import expect from 'expect');
+import expect from 'expect';
 import { randomString } from '../utils';
 import { CacheRequest } from './cache';
 import { Request } from './request';

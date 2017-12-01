@@ -1,6 +1,6 @@
 import Promise from 'es6-promise';
 import isString from 'lodash/isString';
-import url from 'url');
+import url from 'url';
 import { KinveyError } from './errors';
 import { Client } from './client';
 import { RequestMethod, AuthType, KinveyRequest } from './request';

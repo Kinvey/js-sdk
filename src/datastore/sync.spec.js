@@ -9,7 +9,7 @@ import { Query } from '../query';
 import { NetworkRack, NodeHttpMiddleware } from '../request';
 import { User } from '../user';
 import { init } from '../kinvey';
-chai.use(require('chai-as-promised');
+chai.use(require('chai-as-promised'));
 chai.should();
 const collection = 'Books';
 
