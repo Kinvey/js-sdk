@@ -166,7 +166,7 @@ exports.KinveyRequest = class KinveyRequest extends NetworkRequest {
     this.trace = options.trace === true;
   }
 
-  static executeShort(options, client, dataOnly = true) {
+  static execute(options, client, dataOnly = true) {
     const o = assign({
       method: RequestMethod.GET,
       authType: AuthType.Session
@@ -181,16 +181,11 @@ exports.KinveyRequest = class KinveyRequest extends NetworkRequest {
       });
     }
 
-    let prm = KinveyRequest.execute(o);
+    let prm = new KinveyRequest(o).execute();
     if (dataOnly) {
       prm = prm.then(r => r.data);
     }
     return prm;
-  }
-
-  static execute(options) {
-    return new KinveyRequest(options)
-      .execute();
   }
 
   get appVersion() {

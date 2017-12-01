@@ -1,7 +1,5 @@
-// import { syncManagerProvider } from '../src/datastores';
-const { syncManagerProvider } = require('../src');
+import { SyncStore, syncManagerProvider } from '../src';
 const { SyncManager, SyncOperation } = require('../src/sync');
-const { SyncStore } = require('../src/syncstore');
 const { SyncError } = require('kinvey-errors');
 const { randomString } = require('kinvey-utils/string');
 const { Query } = require('kinvey-query');

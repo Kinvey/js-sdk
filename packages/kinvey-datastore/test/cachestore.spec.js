@@ -1,4 +1,4 @@
-const { CacheStore, SyncStore, SyncOperation } = require('../src');
+import { CacheStore, SyncStore, SyncOperation } from '../src';
 const { init } = require('kinvey');
 const { Query } = require('kinvey-query');
 const { Aggregation } = require('kinvey-aggregation');
@@ -57,7 +57,7 @@ describe.only('CacheStore', () => {
       });
   });
 
-  describe('pathname', () => {
+  describe.skip('pathname', () => {
     it(`should equal /appdata/<appkey>/${collection}`, () => {
       const store = new CacheStore(collection);
       expect(store.pathname).toEqual(`/appdata/${client.appKey}/${collection}`);
@@ -70,7 +70,7 @@ describe.only('CacheStore', () => {
     });
   });
 
-  describe('syncAutomatically', () => {
+  describe.skip('syncAutomatically', () => {
     it('should be true', () => {
       const store = new CacheStore(collection);
       expect(store.syncAutomatically).toEqual(true);
@@ -136,6 +136,7 @@ describe.only('CacheStore', () => {
 
       store.pull()
         .then(() => {
+          console.log('pulled')
           const entity3 = {
             _id: randomString()
           };
@@ -377,7 +378,7 @@ describe.only('CacheStore', () => {
     });
   });
 
-  describe('group()', () => {
+  describe.skip('group()', () => {
     it('should throw an error if the query argument is not an instance of the Query class', (done) => {
       const store = new CacheStore(collection);
       store.group({})
@@ -451,7 +452,7 @@ describe.only('CacheStore', () => {
         .reply(200, [entity1, entity2]);
 
       store.pull()
-        .then(() => {
+        .then((res) => {
           const aggregation = Aggregation.count('title');
           const reply = [{ title: randomString(), count: 2 }, { title: randomString(), count: 1 }];
           nock(client.apiHostname)

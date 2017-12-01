@@ -1,3 +1,5 @@
+import { NetworkStore } from 'kinvey-datastore';
+
 const Promise = require('es6-promise');
 const isArray = require('lodash/isArray');
 const isString = require('lodash/isString');
@@ -7,12 +9,11 @@ const { KinveyError } = require('kinvey-errors');
 const { KinveyObservable } = require('kinvey-observable');
 const { isDefined } = require('kinvey-utils/object');
 const { Query } = require('kinvey-query');
-const { NetworkStore } = require('kinvey-datastore');
 
 /**
  * The UserStore class is used to find, save, update, remove, count and group users.
  */
-exports.UserStore = class UserStore extends NetworkStore {
+export class UserStore extends NetworkStore {
   constructor(options) {
     super(null, options);
   }

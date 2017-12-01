@@ -4,10 +4,11 @@ import url from 'url';
 
 import { KinveyRequest, AuthType, RequestMethod } from 'kinvey-request';
 import { KinveyError } from 'kinvey-errors';
-import Query from 'kinvey-query';
-import Client from 'kinvey-client';
-import { KinveyObservable, isDefined } from 'kinvey-utils';
-import Aggregation from 'kinvey-aggregation';
+import { Query } from 'kinvey-query';
+import { Client } from 'kinvey-client';
+import { isDefined } from 'kinvey-utils';
+import { KinveyObservable } from 'kinvey-observable';
+import { Aggregation } from 'kinvey-aggregation';
 import { getLiveCollectionManager } from 'kinvey-live';
 
 import { Operation, OperationType } from '../operations';
@@ -17,7 +18,7 @@ import { processorFactory } from '../processors';
 /**
  * The NetworkStore class is used to find, create, update, remove, count and group entities over the network.
  */
-export default class NetworkStore {
+export class NetworkStore {
   /** @type {CacheOperator} */
   _processor;
 

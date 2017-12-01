@@ -31,6 +31,10 @@ exports.HttpMiddleware = class HttpMiddleware extends Middleware {
   }
 
   handle(request) {
+    if (!request.url) {
+      console.log('>>>>>>>>> ', new Error().stack)
+    }
+    
     const promise = new Promise((resolve, reject) => {
       const { url, method, headers, body, timeout, followRedirect } = request;
 

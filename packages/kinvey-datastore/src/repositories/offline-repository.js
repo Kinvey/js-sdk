@@ -1,4 +1,4 @@
-import Client from 'kinvey-client';
+import { Client } from 'kinvey-client';
 
 import { Repository } from './repository';
 

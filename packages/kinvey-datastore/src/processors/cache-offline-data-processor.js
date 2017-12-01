@@ -1,4 +1,4 @@
-import Query from 'kinvey-query';
+import { Query } from 'kinvey-query';
 import { KinveyError, NotFoundError } from 'kinvey-errors';
 
 import { OfflineDataProcessor } from './offline-data-processor';

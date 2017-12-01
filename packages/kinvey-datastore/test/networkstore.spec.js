@@ -50,7 +50,7 @@ describe.only('NetworkStore', () => {
     return User.login(username, password);
   });
 
-  describe('pathname', () => {
+  describe.skip('pathname', () => {
     it(`should equal /appdata/<appkey>/${collection}`, () => {
       const store = new NetworkStore(collection);
       expect(store.pathname).toEqual(`/appdata/${store.client.appKey}/${collection}`);
@@ -141,7 +141,7 @@ describe.only('NetworkStore', () => {
     });
   });
 
-  describe('group()', () => {
+  describe.skip('group()', () => {
     it('should throw an error for an invlad aggregation', () => {
       const store = new NetworkStore(collection);
       return store.group({}).toPromise()
@@ -465,7 +465,7 @@ describe.only('NetworkStore', () => {
     });
   });
 
-  describe('when working with live service', () => {
+  describe.skip('when working with live service', () => {
     const path = '../src/datastore/networkstore';
     const managerMock = {
       subscribeCollection: () => { },

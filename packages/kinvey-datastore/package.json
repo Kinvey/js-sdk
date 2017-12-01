@@ -24,9 +24,10 @@
     "mocha": "4.0.1",
     "nock": "9.0.28",
     "proxyquire": "1.8.0",
-    "request": "2.83.0"
+    "request": "2.83.0",
+    "babel-register": "6.26.0"
   },
   "scripts": {
-    "test": "mocha -s 250 test/**/*.spec.js"
+    "test": "mocha --require babel-register --require babel-polyfill -s 250 test/**/*.spec.js"
   }
 }

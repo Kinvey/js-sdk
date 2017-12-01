@@ -1,4 +1,4 @@
-import Client from 'kinvey-client';
+import { Client } from 'kinvey-client';
 import { InmemoryOfflineRepository } from './offline-repositories';
 import { NetworkRepository } from './network-repository';
 import { storageType } from './storage-type';
