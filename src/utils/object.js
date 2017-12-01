@@ -1,16 +1,15 @@
-const isNull = require('lodash/isNull');
-const isUndefined = require('lodash/isUndefined');
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
-function isDefined(obj) {
+export function isDefined(obj) {
   return isUndefined(obj) === false && isNull(obj) === false;
 }
-exports.isDefined = isDefined;
 
-exports.isNumber = function isNumber(num) {
+export function isNumber(num) {
   return !Number.isNaN(parseFloat(num)) && Number.isFinite(num);
 }
 
-exports.nested = function nested(obj, dotProperty, value) {
+export function nested(obj, dotProperty, value) {
   if (isDefined(dotProperty) === false) {
     obj = value || obj;
     return obj;
@@ -26,7 +25,7 @@ exports.nested = function nested(obj, dotProperty, value) {
   return value || obj;
 }
 
-exports.keyBy = function keyBy(array, iteratee) {
+export function keyBy(array, iteratee) {
   if (!array) {
     return {};
   }
@@ -37,7 +36,7 @@ exports.keyBy = function keyBy(array, iteratee) {
   }, {});
 }
 
-exports.isEmpty = function isEmpty(obj) {
+export function isEmpty(obj) {
   // null and undefined are "empty"
   if (!isDefined(obj)) return true;
 

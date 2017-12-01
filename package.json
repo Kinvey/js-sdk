@@ -11,6 +11,14 @@
     "packages/*"
   ],
   "dependencies": {
-    "lerna": "^2.5.1"
+    "es6-promise": "~4.1.1",
+    "lodash": "~4.17.4",
+    "qs": "~6.5.1",
+    "rxjs": "~5.5.2"
+  },
+  "devDependencies": {
+    "expect": "~1.20.2",
+    "lerna": "^2.5.1",
+    "mocha": "~4.0.1"
   }
 }

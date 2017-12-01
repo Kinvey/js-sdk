@@ -1,6 +1,6 @@
-const { randomString } = require('../string');
-const { nested, isDefined } = require('../object');
-const expect = require('expect');
+import expect from 'expect';
+import { randomString } from './string';
+import { nested, isDefined } from './object';
 
 describe('Object', () => {
   describe('nested()', () => {

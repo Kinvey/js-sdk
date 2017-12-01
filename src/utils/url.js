@@ -1,14 +1,13 @@
-const url = require('url');
-const qs = require('qs');
-const assign = require('lodash/assign');
-const isArray = require('lodash/isArray');
-const isPlainObject = require('lodash/isPlainObject');
-const isString = require('lodash/isString');
-const isEmpty = require('lodash/isEmpty');
-const { isDefined } = require('./object');
+import url from 'url';
+import qs from 'qs';
+import assign from 'lodash/assign';
+import isArray from 'lodash//isArray';
+import isPlainObject from 'lodash//isPlainObject';
+import isString from 'lodash//isString';
+import isEmpty from 'lodash//isEmpty';
+import { isDefined } from './object';
 
 /**
- * @private
  * Adapted from https://github.com/lakenen/node-append-query, to fit a non-node runtime.
  */
 function serialize(obj, options = {}, prefix) {
@@ -47,10 +46,7 @@ function serialize(obj, options = {}, prefix) {
   return str.join('&');
 }
 
-/**
- * @private
- */
-exports.appendQuery = function appendQuery(uri, query, options = {}) {
+export function appendQuery(uri, query, options = {}) {
   const parts = url.parse(uri, true);
   const queryToAppend = isString(query) ? qs.parse(query) : query;
   const parsedQuery = assign({}, parts.query, queryToAppend);

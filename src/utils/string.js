@@ -1,6 +1,3 @@
-/**
- * @private
- */
 function uid(size = 10) {
   let text = '';
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -12,18 +9,15 @@ function uid(size = 10) {
   return text;
 }
 
-/**
- * @private
- */
-exports.randomString = function randomString(size = 18, prefix = '') {
+export function randomString(size = 18, prefix = '') {
   return `${prefix}${uid(size)}`;
 }
 
-exports.isNonemptyString = function isNonemptyString(obj) {
+export function isNonemptyString(obj) {
   return (typeof obj === 'string') && obj !== '';
 }
 
-exports.uuidv4 = function uuidv4() {
+export function uuidv4() {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
       .toString(16)
