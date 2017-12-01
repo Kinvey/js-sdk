@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 
-const { expect } = require('chai');
-const { randomString } = require('kinvey-utils/string');
-const { Query } = require('../src');
+import { expect } from 'chai';
+import { randomString } from './utils';
+import { Query } from './query';
 
 describe('Query', () => {
   describe('constructor', () => {

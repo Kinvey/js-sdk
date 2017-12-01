@@ -1,8 +1,8 @@
-const isPlainObject = require('lodash/isPlainObject');
-const isArray = require('lodash/isArray');
-const assign = require('lodash/assign');
-const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
+import isPlainObject from 'lodash/isPlainObject';
+import isArray from 'lodash/isArray';
+import assign from 'lodash/assign';
+import { KinveyError } from './errors';
+import { isDefined } from './utils';
 
 /**
  * The Acl class is used as a wrapper for reading and setting permissions on an entity level.
@@ -11,7 +11,7 @@ const { isDefined } = require('kinvey-utils/object');
  * var entity = { _acl: {} };
  * var acl = new Kinvey.Acl(entity);
  */
-exports.Acl = class Acl {
+export class Acl {
   constructor(entity) {
     if (isPlainObject(entity) === false) {
       throw new KinveyError('entity argument must be an object');

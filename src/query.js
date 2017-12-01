@@ -1,8 +1,8 @@
-const sift = require('sift');
-const isPlainObject = require('lodash/isPlainObject');
-const { QueryError } = require('kinvey-errors');
-const { nested, isDefined, isNumber } = require('kinvey-utils/object');
-const { Log } = require('kinvey-log');
+import sift from 'sift';
+import isPlainObject from 'lodash/isPlainObject';
+import { QueryError } from './errors';
+import { nested, isDefined, isNumber } from './utils';
+import { Log } from './log';
 
 const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
 
@@ -14,7 +14,7 @@ const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
  * var query = new Kinvey.Query();
  * query.equalTo('name', 'Kinvey');
  */
-exports.Query = class Query {
+export class Query {
   /**
    * Create an instance of the Query class.
    *

@@ -1,7 +1,7 @@
-const { Acl } = require('../src');
-const { randomString } = require('kinvey-utils/string');
-const { KinveyError } = require('kinvey-errors');
-const expect = require('expect');
+import expect from 'expect';
+import { Acl } from './acl';
+import { randomString } from './utils';
+import { KinveyError } from './errors';
 
 describe('Acl', () => {
   describe('constructor', () => {

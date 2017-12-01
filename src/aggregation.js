@@ -1,14 +1,14 @@
-const assign = require('lodash/assign');
-const forEach = require('lodash/forEach');
-const isString = require('lodash/isString');
-const isObject = require('lodash/isObject');
-const isFunction = require('lodash/isFunction');
-const cloneDeep = require('lodash/cloneDeep');
-const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { Query } = require('kinvey-query');
+import assign from 'lodash/assign';
+import forEach from 'lodash/forEach';
+import isString from 'lodash/isString';
+import isObject from 'lodash/isObject';
+import isFunction from 'lodash/isFunction';
+import cloneDeep from 'lodash/cloneDeep';
+import { KinveyError } from './errors';
+import { isDefined } from './utils';
+import { Query } from './query';
 
-exports.Aggregation = class Aggregation {
+export class Aggregation {
   constructor(options) {
     options = assign({
       query: null,

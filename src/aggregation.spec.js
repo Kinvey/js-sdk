@@ -1,10 +1,9 @@
 /* eslint-env mocha */
 
-const { expect } = require('chai');
-const { Aggregation } = require('../src');
-const { Query } = require('kinvey-query');
-const { isDefined } = require('kinvey-utils/object');
-const { randomString } = require('kinvey-utils/string');
+import { expect } from 'chai';
+import { Aggregation } from './aggregation';
+import { Query } from './query';
+import { isDefined, randomString } from './utils';
 
 describe('Aggregation', () => {
   const commonTitle = 'Kinvey';
