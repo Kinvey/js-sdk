@@ -34,4 +34,4 @@ export * from './staleRequest';
 export * from './sync';
 export * from './timeout';
 export * from './userAlreadyExists';
-export * from './writesToCollectionDisallowed')
+export * from './writesToCollectionDisallowed';

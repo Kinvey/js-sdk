@@ -1,11 +1,10 @@
-const MemoryCache = require('fast-memory-cache');
-const url = require('url');
-const isString = require('lodash/isString');
-const isNumber = require('lodash/isNumber');
-const { KinveyError } = require('kinvey-errors');
-const { Log } = require('kinvey-log');
-const { isDefined } = require('kinvey-utils/object');
-const { uuidv4 } = require('kinvey-utils/string');
+import MemoryCache from 'fast-memory-cache';
+import url from 'url';
+import isString from 'lodash/isString';
+import isNumber from 'lodash/isNumber';
+import { KinveyError } from './errors';
+import { Log } from './log';
+import { isDefined, uuidv4 } from './utils';
 
 const DEFAULT_TIMEOUT = 60000;
 const ACTIVE_USER_KEY = 'active_user';
@@ -47,7 +46,7 @@ class ActiveUserStorage {
  * The Client class stores information about your application on the Kinvey platform. You can create mutiple clients
  * to send requests to different environments on the Kinvey platform.
  */
-exports.Client = class Client {
+export class Client {
   /**
    * Creates a new instance of the Client class.
    *

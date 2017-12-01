@@ -4,7 +4,7 @@ import { appendQuery } from './url';
 /**
  * Adapted from https://github.com/lakenen/node-append-query
  */
-describe('appendQuery', () =>{
+describe('appendQuery()', () =>{
     it('should append querystring to queryless url', () => {
         const result = appendQuery('http://example.com/foo', 'bar=baz&beep=boop')
             , expected = 'http://example.com/foo?bar=baz&beep=boop'

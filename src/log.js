@@ -1,4 +1,4 @@
-const log = require('loglevel');
+import log from 'loglevel';
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -17,4 +17,6 @@ log.methodFactory = function methodFactory(methodName, logLevel, loggerName) {
   };
 };
 
-exports.Log = log;
+export {
+  log as Log
+};
