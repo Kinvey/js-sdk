@@ -6,8 +6,8 @@ import values from 'lodash/values';
 import find from 'lodash/find';
 import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
-import { isDefined } from '../../utils';
-import { NotFoundError } from '../../errors';
+import { isDefined } from '../../../utils';
+import { NotFoundError } from '../../../errors';
 
 const caches = {};
 
@@ -110,7 +110,7 @@ class Memory {
   }
 }
 
-export const MemoryAdapter {
+export const MemoryAdapter = {
   load(name) {
     return new Memory(name);
   }

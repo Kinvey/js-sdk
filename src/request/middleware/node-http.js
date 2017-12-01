@@ -22,6 +22,7 @@ function deviceInformation(pkg) {
 
 export class NodeHttpMiddleware extends Middleware {
   constructor(pkg) {
+    super();
     this.pkg = pkg;
   }
 

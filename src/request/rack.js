@@ -4,7 +4,7 @@ import isFunction from 'lodash/isFunction';
 import values from 'lodash/values';
 import { isDefined } from '../utils';
 import { Log } from '../log';
-import { Middleware. CacheMiddleware, HttpMiddleware, ParseMiddleware, SerializeMiddleware } from './middleware';
+import { Middleware, CacheMiddleware, HttpMiddleware, ParseMiddleware, SerializeMiddleware } from './middleware';
 
 export class Rack extends Middleware {
   constructor(name = 'Rack') {
