@@ -1,26 +1,32 @@
 import expect from 'expect';
 import PubNub from 'pubnub';
 
-import { Kinvey } from 'src/kinvey';
-import { randomString } from 'src/utils';
-import { PubNubListener, getLiveService } from 'src/live';
+import { User } from '../user';
+import { randomString } from '../utils';
+import { Client } from '../client';
+import { PubNubListener, getLiveService } from './live-service';
 
 import * as nockHelper from './nock-helper';
-import { PubNubClientMock, PubNubListenerMock } from '../mocks';
+import { PubNubClientMock } from './pubnub-client-mock';
+import { PubNubListenerMock } from './pubnub-listener-mock';
 import {
   notInitializedCheckRegexp,
   invalidOrMissingCheckRegexp,
   alreadyInitializedCheckRegexp
 } from './utilities';
 
-const pathToLiveService = '../../../src/live/live-service';
+const pathToLiveService = './live-service';
 
 describe('LiveService', () => {
   let liveService;
   let registerUserResponse;
 
   before(function () {
-    nockHelper.setClient(this.client);
+    const client = Client.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+    nockHelper.setClient(client);
   });
 
   beforeEach(() => {
@@ -63,7 +69,7 @@ describe('LiveService', () => {
     });
 
     it('should return an error if a user other than the active user is passed to registerUser', (done) => {
-      liveService.registerUser(new Kinvey.User())
+      liveService.registerUser(new User())
         .then(() => done(new Error('registerUser() succeeded without active user')))
         .catch((err) => {
           expect(err.message).toEqual('Missing or invalid active user');
@@ -73,7 +79,7 @@ describe('LiveService', () => {
 
     it('should call /register endpoint for live service and return a PubNub config object', () => {
       const nockScope = nockHelper.mockRegisterRealtimeCall(registerUserResponse);
-      const activeUser = Kinvey.User.getActiveUser();
+      const activeUser = User.getActiveUser();
       return liveService.registerUser(activeUser)
         .then((config) => {
           nockScope.done();
@@ -86,7 +92,7 @@ describe('LiveService', () => {
 
     it('should should not put LiveService in an initialized state', () => {
       const nockScope = nockHelper.mockRegisterRealtimeCall();
-      return liveService.registerUser(Kinvey.User.getActiveUser())
+      return liveService.registerUser(User.getActiveUser())
         .then(() => {
           expect(liveService.isInitialized()).toBe(false);
           nockScope.done();
@@ -101,7 +107,7 @@ describe('LiveService', () => {
 
     beforeEach(() => {
       nockScope = nockHelper.mockRegisterRealtimeCall(registerUserResponse);
-      return liveService.registerUser(Kinvey.User.getActiveUser())
+      return liveService.registerUser(User.getActiveUser())
         .then(() => {
           pubnubClient = new PubNubClientMock();
           pubnubListener = new PubNubListenerMock();
@@ -146,7 +152,7 @@ describe('LiveService', () => {
       expect.spyOn(liveService, 'isInitialized')
         .andReturn(true);
 
-      liveService.fullInitialization(Kinvey.User.getActiveUser())
+      liveService.fullInitialization(User.getActiveUser())
         .then(() => done(new Error('fullInitialization succeeded when already initialized')))
         .catch((err) => {
           expect(err.message).toMatch(alreadyInitializedCheckRegexp);
@@ -166,7 +172,7 @@ describe('LiveService', () => {
     });
 
     it('should fail if passed user is not the active user', (done) => {
-      liveService.fullInitialization(new Kinvey.User())
+      liveService.fullInitialization(new User())
         .then(() => done(new Error('registration succeeded with no user')))
         .catch((err) => {
           expect(err.message).toMatch(invalidOrMissingCheckRegexp);
@@ -179,7 +185,7 @@ describe('LiveService', () => {
       const userRegSpy = expect.spyOn(liveService, 'registerUser')
         .andReturn(Promise.resolve({}));
       const initializeSpy = expect.spyOn(liveService, 'initialize');
-      const activeUser = Kinvey.User.getActiveUser();
+      const activeUser = User.getActiveUser();
       return liveService.fullInitialization(activeUser)
         .then(() => {
           expect(userRegSpy.calls.length).toBe(1);
@@ -252,7 +258,7 @@ describe('LiveService', () => {
 
       beforeEach(() => {
         nockScope = nockHelper.mockRegisterRealtimeCall(registerUserResponse);
-        return liveService.registerUser(Kinvey.User.getActiveUser())
+        return liveService.registerUser(User.getActiveUser())
           .then((config) => {
             pubnubClient = new PubNubClientMock(config);
             pubnubListener = new PubNubListenerMock();
@@ -296,7 +302,7 @@ describe('LiveService', () => {
 
     beforeEach(() => {
       nockScope = nockHelper.mockRegisterRealtimeCall(registerUserResponse);
-      return liveService.registerUser(Kinvey.User.getActiveUser())
+      return liveService.registerUser(User.getActiveUser())
         .then(() => {
           pubnubClient = new PubNubClientMock();
           pubnubListener = new PubNubListenerMock();
@@ -381,7 +387,7 @@ describe('LiveService', () => {
 
       beforeEach(() => {
         nockScope = nockHelper.mockRegisterRealtimeCall(registerUserResponse);
-        return liveService.registerUser(Kinvey.User.getActiveUser())
+        return liveService.registerUser(User.getActiveUser())
           .then(() => {
             pubnubClient = new PubNubClientMock();
             pubnubListener = new PubNubListenerMock();
@@ -425,7 +431,7 @@ describe('LiveService', () => {
 
       beforeEach(() => {
         nockScope = nockHelper.mockRegisterRealtimeCall(registerUserResponse);
-        return liveService.registerUser(Kinvey.User.getActiveUser())
+        return liveService.registerUser(User.getActiveUser())
           .then(() => {
             nockHelper.mockUnregisterRealtimeCall();
             pubnubClient = new PubNubClientMock();
@@ -462,7 +468,7 @@ describe('LiveService', () => {
 
     beforeEach(() => {
       nockScope = nockHelper.mockRegisterRealtimeCall();
-      return liveService.registerUser(Kinvey.User.getActiveUser())
+      return liveService.registerUser(User.getActiveUser())
         .then((config) => {
           pubnubClient = new PubNubClientMock(config);
           pubnubListener = new PubNubListenerMock();
@@ -496,7 +502,7 @@ describe('LiveService', () => {
 
     beforeEach(() => {
       nockScope = nockHelper.mockRegisterRealtimeCall();
-      return liveService.registerUser(Kinvey.User.getActiveUser())
+      return liveService.registerUser(User.getActiveUser())
         .then((config) => {
           pubnubClient = new PubNubClientMock(config);
           pubnubListener = new PubNubListenerMock();

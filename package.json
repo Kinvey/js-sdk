@@ -18,6 +18,7 @@
     "url-join": "~2.0.2"
   },
   "devDependencies": {
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-polyfill": "~6.26.0",
     "babel-preset-env": "~1.6.1",
     "babel-register": "~6.26.0",

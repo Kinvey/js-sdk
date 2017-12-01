@@ -1,7 +1,7 @@
 import nock from 'nock';
 
-import Client from '../../../src/client';
-import { StreamACL } from '../../../src/live';
+import { Client } from '../client';
+import { StreamACL } from './user-to-user';
 
 /** @type {Client} */
 let _client;

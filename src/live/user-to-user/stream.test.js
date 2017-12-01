@@ -1,10 +1,10 @@
 import expect from 'expect';
 import cloneDeep from 'lodash/cloneDeep';
-
-import { Stream } from 'src/live';
-
+import { Stream } from './stream';
 import * as nockHelper from '../nock-helper';
 import { invalidOrMissingCheckRegexp } from '../utilities';
+import { randomString } from '../../utils';
+import { Client } from '../../client';
 
 // TODO: add more tests
 
@@ -15,7 +15,11 @@ describe('Stream', () => {
   let stream;
 
   before(function () {
-    nockHelper.setClient(this.client);
+    const client = Client.init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
+    nockHelper.setClient(client);
   });
 
   beforeEach(() => {

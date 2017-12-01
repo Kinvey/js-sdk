@@ -18,7 +18,10 @@ describe('LiveCollectionManager', () => {
   const collectionName = 'someCollection';
 
   before(function () {
-    client = this.client;
+    client = init({
+      appKey: randomString(),
+      appSecret: randomString()
+    });
     nockHelper.setClient(client);
     expectedCollectionChannel = `${client.appKey}.c-${collectionName}`;
   });

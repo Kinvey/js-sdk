@@ -1,6 +1,5 @@
 import expect from 'expect';
-
-import { PubNubListener } from 'src/live';
+import { PubNubListener } from './pubnub-listener';
 
 describe('PubNubListener', function () {
   /** @type {PubNubListener} */
