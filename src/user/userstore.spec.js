@@ -1,19 +1,18 @@
-const { UserStore } = require('../src/userstore');
-const { User } = require('../src/user');
-const { Query } = require('kinvey-query');
-const { KinveyError } = require('kinvey-errors');
-const { randomString } = require('kinvey-utils/string');
-const { NetworkRack } = require('kinvey-request');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
-const nock = require('nock');
-const expect = require('expect');
+import nock from 'nock';
+import expect from 'expect';
+import { UserStore } from './userstore';
+import { User } from './user';
+import { Query } from '../query';
+import { KinveyError } from '../errors';
+import { randomString } from '../utils';
+import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { init } from '../kinvey';
 
 describe('UserStore', () => {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {

@@ -1,20 +1,19 @@
-const { Acl } = require('kinvey-acl');
-const { Metadata } = require('kinvey-metadata');
-const { User } = require('../src');
-const { randomString } = require('kinvey-utils/string');
-const { ActiveUserError, InvalidCredentialsError, KinveyError } = require('kinvey-errors');
-const { CacheStore, SyncStore } = require('kinvey-datastore');
-const { Client } = require('kinvey-client');
-const { Query } = require('kinvey-query');
-const { NetworkRack } = require('kinvey-request');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
-const expect = require('expect');
-const nock = require('nock');
-const assign = require('lodash/assign');
-const localStorage = require('local-storage');
-const { getLiveService } = require('kinvey-live');
-const rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
+import expect from 'expect';
+import nock from 'nock';
+import assign from 'lodash/assign';
+import localStorage from 'local-storage';
+import { Acl } from '../acl';
+import { Metadata } from '../metadata';
+import { User } from './user';
+import { randomString } from '../utils';
+import { ActiveUserError, InvalidCredentialsError, KinveyError } from '../errors';
+import { CacheStore, SyncStore } from '../datastore';
+import { Client } from '../client';
+import { Query } from '../query';
+import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { init } from '../kinvey';
+import { getLiveService } from '../live';
+import rpcNamespace = process.env.KINVEY_RPC_NAMESPACE || 'rpc';
 
 describe('User', () => {
   let client;
@@ -174,7 +173,7 @@ describe('User', () => {
   }
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {

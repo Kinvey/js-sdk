@@ -1,26 +1,26 @@
-const Promise = require('es6-promise');
-const assign = require('lodash/assign');
-const isString = require('lodash/isString');
-const isObject = require('lodash/isObject');
-const isEmpty = require('lodash/isEmpty');
-const url = require('url');
-const { Client } = require('kinvey-client');
-const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
-const { KinveyError, NotFoundError, ActiveUserError } = require('kinvey-errors');
-const { DataStore } = require('kinvey-datastore');
-const { MobileIdentityConnect } = require('kinvey-identity');
-const { Log } = require('kinvey-log');
-const { isDefined } = require('kinvey-utils/object');
-const { Acl } = require('kinvey-acl');
-const { Metadata } = require('kinvey-metadata');
-const { getLiveService } = require('kinvey-live');
-const { UserStore } = require('./userstore');
+import Promise from 'es6-promise';
+import assign from 'lodash/assign';
+import isString from 'lodash/isString';
+import isObject from 'lodash/isObject';
+import isEmpty from 'lodash/isEmpty';
+import url from 'url';
+import { Client } from '../client';
+import { AuthType, RequestMethod, KinveyRequest } from '../request';
+import { KinveyError, NotFoundError, ActiveUserError } from '../errors';
+import { DataStore } from '../datastore';
+import { MobileIdentityConnect } from '../identity';
+import { Log } from '../log';
+import { isDefined } from '../utils';
+import { Acl } from '../acl';
+import { Metadata } from '../metadata';
+import { getLiveService } from '../live';
+import { UserStore } from './userstore';
 
 /**
  * The User class is used to represent a single user on the Kinvey platform.
  * Use the user class to manage the active user lifecycle and perform user operations.
  */
-exports.User = class User {
+export class User {
   /**
    * Create a new instance of a User.
    *
@@ -336,7 +336,7 @@ exports.User = class User {
 
   /**
    * @private
-   * Disconnects the user from an identity.
+   * Disconnects the user from  an identity.
    *
    * @param {SocialIdentity|string} identity Identity used to connect the user.
    * @param  {Object} [options] Options
@@ -376,7 +376,7 @@ exports.User = class User {
    * @return {Promise<User>} The user.
    */
   logout(options = {}) {
-    // Logout from Kinvey
+    // Logout from  Kinvey
     const request = new KinveyRequest({
       method: RequestMethod.POST,
       authType: AuthType.Session,
@@ -825,7 +825,7 @@ exports.User = class User {
    *
    * @param   {string}  id               Id of the user to remove.
    * @param   {Object}  [options]        Options
-   * @param   {boolean} [options.hard=false]   Boolean indicating whether user should be permanently removed from the backend (defaults to false).
+   * @param   {boolean} [options.hard=false]   Boolean indicating whether user should be permanently removed from  the backend (defaults to false).
    * @return  {Promise}
    */
   static remove(id, options = {}) {
