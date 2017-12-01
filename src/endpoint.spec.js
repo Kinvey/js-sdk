@@ -1,13 +1,12 @@
-const { CustomEndpoint } = require('../src');
-const { Client } = require('kinvey-client');
-const { KinveyError, NotFoundError } = require('kinvey-errors');
-const { NetworkRack } = require('kinvey-request');
-const { User } = require('kinvey-user');
-const { init } = require('kinvey');
-const { randomString } = require('kinvey-utils/string');
-const { HttpMiddleware } = require('./http');
-const nock = require('nock');
-const expect = require('expect');
+import nock from 'nock';
+import expect from 'expect';
+import { CustomEndpoint } from './endpoint';
+import { Client } from './client';
+import { KinveyError, NotFoundError } from './errors';
+import { NetworkRack, NodeHttpMiddleware } from './request';
+import { User } from './user';
+import { init } from './kinvey';
+import { randomString } from './utils';
 
 describe('Endpoint', () => {
   let client;

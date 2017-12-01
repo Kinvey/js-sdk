@@ -1,14 +1,14 @@
-const Promise = require('es6-promise');
-const isString = require('lodash/isString');
-const url = require('url');
-const { KinveyError } = require('kinvey-errors');
-const { Client } = require('kinvey-client');
-const { RequestMethod, AuthType, KinveyRequest } = require('kinvey-request');
+import Promise from 'es6-promise';
+import isString from 'lodash/isString';
+import url from 'url');
+import { KinveyError } from './errors';
+import { Client } from './client';
+import { RequestMethod, AuthType, KinveyRequest } from './request';
 
 /**
  * Executes a custom endpoint on the Kinvey backend.
  */
-exports.CustomEndpoint = class CustomEndpoint {
+export class CustomEndpoint {
   constructor() {
     throw new KinveyError('Not allowed to create an instance of the `CustomEndpoint` class.',
       'Please use `CustomEndpoint.execute()` function.');
