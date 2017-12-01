@@ -5,8 +5,8 @@ import { isDefined } from 'kinvey-utils';
 import NetworkStore from './networkstore';
 import CacheStore from './cachestore';
 import SyncStore from './syncstore';
-// import { processorFactory } from '../processors';
-// import { repositoryProvider } from '../repositories';
+import { processorFactory } from '../processors';
+import { repositoryProvider } from '../repositories';
 
 /**
  * @typedef   {Object}    DataStoreType
