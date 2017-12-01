@@ -1,6 +1,7 @@
 import nock from 'nock';
 import expect from 'expect';
-import { SyncStore, SyncOperation } from './sync';
+import { SyncOperation } from './sync';
+import { SyncStore } from './syncstore';
 import { Aggregation } from '../aggregation';
 import { Query } from '../query';
 import { KinveyError, NotFoundError } from '../errors';
@@ -63,9 +64,10 @@ describe('SyncStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      const store = new SyncStore(collection);
-      store.pathname = `/tests/${collection}`;
-      expect(store.pathname).toEqual(`/appdata/${client.appKey}/${collection}`);
+      expect(() => {
+        const store = new SyncStore(collection);
+        store.pathname = `/tests/${collection}`;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -76,9 +78,10 @@ describe('SyncStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      const store = new SyncStore(collection);
-      store.syncAutomatically = true;
-      expect(store.syncAutomatically).toEqual(false);
+      expect(() => {
+        const store = new SyncStore(collection);
+        store.syncAutomatically = true;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 

@@ -65,9 +65,10 @@ describe('CacheStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      const store = new CacheStore(collection);
-      store.pathname = `/tests/${collection}`;
-      expect(store.pathname).toEqual(`/appdata/${client.appKey}/${collection}`);
+      expect(() => {
+        const store = new CacheStore(collection);
+        store.pathname = `/tests/${collection}`;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -78,9 +79,10 @@ describe('CacheStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      const store = new CacheStore(collection);
-      store.syncAutomatically = false;
-      expect(store.syncAutomatically).toEqual(true);
+      expect(() => {
+        const store = new CacheStore(collection);
+        store.syncAutomatically = false;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 

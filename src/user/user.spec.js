@@ -225,11 +225,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the _acl', () => {
-      const user = new User();
-      const acl = user._acl;
-      const data = { _acl: { creator: randomString() } };
-      user._acl = new Acl(data);
-      expect(user._acl).toEqual(acl);
+      expect(() => {
+        const user = new User();
+        const acl = user._acl;
+        const data = { _acl: { creator: randomString() } };
+        user._acl = new Acl(data);
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -241,11 +242,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the metadata', () => {
-      const user = new User();
-      const metadata = user.metadata;
-      const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
-      user.metadata = new Metadata(data);
-      expect(user.metadata).toEqual(metadata);
+      expect(() => {
+        const user = new User();
+        const metadata = user.metadata;
+        const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+        user.metadata = new Metadata(data);
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -257,11 +259,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the _kmd', () => {
-      const user = new User();
-      const kmd = user._kmd;
-      const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
-      user._kmd = new Metadata(data);
-      expect(user._kmd).toEqual(kmd);
+      expect(() => {
+        const user = new User();
+        const kmd = user._kmd;
+        const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+        user._kmd = new Metadata(data);
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -273,11 +276,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the _socialIdentity', () => {
-      const user = new User();
-      const socialIdentity = user._socialIdentity;
-      const data = { _socialIdentity: { kinvey: {} } };
-      user._socialIdentity = data._socialIdentity;
-      expect(user._socialIdentity).toEqual(socialIdentity);
+      expect(() => {
+        const user = new User();
+        const socialIdentity = user._socialIdentity;
+        const data = { _socialIdentity: { kinvey: {} } };
+        user._socialIdentity = data._socialIdentity;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -289,11 +293,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the authtoken', () => {
-      const user = new User();
-      const authtoken = user.authtoken;
-      const data = { _kmd: { authtoken: randomString() } };
-      user.authtoken = new Metadata(data).authtoken;
-      expect(user.authtoken).toEqual(authtoken);
+      expect(() => {
+        const user = new User();
+        const authtoken = user.authtoken;
+        const data = { _kmd: { authtoken: randomString() } };
+        user.authtoken = new Metadata(data).authtoken;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -305,11 +310,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the username', () => {
-      const user = new User();
-      const username = user.username;
-      const data = { username: randomString() };
-      user.username = data.username;
-      expect(user.username).toEqual(username);
+      expect(() => {
+        const user = new User();
+        const username = user.username;
+        const data = { username: randomString() };
+        user.username = data.username;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -321,11 +327,12 @@ describe('User', () => {
     });
 
     it('should not be able to set the email', () => {
-      const user = new User();
-      const email = user.email;
-      const data = { email: randomString() };
-      user.email = data.email;
-      expect(user.email).toEqual(email);
+      expect(() => {
+        const user = new User();
+        const email = user.email;
+        const data = { email: randomString() };
+        user.email = data.email;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
@@ -336,9 +343,10 @@ describe('User', () => {
     });
 
     it('should not be able to set the pathname', () => {
-      const user = new User();
-      user.pathname = 'user';
-      expect(user.pathname).toEqual(`/user/${user.client.appKey}`);
+      expect(() => {
+        const user = new User();
+        user.pathname = 'user';
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 

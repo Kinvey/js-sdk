@@ -14,7 +14,7 @@ import { init } from './kinvey';
 chai.use(require('chai-as-promised'));
 chai.should();
 
-describe('FileStore', () => {
+describe('Files', () => {
   let client;
 
   before(() => {
@@ -57,8 +57,9 @@ describe('FileStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      Files.pathname = '/foo';
-      expect(Files.pathname).toEqual(`/blob/${Files.client.appKey}`);
+      expect(() => {
+        Files.pathname = '/foo';
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 

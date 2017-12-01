@@ -14,7 +14,7 @@ describe('KinveyRequest', () => {
 
   function loginWithMIC(redirectUri, authorizationGrant, options) {
     nock(client.apiHostname, { encodedQueryParams: true })
-      .post(`${this.pathname}/_logout`)
+      .post(`${client.pathname}/_logout`)
       .reply(204);
 
     return User.logout()

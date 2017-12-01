@@ -57,9 +57,10 @@ describe('NetworkStore', () => {
     });
 
     it('should not be able to be changed', () => {
-      const store = new NetworkStore(collection);
-      store.pathname = `/tests/${collection}`;
-      expect(store.pathname).toEqual(`/appdata/${store.client.appKey}/${collection}`);
+      expect(() => {
+        const store = new NetworkStore(collection);
+        store.pathname = `/tests/${collection}`;
+      }).toThrow(TypeError, /which has only a getter/);
     });
   });
 
