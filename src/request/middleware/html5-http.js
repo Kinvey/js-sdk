@@ -1,8 +1,8 @@
-const xhr = require('xhr');
-const Promise = require('es6-promise');
-const { Middleware } = require('kinvey-request');
-const { NetworkConnectionError, TimeoutError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
+import xhr from 'xhr';
+import Promise from 'es6-promise';
+import { Middleware } from './middleware';
+import { NetworkConnectionError, TimeoutError } from '../../errors';
+import { isDefined } from '../../utils';
 
 // Helper function to detect the browser name and version.
 function browserDetect(ua) {
@@ -71,14 +71,10 @@ function deviceInformation(pkg) {
   }).join(' ');
 }
 
-exports.HttpMiddleware = class HttpMiddleware extends Middleware {
+export class HttpMiddleware extends Middleware {
   constructor(pkg) {
     super();
     this.pkg = pkg
-  }
-
-  get deviceInformation() {
-    return deviceInformation(this.pkg);
   }
 
   handle(request) {
@@ -93,7 +89,7 @@ exports.HttpMiddleware = class HttpMiddleware extends Middleware {
       } = request;
 
       // Add the X-Kinvey-Device-Information header
-      // headers['X-Kinvey-Device-Information'] = this.deviceInformation;
+      headers['X-Kinvey-Device-Information'] = deviceInformation(this.pkg);
 
       this.xhrRequest = xhr({
         method: method,

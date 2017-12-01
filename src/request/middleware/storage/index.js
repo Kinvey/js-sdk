@@ -6,6 +6,9 @@ import { Queue } from './promise-queue';
 import { Log } from '../../../log';
 import { KinveyError, NotFoundError } from '../../../errors';
 import { MemoryAdapter } from './memory';
+import { IndexedDBAdapter } from './indexeddb';
+import { WebSQLAdapter } from './websql';
+import { LocalStorageAdapter, SessionStorageAdapter } from './webstorage';
 
 const queue = new Queue(1, Infinity);
 
@@ -23,8 +26,35 @@ export class Storage {
   }
 
   loadAdapter() {
-    return Promise.resolve()
-      .then(() => MemoryAdapter.load(this.name))
+    return WebSQLAdapter.load(this.name)
+      .then((adapter) => {
+        if (!adapter) {
+          return IndexedDBAdapter.load(this.name);
+        }
+
+        return adapter;
+      })
+      .then((adapter) => {
+        if (!adapter) {
+          return LocalStorageAdapter.load(this.name);
+        }
+
+        return adapter;
+      })
+      .then((adapter) => {
+        if (!adapter) {
+          return SessionStorageAdapter.load(this.name);
+        }
+
+        return adapter;
+      })
+      .then((adapter) => {
+        if (!adapter) {
+          return MemoryAdapter.load(this.name);
+        }
+
+        return adapter;
+      })
       .then((adapter) => {
         if (!isDefined(adapter)) {
           return Promise.reject(new KinveyError('Unable to load a storage adapter.'));

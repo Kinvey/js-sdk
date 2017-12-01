@@ -1,8 +1,8 @@
-const { storage } = require('local-storage-fallback');
-const { Client } = require('kinvey-client');
-const { KinveyError } = require('kinvey-errors');
-const { Log } = require('kinvey-log');
-const { isDefined } = require('kinvey-utils/object');
+import { storage } from 'local-storage-fallback';
+import { Client } from '../../../src/client';
+import { KinveyError } from '../../../src/errors';
+import { Log } from '../../../src/log';
+import { isDefined } from '../../../src/utils';
 
 class ActiveUserStorage {
   get(key) {
@@ -33,11 +33,10 @@ class ActiveUserStorage {
   }
 }
 
-class Html5Client extends Client {
+export class Html5Client extends Client {
   static init(config) {
     const client = Client.init(config);
     client.activeUserStorage = new ActiveUserStorage();
     return client;
   }
 }
-exports.Client = Html5Client;

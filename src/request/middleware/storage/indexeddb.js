@@ -1,6 +1,6 @@
-const Promise = require('es6-promise');
-const { KinveyError, NotFoundError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
+import Promise from 'es6-promise';
+import { KinveyError, NotFoundError } from '../../../errors';
+import { isDefined } from '../../../utils';
 
 let dbCache = {};
 let isSupported;
@@ -292,7 +292,7 @@ class IndexedDB {
   }
 }
 
-exports.IndexedDBAdapter = {
+export const IndexedDBAdapter = {
   load(name) {
     const indexedDB = global.indexedDB || global.webkitIndexedDB || global.mozIndexedDB || global.msIndexedDB;
     const adapter = new IndexedDB(name);

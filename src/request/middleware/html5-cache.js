@@ -1,5 +1,5 @@
-const { CacheMiddleware } = require('kinvey-request');
-const { Storage } = require('./storage');
+import { CacheMiddleware } from './cache';
+import { Storage } from './storage';
 
 exports.CacheMiddleware = class Html5CacheMiddleware extends CacheMiddleware {
   loadStorage(name) {

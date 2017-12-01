@@ -1,5 +1,5 @@
-const Promise = require('es6-promise');
-const { WebStorage } = require('./webstorage');
+import Promise from 'es6-promise';
+import { WebStorage } from './webstorage';
 
 const MASTER_COLLECTION = '__master__';
 
@@ -78,7 +78,7 @@ class SessionStorage extends WebStorage {
   }
 }
 
-exports.SessionStorageAdapter = {
+export const SessionStorageAdapter = {
   load(name) {
     if (global.sessionStorage) {
       const item = '__testSupport__';

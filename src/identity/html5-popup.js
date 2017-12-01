@@ -1,6 +1,6 @@
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
-exports.Popup = class Popup extends EventEmitter {
+export class Popup extends EventEmitter {
   open(url = '/') {
     const that = this;
     const popupWindow = global.open(url, '_blank', 'toolbar=no,location=no');

@@ -1,5 +1,6 @@
-const Promise = require('es6-promise');
-const { WebStorage } = require('./webstorage');
+
+import Promise from 'es6-promise';
+import { WebStorage } from './webstorage';
 
 const MASTER_COLLECTION = '__master__';
 
@@ -78,7 +79,7 @@ class LocalStorage extends WebStorage {
   }
 }
 
-exports.LocalStorageAdapter = {
+export const LocalStorageAdapter = {
   load(name) {
     if (global.localStorage) {
       const item = '__testSupport__';

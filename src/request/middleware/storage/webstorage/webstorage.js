@@ -1,6 +1,6 @@
 const masterCollectionName = 'master';
 
-exports.WebStorage = class WebStorage {
+export class WebStorage {
   constructor(name = 'kinvey') {
     this.name = name;
   }

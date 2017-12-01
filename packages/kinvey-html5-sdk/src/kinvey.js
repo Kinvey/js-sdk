@@ -1,21 +1,15 @@
-const url = require('url');
-const Promise = require('es6-promise');
-const { client, getAppVersion, setAppVersion, ping } = require('kinvey');
-const { isDefined } = require('kinvey-utils/object');
-const { KinveyError } = require('kinvey-errors');
-const { CacheRequest, RequestMethod } = require('kinvey-request');
-const { User } = require('kinvey-user');
-const { Client } = require('./client');
+import url from 'url';
+import Promise from 'es6-promise';
+import { isDefined } from '../../../src/utils';
+import { KinveyError } from '../../../src/errors';
+import { CacheRequest, RequestMethod } from '../../../src/request';
+import { User } from '../../../src/user';
+import { Client } from './client';
 
 const USERS_NAMESPACE = 'user';
 const ACTIVE_USER_COLLECTION_NAME = 'kinvey_active_user';
 
-exports.client = client;
-exports.getAppVersion = getAppVersion;
-exports.setAppVersion = setAppVersion;
-exports.ping = ping;
-
-function init(config) {
+export function init(config) {
   if (!isDefined(config.appKey)) {
     throw new KinveyError('No App Key was provided.'
       + ' Unable to create a new Client without an App Key.');
@@ -28,9 +22,8 @@ function init(config) {
 
   return Client.init(config);
 }
-exports.init = init;
 
-function initialize(config) {
+export function initialize(config) {
   try {
     const client = init(config);
     const activeUser = User.getActiveUser(client);
@@ -72,4 +65,3 @@ function initialize(config) {
     return Promise.reject(e);
   }
 }
-exports.initialize = initialize;
