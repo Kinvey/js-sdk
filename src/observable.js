@@ -1,9 +1,9 @@
-const Promise = require('es6-promise');
-const { Observable } = require('rxjs/Observable');
-const { Subscriber } = require('rxjs/Subscriber');
-const { rxSubscriber } = require('rxjs/symbol/rxSubscriber');
-const isFunction = require('lodash/isFunction');
-const { isDefined } = require('kinvey-utils/object');
+import Promise from 'es6-promise';
+import { Observable } from 'rxjs/Observable';
+import { Subscriber } from 'rxjs/Subscriber';
+import { rxSubscriber } from 'rxjs/symbol/rxSubscriber';
+import isFunction from 'lodash/isFunction';
+import { isDefined } from './utils';
 
 /**
  * @private
@@ -231,7 +231,7 @@ function toSubscriber(observerOrNext, error, complete, status, presence) {
 /**
  * @private
  */
-exports.KinveyObservable = class KinveyObservable extends Observable {
+export class KinveyObservable extends Observable {
   subscribe(observerOrNext, error, complete, status, presence) {
     const { operator } = this;
     const sink = toSubscriber(observerOrNext, error, complete, status, presence);
