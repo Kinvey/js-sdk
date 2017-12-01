@@ -1,12 +1,12 @@
-const isString = require('lodash/isString');
-const url = require('url');
-const { CacheRequest, RequestMethod } = require('kinvey-request');
-const { KinveyError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { Client } = require('kinvey-client');
-const { NetworkStore } = require('./networkstore');
-const { CacheStore } = require('./cachestore');
-const { SyncStore } = require('./syncstore');
+import isString from 'lodash/isString';
+
+import { KinveyError } from 'kinvey-errors';
+import { isDefined } from 'kinvey-utils';
+import NetworkStore from './networkstore';
+import CacheStore from './cachestore';
+import SyncStore from './syncstore';
+// import { processorFactory } from '../processors';
+// import { repositoryProvider } from '../repositories';
 
 /**
  * @typedef   {Object}    DataStoreType
@@ -20,12 +20,12 @@ const DataStoreType = {
   Sync: 'Sync'
 };
 Object.freeze(DataStoreType);
-exports.DataStoreType = DataStoreType;
+export { DataStoreType };
 
 /**
  * The DataStore class is used to find, create, update, remove, count and group entities.
  */
-exports.DataStore = class DataStore {
+export default class DataStore {
   constructor() {
     throw new KinveyError('Not allowed to construct a DataStore instance.'
       + ' Please use the collection() function to get an instance of a DataStore instance.');
@@ -34,9 +34,9 @@ exports.DataStore = class DataStore {
   /**
    * Returns an instance of the Store class based on the type provided.
    *
-   * @param  {string}       [collection]                  Name of the collection.
-   * @param  {StoreType}    [type=DataStoreType.Network]  Type of store to return.
-   * @return {DataStore}                                  DataStore instance.
+   * @param  {string}           [collection]                  Name of the collection.
+   * @param  {DataStoreType}    [type=DataStoreType.Cache]    Type of store to return.
+   * @return {DataStore}                                      DataStore instance.
    */
   static collection(collection, type = DataStoreType.Cache, options) {
     let store;
@@ -46,16 +46,21 @@ exports.DataStore = class DataStore {
     }
 
     switch (type) {
-      case DataStoreType.Network:
-        store = new NetworkStore(collection, options);
+      case DataStoreType.Network: {
+        const processor = processorFactory.getNetworkProcessor();
+        store = new NetworkStore(collection, options, processor);
         break;
-      case DataStoreType.Sync:
-        store = new SyncStore(collection, options);
+      }
+      case DataStoreType.Sync: {
+        const processor = processorFactory.getOfflineProcessor();
+        store = new SyncStore(collection, options, processor);
         break;
+      }
       case DataStoreType.Cache:
-      default:
-        store = new CacheStore(collection, options);
-
+      default: {
+        const operator = processorFactory.getCacheOfflineDataProcessor();
+        store = new CacheStore(collection, options, operator);
+      }
     }
 
     return store;
@@ -75,19 +80,7 @@ exports.DataStore = class DataStore {
    * @return {Promise<Object>} The result of clearing the cache.
    */
   static clearCache(options = {}) {
-    const client = options.client || Client.sharedInstance();
-    const pathname = `/appdata/${client.appKey}`;
-    const request = new CacheRequest({
-      method: RequestMethod.DELETE,
-      url: url.format({
-        protocol: client.apiProtocol,
-        host: client.apiHost,
-        pathname: pathname
-      }),
-      properties: options.properties,
-      timeout: options.timeout
-    });
-    return request.execute()
-      .then(response => response.data);
+    const repo = repositoryProvider.getOfflineRepository();
+    return repo.clear();
   }
 }

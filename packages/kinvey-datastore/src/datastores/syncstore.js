@@ -1,21 +1,15 @@
 import url from 'url';
 
+import { CacheRequest, RequestMethod } from 'kinvey-request';
+import { KinveyError } from 'kinvey-errors';
+import Query from 'kinvey-query';
+import Aggregation from 'kinvey-aggregation';
+import { KinveyObservable, isDefined } from 'kinvey-utils';
 import CacheStore from './cachestore';
-import { OperationType } from '../operations';
-import { processorFactory } from '../processors';
-import { wrapInObservable } from '../utils';
 
-// import { CacheRequest, RequestMethod } from 'src/request';
-const { CacheRequest, RequestMethod } = require('kinvey-request');
-// import { KinveyError } from 'src/errors';
-const { KinveyError } = require('kinvey-errors');
-// import Query from 'src/query';
-const { Query } = require('kinvey-query');
-// import Aggregation from 'src/aggregation';
-const { Aggregation } = require('kinvey-aggregation');
-// import { KinveyObservable, isDefined } from 'src/utils';
-const { isDefined } = require('kinvey-utils/object');
-const { KinveyObservable } = require('kinvey-observable');
+import { OperationType } from '../operations';
+import { wrapInObservable } from '../utils';
+import { processorFactory } from '../processors';
 
 // TODO: refactor all datastores
 

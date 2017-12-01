@@ -11,6 +11,10 @@
     "packages/*"
   ],
   "dependencies": {
-    "lerna": "^2.5.1"
+    "lerna": "^2.5.1",
+    "eslint": "4.12.1",
+    "babel-eslint": "8.0.2",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-plugin-import": "2.8.0"
   }
 }
