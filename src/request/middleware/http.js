@@ -1,8 +1,8 @@
-const Promise = require('es6-promise');
-const { KinveyError } = require('kinvey-errors');
-const { Middleware } = require('./middleware');
+import Promise from 'es6-promise';
+import { KinveyError } from '../../errors';
+import { Middleware } from './middleware';
 
-exports.HttpMiddleware = class HttpMiddleware extends Middleware {
+export class HttpMiddleware extends Middleware {
   constructor(name = 'Http Middleware') {
     super(name);
   }

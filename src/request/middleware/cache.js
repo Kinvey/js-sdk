@@ -1,9 +1,9 @@
-const isEmpty = require('lodash/isEmpty');
-const { isDefined } = require('kinvey-utils/object');
-const { Middleware } = require('./middleware');
-const { Storage } = require('./storage');
+import isEmpty from 'lodash/isEmpty';
+import { isDefined } from '../../utils';
+import { Middleware } from './middleware';
+import { Storage } from './storage';
 
-exports.CacheMiddleware = class CacheMiddleware extends Middleware {
+export class CacheMiddleware extends Middleware {
   constructor(name = 'Cache Middleware') {
     super(name);
   }

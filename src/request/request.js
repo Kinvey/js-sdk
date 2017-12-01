@@ -1,17 +1,15 @@
-const Promise = require('es6-promise');
-const qs = require('qs');
-const assign = require('lodash/assign');
-const isString = require('lodash/isString');
-const isNumber = require('lodash/isNumber');
-const { Client } = require('kinvey-client');
-const { KinveyError, NoResponseError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { appendQuery } = require('kinvey-utils/url');
-const { randomString } = require('kinvey-utils/string');
-const { Response } = require('./response');
-const { Headers } = require('./headers');
+import Promise from 'es6-promise';
+import qs from 'qs';
+import assign from 'lodash/assign';
+import isString from 'lodash/isString';
+import isNumber from 'lodash/isNumber';
+import { Client } from '../client';
+import { KinveyError, NoResponseError } from '../errors';
+import { isDefined, appendQuery, randomString } from '../utils';
+import { Response } from './response';
+import { Headers } from './headers';
 
-const RequestMethod = {
+export const RequestMethod = {
   GET: 'GET',
   POST: 'POST',
   PATCH: 'PATCH',
@@ -19,9 +17,8 @@ const RequestMethod = {
   DELETE: 'DELETE'
 };
 Object.freeze(RequestMethod);
-exports.RequestMethod = RequestMethod;
 
-exports.Request = class Request {
+export class Request {
   constructor(options = {}) {
     options = assign({
       followRedirect: true

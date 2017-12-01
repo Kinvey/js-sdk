@@ -1,13 +1,13 @@
-const Promise = require('es6-promise');
-const MemoryCache = require('fast-memory-cache');
-const keyBy = require('lodash/keyBy');
-const forEach = require('lodash/forEach');
-const values = require('lodash/values');
-const find = require('lodash/find');
-const isString = require('lodash/isString');
-const isArray = require('lodash/isArray');
-const { isDefined } = require('kinvey-utils/object');
-const { NotFoundError } = require('kinvey-errors');
+import Promise from 'es6-promise';
+import MemoryCache from 'fast-memory-cache';
+import keyBy from 'lodash/keyBy';
+import forEach from 'lodash/forEach';
+import values from 'lodash/values';
+import find from 'lodash/find';
+import isString from 'lodash/isString';
+import isArray from 'lodash/isArray';
+import { isDefined } from '../../utils';
+import { NotFoundError } from '../../errors';
 
 const caches = {};
 
@@ -110,7 +110,7 @@ class Memory {
   }
 }
 
-exports.MemoryAdapter = {
+export const MemoryAdapter {
   load(name) {
     return new Memory(name);
   }

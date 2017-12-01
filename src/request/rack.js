@@ -1,18 +1,12 @@
-const Promise = require('es6-promise');
-const reduce = require('lodash/reduce');
-const isFunction = require('lodash/isFunction');
-const values = require('lodash/values');
-const { isDefined } = require('kinvey-utils/object');
-const { Log } = require('kinvey-log');
-const {
-  Middleware,
-  CacheMiddleware,
-  HttpMiddleware,
-  ParseMiddleware,
-  SerializeMiddleware
-} = require('./middleware');
+import Promise from 'es6-promise';
+import reduce from 'lodash/reduce';
+import isFunction from 'lodash/isFunction';
+import values from 'lodash/values';
+import { isDefined } from '../utils';
+import { Log } from '../log';
+import { Middleware. CacheMiddleware, HttpMiddleware, ParseMiddleware, SerializeMiddleware } from './middleware';
 
-class Rack extends Middleware {
+export class Rack extends Middleware {
   constructor(name = 'Rack') {
     super(name);
     this.middlewares = [];
@@ -89,7 +83,6 @@ class Rack extends Middleware {
     return root;
   }
 }
-exports.Rack = Rack;
 
 class CacheRack extends Rack {
   constructor(name = 'Cache Rack') {

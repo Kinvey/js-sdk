@@ -1,17 +1,15 @@
-const Promsie = require('es6-promise');
-const isString = require('lodash/isString');
-const isArray = require('lodash/isArray');
-const { isDefined } = require('kinvey-utils/object');
-const { Queue } = require('kinvey-promise-queue');
-const { Log } = require('kinvey-log');
-const { KinveyError, NotFoundError } = require('kinvey-errors');
-const { MemoryAdapter } = require('./memory');
+import Promsie from 'es6-promise';
+import isString from 'lodash/isString';
+import isArray from 'lodash/isArray';
+import { isDefined } from '../../../utils';
+import { Queue } from './promise-queue';
+import { Log } from '../../../log';
+import { KinveyError, NotFoundError } from '../../../errors';
+import { MemoryAdapter } from './memory';
 
 const queue = new Queue(1, Infinity);
 
-exports.MemoryAdapter = MemoryAdapter;
-
-exports.Storage = class Storage {
+export class Storage {
   constructor(name) {
     if (!name) {
       throw new KinveyError('Unable to create a Storage instance without a name.');
@@ -149,3 +147,5 @@ exports.Storage = class Storage {
     });
   }
 }
+
+export { MemoryAdapter };
