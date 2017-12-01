@@ -108,7 +108,7 @@ class CacheRack extends Rack {
       });
   }
 }
-exports.CacheRack = new CacheRack();
+const cacheRack = new CacheRack();
 
 class NetworkRack extends Rack {
   constructor(name = 'Network Rack') {
@@ -138,4 +138,10 @@ class NetworkRack extends Rack {
       });
   }
 }
-exports.NetworkRack = new NetworkRack();
+const networkRack = new NetworkRack();
+
+
+export {
+  cacheRack as CacheRack,
+  networkRack as NetworkRack
+};

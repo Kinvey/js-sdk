@@ -5,7 +5,7 @@ import urljoin from 'url-join';
 import { AuthType, RequestMethod, KinveyRequest } from '../request';
 import { KinveyError, MobileIdentityConnectError } from '../errors';
 import { isDefined } from '../utils';
-import { CorePopup } from './popup';
+import { Popup as CorePopup } from './popup';
 import { Identity } from './identity';
 import { SocialIdentity } from './enums';
 
