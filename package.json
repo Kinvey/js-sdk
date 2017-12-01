@@ -3,13 +3,8 @@
   "license": "Apache-2.0",
   "author": "Kinvey, Inc.",
   "scripts": {
-    "build": "lerna run build --parallel",
-    "publish": "lerna publish --skip-npm --preid=beta",
-    "test": "lerna run test --parallel"
+    "test": "mocha --require babel-register src/**/*.spec.js"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "dependencies": {
     "es6-promise": "~4.1.1",
     "lodash": "~4.17.4",
@@ -17,8 +12,8 @@
     "rxjs": "~5.5.2"
   },
   "devDependencies": {
+    "babel-register": "~6.26.0",
     "expect": "~1.20.2",
-    "lerna": "^2.5.1",
     "mocha": "~4.0.1"
   }
 }
