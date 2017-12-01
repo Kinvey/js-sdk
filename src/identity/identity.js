@@ -1,7 +1,7 @@
-const { Client } = require('kinvey-client');
-const { KinveyError } = require('kinvey-errors');
+import { Client } from '../client';
+import { KinveyError } from '../errors';
 
-exports.Identity = class Identity {
+export class Identity {
   constructor(options = {}) {
     this.client = options.client || Client.sharedInstance();
   }

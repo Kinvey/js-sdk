@@ -1,13 +1,13 @@
-const Promise = require('es6-promise');
-const isString = require('lodash/isString');
-const url = require('url');
-const urljoin = require('url-join');
-const { AuthType, RequestMethod, KinveyRequest } = require('kinvey-request');
-const { KinveyError, MobileIdentityConnectError } = require('kinvey-errors');
-const { isDefined } = require('kinvey-utils/object');
-const { CorePopup } = require('./popup');
-const { Identity } = require('./identity');
-const { SocialIdentity } = require('./enums');
+import Promise from 'es6-promise';
+import isString from 'lodash/isString';
+import url from 'url';
+import urljoin from 'url-join';
+import { AuthType, RequestMethod, KinveyRequest } from '../request';
+import { KinveyError, MobileIdentityConnectError } from '../errors';
+import { isDefined } from '../utils';
+import { CorePopup } from './popup';
+import { Identity } from './identity';
+import { SocialIdentity } from './enums';
 
 let Popup = CorePopup;
 
@@ -16,14 +16,13 @@ let Popup = CorePopup;
  * @property  {string}    AuthorizationCodeLoginPage   AuthorizationCodeLoginPage grant
  * @property  {string}    AuthorizationCodeAPI         AuthorizationCodeAPI grant
  */
-const AuthorizationGrant = {
+export const AuthorizationGrant = {
   AuthorizationCodeLoginPage: 'AuthorizationCodeLoginPage',
   AuthorizationCodeAPI: 'AuthorizationCodeAPI'
 };
 Object.freeze(AuthorizationGrant);
-exports.AuthorizationGrant = AuthorizationGrant;
 
-exports.MobileIdentityConnect = class MobileIdentityConnect extends Identity {
+export class MobileIdentityConnect extends Identity {
   get identity() {
     return SocialIdentity.MobileIdentityConnect;
   }

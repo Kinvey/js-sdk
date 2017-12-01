@@ -1,7 +1,7 @@
-const { EventEmitter } = require('events');
-const { PopupError } = require('kinvey-errors');
+import { EventEmitter } from 'events';
+import { PopupError } from '../errors';
 
-exports.Popup = class Popup extends EventEmitter {
+export class Popup extends EventEmitter {
   open() {
     throw new PopupError('Unable to open a popup on this platform.');
   }

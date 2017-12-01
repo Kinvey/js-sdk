@@ -1,22 +1,22 @@
-const { MobileIdentityConnect, AuthorizationGrant } = require('../src');
-const { InsufficientCredentialsError, MobileIdentityConnectError } = require('kinvey-errors');
-const { Client } = require('kinvey-client');
-const { randomString } = require('kinvey-utils/string');
-const { NetworkRack } = require('kinvey-request');
-const { User } = require('kinvey-user');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
-const assign = require('lodash/assign');
-const expect = require('expect');
-const nock = require('nock');
-const url = require('url');
+import assign from 'lodash/assign';
+import expect from 'expect';
+import nock from 'nock';
+import url from 'url';
+import { MobileIdentityConnect, AuthorizationGrant } from './mic';
+import { InsufficientCredentialsError, MobileIdentityConnectError } from '../errors';
+import { Client } from '../client';
+import { randomString } from '../utils';
+import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { User } from '../user';
+import { init } from '../kinvey';
+
 const redirectUri = 'http://localhost:3000';
 
 describe('MobileIdentityConnect', () => {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {
