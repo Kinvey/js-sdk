@@ -5,7 +5,8 @@ import { User } from './user';
 import { Query } from '../query';
 import { KinveyError } from '../errors';
 import { randomString } from '../utils';
-import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { NetworkRack } from '../request';
+import { NodeHttpMiddleware } from '../../node/http';
 import { init } from '../kinvey';
 
 describe('UserStore', () => {

@@ -3,7 +3,8 @@ import nock from 'nock';
 import { init, ping } from './kinvey';
 import { randomString } from './utils';
 import { Client } from './client';
-import { NetworkRack, NodeHttpMiddleware } from './request';
+import { NetworkRack } from './request';
+import { NodeHttpMiddleware } from '../node/http';
 
 const appdataNamespace = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 

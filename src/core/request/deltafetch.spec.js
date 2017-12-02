@@ -10,7 +10,7 @@ import { randomString } from '../utils';
 import { Query } from '../query';
 import { init } from '../kinvey';
 import { User } from '../user';
-import { NodeHttpMiddleware } from './middleware';
+import { NodeHttpMiddleware } from '../../node/http';
 
 const collection = 'books';
 

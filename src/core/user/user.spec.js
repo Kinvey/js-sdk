@@ -10,7 +10,8 @@ import { ActiveUserError, InvalidCredentialsError, KinveyError } from '../errors
 import { CacheStore, SyncStore } from '../datastore';
 import { Client } from '../client';
 import { Query } from '../query';
-import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { NetworkRack } from '../request';
+import { NodeHttpMiddleware } from '../../node/http';
 import { init } from '../kinvey';
 import { getLiveService } from '../live';
 

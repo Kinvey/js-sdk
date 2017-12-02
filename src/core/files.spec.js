@@ -7,7 +7,8 @@ import { Files } from './files';
 import { KinveyError, NotFoundError, ServerError } from './errors';
 import { randomString } from './utils';
 import { Query } from './query';
-import { NetworkRack, NodeHttpMiddleware } from './request';
+import { NetworkRack } from './request';
+import { NodeHttpMiddleware } from '../node/http';
 import { User } from './user';
 import { init } from './kinvey';
 

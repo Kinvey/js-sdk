@@ -112,6 +112,6 @@ class Memory {
 
 export const MemoryAdapter = {
   load(name) {
-    return new Memory(name);
+    return Promise.resolve(new Memory(name));
   }
 };

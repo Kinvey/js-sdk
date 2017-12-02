@@ -8,7 +8,8 @@ import { Query } from '../query';
 import { Aggregation } from '../aggregation';
 import { KinveyError, NotFoundError, ServerError } from '../errors';
 import { randomString } from '../utils';
-import { NetworkRack, NodeHttpMiddleware } from '../request';
+import { NetworkRack } from '../request';
+import { NodeHttpMiddleware } from '../../node/http';
 import { User } from '../user';
 
 const collection = 'Books';
