@@ -1,6 +1,6 @@
 import Promise from 'es6-promise';
-import { KinveyError } from '../../../errors';
-import { isDefined } from '../../../utils';
+import { KinveyError } from '../../core/errors';
+import { isDefined } from '../../core/utils';
 
 const masterCollectionName = 'sqlite_master';
 const size = 2 * 1024 * 1024; // Database size in bytes

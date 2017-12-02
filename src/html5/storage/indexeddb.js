@@ -1,6 +1,6 @@
 import Promise from 'es6-promise';
-import { KinveyError, NotFoundError } from '../../../errors';
-import { isDefined } from '../../../utils';
+import { KinveyError, NotFoundError } from '../../core/errors';
+import { isDefined } from '../../core/utils';
 
 let dbCache = {};
 let isSupported;

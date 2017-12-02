@@ -1,7 +1,8 @@
 import httpRequest from 'request';
-import { Middleware } from './middleware';
-import { isDefined } from '../../utils';
-import { NetworkConnectionError, TimeoutError } from '../../errors';
+import Promise from 'es6-promise';
+import { Middleware } from '../core/request';
+import { isDefined } from '../core/utils';
+import { NetworkConnectionError, TimeoutError } from '../core/errors';
 
 function deviceInformation(pkg) {
   const platform = process.title;

@@ -1,10 +1,10 @@
 import url from 'url';
 import Promise from 'es6-promise';
-import { isDefined } from '../../../src/utils';
-import { KinveyError } from '../../../src/errors';
-import { CacheRequest, RequestMethod } from '../../../src/request';
-import { User } from '../../../src/user';
-import { Client } from './client';
+import { isDefined } from '../core/utils';
+import { KinveyError } from '../core/errors';
+import { CacheRequest, RequestMethod } from '../core/request';
+import { User } from '../core/user';
+import { Html5Client } from './client';
 
 const USERS_NAMESPACE = 'user';
 const ACTIVE_USER_COLLECTION_NAME = 'kinvey_active_user';
@@ -20,7 +20,7 @@ export function init(config) {
       + ' Unable to create a new Client without an App Secret.');
   }
 
-  return Client.init(config);
+  return Html5Client.init(config);
 }
 
 export function initialize(config) {

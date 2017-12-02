@@ -1,14 +1,16 @@
-import { NetworkRack } from '../../src/request';
-import { Html5HttpMiddleware } from '../../src/request/middleware/html5-http';
-import { MobileIdentityConnect } from '../../src/identity';
-import { Popup } from '../../src/identity/html5-popup';
+import { NetworkRack, CacheRack } from '../../src/core/request';
+import { Html5HttpMiddleware } from '../../src/html5/http';
+import { Html5CacheMiddleware } from '../../src/html5/cache';
+import { MobileIdentityConnect } from '../../src/core/identity';
+import { Popup } from '../../src/html5/popup';
 import pkg from './package.json';
 
 // Setup racks
-NetworkRack.useHttpMiddleware(new HttpMiddleware(pkg));
+CacheRack.useCacheMiddleware(new Html5CacheMiddleware());
+NetworkRack.useHttpMiddleware(new Html5HttpMiddleware(pkg));
 
 // Setup popup
 MobileIdentityConnect.usePopupClass(Popup);
 
-export * from '../../src';
-export * from './src';
+export * from '../../src/core';
+export * from '../../src/html5';
