@@ -1,17 +1,18 @@
-const { EventEmitter } = require('events');
-const { CacheRequest, RequestMethod } = require('kinvey-request');
-const { NotFoundError } = require('kinvey-errors');
-const { randomString } = require('kinvey-utils/string');
-const { User } = require('kinvey-user');
-const { NetworkRack } = require('kinvey-request');
-const { init } = require('kinvey');
-const { HttpMiddleware } = require('./http');
-const isFunction = require('lodash/isFunction');
-const os = require('os');
-const url = require('url');
-const nock = require('nock');
-const expect = require('expect');
-const { PushNotification } = require('../src');
+import { EventEmitter } from 'events';
+import isFunction from 'lodash/isFunction';
+import os from 'os';
+import url from 'url';
+import nock from 'nock';
+import expect from 'expect';
+import { CacheRequest, RequestMethod } from '../core/request';
+import { NotFoundError } from '../core/errors';
+import { randomString } from '../core/utils';
+import { User } from '../core/user';
+import { NetworkRack } from '../core/request';
+import { init } from '../core/kinvey';
+import { NodeHttpMiddleware } from '../node/http';
+import { PushNotification } from './push';
+
 const APP_DATA_NAMESPACE = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 const PUSH_NAMESPACE = process.env.KINVEY_PUSH_NAMESPACE || 'push';
 
@@ -45,7 +46,7 @@ describe('Push', function() {
   let client;
 
   before(() => {
-    NetworkRack.useHttpMiddleware(new HttpMiddleware());
+    NetworkRack.useHttpMiddleware(new NodeHttpMiddleware({}));
   });
 
   before(() => {

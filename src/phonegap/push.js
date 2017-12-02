@@ -1,11 +1,11 @@
-const Promise = require('es6-promise');
-const { EventEmitter } = require('events');
-const url = require('url');
-const { AuthType, RequestMethod, KinveyRequest, CacheRequest } = require('kinvey-request');
-const { KinveyError, NotFoundError } = require('kinvey-errors');
-const { User } = require('kinvey-user');
-const { Client } = require('kinvey-client');
-const { Device } = require('kinvey-phonegap-device');
+import Promise from 'es6-promise';
+import { EventEmitter } from 'events';
+import url from 'url';
+import { AuthType, RequestMethod, KinveyRequest, CacheRequest } from '../core/request';
+import { KinveyError, NotFoundError } from '../core/errors';
+import { User } from '../core/user';
+import { Client } from '../core/client';
+import { Device } from './device';
 
 const APP_DATA_NAMESPACE = process.env.KINVEY_DATASTORE_NAMESPACE || 'appdata';
 const PUSH_NAMESPACE = process.env.KINVEY_PUSH_NAMESPACE || 'push';
@@ -13,7 +13,7 @@ const NOTIFICATION_EVENT = process.env.KINVEY_NOTIFICATION_EVENT || 'notificatio
 const DEVICE_COLLECTION = '__device';
 let phonegapPush;
 
-class PushNotification extends EventEmitter {
+export class PushNotification extends EventEmitter {
   get pathname() {
     return `/${PUSH_NAMESPACE}/${this.client.appKey}`;
   }
@@ -264,6 +264,4 @@ class PushNotification extends EventEmitter {
   }
 }
 
-// Export
-exports.PushNotification = PushNotification;
-exports.Push = new PushNotification();
+export const Push = new PushNotification();

@@ -1,7 +1,7 @@
-const { Popup } = require('kinvey-html5-popup');
-const { Device } = require('kinvey-phonegap-device');
+import { Popup } from '../html5/popup';
+import { Device } from './device';
 
-class PhoneGapPopup extends Popup {
+export class PhoneGapPopup extends Popup {
   open(url = '/') {
     const that = this;
 
@@ -97,4 +97,3 @@ class PhoneGapPopup extends Popup {
     return popup.open(url);
   }
 }
-exports.Popup = PhoneGapPopup;

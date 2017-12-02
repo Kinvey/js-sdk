@@ -1,8 +1,8 @@
-const Promise = require('es6-promise');
+import Promise from 'es6-promise';
 
 let deviceReady;
 
-const Device = {
+export const Device = {
   isPhoneGap() {
     if (typeof global.document !== 'undefined') {
       return global.document.URL.indexOf('http://') === -1 && global.document.URL.indexOf('https://') === -1;
@@ -38,7 +38,6 @@ const Device = {
     return deviceReady;
   }
 };
-exports.Device = Device;
 
 // Check that cordova plugins are installed
 if (Device.isPhoneGap()) {
