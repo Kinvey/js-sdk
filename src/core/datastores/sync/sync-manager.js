@@ -1,6 +1,6 @@
 import clone from 'lodash/clone';
 
-import { KinveyError, NotFoundError, SyncError } from 'kinvey-errors';
+import { KinveyError, NotFoundError, SyncError } from '../../errors';
 
 import {
   SyncOps,

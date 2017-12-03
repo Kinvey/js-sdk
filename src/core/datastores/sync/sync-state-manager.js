@@ -1,6 +1,6 @@
 import clone from 'lodash/clone';
 
-import Query from 'kinvey-query';
+import Query from '../../query';
 
 import { repositoryProvider } from '../repositories';
 import { syncCollectionName, SyncOps, buildSyncItem } from './utils';

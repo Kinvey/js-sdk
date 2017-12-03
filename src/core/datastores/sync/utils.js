@@ -1,4 +1,4 @@
-import { RequestMethod } from 'kinvey-request';
+import { RequestMethod } from '../../request';
 import { generateEntityId } from '../utils';
 
 export function groupBy(array, propOrPredicate) {
