@@ -4,8 +4,7 @@ import isString from 'lodash/isString';
 import url from 'url';
 import { AuthType, RequestMethod, KinveyRequest } from '../request';
 import { KinveyError } from '../errors';
-import { KinveyObservable } from '../observable';
-import { isDefined } from '../utils';
+import { isDefined, KinveyObservable } from '../utils';
 import { Query } from '../query';
 import { NetworkStore } from '../datastore';
 

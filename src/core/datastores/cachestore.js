@@ -3,23 +3,23 @@ import assign from 'lodash/assign';
 import isArray from 'lodash/isArray';
 import url from 'url';
 
-import { CacheRequest, RequestMethod } from 'kinvey-request';
-import { KinveyError } from 'kinvey-errors';
-import Query from 'kinvey-query';
-import Aggregation from 'kinvey-aggregation';
-import { KinveyObservable, isDefined, isNonemptyString } from 'kinvey-utils';
+import { CacheRequest, RequestMethod } from '../request';
+import { KinveyError } from '../errors';
+import Query from '../query';
+import Aggregation from '../aggregation';
+import { KinveyObservable, isDefined, isNonemptyString } from '../utils';
 import NetworkStore from './networkstore';
 
-import { OperationType } from '../operations';
-import { processorFactory } from '../processors';
-import { syncManagerProvider } from '../sync';
-import { wrapInObservable } from '../utils';
+import { OperationType } from './operations';
+import { processorFactory } from './processors';
+import { syncManagerProvider } from './sync';
+import { wrapInObservable } from './utils';
 
 /**
  * The CacheStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-export default class CacheStore extends NetworkStore {
+export class CacheStore extends NetworkStore {
   constructor(collection, options = {}, processor) {
     const proc = processor || processorFactory.getCacheOfflineDataProcessor();
     super(collection, options, proc);

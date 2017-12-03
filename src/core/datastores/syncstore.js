@@ -1,15 +1,15 @@
 import url from 'url';
 
-import { CacheRequest, RequestMethod } from 'kinvey-request';
-import { KinveyError } from 'kinvey-errors';
-import Query from 'kinvey-query';
-import Aggregation from 'kinvey-aggregation';
-import { KinveyObservable, isDefined } from 'kinvey-utils';
+import { CacheRequest, RequestMethod } from '../request';
+import { KinveyError } from '../errors';
+import Query from '../query';
+import Aggregation from '../aggregation';
+import { KinveyObservable, isDefined } from '../utils';
 import CacheStore from './cachestore';
 
-import { OperationType } from '../operations';
-import { wrapInObservable } from '../utils';
-import { processorFactory } from '../processors';
+import { OperationType } from './operations';
+import { wrapInObservable } from './utils';
+import { processorFactory } from './processors';
 
 // TODO: refactor all datastores
 
@@ -17,7 +17,7 @@ import { processorFactory } from '../processors';
  * The SyncStore class is used to find, create, update, remove, count and group entities. Entities are stored
  * in a cache and synced with the backend.
  */
-export default class SyncStore extends CacheStore {
+export class SyncStore extends CacheStore {
   constructor(collection, options = {}, processor) {
     const proc = processor || processorFactory.getOfflineProcessor();
     super(collection, options, proc);

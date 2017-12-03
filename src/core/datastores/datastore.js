@@ -1,7 +1,7 @@
 import isString from 'lodash/isString';
 
-import { KinveyError } from 'kinvey-errors';
-import { isDefined } from 'kinvey-utils';
+import { KinveyError } from '../errors';
+import { isDefined } from '../utils';
 import NetworkStore from './networkstore';
 import CacheStore from './cachestore';
 import SyncStore from './syncstore';
@@ -14,18 +14,17 @@ import SyncStore from './syncstore';
  * @property  {string}    Network         Network datastore type
  * @property  {string}    Sync            Sync datastore type
  */
-const DataStoreType = {
+export const DataStoreType = {
   Cache: 'Cache',
   Network: 'Network',
   Sync: 'Sync'
 };
 Object.freeze(DataStoreType);
-export { DataStoreType };
 
 /**
  * The DataStore class is used to find, create, update, remove, count and group entities.
  */
-export default class DataStore {
+export class DataStore {
   constructor() {
     throw new KinveyError('Not allowed to construct a DataStore instance.'
       + ' Please use the collection() function to get an instance of a DataStore instance.');
