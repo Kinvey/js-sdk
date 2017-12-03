@@ -2,7 +2,7 @@ import { request as HttpRequest } from 'tns-core-modules/http';
 import { device } from 'tns-core-modules/platform';
 import { Middleware } from '../core/request';
 
-function deviceInformation(pkg: any) {
+function deviceInformation(pkg = <any>{}) {
   const platform = device.os;
   const version = device.osVersion;
   const manufacturer = device.manufacturer;

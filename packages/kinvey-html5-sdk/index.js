@@ -12,5 +12,62 @@ NetworkRack.useHttpMiddleware(new Html5HttpMiddleware(pkg));
 // Setup popup
 MobileIdentityConnect.usePopupClass(Popup);
 
-export * from '../../src/core';
-export * from '../../src/html5';
+export {
+  client,
+  getAppVersion,
+  setAppVersion,
+  ping,
+  Acl,
+  Aggregation,
+  AuthorizationGrant,
+  CustomEndpoint,
+  DataStore,
+  DataStoreType, SyncOperation,
+  LiveService,
+  Files,
+  Log,
+  Metadata,
+  Query,
+  User,
+
+  ActiveUserError,
+  APIVersionNotAvailableError,
+  APIVersionNotImplementedError,
+  AppProblemError,
+  BadRequestError,
+  BLError,
+  CORSDisabledError,
+  DuplicateEndUsersError,
+  FeatureUnavailableError,
+  IncompleteRequestBodyError,
+  IndirectCollectionAccessDisallowedError,
+  InsufficientCredentialsError,
+  InvalidCredentialsError,
+  InvalidIdentifierError,
+  InvalidQuerySyntaxError,
+  JSONParseError,
+  KinveyError,
+  KinveyInternalErrorRetry,
+  KinveyInternalErrorStop,
+  MissingQueryError,
+  MissingRequestHeaderError,
+  MissingRequestParameterError,
+  MobileIdentityConnectError,
+  NoActiveUserError,
+  NetworkConnectionError,
+  NoResponseError,
+  NotFoundError,
+  ParameterValueOutOfRangeError,
+  PopupError,
+  QueryError,
+  ServerError,
+  StaleRequestError,
+  SyncError,
+  TimeoutError,
+  UserAlreadyExistsError,
+  WritesToCollectionDisallowedError
+} from '../../src/core';
+export {
+  init,
+  initialize
+} from '../../src/html5';
