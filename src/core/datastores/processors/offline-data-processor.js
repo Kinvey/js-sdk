@@ -1,4 +1,4 @@
-import { isDefined } from 'kinvey-utils';
+import { isDefined } from '../../utils';
 
 import { OperationType } from '../operations';
 import { repositoryProvider } from '../repositories';

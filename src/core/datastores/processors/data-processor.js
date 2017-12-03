@@ -1,4 +1,4 @@
-import { KinveyError } from 'kinvey-errors';
+import { KinveyError } from '../../errors';
 
 import { OperationType } from '../operations';
 import { ensureArray } from '../utils';

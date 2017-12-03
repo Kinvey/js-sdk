@@ -1,5 +1,5 @@
-import Query from 'kinvey-query';
-import { KinveyError, NotFoundError } from 'kinvey-errors';
+import Query from '../../query';
+import { KinveyError, NotFoundError } from '../../errors';
 
 import { OfflineDataProcessor } from './offline-data-processor';
 import { wrapInObservable, isLocalEntity, isNotEmpty, ensureArray } from '../utils';
