@@ -1,8 +1,8 @@
 import { Promise } from 'es6-promise';
-import { isDefined } from 'kinvey-utils/object';
-import { KinveyError } from 'kinvey-errors';
+import { isDefined } from '../../core/utils';
+import { KinveyError } from '../../core/errors';
 import { PushCommon } from './common';
-import { PushConfig, AndroidPushConfig } from './';
+import { PushConfig, IOSPushConfig } from './';
 // tslint:disable-next-line:variable-name
 let PushPlugin;
 
@@ -12,9 +12,9 @@ try {
   // Just catch the error
 }
 
-class AndroidPush extends PushCommon {
+class IOSPush extends PushCommon {
   protected _registerWithPushPlugin(options = <PushConfig>{}): Promise<string> {
-    const config = options.android || <AndroidPushConfig>{};
+    const config = options.ios || <IOSPushConfig>{};
 
     return new Promise((resolve, reject) => {
       if (isDefined(PushPlugin) === false) {
@@ -23,10 +23,22 @@ class AndroidPush extends PushCommon {
           + ' setting up your project.'));
       }
 
-      PushPlugin.register(config, resolve, reject);
-      PushPlugin.onMessageReceived((data: any) => {
+      config.notificationCallbackIOS = (data: any) => {
         (this as any).emit('notification', data);
-      });
+      };
+
+      PushPlugin.register(config, (token) => {
+        if (isDefined(config.interactiveSettings)) {
+          PushPlugin.registerUserNotificationSettings(() => {
+            resolve(token);
+          }, (error) => {
+            // do something with error
+            resolve(token);
+          });
+        } else {
+          resolve(token);
+        }
+      }, reject);
     });
   }
 
@@ -44,5 +56,5 @@ class AndroidPush extends PushCommon {
 }
 
 // tslint:disable-next-line:variable-name
-const Push = new AndroidPush();
+const Push = new IOSPush();
 export { Push };

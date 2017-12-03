@@ -52,7 +52,7 @@ module.exports = (env) => {
     plugins: plugins,
     devtool: 'source-map'
   };
-  config.entry[`kinvey-nativescript-sdk.${platform}.min`] = './src/index.ts';
+  config.entry[`kinvey-nativescript-sdk.${platform}`] = './index.ts';
   return config;
 };
 
@@ -86,6 +86,16 @@ function getRules() {
       ]
     },
     {
+      test: /\.js$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          sourceMaps: true
+        }
+      }
+    },
+    {
       test: /\.json$/,
       loaders: [
         'json-loader'
@@ -98,7 +108,6 @@ function getPlugins(platform, env) {
   let plugins = [
     // Copy assets to out dir. Add your own globs as needed.
     new CopyWebpackPlugin([
-      { from: '.travis.yml' },
       {
         from: 'package.json',
         transform: (content) => {
@@ -109,10 +118,11 @@ function getPlugins(platform, env) {
           return new Buffer(JSON.stringify(pkg, null, 2));
         }
       },
+      { from: '.travis.yml' },
+      { from: path.join(__dirname, '../../src/kinvey.d.ts') },
+      { from: 'platforms/**/*' },
       { from: 'LICENSE' },
       { from: 'README.md' },
-      { from: 'src/kinvey.d.ts' },
-      { from: 'platforms/**/*' },
     ])
   ];
 

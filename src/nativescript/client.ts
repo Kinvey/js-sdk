@@ -1,7 +1,7 @@
-import { Client as CoreClient } from 'kinvey-client';
-import { KinveyError } from 'kinvey-errors';
-import { isDefined } from 'kinvey-utils/object';
-import { Log } from 'kinvey-log';
+import { Client as CoreClient } from '../core/client';
+import { KinveyError } from '../core/errors';
+import { isDefined } from '../core/utils';
+import { Log } from '../core/log';
 import { SecureStorage } from './secure';
 const storage = new SecureStorage();
 

@@ -1,6 +1,6 @@
 import { File } from 'tns-core-modules/file-system';
-import { KinveyResponse } from 'kinvey-request';
-import { KinveyError } from 'kinvey-errors';
+import { KinveyResponse } from '../../core/request';
+import { KinveyError } from '../../core/errors';
 import { CommonFileStore, FileMetadata, FileUploadRequestOptions } from './common';
 
 export class FileStore extends CommonFileStore {

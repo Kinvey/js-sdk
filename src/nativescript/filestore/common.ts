@@ -1,7 +1,7 @@
 import { File } from 'tns-core-modules/file-system';
-import { KinveyResponse } from 'kinvey-request';
-import { KinveyError } from 'kinvey-errors';
-import { FileStore as CoreFileStore } from 'kinvey-filestore';
+import { KinveyResponse } from '../../core/request';
+import { KinveyError } from '../../core/errors';
+import { FileStore as CoreFileStore } from '../../core/files';
 import { KinveyWorker } from './worker';
 
 export interface FileMetadata {

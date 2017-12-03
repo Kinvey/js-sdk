@@ -1,9 +1,8 @@
 import { Promise } from 'es6-promise';
 import * as url from 'url';
-import { isDefined } from 'kinvey-utils/object';
-import { KinveyError } from 'kinvey-errors';
-import { CacheRequest, RequestMethod } from 'kinvey-request';
-import { client, getAppVersion, setAppVersion, ping } from 'kinvey';
+import { isDefined } from '../core/utils';
+import { KinveyError } from '../core/errors';
+import { CacheRequest, RequestMethod } from '../core/request';
 import { Client } from './client';
 
 const USERS_NAMESPACE = 'user';
@@ -27,10 +26,3 @@ export function initialize(config) {
   const client = init(config);
   return Promise.resolve(client.getActiveUser());
 }
-
-export {
-  client,
-  getAppVersion,
-  setAppVersion,
-  ping
-};

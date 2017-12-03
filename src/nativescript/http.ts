@@ -1,6 +1,6 @@
 import { request as HttpRequest } from 'tns-core-modules/http';
 import { device } from 'tns-core-modules/platform';
-import { Middleware } from 'kinvey-request';
+import { Middleware } from '../core/request';
 
 function deviceInformation(pkg: any) {
   const platform = device.os;
