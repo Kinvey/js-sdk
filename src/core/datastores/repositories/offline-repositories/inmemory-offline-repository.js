@@ -1,5 +1,5 @@
 import keyBy from 'lodash/keyBy';
-import { NotFoundError } from 'kinvey-errors';
+import { NotFoundError } from '../../../errors';
 
 import { OfflineRepository } from '../offline-repository';
 import {

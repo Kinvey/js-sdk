@@ -1,4 +1,4 @@
-import { KinveyRequest, RequestMethod, DeltaFetchRequest } from 'kinvey-request';
+import { KinveyRequest, RequestMethod, DeltaFetchRequest } from '../../request';
 
 import { Repository } from './repository';
 import { buildCollectionUrl, ensureArray } from '../utils';
