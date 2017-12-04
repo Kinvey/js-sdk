@@ -1,9 +1,8 @@
 {
   "plugins": [
-    "inline-dotenv"
+    "transform-class-properties"
   ],
   "presets": [
-    "es2015",
-    "stage-2"
+    "env"
   ]
 }
