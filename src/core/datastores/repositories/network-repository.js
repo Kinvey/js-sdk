@@ -17,8 +17,8 @@ import { buildCollectionUrl, ensureArray } from '../utils';
  */
 
 export class NetworkRepository extends Repository {
-  read(collection, query, options) {
-    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, options = {});
+  read(collection, query, options = {}) {
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, options);
     return this._makeHttpRequest(requestConfig, options.useDeltaFetch);
   }
 

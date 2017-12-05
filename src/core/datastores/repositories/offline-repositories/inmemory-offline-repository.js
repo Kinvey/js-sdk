@@ -147,6 +147,7 @@ export class InmemoryOfflineRepository extends OfflineRepository {
             }
           });
 
+          // the upsert part
           Object.keys(updateEntitiesById).forEach((entityId) => {
             allEntities.push(updateEntitiesById[entityId]);
           });
@@ -193,11 +194,14 @@ export class InmemoryOfflineRepository extends OfflineRepository {
       return this.delete(collection, query);
     }
 
-    return this._enqueueCrudOperation(collection, () => {
-      if (collection) {
+    if (collection) {
+      return this._enqueueCrudOperation(collection, () => {
         return this._countAndDelete(collection);
-      }
-      return this._clearAllCollections(); // this does not return count. problem?
-    });
+      });
+    }
+
+    // TODO: this does not enqueue, so it might cause problems
+    // currently it's only called from Kinvey.DataStore.clear()
+    return this._clearAllCollections(); // this does not return count. problem?
   }
 }
