@@ -7,7 +7,7 @@ import url from 'url';
 import { Client } from '../client';
 import { AuthType, RequestMethod, KinveyRequest } from '../request';
 import { KinveyError, NotFoundError, ActiveUserError } from '../errors';
-import { DataStore } from '../datastore';
+import { DataStore } from '../datastores';
 import { MobileIdentityConnect } from '../identity';
 import { Log } from '../log';
 import { isDefined } from '../utils';

@@ -6,11 +6,11 @@ import isNumber from 'lodash/isNumber';
 import url from 'url';
 import { NetworkRequest, KinveyRequest, AuthType, RequestMethod, Headers } from './request';
 import { KinveyError } from './errors';
-import { KinveyObservable } from './observable';
+import { KinveyObservable } from './utils';
 import { Log } from './log';
 import { isDefined } from './utils';
 import { Query } from './query';
-import { NetworkStore } from './datastore';
+import { NetworkStore } from './datastores';
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;

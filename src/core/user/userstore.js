@@ -6,7 +6,7 @@ import { AuthType, RequestMethod, KinveyRequest } from '../request';
 import { KinveyError } from '../errors';
 import { isDefined, KinveyObservable } from '../utils';
 import { Query } from '../query';
-import { NetworkStore } from '../datastore';
+import { NetworkStore } from '../datastores';
 
 /**
  * The UserStore class is used to find, save, update, remove, count and group users.

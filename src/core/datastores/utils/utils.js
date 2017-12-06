@@ -1,6 +1,6 @@
-import { KinveyObservable } from 'kinvey-observable';
-import { Metadata } from 'kinvey-metadata';
-import { Client } from 'kinvey-client';
+import { KinveyObservable } from '../../utils';
+import { Metadata } from '../../metadata';
+import { Client } from '../../client';
 
 export function buildCollectionUrl(collectionName, id) {
   let result = `appdata/${Client.sharedInstance().appKey}/${collectionName}`;
