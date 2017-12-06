@@ -1,11 +1,13 @@
-import { KinveyObservable } from '../../utils';
 import { Metadata } from '../../metadata';
 import { Client } from '../../client';
 
-export function buildCollectionUrl(collectionName, id) {
+export function buildCollectionUrl(collectionName, id, restAction) {
   let result = `appdata/${Client.sharedInstance().appKey}/${collectionName}`;
   if (id) {
     result += `/${id}`;
+  }
+  if (restAction) {
+    result += `/${restAction}`;
   }
   return result;
 }
