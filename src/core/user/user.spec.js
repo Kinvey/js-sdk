@@ -7,7 +7,7 @@ import { Metadata } from '../metadata';
 import { User } from './user';
 import { randomString } from '../utils';
 import { ActiveUserError, InvalidCredentialsError, KinveyError } from '../errors';
-import { CacheStore, SyncStore } from '../datastore';
+import { CacheStore, SyncStore } from '../datastores';
 import { Client } from '../client';
 import { Query } from '../query';
 import { NetworkRack } from '../request';

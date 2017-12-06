@@ -5,10 +5,10 @@ import url from 'url';
 
 import { CacheRequest, RequestMethod } from '../request';
 import { KinveyError } from '../errors';
-import Query from '../query';
-import Aggregation from '../aggregation';
+import { Query } from '../query';
+import { Aggregation } from '../aggregation';
 import { KinveyObservable, isDefined, isNonemptyString } from '../utils';
-import NetworkStore from './networkstore';
+import { NetworkStore } from './networkstore';
 
 import { OperationType } from './operations';
 import { processorFactory } from './processors';

@@ -26,7 +26,7 @@ const syncOpToPushOpMap = {
 };
 
 // TODO: this exists in old sync-manager.js
-export const SyncOps = {
+export const SyncOperation = {
   Create: RequestMethod.POST,
   Update: RequestMethod.PUT,
   Delete: RequestMethod.DELETE

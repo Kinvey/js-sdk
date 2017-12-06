@@ -381,7 +381,7 @@ describe.only('CacheStore', () => {
     });
   });
 
-  describe('group()', () => {
+  describe.skip('group()', () => {
     it('should throw an error if the query argument is not an instance of the Query class', (done) => {
       const store = new CacheStore(collection);
       store.group({})

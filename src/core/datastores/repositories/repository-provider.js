@@ -1,4 +1,4 @@
-import Client from '../../client';
+import { Client } from '../../client';
 import { InmemoryOfflineRepository } from './offline-repositories';
 import { NetworkRepository } from './network-repository';
 import { storageType } from './storage-type';
