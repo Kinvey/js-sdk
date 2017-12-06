@@ -28,10 +28,17 @@ describe('MemoryKeyValuePersister', () => {
   });
 
   describe('persistEntities', () => {
-    it('should throw an error if a key is not provided', () => {
+    it('should throw an error if a key is undefined', () => {
       const persister = new MemoryKeyValuePersister();
       const data = [{ _id: 'test' }];
       const promise = persister.persistEntities(undefined, data);
+      return expect(promise).to.be.rejected;
+    });
+
+    it('should throw an error if a key is null', () => {
+      const persister = new MemoryKeyValuePersister();
+      const data = [{ _id: 'test' }];
+      const promise = persister.persistEntities(null, data);
       return expect(promise).to.be.rejected;
     });
 
