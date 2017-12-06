@@ -1,7 +1,8 @@
 import { KinveyRequest, RequestMethod, DeltaFetchRequest } from '../../request';
 
 import { Repository } from './repository';
-import { buildCollectionUrl, ensureArray } from '../utils';
+import { ensureArray } from '../../utils';
+import { buildCollectionUrl } from '../utils';
 
 /**
  * @typedef RequestOptions
@@ -17,13 +18,13 @@ import { buildCollectionUrl, ensureArray } from '../utils';
  */
 
 export class NetworkRepository extends Repository {
-  read(collection, query, options) {
-    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, options = {});
+  read(collection, query, options = {}) {
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, null, options);
     return this._makeHttpRequest(requestConfig, options.useDeltaFetch);
   }
 
   readById(collection, entityId, options) {
-    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, null, entityId, options);
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, null, entityId, null, options);
     return this._makeHttpRequest(requestConfig);
   }
 
@@ -36,17 +37,17 @@ export class NetworkRepository extends Repository {
   }
 
   deleteById(collection, entityId, options) {
-    const requestConfig = this._buildRequestConfig(collection, RequestMethod.DELETE, null, null, entityId, options);
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.DELETE, null, null, entityId, null, options);
     return this._makeHttpRequest(requestConfig);
   }
 
   delete(collection, query, options) {
-    const requestConfig = this._buildRequestConfig(collection, RequestMethod.DELETE, null, query, null, options);
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.DELETE, null, query, null, null, options);
     return this._makeHttpRequest(requestConfig);
   }
 
   count(collection, query, options) {
-    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, '_count', options);
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, '_count', null, options);
     return this._makeHttpRequest(requestConfig);
   }
 
@@ -54,7 +55,7 @@ export class NetworkRepository extends Repository {
     const isSingle = !Array.isArray(entities);
     const requestPromises = ensureArray(entities).map((entity) => {
       const id = method === RequestMethod.PUT ? entity._id : null; // TODO: this isn't great :)
-      const requestConfig = this._buildRequestConfig(collection, method, entity, null, id, options);
+      const requestConfig = this._buildRequestConfig(collection, method, entity, null, id, null, options);
       return this._makeHttpRequest(requestConfig);
     });
     // TODO: different error handling?
@@ -78,11 +79,11 @@ export class NetworkRepository extends Repository {
    * @param {Objet} data
    * @returns {RequestOptions}
    */
-  _buildRequestConfig(collection, method, data, query, idOrRestAction, options) {
+  _buildRequestConfig(collection, method, data, query, id, restAction, options) {
     options = options || {};
     const config = {
       method,
-      pathname: buildCollectionUrl(collection, idOrRestAction),
+      pathname: buildCollectionUrl(collection, id, restAction),
       query: query,
       timeout: options.timeout,
       properties: options.properties,

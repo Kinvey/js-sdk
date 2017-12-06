@@ -2,13 +2,12 @@ import url from 'url';
 
 import { CacheRequest, RequestMethod } from '../request';
 import { KinveyError } from '../errors';
-import Query from '../query';
-import Aggregation from '../aggregation';
-import { KinveyObservable, isDefined } from '../utils';
-import CacheStore from './cachestore';
+import { Query } from '../query';
+import { Aggregation } from '../aggregation';
+import { KinveyObservable, isDefined, wrapInObservable } from '../utils';
+import { CacheStore } from './cachestore';
 
 import { OperationType } from './operations';
-import { wrapInObservable } from './utils';
 import { processorFactory } from './processors';
 
 // TODO: refactor all datastores
@@ -82,7 +81,7 @@ export class SyncStore extends CacheStore {
    * @return  {Observable}                                             Observable.
    */
   findById(id, options = {}) {
-    if (!id || id === '') {
+    if (!id) { // really?
       return wrapInObservable((observer) => {
         observer.next();
         observer.complete();

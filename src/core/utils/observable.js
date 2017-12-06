@@ -4,6 +4,7 @@ import { Subscriber } from 'rxjs/Subscriber';
 import { rxSubscriber } from 'rxjs/symbol/rxSubscriber';
 import isFunction from 'lodash/isFunction';
 import { isDefined } from './object';
+import { isPromiseLike } from './misc';
 
 /**
  * @private
@@ -266,4 +267,30 @@ export class KinveyObservable extends Observable {
   static create(subscriber) {
     return new KinveyObservable(subscriber);
   }
+}
+
+export function wrapInObservable(promiseGeneratorOrPromise, completeAfter = true) {
+  const argIsPromise = isPromiseLike(promiseGeneratorOrPromise);
+
+  const stream = KinveyObservable.create((observer) => {
+    let promise;
+    if (argIsPromise) {
+      promise = promiseGeneratorOrPromise;
+    } else {
+      promise = promiseGeneratorOrPromise(observer);
+    }
+
+    promise
+      .then((result) => {
+        if (argIsPromise) {
+          observer.next(result);
+        }
+        if (completeAfter) {
+          observer.complete();
+        }
+      })
+      .catch(err => observer.error(err));
+  });
+
+  return stream;
 }

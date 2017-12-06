@@ -1,10 +1,12 @@
 import clone from 'lodash/clone';
 
-import Query from '../../query';
+import { Query } from '../../query';
 
+import { SyncOperation } from '../sync';
 import { repositoryProvider } from '../repositories';
-import { syncCollectionName, SyncOps, buildSyncItem } from './utils';
-import { ensureArray, isNotEmpty, isLocalEntity } from '../utils';
+import { syncCollectionName, buildSyncItem } from './utils';
+import { ensureArray } from '../../utils';
+import { isNotEmpty, isLocalEntity } from '../utils';
 
 // imported for typings
 // import { OfflineRepository } from '../repositories';
@@ -79,7 +81,7 @@ export class SyncStateManager {
 
   addCreateEvent(collection, entities) {
     entities = Array.isArray(entities) ? entities : [entities];
-    const syncItems = entities.map(e => buildSyncItem(collection, SyncOps.Create, e._id));
+    const syncItems = entities.map(e => buildSyncItem(collection, SyncOperation.Create, e._id));
     return this._getRepository()
       .then(repo => repo.create(syncCollectionName, syncItems));
   }
@@ -89,12 +91,12 @@ export class SyncStateManager {
       return this.removeSyncItemForEntityId(deletedEntity._id);
     }
 
-    const syncItem = buildSyncItem(collection, SyncOps.Delete, deletedEntity._id);
+    const syncItem = buildSyncItem(collection, SyncOperation.Delete, deletedEntity._id);
     return this._upsertSyncItem(syncItem);
   }
 
   addUpdateEvent(collection, entity) {
-    const syncItem = buildSyncItem(collection, SyncOps.Update, entity._id);
+    const syncItem = buildSyncItem(collection, SyncOperation.Update, entity._id);
     return this._upsertSyncItem(syncItem);
   }
 
@@ -107,7 +109,7 @@ export class SyncStateManager {
       if (isLocalEntity(entity)) {
         localEntityIds.push(entity._id);
       } else {
-        const item = buildSyncItem(collection, SyncOps.Delete, entity._id);
+        const item = buildSyncItem(collection, SyncOperation.Delete, entity._id);
         syncItems.push(item);
         syncItemEntityIds.push(entity._id);
       }

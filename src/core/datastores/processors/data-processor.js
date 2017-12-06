@@ -1,7 +1,7 @@
 import { KinveyError } from '../../errors';
 
 import { OperationType } from '../operations';
-import { ensureArray } from '../utils';
+import { ensureArray } from '../../utils';
 
 // imported for type definition
 // import { Repository } from '../repositories';

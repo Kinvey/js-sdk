@@ -1,9 +1,10 @@
-import Client from '../../client';
+import { Client } from '../../client';
 import { InmemoryOfflineRepository } from './offline-repositories';
 import { NetworkRepository } from './network-repository';
 import { storageType } from './storage-type';
 import { persisterProvider } from '../persisters';
-import { InmemoryCrudQueue, ensureArray } from '../utils';
+import { ensureArray } from '../../utils';
+import { InmemoryCrudQueue } from '../utils';
 
 const defaultConstructorName = 'default';
 const inmemoryRepoBuilder = (queue) => {

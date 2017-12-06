@@ -1,8 +1,9 @@
-import Query from '../../query';
+import { Query } from '../../query';
 import { KinveyError, NotFoundError } from '../../errors';
 
 import { OfflineDataProcessor } from './offline-data-processor';
-import { wrapInObservable, isLocalEntity, isNotEmpty, ensureArray } from '../utils';
+import { ensureArray, wrapInObservable } from '../../utils';
+import { isLocalEntity, isNotEmpty } from '../utils';
 
 // imported for type info
 // import { NetworkRepository } from '../repositories';

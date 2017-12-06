@@ -5,7 +5,7 @@ import { DeltaFetchRequest } from './deltafetch';
 import { RequestMethod } from './request';
 import { NetworkRack } from './rack';
 import { KinveyError } from '../errors';
-import { SyncStore } from '../datastore';
+import { SyncStore } from '../datastores';
 import { randomString } from '../utils';
 import { Query } from '../query';
 import { init } from '../kinvey';

@@ -7,7 +7,7 @@ import { Metadata } from '../metadata';
 import { User } from './user';
 import { randomString } from '../utils';
 import { ActiveUserError, InvalidCredentialsError, KinveyError } from '../errors';
-import { CacheStore, SyncStore } from '../datastore';
+import { CacheStore, SyncStore } from '../datastores';
 import { Client } from '../client';
 import { Query } from '../query';
 import { NetworkRack } from '../request';
@@ -1124,7 +1124,9 @@ describe('User', () => {
     });
 
     it('should throw an error if the query argument is not an instance of the Query class', () => {
-      return User.lookup({}, { discover: true })
+      const test = User.lookup({}, { discover: true });
+      // console.log('>>>>>>>>>>> test', test);
+      return test
         .toPromise()
         .catch((error) => {
           expect(error).toBeA(KinveyError);

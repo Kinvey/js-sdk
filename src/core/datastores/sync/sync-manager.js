@@ -2,11 +2,10 @@ import clone from 'lodash/clone';
 
 import { KinveyError, NotFoundError, SyncError } from '../../errors';
 
-import {
-  SyncOps,
-  syncBatchSize
-} from './utils';
-import { PromiseQueue, isEmpty } from '../utils';
+import { PromiseQueue } from '../../utils';
+import { SyncOperation } from './sync-operation';
+import { syncBatchSize } from './utils';
+import { isEmpty } from '../utils';
 import { repositoryProvider } from '../repositories';
 
 // imported for typings
@@ -129,7 +128,7 @@ export class SyncManager {
       operation: operation
     };
 
-    if (operation !== SyncOps.Delete) {
+    if (operation !== SyncOperation.Delete) {
       result.entity = null;
     }
 
@@ -147,7 +146,7 @@ export class SyncManager {
     if (entity._kmd && entity._kmd.local) {
       entityToCreate = this._sanitizeOfflineEntity(entity);
     }
-    const result = this._getPushOpResult(entity._id, SyncOps.Create);
+    const result = this._getPushOpResult(entity._id, SyncOperation.Create);
     return this._networkRepo.create(collection, entityToCreate)
       .then((createdItem) => {
         result.entity = createdItem;
@@ -160,7 +159,7 @@ export class SyncManager {
   }
 
   _pushDelete(collection, entityId) {
-    const result = this._getPushOpResult(entityId, SyncOps.Delete);
+    const result = this._getPushOpResult(entityId, SyncOperation.Delete);
     return this._networkRepo.deleteById(collection, entityId)
       .then(() => result)
       .catch((err) => {
@@ -170,7 +169,7 @@ export class SyncManager {
   }
 
   _pushUpdate(collection, entity) {
-    const result = this._getPushOpResult(entity._id, SyncOps.Update);
+    const result = this._getPushOpResult(entity._id, SyncOperation.Update);
     return this._networkRepo.update(collection, entity)
       .then((updateResult) => {
         result.entity = updateResult;
@@ -199,18 +198,18 @@ export class SyncManager {
       .then((offlineEntity) => {
         entity = offlineEntity;
 
-        if (!entity && syncOp !== SyncOps.Delete) { // todo: duplication
+        if (!entity && syncOp !== SyncOperation.Delete) { // todo: duplication
           const res = this._getPushOpResult(entityId, syncOp);
           res.error = new KinveyError(`Entity with id ${entityId} not found`);
           return res;
         }
 
         switch (syncOp) {
-          case SyncOps.Create:
+          case SyncOperation.Create:
             return this._pushCreate(collection, entity);
-          case SyncOps.Delete:
+          case SyncOperation.Delete:
             return this._pushDelete(collection, entityId);
-          case SyncOps.Update:
+          case SyncOperation.Update:
             return this._pushUpdate(collection, entity);
           default: {
             const res = this._getPushOpResult(entityId, syncOp);

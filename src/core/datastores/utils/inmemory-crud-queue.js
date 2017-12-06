@@ -1,4 +1,4 @@
-import { PromiseQueue } from './promise-queue';
+import { PromiseQueue } from '../../utils';
 
 export class InmemoryCrudQueue {
   _simultaneousOpsCount;

@@ -19,17 +19,11 @@ export const CrudOps = {
   Delete: 'delete'
 };
 
+// TODO: this exists in... datastore?
 const syncOpToPushOpMap = {
   [RequestMethod.POST]: 'create',
   [RequestMethod.PUT]: 'update',
   [RequestMethod.DELETE]: 'delete'
-};
-
-// TODO: this exists in old sync-manager.js
-export const SyncOps = {
-  Create: RequestMethod.POST,
-  Update: RequestMethod.PUT,
-  Delete: RequestMethod.DELETE
 };
 
 export function syncOpToCrudOp(syncOp) {

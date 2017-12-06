@@ -6,7 +6,7 @@ import {
   applyQueryToDataset,
   collectionsMaster as masterCollectionName
 } from '../utils';
-import { ensureArray } from '../../utils';
+import { ensureArray } from '../../../utils';
 
 // Imported for typings
 // import { KeyValuePersister } from '../../persisters';
@@ -75,7 +75,7 @@ export class InmemoryOfflineRepository extends OfflineRepository {
   }
 
   // ----- protected methods
-  _ensureCollection(collection) {
+  _ensureCollectionExists(collection) {
     return this._readAll(masterCollectionName)
       .then((collectionsForAppKey) => {
         const exists = collectionsForAppKey.indexOf(collection) > -1;
@@ -93,7 +93,7 @@ export class InmemoryOfflineRepository extends OfflineRepository {
 
   create(collection, entitiesToSave) {
     return this._enqueueCrudOperation(collection, () => {
-      return this._ensureCollection(collection)
+      return this._ensureCollectionExists(collection)
         .then(() => this._readAll(collection))
         .then((existingEntities) => {
           existingEntities = existingEntities.concat(entitiesToSave);
@@ -147,6 +147,7 @@ export class InmemoryOfflineRepository extends OfflineRepository {
             }
           });
 
+          // the upsert part
           Object.keys(updateEntitiesById).forEach((entityId) => {
             allEntities.push(updateEntitiesById[entityId]);
           });
@@ -193,11 +194,14 @@ export class InmemoryOfflineRepository extends OfflineRepository {
       return this.delete(collection, query);
     }
 
-    return this._enqueueCrudOperation(collection, () => {
-      if (collection) {
+    if (collection) {
+      return this._enqueueCrudOperation(collection, () => {
         return this._countAndDelete(collection);
-      }
-      return this._clearAllCollections(); // this does not return count. problem?
-    });
+      });
+    }
+
+    // TODO: this does not enqueue, so it might cause problems
+    // currently it's only called from Kinvey.DataStore.clear()
+    return this._clearAllCollections(); // this does not return count. problem?
   }
 }
