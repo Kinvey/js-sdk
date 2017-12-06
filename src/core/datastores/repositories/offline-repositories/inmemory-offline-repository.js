@@ -75,7 +75,7 @@ export class InmemoryOfflineRepository extends OfflineRepository {
   }
 
   // ----- protected methods
-  _ensureCollection(collection) {
+  _ensureCollectionExists(collection) {
     return this._readAll(masterCollectionName)
       .then((collectionsForAppKey) => {
         const exists = collectionsForAppKey.indexOf(collection) > -1;
@@ -93,7 +93,7 @@ export class InmemoryOfflineRepository extends OfflineRepository {
 
   create(collection, entitiesToSave) {
     return this._enqueueCrudOperation(collection, () => {
-      return this._ensureCollection(collection)
+      return this._ensureCollectionExists(collection)
         .then(() => this._readAll(collection))
         .then((existingEntities) => {
           existingEntities = existingEntities.concat(entitiesToSave);

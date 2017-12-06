@@ -82,7 +82,7 @@ export class SyncStore extends CacheStore {
    * @return  {Observable}                                             Observable.
    */
   findById(id, options = {}) {
-    if (!id || id === '') {
+    if (!id) { // really?
       return wrapInObservable((observer) => {
         observer.next();
         observer.complete();
