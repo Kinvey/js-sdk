@@ -11,7 +11,7 @@ import { Aggregation } from '../aggregation';
 import { getLiveCollectionManager } from '../live';
 
 import { Operation, OperationType } from './operations';
-import { wrapInObservable } from './utils';
+import { wrapInObservable } from '../utils';
 import { processorFactory } from './processors';
 
 /**

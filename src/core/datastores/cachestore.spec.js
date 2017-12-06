@@ -14,7 +14,7 @@ import { User } from '../user';
 
 const collection = 'Books';
 
-describe.only('CacheStore', () => {
+describe('CacheStore', () => {
   let client;
 
   before(() => {

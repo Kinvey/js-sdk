@@ -3,7 +3,8 @@ import { isDefined } from '../../utils';
 import { OperationType } from '../operations';
 import { repositoryProvider } from '../repositories';
 import { DataProcessor } from './data-processor';
-import { generateEntityId, ensureArray } from '../utils';
+import { ensureArray } from '../../utils';
+import { generateEntityId } from '../utils';
 
 // imported for typings
 // import { SyncManager } from '../sync';

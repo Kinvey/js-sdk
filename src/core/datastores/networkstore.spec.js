@@ -14,7 +14,7 @@ import { init } from '../kinvey';
 
 const collection = 'Books';
 
-describe.only('NetworkStore', () => {
+describe('NetworkStore', () => {
   let client;
 
   before(() => {

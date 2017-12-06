@@ -267,3 +267,17 @@ export class KinveyObservable extends Observable {
     return new KinveyObservable(subscriber);
   }
 }
+
+export function wrapInObservable(promiseGenerator, completeAfter = true) {
+  const stream = KinveyObservable.create((observer) => {
+    promiseGenerator(observer)
+      .then(() => {
+        if (completeAfter) {
+          observer.complete();
+        }
+      })
+      .catch(err => observer.error(err));
+  });
+
+  return stream;
+}

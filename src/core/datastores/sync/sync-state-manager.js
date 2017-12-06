@@ -2,9 +2,11 @@ import clone from 'lodash/clone';
 
 import { Query } from '../../query';
 
+import { SyncOperation } from '../sync';
 import { repositoryProvider } from '../repositories';
-import { syncCollectionName, SyncOperation, buildSyncItem } from './utils';
-import { ensureArray, isNotEmpty, isLocalEntity } from '../utils';
+import { syncCollectionName, buildSyncItem } from './utils';
+import { ensureArray } from '../../utils';
+import { isNotEmpty, isLocalEntity } from '../utils';
 
 // imported for typings
 // import { OfflineRepository } from '../repositories';

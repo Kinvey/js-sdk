@@ -13,7 +13,7 @@ import { init } from '../kinvey';
 
 const collection = 'Books';
 
-describe.only('SyncStore', () => {
+describe('SyncStore', () => {
   let client;
 
   before(() => {

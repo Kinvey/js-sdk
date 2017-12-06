@@ -8,7 +8,7 @@ import { KinveyObservable, isDefined } from '../utils';
 import { CacheStore } from './cachestore';
 
 import { OperationType } from './operations';
-import { wrapInObservable } from './utils';
+import { wrapInObservable } from '../utils';
 import { processorFactory } from './processors';
 
 // TODO: refactor all datastores

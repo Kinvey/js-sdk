@@ -5,4 +5,5 @@ export * from './networkstore';
 export * from './operations';
 export * from './persisters';
 export * from './processors';
+export * from './repositories';
 export * from './sync';

@@ -1,24 +1,15 @@
 import Promise from 'es6-promise';
+import { noop, wrapInPromise } from './misc';
 
-const noop = function() {};
-
-function resolveWith(value) {
-  if (value && typeof value.then === 'function') {
-    return value;
-  }
-
-  return Promise.resolve(value);
-}
-
-export class Queue {
-  constructor(maxPendingPromises, maxQueuedPromises) {
+export class PromiseQueue {
+  constructor(maxPendingPromises = 1, maxQueuedPromises = Infinity) {
     this.pendingPromises = 0;
-    this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
-    this.maxQueuedPromises = typeof maxQueuedPromises !== 'undefined' ? maxQueuedPromises : Infinity;
+    this.maxPendingPromises = maxPendingPromises;
+    this.maxQueuedPromises = maxQueuedPromises;
     this.queue = [];
   }
 
-  add(promiseGenerator) {
+  enqueue(promiseGenerator) {
     return new Promise((resolve, reject, notify) => {
       if (this.queue.length >= this.maxQueuedPromises) {
         reject(new Error('Queue limit reached'));
@@ -57,7 +48,7 @@ export class Queue {
 
     try {
       this.pendingPromises += 1;
-      resolveWith(item.promiseGenerator())
+      wrapInPromise(item.promiseGenerator())
         // Forward all stuff
         .then((value) => {
           // It is not pending now

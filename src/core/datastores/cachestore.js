@@ -13,7 +13,7 @@ import { NetworkStore } from './networkstore';
 import { OperationType } from './operations';
 import { processorFactory } from './processors';
 import { syncManagerProvider } from './sync';
-import { wrapInObservable } from './utils';
+import { wrapInObservable } from '../utils';
 
 /**
  * The CacheStore class is used to find, create, update, remove, count and group entities. Entities are stored

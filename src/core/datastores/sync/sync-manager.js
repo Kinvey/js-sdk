@@ -2,11 +2,10 @@ import clone from 'lodash/clone';
 
 import { KinveyError, NotFoundError, SyncError } from '../../errors';
 
-import {
-  SyncOperation,
-  syncBatchSize
-} from './utils';
-import { PromiseQueue, isEmpty } from '../utils';
+import { PromiseQueue } from '../../utils';
+import { SyncOperation } from './sync-operation';
+import { syncBatchSize } from './utils';
+import { isEmpty } from '../utils';
 import { repositoryProvider } from '../repositories';
 
 // imported for typings

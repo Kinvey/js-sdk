@@ -6,7 +6,7 @@ import {
   applyQueryToDataset,
   collectionsMaster as masterCollectionName
 } from '../utils';
-import { ensureArray } from '../../utils';
+import { ensureArray } from '../../../utils';
 
 // Imported for typings
 // import { KeyValuePersister } from '../../persisters';

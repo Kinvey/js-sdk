@@ -2,9 +2,9 @@ import isString from 'lodash/isString';
 
 import { KinveyError } from '../errors';
 import { isDefined } from '../utils';
-import NetworkStore from './networkstore';
-import CacheStore from './cachestore';
-import SyncStore from './syncstore';
+import { NetworkStore } from './networkstore';
+import { CacheStore } from './cachestore';
+import { SyncStore } from './syncstore';
 import { processorFactory } from './processors';
 import { repositoryProvider } from './repositories';
 

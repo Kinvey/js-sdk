@@ -1,7 +1,8 @@
 import { KinveyRequest, RequestMethod, DeltaFetchRequest } from '../../request';
 
 import { Repository } from './repository';
-import { buildCollectionUrl, ensureArray } from '../utils';
+import { ensureArray } from '../../utils';
+import { buildCollectionUrl } from '../utils';
 
 /**
  * @typedef RequestOptions
