@@ -7,13 +7,12 @@ import { CacheRequest, RequestMethod } from '../request';
 import { KinveyError } from '../errors';
 import { Query } from '../query';
 import { Aggregation } from '../aggregation';
-import { KinveyObservable, isDefined, isNonemptyString } from '../utils';
+import { KinveyObservable, isDefined, isNonemptyString, wrapInObservable } from '../utils';
 import { NetworkStore } from './networkstore';
 
 import { OperationType } from './operations';
 import { processorFactory } from './processors';
 import { syncManagerProvider } from './sync';
-import { wrapInObservable } from '../utils';
 
 /**
  * The CacheStore class is used to find, create, update, remove, count and group entities. Entities are stored

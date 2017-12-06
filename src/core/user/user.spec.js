@@ -1124,7 +1124,9 @@ describe('User', () => {
     });
 
     it('should throw an error if the query argument is not an instance of the Query class', () => {
-      return User.lookup({}, { discover: true })
+      const test = User.lookup({}, { discover: true });
+      // console.log('>>>>>>>>>>> test', test);
+      return test
         .toPromise()
         .catch((error) => {
           expect(error).toBeA(KinveyError);

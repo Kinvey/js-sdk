@@ -6,12 +6,11 @@ import { KinveyRequest, AuthType, RequestMethod } from '../request';
 import { KinveyError } from '../errors';
 import { Query } from '../query';
 import { Client } from '../client';
-import { KinveyObservable, isDefined } from '../utils';
+import { KinveyObservable, isDefined, wrapInObservable } from '../utils';
 import { Aggregation } from '../aggregation';
 import { getLiveCollectionManager } from '../live';
 
 import { Operation, OperationType } from './operations';
-import { wrapInObservable } from '../utils';
 import { processorFactory } from './processors';
 
 /**

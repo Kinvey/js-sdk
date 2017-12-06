@@ -1,7 +1,11 @@
 export function noop() { }
 
+export function isPromiseLike(obj) {
+  return obj && (typeof obj.then === 'function') && (typeof obj.catch === 'function');
+}
+
 export function wrapInPromise(value) {
-  if (value && typeof value.then === 'function') {
+  if (isPromiseLike(value)) {
     return value;
   }
 
