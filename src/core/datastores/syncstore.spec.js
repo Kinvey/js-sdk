@@ -13,7 +13,7 @@ import { init } from '../kinvey';
 
 const collection = 'Books';
 
-describe('SyncStore', () => {
+describe.only('SyncStore', () => {
   let client;
 
   before(() => {
@@ -299,7 +299,8 @@ describe('SyncStore', () => {
                 done(error);
               }
             });
-        });
+        })
+        .catch(done);
     });
   });
 

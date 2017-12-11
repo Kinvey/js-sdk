@@ -1,8 +1,7 @@
 import Promise from 'es6-promise';
 import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
-import { isDefined } from '../../../utils';
-import { Queue } from './promise-queue';
+import { isDefined, Queue } from '../../../utils';
 import { Log } from '../../../log';
 import { KinveyError, NotFoundError } from '../../../errors';
 import { MemoryAdapter } from './memory';

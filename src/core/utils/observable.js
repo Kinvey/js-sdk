@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subscriber } from 'rxjs/Subscriber';
 import { rxSubscriber } from 'rxjs/symbol/rxSubscriber';
 import isFunction from 'lodash/isFunction';
-import { isDefined } from './utils';
+import { isDefined } from './object';
 
 /**
  * @private

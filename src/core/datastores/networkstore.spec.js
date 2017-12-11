@@ -14,7 +14,7 @@ import { init } from '../kinvey';
 
 const collection = 'Books';
 
-describe('NetworkStore', () => {
+describe.only('NetworkStore', () => {
   let client;
 
   before(() => {
@@ -96,7 +96,7 @@ describe('NetworkStore', () => {
     });
 
     it('should find the entities that match the query', () => {
-      const store = new NetworkStore();
+      const store = new NetworkStore('comecollection'); // TODO: how was this missing?
       const entity1 = { _id: randomString() };
       const query = new Query();
       query.equalTo('_id', entity1._id);
@@ -467,41 +467,41 @@ describe('NetworkStore', () => {
     });
   });
 
-  // describe('when working with live service', () => {
-  //   const path = '../src/datastore/networkstore';
-  //   const managerMock = {
-  //     subscribeCollection: () => { },
-  //     unsubscribeCollection: () => { }
-  //   };
-  //   const requireMocks = {
-  //     '../../live': { getLiveCollectionManager: () => managerMock }
-  //   };
+  describe('when working with live service', () => {
+    const path = '../src/datastore/networkstore';
+    const managerMock = {
+      subscribeCollection: () => { },
+      unsubscribeCollection: () => { }
+    };
+    const requireMocks = {
+      '../../live': { getLiveCollectionManager: () => managerMock }
+    };
 
-  //   /** @type {NetworkStore} */
-  //   let proxiedStore;
+    /** @type {NetworkStore} */
+    let proxiedStore;
 
-  //   beforeEach(() => {
-  //     const ProxiedNetworkStore = mockRequiresIn(__dirname, path, requireMocks, 'default');
-  //     proxiedStore = new ProxiedNetworkStore(collection);
-  //   });
+    beforeEach(() => {
+      const ProxiedNetworkStore = mockRequiresIn(__dirname, path, requireMocks, 'default');
+      proxiedStore = new ProxiedNetworkStore(collection);
+    });
 
-  //   afterEach(() => expect.restoreSpies());
+    afterEach(() => expect.restoreSpies());
 
-  //   describe('subscribe()', () => {
-  //     it('should call subscribeCollection() method of LiveCollectionManager class', () => {
-  //       const spy = expect.spyOn(managerMock, 'subscribeCollection');
-  //       const handler = { onMessage: () => { } };
-  //       proxiedStore.subscribe(handler);
-  //       expect(spy).toHaveBeenCalledWith(collection, handler);
-  //     });
-  //   });
+    describe('subscribe()', () => {
+      it('should call subscribeCollection() method of LiveCollectionManager class', () => {
+        const spy = expect.spyOn(managerMock, 'subscribeCollection');
+        const handler = { onMessage: () => { } };
+        proxiedStore.subscribe(handler);
+        expect(spy).toHaveBeenCalledWith(collection, handler);
+      });
+    });
 
-  //   describe('unsubscribe()', () => {
-  //     it('should call unsubscribeCollection() method of LiveCollectionManager class', () => {
-  //       const spy = expect.spyOn(managerMock, 'unsubscribeCollection');
-  //       proxiedStore.unsubscribe();
-  //       expect(spy).toHaveBeenCalledWith(collection);
-  //     });
-  //   });
-  // });
+    describe('unsubscribe()', () => {
+      it('should call unsubscribeCollection() method of LiveCollectionManager class', () => {
+        const spy = expect.spyOn(managerMock, 'unsubscribeCollection');
+        proxiedStore.unsubscribe();
+        expect(spy).toHaveBeenCalledWith(collection);
+      });
+    });
+  });
 });
