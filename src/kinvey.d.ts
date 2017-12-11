@@ -598,7 +598,7 @@ export namespace LiveService {
 
       static isValidACLObject: (obj: any) => boolean;
 
-      constructor(obj: StreamACL | PlainStreamACLObject);
+      constructor(obj?: StreamACL | PlainStreamACLObject);
 
       addPublishers(publishers: User | User[] | string | string[]): this;
       addSubscribers(publishers: User | User[] | string | string[]): this;
@@ -621,10 +621,8 @@ export namespace LiveService {
     name: string;
 
     constructor(name: string);
-
-    getSubstreams(): Promise<{
-      _id: string
-    }>;
+                      
+    getSubstreams(): Promise<{ _id: string }[]>;
     getACL(userId: string): Promise<PlainStreamACLObject>;
     setACL(userId: string, acl: PlainStreamACLObject | Stream.StreamACL): Promise<PlainStreamACLObject>;
 
@@ -799,18 +797,12 @@ declare class NetworkStore<T extends Entity = Entity> {
   find(query?: Query, options?: RequestOptions): Observable<T[]>;
   findById(id: string, options?: RequestOptions): Observable<T>;
   group(aggregation: Aggregation, options?: RequestOptions): Observable<{}>;
-  count(query?: Query, options?: RequestOptions): Observable<{
-    count: number
-  }>;
-  create(entities: {}, options?: RequestOptions): Promise<T>;
-  update(entities: {}, options?: RequestOptions): Promise<T>;
-  save(entity: {}, options?: RequestOptions): Promise<T>;
-  remove(query?: Query, options?: RequestOptions): Promise<{
-    count: number
-  }>;
-  removeById(id: string, options?: RequestOptions): Promise<{
-    count: number
-  }>;
+  count(query?: Query, options?: RequestOptions): Observable<{ count: number }>;
+  create(entity: T, options?: RequestOptions): Promise<T>;
+  update(entity: T, options?: RequestOptions): Promise<T>;
+  save(entity: T, options?: RequestOptions): Promise<T>;
+  remove(query?: Query, options?: RequestOptions): Promise<{ count: number }>;
+  removeById(id: string, options?: RequestOptions): Promise<{ count: number }>;
 
   subscribe(receiver: LiveService.MessageReceiver): Promise<void>;
   unsubscribe(): Promise<void>;
@@ -934,10 +926,8 @@ export enum AuthorizationGrant {
 
 // User class
 export class User {
-  constructor(data?: {}, options?: {
-    client?: Client
-  })
-  data: {};
+  constructor(data?: {}, options?: { client?: Client })
+  data: any;
   _id: string | undefined;
   _acl: Acl;
   metadata: Metadata;
