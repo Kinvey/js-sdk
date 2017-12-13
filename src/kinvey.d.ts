@@ -31,7 +31,6 @@ export namespace Kinvey {
   interface ClientConfig {
     apiHostname ? : string;
     micHostname ? : string;
-    liveServiceHostname ? : string;
     appKey: string;
     appSecret ? : string;
     masterSecret ? : string;
@@ -550,7 +549,6 @@ interface RequestOptions {
 interface ClientConfig {
   apiHostname?: string;
   micHostname?: string;
-  liveServiceHostname?: string;
   appKey: string;
   appSecret?: string;
   masterSecret?: string;
@@ -621,7 +619,7 @@ export namespace LiveService {
     name: string;
 
     constructor(name: string);
-                      
+
     getSubstreams(): Promise<{ _id: string }[]>;
     getACL(userId: string): Promise<PlainStreamACLObject>;
     setACL(userId: string, acl: PlainStreamACLObject | Stream.StreamACL): Promise<PlainStreamACLObject>;
