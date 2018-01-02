@@ -4,7 +4,7 @@
   "author": "Kinvey, Inc.",
   "scripts": {
     "build": "lerna run build --parallel",
-    "test": "mocha --require babel-polyfill --require babel-register src/**/*.spec.js"
+    "test": "mocha --require babel-polyfill --require babel-register \"src/**/*.spec.js\""
   },
   "dependencies": {
     "es6-promise": "~4.1.1",
