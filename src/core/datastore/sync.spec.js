@@ -62,7 +62,7 @@ describe('Sync', () => {
     return manager.clearSync(collection);
   });
 
-  describe.skip('count()', () => {
+  describe('counting sync items', () => {
     const entity1 = { _id: randomString() };
     const entity2 = { _id: randomString() };
 
@@ -77,28 +77,28 @@ describe('Sync', () => {
     });
 
     it('should return the count for all entities that need to be synced', () => {
-      const sync = new SyncManager(collection);
-      return sync.count()
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.getSyncItemCount(collection)
         .then((count) => {
           expect(count).toEqual(2);
         });
     });
 
     it('should return the count for all entities that match the query that need to be synced', () => {
-      const sync = new SyncManager(collection);
+      const manager = syncManagerProvider.getSyncManager();
       const query = new Query().equalTo('_id', entity1._id);
-      return sync.count(query)
+      return manager.getSyncItemCountByEntityQuery(collection, query)
         .then((count) => {
           expect(count).toEqual(1);
         });
     });
   });
 
-  describe.skip('addCreateOperation()', () => {
+  describe('addCreateEvent()', () => {
     it('should throw an error when an entity does not contain and _id', () => {
       const collection = randomString();
-      const sync = new SyncManager(collection);
-      return sync.addCreateOperation(collection, { prop: randomString() })
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addCreateEvent(collection, { prop: randomString() })
         .then(() => {
           throw new Error('This test should fail.');
         })
@@ -109,8 +109,8 @@ describe('Sync', () => {
 
     it('should accept a single entity', () => {
       const entity = { _id: randomString() };
-      const sync = new SyncManager(collection);
-      return sync.addCreateOperation(entity)
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addCreateEvent(collection, entity)
         .then((syncEntity) => {
           expect(syncEntity).toEqual(entity);
         });
@@ -118,8 +118,8 @@ describe('Sync', () => {
 
     it('should accept an array of entities', () => {
       const entities = [{ _id: randomString() }];
-      const sync = new SyncManager(collection);
-      return sync.addCreateOperation(entities)
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addCreateEvent(collection, entities)
         .then((syncEntities) => {
           expect(syncEntities).toEqual(entities);
         });
@@ -130,8 +130,8 @@ describe('Sync', () => {
       const store = new SyncStore(collection);
       return store.create(entity)
         .then(() => {
-          const sync = new SyncManager(collection);
-          return sync.count();
+          const manager = syncManagerProvider.getSyncManager();
+          return manager.getSyncItemCount(collection);
         })
         .then((count) => {
           expect(count).toEqual(1);
@@ -139,11 +139,11 @@ describe('Sync', () => {
     });
   });
 
-  describe.skip('addUpdateOperation()', () => {
+  describe('addUpdateEvent()', () => {
     it('should throw an error when an entity does not contain and _id', () => {
       const collection = randomString();
-      const sync = new SyncManager(collection);
-      return sync.addUpdateOperation(collection, { prop: randomString() })
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addUpdateEvent(collection, { prop: randomString() })
         .then(() => {
           throw new Error('This test should fail.');
         })
@@ -154,8 +154,8 @@ describe('Sync', () => {
 
     it('should accept a single entity', () => {
       const entity = { _id: randomString() };
-      const sync = new SyncManager(collection);
-      return sync.addUpdateOperation(entity)
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addUpdateEvent(collection, entity)
         .then((syncEntity) => {
           expect(syncEntity).toEqual(entity);
         });
@@ -163,8 +163,8 @@ describe('Sync', () => {
 
     it('should accept an array of entities', () => {
       const entities = [{ _id: randomString() }];
-      const sync = new SyncManager(collection);
-      return sync.addUpdateOperation(entities)
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addUpdateEvent(collection, entities)
         .then((syncEntities) => {
           expect(syncEntities).toEqual(entities);
         });
@@ -175,8 +175,8 @@ describe('Sync', () => {
       const store = new SyncStore(collection);
       return store.update(entity)
         .then(() => {
-          const sync = new SyncManager(collection);
-          return sync.count();
+          const manager = syncManagerProvider.getSyncManager();
+          return manager.getSyncItemCount(collection);
         })
         .then((count) => {
           expect(count).toEqual(1);
@@ -184,11 +184,11 @@ describe('Sync', () => {
     });
   });
 
-  describe.skip('addDeleteOperation', () => {
+  describe('addDeleteEvent', () => {
     it('should throw an error when an entity does not contain and _id', () => {
       const collection = randomString();
-      const sync = new SyncManager(collection);
-      return sync.addDeleteOperation(collection, { prop: randomString() })
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addDeleteEvent(collection, { prop: randomString() })
         .then(() => {
           throw new Error('This test should fail.');
         })
@@ -199,8 +199,8 @@ describe('Sync', () => {
 
     it('should accept a single entity', () => {
       const entity = { _id: randomString() };
-      const sync = new SyncManager(collection);
-      return sync.addUpdateOperation(entity)
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addDeleteEvent(collection, entity)
         .then((syncEntity) => {
           expect(syncEntity).toEqual(entity);
         });
@@ -208,8 +208,8 @@ describe('Sync', () => {
 
     it('should accept an array of entities', () => {
       const entities = [{ _id: randomString() }];
-      const sync = new SyncManager(collection);
-      return sync.addUpdateOperation(entities)
+      const manager = syncManagerProvider.getSyncManager();
+      return manager.addDeleteEvent(collection, entities)
         .then((syncEntities) => {
           expect(syncEntities).toEqual(entities);
         });
@@ -223,8 +223,8 @@ describe('Sync', () => {
           return store.removeById(entity._id);
         })
         .then(() => {
-          const sync = new SyncManager(collection);
-          return sync.count();
+          const manager = syncManagerProvider.getSyncManager();
+          return manager.getSyncItemCount(collection);
         })
         .then((count) => {
           expect(count).toEqual(1);
