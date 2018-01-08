@@ -24,14 +24,6 @@ class ActiveUserStorage {
       throw new KinveyError('The key argument must be a string.');
     }
 
-    if (value !== null && value !== undefined && typeof value === 'object') {
-      value = JSON.stringify(value);
-    }
-
-    if (value !== null && value !== undefined && typeof value !== 'string') {
-      value = String(value);
-    }
-
     if (isDefined(value)) {
       storage.set(key, value);
     } else {
