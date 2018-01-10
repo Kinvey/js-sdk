@@ -25,9 +25,7 @@ export class WebSqlKeyValueStorePersister extends KeyValueStorePersister {
 
   deleteEntity(collection, entityId) {
     return this.openTransaction(collection, 'DELETE FROM #{collection} WHERE key = ?', [entityId], true)
-      .then((response) => {
-        return { count: response.rowCount };
-      });
+      .then((response) => ({ count: response.rowCount }));
   }
 
   // protected methods
@@ -64,12 +62,10 @@ export class WebSqlKeyValueStorePersister extends KeyValueStorePersister {
       .then(() => (singular ? array[0] : array));
   }
 
-  _deletePersistance(key) {
+  _deleteFromPersistance(key) {
     // TODO: this should drop the table, instead of deleting all rows
     return this._openTransaction(key, 'DELETE FROM #{collection}', null, true)
-      .then((response) => {
-        return { count: response.rowCount };
-      });
+      .then((response) => ({ count: response.rowCount }));
   }
 
   // private methods
