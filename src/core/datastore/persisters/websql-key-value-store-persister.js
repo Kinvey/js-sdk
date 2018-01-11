@@ -1,9 +1,9 @@
 import { KinveyError, NotFoundError } from '../../errors';
 
 import { KeyValueStorePersister } from './key-value-store-persister';
-import { webSqlCollectionsMaster, webSqlDatabaseSize } from '../utils';
+import { webSqlCollectionsMaster, webSqlDatabaseSize, isEmpty } from '../utils';
+import { ensureArray } from '../../utils';
 
-// TODO: things can be done in a single transaction
 export class WebSqlKeyValueStorePersister extends KeyValueStorePersister {
   readEntity(collection, entityId) {
     const sql = 'SELECT value FROM #{collection} WHERE key = ?';
@@ -20,8 +20,12 @@ export class WebSqlKeyValueStorePersister extends KeyValueStorePersister {
   }
 
   getKeys() {
-    // TODO: read db tables
-    super.getKeys();
+    const query = 'SELECT name AS value FROM #{collection} WHERE type = ?';
+    return this._openTransaction(webSqlCollectionsMaster, query, ['table'], false)
+      .then((response) => {
+        return response.result
+          .filter(table => (/^[a-zA-Z0-9-]{1,128}/).test(table));
+      });
   }
 
   // protected methods
@@ -47,12 +51,17 @@ export class WebSqlKeyValueStorePersister extends KeyValueStorePersister {
       .then((response) => ({ count: response.rowCount }));
   }
 
-  _writeEntityToPersistance(collection, entity) {
-    return this._upsertEntities(collection, [entity]);
+  _writeEntitiesToPersistance(collection, entities) {
+    return this._upsertEntities(collection, ensureArray(entities));
   }
 
-  _deleteEntityFromPersistance(collection, entityId) {
-    return this._openTransaction(collection, 'DELETE FROM #{collection} WHERE key = ?', [entityId], true)
+  _deleteEntitiesFromPersistance(collection, entityIds) {
+    if (isEmpty(entityIds)) {
+      return Promise.resolve({ count: 0 });
+    }
+    const idsFilter = ensureArray(entityIds).join(', ');
+    const query = `DELETE FROM #{collection} WHERE key = (${idsFilter})`;
+    return this._openTransaction(collection, query, null, true)
       .then((response) => ({ count: response.rowCount }));
   }
 
