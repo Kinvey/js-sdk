@@ -976,9 +976,7 @@ function testFunc() {
               _id: utilities.randomString()
             };
             storeToTest.save(newEntity)
-              .then(() => {
-                return storeToTest.removeById(newEntity._id)
-              })
+              .then(() => storeToTest.removeById(newEntity._id))
               .then((result) => {
                 expect(result.count).to.equal(1);
                 const onNextSpy = sinon.spy();
@@ -997,7 +995,8 @@ function testFunc() {
                       done(error);
                     }
                   });
-              });
+              })
+              .catch(done);
           });
         });
 
