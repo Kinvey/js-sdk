@@ -976,7 +976,8 @@ function testFunc() {
                     }
                     return null;
                   });
-              });
+              })
+              .catch(done);
           });
         });
 
