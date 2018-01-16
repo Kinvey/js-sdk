@@ -778,9 +778,9 @@ export class Query {
             const bField = nested(b, field);
 
             if (isDefined(aField) && isDefined(bField) === false) {
-              return -1;
-            } else if (isDefined(bField) && isDefined(aField) === false) {
               return 1;
+            } else if (isDefined(bField) && isDefined(aField) === false) {
+              return -1;
             } else if (aField !== bField) {
               const modifier = json.sort[field]; // 1 or -1.
               return (aField < bField ? -1 : 1) * modifier;
