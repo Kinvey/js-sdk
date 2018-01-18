@@ -9,8 +9,13 @@ import { MemoryAdapter } from './memory';
 
 const queue = new Queue(1, Infinity);
 
+export const StorageAdapter = {
+  Memory: 'Memory'
+};
+Object.freeze(StorageAdapter);
+
 export class Storage {
-  constructor(name) {
+  constructor(name, storageAdapters = [StorageAdapter.Memory]) {
     if (!name) {
       throw new KinveyError('Unable to create a Storage instance without a name.');
     }
@@ -20,17 +25,37 @@ export class Storage {
     }
 
     this.name = name;
+
+    if (!Array.isArray(storageAdapters)) {
+      storageAdapters = [storageAdapters];
+    }
+    this.storageAdapters = storageAdapters;
+
+    this.adapter;
   }
 
   loadAdapter() {
-    return MemoryAdapter.load(this.name)
-      .then((adapter) => {
-        if (!isDefined(adapter)) {
-          return Promise.reject(new KinveyError('Unable to load a storage adapter.'));
-        }
+    if (this.adapter) {
+      return Promise.resolve(adapter);
+    }
 
-        return adapter;
+    return this.storageAdapters.reduce((promise, storageAdapter) => {
+      return promise.then(() => {
+        switch (storageAdapter) {
+          case StorageAdapter.Memory:
+          default:
+            return MemoryAdapter.load(this.name)
+              .then((adapter) => {
+                if (!adapter) {
+                  return Promise.reject(new KinveyError('Unable to load a storage adapter.'));
+                }
+
+                this.adapter = adapter;
+                return adapter;
+              });
+        }
       });
+    }, Promise.resolve());
   }
 
   generateObjectId(length = 24) {
