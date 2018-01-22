@@ -6,7 +6,18 @@ function testFunc() {
   let cacheStore;
   let storeToTest;
   const notFoundErrorName = 'NotFoundError';
-  const collectionName = externalConfig.collectionName;
+  const collectionName = externalConfig.collectionWithPreSaveHook;
+  const propertyFromBLName = externalConfig.propertyFromBLName || 'propertyFromBL';
+
+  const simulateBLPreSaveHook = (entities) => {
+    const isSingle = !_.isArray(entities);
+    entities = utilities.ensureArray(entities);
+    const clonedEntities = _.cloneDeep(entities);
+    clonedEntities.forEach(e => {
+      e[propertyFromBLName] = true;
+    });
+    return isSingle ? clonedEntities[0] : clonedEntities;
+  };
 
   //validates Push operation result for 1 created, 1 modified and 1 deleted locally items
   const validatePushOperation = (result, createdItem, modifiedItem, deletedItem, expectedServerItemsCount) => {
@@ -17,7 +28,8 @@ function testFunc() {
       if (record.operation !== 'DELETE') {
         utilities.assertEntityMetadata(record.entity);
         utilities.deleteEntityMetadata(record.entity);
-        expect(record.entity).to.deep.equal(record._id === createdItem._id ? createdItem : modifiedItem);
+        const expectedItem = record._id === createdItem._id ? createdItem : modifiedItem;
+        expect(record.entity).to.deep.equal(simulateBLPreSaveHook(expectedItem));
       } else {
         expect(record.entity).to.not.exist;
       }
@@ -39,6 +51,7 @@ function testFunc() {
   //validates Pull operation result
   const validatePullOperation = (result, expectedItems, expectedPulledItemsCount) => {
     expect(result.length).to.equal(expectedPulledItemsCount || expectedItems.length);
+    expectedItems = simulateBLPreSaveHook(expectedItems);
     expectedItems.forEach((entity) => {
       const resultEntity = _.find(result, e => e._id === entity._id);
       expect(utilities.deleteEntityMetadata(resultEntity)).to.deep.equal(entity);
@@ -51,7 +64,7 @@ function testFunc() {
           expect(utilities.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
         })
       });
-  }
+  };
 
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`${currentDataStoreType} Sync Tests`, () => {
@@ -151,7 +164,7 @@ function testFunc() {
             .then((entities) => {
               expect(entities.length).to.equal(2);
               entities.forEach((entity) => {
-                expect(entity.collection).to.equal(externalConfig.collectionName);
+                expect(entity.collection).to.equal(collectionName);
                 expect(entity.state.operation).to.equal('PUT');
                 expect([entity1._id, entity2._id]).to.include(entity.entityId);
               })
@@ -240,6 +253,22 @@ function testFunc() {
               }).catch(done);
           });
 
+          it('should update local entities with result from network', (done) => {
+            storeToTest.push()
+              .then(() => syncStore.find().toPromise())
+              .then((offlineEntities) => {
+                expect(offlineEntities.length).to.equal(3);
+                const ent1 = offlineEntities.find(e => e._id === entity1._id);
+                const ent2 = offlineEntities.find(e => e._id === entity2._id);
+                const modifiedEntities = offlineEntities.filter(e => propertyFromBLName in e);
+                expect(modifiedEntities.length).to.equal(3);
+                expect(ent1[propertyFromBLName]).to.equal(true);
+                expect(ent2[propertyFromBLName]).to.equal(true);
+              })
+              .then(done)
+              .catch(done);
+          });
+
           it('should log an error, finish the push and not clear the sync queue if an item push fails', (done) => {
             networkStore.removeById(entity3._id)
               .then(() => {
@@ -280,7 +309,7 @@ function testFunc() {
           it('should save the entities from the backend in the cache', (done) => {
             storeToTest.pull()
               .then((result) => {
-                return validatePullOperation(result, [entity1, entity2])
+                return validatePullOperation(result, [entity1, entity2]);
               })
               .then(() => done())
               .catch(done);
