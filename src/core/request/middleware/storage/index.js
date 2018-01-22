@@ -30,32 +30,30 @@ export class Storage {
       storageAdapters = [storageAdapters];
     }
     this.storageAdapters = storageAdapters;
-
-    this.adapter;
   }
 
   loadAdapter() {
-    if (this.adapter) {
-      return Promise.resolve(adapter);
-    }
-
     return this.storageAdapters.reduce((promise, storageAdapter) => {
-      return promise.then(() => {
+      return promise.then((adapter) => {
+        if (adapter) {
+          return adapter;
+        }
+
         switch (storageAdapter) {
           case StorageAdapter.Memory:
+            return MemoryAdapter.load(this.name);
           default:
-            return MemoryAdapter.load(this.name)
-              .then((adapter) => {
-                if (!adapter) {
-                  return Promise.reject(new KinveyError('Unable to load a storage adapter.'));
-                }
-
-                this.adapter = adapter;
-                return adapter;
-              });
+            return null;
         }
       });
-    }, Promise.resolve());
+    }, Promise.resolve())
+      .then((adapter) => {
+        if (!adapter) {
+          return Promise.reject(new KinveyError('Unable to load a storage adapter.'));
+        }
+
+        return adapter;
+      });
   }
 
   generateObjectId(length = 24) {

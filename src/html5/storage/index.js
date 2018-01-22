@@ -3,7 +3,7 @@ import { IndexedDBAdapter } from './indexeddb';
 import { WebSQLAdapter } from './websql';
 import { LocalStorageAdapter, SessionStorageAdapter } from './webstorage';
 
-export const StorageAdapter = Object.assign(CoreStorageAdapter, {
+export const StorageAdapter = Object.assign({}, CoreStorageAdapter, {
   IndexedDB: 'IndexedDB',
   LocalStorage: 'LocalStorage',
   SessionStorage: 'SessionStorage',
@@ -12,58 +12,26 @@ export const StorageAdapter = Object.assign(CoreStorageAdapter, {
 Object.freeze(StorageAdapter);
 
 export class Html5Storage extends Storage {
-  constructor(name, storageAdapters = [StorageAdapter.WebSQL, StorageAdapter.IndexedDB, StorageAdapter.LocalStorage, StorageAdapter.SessionStorage]) {
+  constructor(name, storageAdapters = [StorageAdapter.WebSQL, StorageAdapter.IndexedDB, StorageAdapter.LocalStorage, StorageAdapter.SessionStorage, StorageAdapter.Memory]) {
     super(name, storageAdapters);
   }
 
   loadAdapter() {
-    if (this.adapter) {
-      return Promise.resolve(adapter);
-    }
-
     return this.storageAdapters.reduce((promise, storageAdapter) => {
-      return promise.then(() => {
+      return promise.then((adapter) => {
+        if (adapter) {
+          return adapter;
+        }
+
         switch (storageAdapter) {
           case StorageAdapter.IndexedDB:
-            return IndexedDBAdapter.load(this.name)
-              .then((adapter) => {
-                if (!adapter) {
-                  return this.loadAdapter(adaptersCopy);
-                }
-
-                this.adapter = adapter;
-                return adapter;
-              });
+            return IndexedDBAdapter.load(this.name);
           case StorageAdapter.LocalStorage:
-            return LocalStorageAdapter.load(this.name)
-              .then((adapter) => {
-                if (!adapter) {
-                  return this.loadAdapter(adaptersCopy);
-                }
-
-                this.adapter = adapter;
-                return adapter;
-              });
+            return LocalStorageAdapter.load(this.name);
           case StorageAdapter.SessionStorage:
-            return SessionStorageAdapter.load(this.name)
-              .then((adapter) => {
-                if (!adapter) {
-                  return this.loadAdapter(adaptersCopy);
-                }
-
-                this.adapter = adapter;
-                return adapter;
-              });
+            return SessionStorageAdapter.load(this.name);
           case StorageAdapter.WebSQL:
-            return WebSQLAdapter.load(this.name)
-              .then((adapter) => {
-                if (!adapter) {
-                  return this.loadAdapter(adaptersCopy);
-                }
-
-                this.adapter = adapter;
-                return adapter;
-              });
+            return WebSQLAdapter.load(this.name);
           default:
             return super.loadAdapter();
         }
