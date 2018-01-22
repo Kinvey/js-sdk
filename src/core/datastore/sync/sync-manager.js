@@ -3,7 +3,7 @@ import clone from 'lodash/clone';
 
 import { KinveyError, NotFoundError, SyncError } from '../../errors';
 
-import { PromiseQueue, ensureArray } from '../../utils';
+import { PromiseQueue, ensureArray, forEachAsync } from '../../utils';
 import { SyncOperation } from './sync-operation';
 import { syncBatchSize } from './utils';
 import { isEmpty } from '../utils';
@@ -243,28 +243,16 @@ export class SyncManager {
 
   // TODO: error handling needs consideration
   _processSyncItems(syncItems) {
-    if (isEmpty(syncItems)) {
-      return Promise.resolve([]);
-    }
-
     const queue = new PromiseQueue(syncBatchSize);
     const pushResults = [];
 
-    return new Promise((resolve) => { // TODO: too nested, refactor?
-      let completedCount = 0;
-      syncItems.forEach((syncItem) => {
-        queue.enqueue(() => {
-          return this._processSyncItem(syncItem)
-            .then((pushResult) => {
-              pushResults.push(pushResult);
-              completedCount += 1;
-              if (syncItems.length === completedCount) {
-                resolve(pushResults);
-              }
-            });
-        });
+    return forEachAsync(syncItems, (syncItem) => {
+      return queue.enqueue(() => {
+        return this._processSyncItem(syncItem)
+          .then(pushResult => pushResults.push(pushResult));
       });
-    });
+    })
+      .then(() => pushResults);
   }
 
   _fetchItemsFromServer(collection, query, options) {
