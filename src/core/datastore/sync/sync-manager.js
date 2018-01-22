@@ -149,6 +149,16 @@ export class SyncManager {
     return copy;
   }
 
+  _replaceOfflineEntityWithNetwork(collection, offlineEntityId, networkEntity) {
+    let offlineRepo;
+    return this._getOfflineRepo()
+      .then((repo) => {
+        offlineRepo = repo;
+        return offlineRepo.deleteById(collection, offlineEntityId);
+      })
+      .then(() => offlineRepo.create(collection, networkEntity));
+  }
+
   _pushCreate(collection, entity) {
     let entityToCreate = entity;
     if (entity._kmd && entity._kmd.local) {
@@ -158,8 +168,9 @@ export class SyncManager {
     return this._networkRepo.create(collection, entityToCreate)
       .then((createdItem) => {
         result.entity = createdItem;
-        return result;
+        return this._replaceOfflineEntityWithNetwork(collection, entity._id, createdItem);
       })
+      .then(() => result)
       .catch((err) => {
         result.error = err;
         return result;
@@ -181,8 +192,10 @@ export class SyncManager {
     return this._networkRepo.update(collection, entity)
       .then((updateResult) => {
         result.entity = updateResult;
-        return result;
+        return this._getOfflineRepo();
       })
+      .then(repo => repo.update(collection, result.entity))
+      .then(() => result)
       .catch((err) => {
         result.entity = entity;
         result.error = err;
@@ -190,11 +203,34 @@ export class SyncManager {
       });
   }
 
-  // TODO: refactor results of individual push ops can be done here?
-  _pushItem({ collection, entityId, state }) {
-    let entity;
+  _handlePushOp(syncItem, offlineEntity) {
+    const { collection, state, entityId } = syncItem;
     const syncOp = state.operation;
 
+    if (!offlineEntity && syncOp !== SyncOperation.Delete) { // todo: duplication
+      const res = this._getPushOpResult(entityId, syncOp);
+      res.error = new KinveyError(`Entity with id ${entityId} not found`);
+      return res;
+    }
+
+    switch (syncOp) {
+      case SyncOperation.Create:
+        return this._pushCreate(collection, offlineEntity);
+      case SyncOperation.Delete:
+        return this._pushDelete(collection, entityId);
+      case SyncOperation.Update:
+        return this._pushUpdate(collection, offlineEntity);
+      default: {
+        const res = this._getPushOpResult(entityId, syncOp);
+        res.error = new KinveyError(`Unexpected sync operation: ${syncOp}`);
+        return res;
+      }
+    }
+  }
+
+  // TODO: refactor results of individual push ops can be done here?
+  _pushItem(syncItem) {
+    const { collection, entityId } = syncItem;
     return this._getOfflineRepo()
       .then(repo => repo.readById(collection, entityId))
       .catch((err) => {
@@ -203,29 +239,7 @@ export class SyncManager {
         }
         return Promise.reject(err);
       })
-      .then((offlineEntity) => {
-        entity = offlineEntity;
-
-        if (!entity && syncOp !== SyncOperation.Delete) { // todo: duplication
-          const res = this._getPushOpResult(entityId, syncOp);
-          res.error = new KinveyError(`Entity with id ${entityId} not found`);
-          return res;
-        }
-
-        switch (syncOp) {
-          case SyncOperation.Create:
-            return this._pushCreate(collection, entity);
-          case SyncOperation.Delete:
-            return this._pushDelete(collection, entityId);
-          case SyncOperation.Update:
-            return this._pushUpdate(collection, entity);
-          default: {
-            const res = this._getPushOpResult(entityId, syncOp);
-            res.error = new KinveyError(`Unexpected sync operation: ${syncOp}`);
-            return res;
-          }
-        }
-      });
+      .then(offlineEntity => this._handlePushOp(syncItem, offlineEntity));
   }
 
   _processSyncItem(syncItem) {
