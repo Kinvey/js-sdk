@@ -140,7 +140,7 @@ export class Client {
     /**
      * @type {?string[]}
      */
-    this.storageAdapters = config.storageAdapters;
+    this.storageProviders = config.storage;
 
     /**
      * @private
@@ -242,7 +242,7 @@ export class Client {
       masterSecret: this.masterSecret,
       encryptionKey: this.encryptionKey,
       appVersion: this.appVersion,
-      storageAdapters: this.storageAdapters
+      storageProviders: this.storageProviders
     };
   }
 

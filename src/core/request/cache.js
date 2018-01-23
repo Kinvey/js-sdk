@@ -7,7 +7,6 @@ import { isDefined } from  '../utils';
 import { Request } from  './request';
 import { KinveyResponse } from  './response';
 import { CacheRack } from  './rack';
-import { StorageAdapter } from './middleware/storage';
 
 export class CacheRequest extends Request {
   constructor(options = {}) {
@@ -101,7 +100,7 @@ export class CacheRequest extends Request {
     obj.collection = this.collection;
     obj.entityId = this.entityId;
     obj.encryptionKey = this.client ? this.client.encryptionKey : undefined;
-    obj.storageAdapters = this.client ? this.client.storageAdapters : undefined;
+    obj.storageProviders = this.client ? this.client.storage : undefined;
     return obj;
   }
 }

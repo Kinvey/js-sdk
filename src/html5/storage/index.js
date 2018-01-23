@@ -1,36 +1,36 @@
-import { Storage, StorageAdapter as CoreStorageAdapter } from '../../core/request';
+import { Storage, StorageProvider as CoreStorageProvider } from '../../core/request';
 import { IndexedDBAdapter } from './indexeddb';
 import { WebSQLAdapter } from './websql';
 import { LocalStorageAdapter, SessionStorageAdapter } from './webstorage';
 
-export const StorageAdapter = Object.assign({}, CoreStorageAdapter, {
+export const StorageProvider = Object.assign({}, CoreStorageProvider, {
   IndexedDB: 'IndexedDB',
   LocalStorage: 'LocalStorage',
   SessionStorage: 'SessionStorage',
   WebSQL: 'WebSQL'
 });
-Object.freeze(StorageAdapter);
+Object.freeze(StorageProvider);
 
 export class Html5Storage extends Storage {
-  constructor(name, storageAdapters = [StorageAdapter.WebSQL, StorageAdapter.IndexedDB, StorageAdapter.LocalStorage, StorageAdapter.SessionStorage, StorageAdapter.Memory]) {
-    super(name, storageAdapters);
+  constructor(name, storageProviders = [StorageProvider.WebSQL, StorageProvider.IndexedDB, StorageProvider.LocalStorage, StorageProvider.SessionStorage, StorageProvider.Memory]) {
+    super(name, storageProviders);
   }
 
   loadAdapter() {
-    return this.storageAdapters.reduce((promise, storageAdapter) => {
+    return this.storageProviders.reduce((promise, storageProvider) => {
       return promise.then((adapter) => {
         if (adapter) {
           return adapter;
         }
 
-        switch (storageAdapter) {
-          case StorageAdapter.IndexedDB:
+        switch (storageProvider) {
+          case StorageProvider.IndexedDB:
             return IndexedDBAdapter.load(this.name);
-          case StorageAdapter.LocalStorage:
+          case StorageProvider.LocalStorage:
             return LocalStorageAdapter.load(this.name);
-          case StorageAdapter.SessionStorage:
+          case StorageProvider.SessionStorage:
             return SessionStorageAdapter.load(this.name);
-          case StorageAdapter.WebSQL:
+          case StorageProvider.WebSQL:
             return WebSQLAdapter.load(this.name);
           default:
             return super.loadAdapter();

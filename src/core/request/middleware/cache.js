@@ -8,13 +8,13 @@ export class CacheMiddleware extends Middleware {
     super(name);
   }
 
-  loadStorage(name, storageAdapters) {
-    return new Storage(name, storageAdapters);
+  loadStorage(name, storageProviders) {
+    return new Storage(name, storageProviders);
   }
 
   handle(request) {
-    const { method, body, appKey, collection, entityId, encryptionKey, storageAdapters } = request;
-    const storage = this.loadStorage(appKey, storageAdapters, encryptionKey);
+    const { method, body, appKey, collection, entityId, encryptionKey, storageProviders } = request;
+    const storage = this.loadStorage(appKey, storageProviders, encryptionKey);
     let promise;
 
     if (method === 'GET') {
