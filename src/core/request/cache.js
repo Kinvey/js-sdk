@@ -49,24 +49,16 @@ export class CacheRequest extends Request {
     this._aggregation = aggregation;
   }
 
-  get tag() {
-    return this._tag;
-  }
-
-  set tag(tag) {
-    this._tag = tag;
-  }
-
   get collection() {
+    if (isDefined(this.tag)) {
+      return  this._collection + this.tag;
+    }
+
     return this._collection;
   }
 
   set collection(collection) {
-    if (isDefined(this.tag)) {
-      this._collection = collection + this.tag;
-    } else {
-      this._collection = collection;
-    }
+    this._collection = collection;
   }
 
   get url() {

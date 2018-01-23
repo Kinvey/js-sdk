@@ -85,7 +85,8 @@ export class SyncManager {
       query: query,
       properties: options.properties,
       timeout: options.timeout,
-      client: this.client
+      client: this.client,
+      tag: this.tag
     });
     return request.execute()
       .then(response => response.data)
