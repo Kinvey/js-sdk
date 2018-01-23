@@ -25,6 +25,11 @@ export class NetworkStore {
     this.collection = collection;
 
     /**
+     * @type {string}
+     */
+    this.tag = options.tag || undefined;
+
+    /**
      * @type {Client}
      */
     this.client = options.client;
@@ -107,7 +112,8 @@ export class NetworkStore {
         properties: options.properties,
         query: query,
         timeout: options.timeout,
-        client: this.client
+        client: this.client,
+        tag: this.tag
       };
       let request = new KinveyRequest(config);
 
@@ -156,7 +162,8 @@ export class NetworkStore {
         }),
         properties: options.properties,
         timeout: options.timeout,
-        client: this.client
+        client: this.client,
+        tag: this.tag
       };
       let request = new KinveyRequest(config);
 
