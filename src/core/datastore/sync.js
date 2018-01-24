@@ -108,7 +108,8 @@ export class SyncManager {
           properties: options.properties,
           query: syncQuery,
           timeout: options.timeout,
-          client: this.client
+          client: this.client,
+          tag: this.tag
         });
         return request.execute()
           .then(response => response.data);
@@ -178,7 +179,8 @@ export class SyncManager {
         }),
         properties: options.properties,
         query: query,
-        timeout: options.timeout
+        timeout: options.timeout,
+        tag: this.tag
       });
       return findRequest.execute()
         .then(response => response.data)
@@ -201,7 +203,8 @@ export class SyncManager {
             }),
             properties: options.properties,
             body: syncEntity,
-            timeout: options.timeout
+            timeout: options.timeout,
+            tag: this.tag
           });
           return request.execute();
         });
@@ -330,7 +333,8 @@ export class SyncManager {
                           pathname: `${this.pathname}/${syncEntity._id}`
                         }),
                         properties: options.properties,
-                        timeout: options.timeout
+                        timeout: options.timeout,
+                        tag: this.tag
                       });
                       return request.execute();
                     })
@@ -378,8 +382,7 @@ export class SyncManager {
                         properties: options.properties,
                         timeout: options.timeout,
                         body: entity,
-                        client: this.client,
-                        tag: this.tag
+                        client: this.client
                       });
 
                       // Send a POST request, and update the url.
@@ -410,7 +413,8 @@ export class SyncManager {
                               pathname: `${this.pathname}/${syncEntity._id}`
                             }),
                             properties: options.properties,
-                            timeout: options.timeout
+                            timeout: options.timeout,
+                            tag: this.tag
                           });
                           return request.execute()
                             .then(() => {
@@ -548,7 +552,8 @@ export class SyncManager {
               pathname: `${this.pathname}/${entity._id}`
             }),
             properties: options.properties,
-            timeout: options.timeout
+            timeout: options.timeout,
+            tag: this.tag
           });
           return request.execute()
             .then(response => response.data);

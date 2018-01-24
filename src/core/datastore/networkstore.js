@@ -24,6 +24,10 @@ export class NetworkStore {
      */
     this.collection = collection;
 
+    if (options.tag && !isString(options.tag)) {
+      throw new KinveyError('options.tag must be a string.');
+    }
+
     /**
      * @type {string}
      */
