@@ -1,12 +1,7 @@
 import { Promise } from 'es6-promise';
 import assign from 'lodash/assign';
-import url from 'url';
 
-import { CacheRequest, RequestMethod } from '../request';
-import { KinveyError } from '../errors';
-import { Aggregation } from '../aggregation';
 import { isDefined } from '../utils';
-import { KinveyObservable } from '../observable';
 import { NetworkStore } from './networkstore';
 
 import { OperationType } from './operations';

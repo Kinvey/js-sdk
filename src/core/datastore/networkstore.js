@@ -2,14 +2,12 @@ import { Promise } from 'es6-promise';
 import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
 import assign from 'lodash/assign';
-import url from 'url';
 
-import { KinveyRequest, AuthType, RequestMethod } from '../request';
 import { KinveyError } from '../errors';
 import { Query } from '../query';
 import { Client } from '../client';
 import { isDefined, isPromiseLike, isObservable } from '../utils';
-import { KinveyObservable, wrapInObservable } from '../observable';
+import { wrapInObservable } from '../observable';
 import { Aggregation } from '../aggregation';
 import { getLiveCollectionManager } from '../live';
 
