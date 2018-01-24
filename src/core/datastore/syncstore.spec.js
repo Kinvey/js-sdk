@@ -128,6 +128,18 @@ describe('SyncStore', () => {
         });
     });
 
+    it('should throw an error if the tag is not a string', () => {
+      expect(() => {
+        new SyncStore(collection, { tag: {} });
+      }).toThrow();
+    });
+
+    it('should throw an error if the tag is an emptry string', () => {
+      expect(() => {
+        new SyncStore(collection, { tag: ' ' });
+      }).toThrow();
+    });
+
     it('should return the entities by tag', () => {
       const entity1 = { _id: "123foo" };
       const entity2 = { _id: "123bar" };
