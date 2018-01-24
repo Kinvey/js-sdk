@@ -24,14 +24,20 @@ export class NetworkStore {
      */
     this.collection = collection;
 
-    if (options.tag && !isString(options.tag)) {
-      throw new KinveyError('options.tag must be a string.');
-    }
+    if (options.tag) {
+      let tag = options.tag;
 
-    /**
-     * @type {string}
-     */
-    this.tag = options.tag || undefined;
+      if (!isString(tag)) {
+        throw new KinveyError('options.tag must be a string.');
+      }
+
+      tag = tag.trimRight();
+      if (tag === '') {
+        throw new KinveyError('options.tag cannot be an empty string.');
+      }
+
+      this.tag = tag;
+    }
 
     /**
      * @type {Client}
