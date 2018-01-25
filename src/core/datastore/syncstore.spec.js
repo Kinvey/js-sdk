@@ -756,6 +756,42 @@ describe('SyncStore', () => {
           expect(entities).toEqual([entity1, entity2]);
         });
     });
+
+    it('should save the entities from the backend to the cache from multiple pulls', () => {
+      const store = new SyncStore(collection);
+
+      return store.clear()
+        .then(() => {
+          const promises = [];
+
+          for (let i = 0; i < 2; i++) {
+            const doc = { _id: randomString() };
+            const query = new Query();
+            query.limit = 1;
+            query.skip = i;
+
+            nock(store.client.apiHostname)
+              .get(`/appdata/${store.client.appKey}/${collection}`)
+              .query(query.toQueryString())
+              .reply(200, [doc]);
+
+            promises.push(store.pull(query));
+          }
+
+          return Promise.all(promises);
+        })
+        .then((results) => {
+          return results.reduce((docs, result) => {
+            return docs.concat(result);
+          }, []);
+        })
+        .then((docs) => {
+          return store.find().toPromise()
+          .then((cachedDocs) => {
+            expect(cachedDocs).toEqual(docs);
+          });
+        });
+    });
   });
 
   describe('sync', () => {
