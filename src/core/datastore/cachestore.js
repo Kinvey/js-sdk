@@ -32,7 +32,7 @@ export class CacheStore extends NetworkStore {
    * @param   {Properties}            [options.properties]             Custom properties to send with
    *                                                                   the request.
    * @param   {Number}                [options.timeout]                Timeout for the request.
-   * @return  {Observable}                                             Observable.
+   * @return  {Promise}                                                Promise.
    */
   removeById(id, options = {}) {
     if (!isDefined(id)) {
@@ -126,10 +126,7 @@ export class CacheStore extends NetworkStore {
         }
         return Promise.resolve();
       })
-      .then((/* pushResult */) => {
-        // TODO: do something with pushResult?
-        return this.syncManager.pull(this.collection, query, options);
-      });
+      .then(() => this.syncManager.pull(this.collection, query, options));
   }
 
   /**
