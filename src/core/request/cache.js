@@ -51,7 +51,7 @@ export class CacheRequest extends Request {
 
   get collection() {
     if (isDefined(this.tag)) {
-      return  this._collection + this.tag;
+      return  `${this._collection}.${this.tag}`;
     }
 
     return this._collection;
