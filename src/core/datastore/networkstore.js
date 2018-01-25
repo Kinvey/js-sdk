@@ -31,7 +31,6 @@ export class NetworkStore {
         throw new KinveyError('A tag must be a string.');
       }
 
-      tag = tag.trimRight();
       if (!/^[a-zA-Z0-9-]+$/.test(tag)) {
         throw new KinveyError('A tag can only contain letters, numbers, and "-".');
       }
