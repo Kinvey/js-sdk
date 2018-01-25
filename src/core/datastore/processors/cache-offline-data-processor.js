@@ -12,7 +12,6 @@ import { isLocalEntity, isNotEmpty, isEmpty } from '../utils';
 // imported for type info
 // import { NetworkRepository } from '../repositories';
 
-// TODO: refactor similar methods. read and readById, for instance
 export class CacheOfflineDataProcessor extends OfflineDataProcessor {
   /** @type {NetworkRepository} */
   _networkRepository;
@@ -22,7 +21,6 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
     this._networkRepository = networkRepository;
   }
 
-  // TODO: think of a better way to do this, or at least remove duplication
   _deleteEntityAndHandleOfflineState(collection, entity, options) {
     if (isLocalEntity(entity)) { // no need for request, just a regular offline delete
       return super._deleteEntityAndHandleOfflineState(collection, entity, options);
@@ -77,7 +75,6 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
       });
   }
 
-  // TODO: how close is this to pull?
   _processRead(collection, query, options) {
     let offlineEntities;
     return wrapInObservable((observer) => {
