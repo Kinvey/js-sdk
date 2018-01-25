@@ -941,9 +941,8 @@ describe('Query', () => {
       const entity3 = { _id: 2, customProperty: randomString() };
       const entity4 = { customProperty: randomString() };
       const query = new Query().ascending('_id');
-      // query.fields = ['customProperty'];
+      query.fields = ['customProperty'];
       const result = query.process([entity4, entity1, entity3, entity2]);
-      console.log(result);
       expect(result[0].customProperty).to.equal(entity4.customProperty);
       expect(result[1].customProperty).to.equal(entity2.customProperty);
       expect(result[2].customProperty).to.equal(entity1.customProperty);
