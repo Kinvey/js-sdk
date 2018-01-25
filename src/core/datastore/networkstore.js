@@ -32,8 +32,8 @@ export class NetworkStore {
       }
 
       tag = tag.trimRight();
-      if (tag === '') {
-        throw new KinveyError('options.tag cannot be an empty string.');
+      if (/^[a-zA-Z0-9-]+$/.test(tag)) {
+        throw new KinveyError('options.tag can only contain letters, numbers, and "-".');
       }
 
       this.tag = tag;
