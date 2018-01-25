@@ -141,14 +141,14 @@ describe('SyncStore', () => {
     });
 
     it('should return the entities by tag', () => {
-      const entity1 = { _id: "123foo" };
-      const entity2 = { _id: "123bar" };
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
 
-      const optionsFoo = { tag: 'foo' };
+      const optionsFoo = { tag: randomString() };
       const storeFoo = new SyncStore(collection, optionsFoo);
       const queryFoo = new Query().equalTo('_id', entity1._id);
 
-      const optionsBar = { tag: 'bar' };
+      const optionsBar = { tag: randomString() };
       const storeBar = new SyncStore(collection, optionsBar);
       const queryBar = new Query().equalTo('_id', entity2._id);
 
@@ -697,6 +697,26 @@ describe('SyncStore', () => {
           expect(count).toEqual(2);
         });
     });
+
+    it('should clear entities by tag', () => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const store1 = new SyncStore(collection, { tag: randomString() });
+      const store2 = new SyncStore(collection, { tag: randomString() });
+
+      return store1.save(entity1)
+        .then(() => store2.save(entity2))
+        .then(() => store1.clear())
+        .then(() => store1.find().toPromise())
+        .then((entities) => {
+          expect(entities.length).toEqual(0);
+          return store2.find().toPromise();
+        })
+        .then((entities) => {
+          expect(entities.length).toEqual(1);
+          expect(entities[0]).toEqual(entity2);
+        });
+    });
   });
 
   describe('pendingSyncCount()', () => {
@@ -779,6 +799,30 @@ describe('SyncStore', () => {
         })
         .then((count) => {
           expect(count).toEqual(1);
+        });
+    });
+
+    it('should push the entities by tag', () => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const store1 = new SyncStore(collection, { tag: randomString() });
+      const store2 = new SyncStore(collection, { tag: randomString() });
+
+      return store1.save(entity1)
+        .then(() => store2.save(entity2))
+        .then(() => {
+          nock(client.apiHostname)
+            .put(`/appdata/${client.appKey}/${collection}/${entity1._id}`, entity1)
+            .reply(200, entity1);
+          return store1.push();
+        })
+        .then((push) => {
+          expect(push.length).toEqual(1);
+          expect(push[0].entity._id).toEqual(entity1._id);
+          return store2.pendingSyncCount();
+        })
+        .then((syncCount) => {
+          expect(syncCount).toEqual(1);
         });
     });
   });
