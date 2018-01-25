@@ -53,9 +53,7 @@ describe('SyncStore', () => {
   afterEach(() => {
     const store = new SyncStore(collection);
     return store.clear()
-      .then(() => {
-        return store.clearSync();
-      });
+      .then(() => store.clearSync());
   });
 
   describe('pathname', () => {
@@ -619,6 +617,7 @@ describe('SyncStore', () => {
         })
         .then((entities) => {
           expect(entities).toEqual([]);
+          return store.clear();
         });
     });
 

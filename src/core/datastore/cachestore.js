@@ -862,23 +862,19 @@ export class CacheStore extends NetworkStore {
     options = assign({ useDeltaFetch: this.useDeltaFetch }, options);
     return this.syncManager.pull(query, options)
       .then((entities) => {
-        // Clear the cache
-        return this.clear(query, options)
-          .then(() => {
-            // Save network entities to cache
-            const saveRequest = new CacheRequest({
-              method: RequestMethod.PUT,
-              url: url.format({
-                protocol: this.client.apiProtocol,
-                host: this.client.apiHost,
-                pathname: this.pathname
-              }),
-              properties: options.properties,
-              body: entities,
-              timeout: options.timeout
-            });
-            return saveRequest.execute();
-          })
+        // Save network entities to cache
+        const saveRequest = new CacheRequest({
+          method: RequestMethod.PUT,
+          url: url.format({
+            protocol: this.client.apiProtocol,
+            host: this.client.apiHost,
+            pathname: this.pathname
+          }),
+          properties: options.properties,
+          body: entities,
+          timeout: options.timeout
+        });
+        return saveRequest.execute()
           .then(() => entities);
       });
   }
