@@ -143,30 +143,26 @@ describe('SyncStore', () => {
     it('should return the entities by tag', () => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
+      const store1 = new SyncStore(collection, { tag: randomString() });
+      const store2 = new SyncStore(collection, { tag: randomString() });
+      const query1 = new Query().equalTo('_id', entity1._id);
+      const query2 = new Query().equalTo('_id', entity2._id);
 
-      const optionsFoo = { tag: randomString() };
-      const storeFoo = new SyncStore(collection, optionsFoo);
-      const queryFoo = new Query().equalTo('_id', entity1._id);
-
-      const optionsBar = { tag: randomString() };
-      const storeBar = new SyncStore(collection, optionsBar);
-      const queryBar = new Query().equalTo('_id', entity2._id);
-
-      nock(storeFoo.client.apiHostname)
-        .get(`/appdata/${storeFoo.client.appKey}/${collection}`)
+      nock(store1.client.apiHostname)
+        .get(`/appdata/${store1.client.appKey}/${collection}`)
         .query({ query: JSON.stringify({ _id: entity1._id }) })
         .reply(200, [entity1]);
 
-      nock(storeBar.client.apiHostname)
-        .get(`/appdata/${storeBar.client.appKey}/${collection}`)
+      nock(store2.client.apiHostname)
+        .get(`/appdata/${store2.client.appKey}/${collection}`)
         .query({ query: JSON.stringify({ _id: entity2._id }) })
         .reply(200, [entity2]);
 
-      return storeFoo.pull(queryFoo)
+      return store1.pull(query1)
         .then(() => {
-          return storeBar.pull(queryBar)
+          return store2.pull(query2)
         }).then(() => {
-          return storeBar.find().toPromise()
+          return store2.find().toPromise()
             .then((result) => {
               expect(result).toEqual([entity2]);
             });
