@@ -940,13 +940,15 @@ describe('Query', () => {
       const entity2 = { _id: null, customProperty: randomString() };
       const entity3 = { _id: 2, customProperty: randomString() };
       const entity4 = { customProperty: randomString() };
+      const entity5 = { _id: null, customProperty: randomString() };
       const query = new Query().ascending('_id');
       query.fields = ['customProperty'];
-      const result = query.process([entity4, entity1, entity3, entity2]);
-      expect(result[0].customProperty).to.equal(entity4.customProperty);
-      expect(result[1].customProperty).to.equal(entity2.customProperty);
-      expect(result[2].customProperty).to.equal(entity1.customProperty);
-      expect(result[3].customProperty).to.equal(entity3.customProperty);
+      const result = query.process([entity5, entity4, entity1, entity3, entity2]);
+      expect(result[0].customProperty).to.equal(entity5.customProperty);
+      expect(result[1].customProperty).to.equal(entity4.customProperty);
+      expect(result[2].customProperty).to.equal(entity2.customProperty);
+      expect(result[3].customProperty).to.equal(entity1.customProperty);
+      expect(result[4].customProperty).to.equal(entity3.customProperty);
     });
   });
 
@@ -993,13 +995,15 @@ describe('Query', () => {
       const entity2 = { _id: null, customProperty: randomString() };
       const entity3 = { _id: 2, customProperty: randomString() };
       const entity4 = { customProperty: randomString() };
+      const entity5 = { _id: null, customProperty: randomString() };
       const query = new Query().descending('_id');
       query.fields = ['customProperty'];
-      const result = query.process([entity4, entity1, entity3, entity2]);
+      const result = query.process([entity5, entity4, entity1, entity3, entity2]);
       expect(result[0].customProperty).to.equal(entity3.customProperty);
       expect(result[1].customProperty).to.equal(entity1.customProperty);
-      expect(result[2].customProperty).to.equal(entity2.customProperty);
+      expect(result[2].customProperty).to.equal(entity5.customProperty);
       expect(result[3].customProperty).to.equal(entity4.customProperty);
+      expect(result[4].customProperty).to.equal(entity2.customProperty);
     });
   });
 

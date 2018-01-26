@@ -783,9 +783,9 @@ export class Query {
             } else if (isDefined(aField) === false && isDefined(bField)) {
               return -1 * modifier;
             } else if (typeof aField === 'undefined' && bField === null) {
-              return -1 * modifier;
+              return 0;
             } else if (aField === null && typeof bField === 'undefined') {
-              return 1 * modified;
+              return 0;
             } else if (aField !== bField) {
               return (aField < bField ? -1 : 1) * modifier;
             }
