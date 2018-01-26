@@ -336,6 +336,7 @@ describe('Sync', () => {
           offlineEntities.forEach((entity) => {
             expect(entity.someNewProperty).toBe(true);
           });
+          expect(nock.pendingMocks().length).toEqual(0);
         });
     });
 

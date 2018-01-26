@@ -213,7 +213,6 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
       });
   }
 
-  // TODO: passing the error message as an argument?
   _ensureCountBeforeRead(collection, prefix, query) {
     return this._syncManager.getSyncItemCountByEntityQuery(collection, query)
       .then((count) => {

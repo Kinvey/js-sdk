@@ -1,6 +1,7 @@
 import { Promise } from 'es6-promise';
 import clone from 'lodash/clone';
 
+import { Log } from '../../log';
 import { KinveyError, NotFoundError, SyncError } from '../../errors';
 
 import { PromiseQueue, ensureArray, forEachAsync } from '../../utils';
@@ -129,7 +130,6 @@ export class SyncManager {
     return this._syncStateManager.removeSyncEntitiesForIds(entityIds);
   }
 
-  // TODO: refactor - dont mutate this
   _getPushOpResult(entityId, operation) {
     const result = {
       _id: entityId,
@@ -207,7 +207,7 @@ export class SyncManager {
     const { collection, state, entityId } = syncItem;
     const syncOp = state.operation;
 
-    if (!offlineEntity && syncOp !== SyncOperation.Delete) { // todo: duplication
+    if (!offlineEntity && syncOp !== SyncOperation.Delete) {
       const res = this._getPushOpResult(entityId, syncOp);
       res.error = new KinveyError(`Entity with id ${entityId} not found`);
       return res;
@@ -228,7 +228,6 @@ export class SyncManager {
     }
   }
 
-  // TODO: refactor results of individual push ops can be done here?
   _pushItem(syncItem) {
     const { collection, entityId } = syncItem;
     return this._getOfflineRepo()
@@ -255,7 +254,6 @@ export class SyncManager {
       .then(() => pushResult);
   }
 
-  // TODO: error handling needs consideration
   _processSyncItems(syncItems) {
     const queue = new PromiseQueue(syncBatchSize);
     const pushResults = [];
@@ -289,8 +287,7 @@ export class SyncManager {
     if (!this._pushIsInProgress(collection)) {
       pushTrackingByCollection[collection] = true;
     } else {
-      // TODO: remove
-      throw new Error('Temporary - remove');
+      Log.debug('Marking push start, when push already started');
     }
   }
 
@@ -298,8 +295,7 @@ export class SyncManager {
     if (this._pushIsInProgress(collection)) {
       delete pushTrackingByCollection[collection];
     } else {
-      // TODO: remove
-      throw new Error('Temporary - remove');
+      Log.debug('Marking push en, when push is NOT started');
     }
   }
 

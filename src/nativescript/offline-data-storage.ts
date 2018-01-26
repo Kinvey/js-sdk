@@ -13,7 +13,6 @@ const sqliteStorageBuilder = (queue) => {
   return new KeyValueStoreOfflineRepository(persister, queue);
 };
 
-// TODO: this will grow, refactor
 const repoConstructors = {
   [storageType.sqlite]: sqliteStorageBuilder
 };
