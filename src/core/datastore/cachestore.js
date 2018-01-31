@@ -76,14 +76,14 @@ export class CacheStore extends NetworkStore {
    *                                                                            from the local cache.
    * @return  {Promise}                                                         Promise
    */
-  pendingSyncCount(query, options) {
+  pendingSyncCount(query) {
     if (query) {
       return this.syncManager.getSyncItemCountByEntityQuery(this.collection, query);
     }
     return this.syncManager.getSyncItemCount(this.collection);
   }
 
-  pendingSyncEntities(query, options) {
+  pendingSyncEntities(query) {
     return this.syncManager.getSyncEntities(this.collection, query);
   }
 
@@ -157,7 +157,7 @@ export class CacheStore extends NetworkStore {
       });
   }
 
-  clearSync(query, options) {
+  clearSync(query) {
     return this.syncManager.clearSync(this.collection, query);
   }
 }
