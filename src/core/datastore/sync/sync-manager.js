@@ -64,7 +64,6 @@ export class SyncManager {
       .then(entities => this.replaceOfflineEntities(collection, query, entities));
   }
 
-  // TODO: this may need to do querying, since now it's a breaking change/fix :D MLIBZ-2177
   getSyncItemCount(collection) {
     if (isEmpty(collection)) {
       return Promise.reject(new KinveyError('Invalid or missing collection name'));
@@ -73,6 +72,7 @@ export class SyncManager {
     return this._syncStateManager.getSyncItemCount(collection);
   }
 
+  // TODO: this method is temporray, pending fix for MLIBZ-2177
   getSyncItemCountByEntityQuery(collection, query) {
     return this._getOfflineRepo()
       .then(repo => repo.read(collection, query))
@@ -209,7 +209,7 @@ export class SyncManager {
 
     if (!offlineEntity && syncOp !== SyncOperation.Delete) {
       const res = this._getPushOpResult(entityId, syncOp);
-      res.error = new KinveyError(`Entity with id ${entityId} not found`);
+      res.error = new SyncError(`Entity with id ${entityId} not found`);
       return res;
     }
 
@@ -222,36 +222,44 @@ export class SyncManager {
         return this._pushUpdate(collection, offlineEntity);
       default: {
         const res = this._getPushOpResult(entityId, syncOp);
-        res.error = new KinveyError(`Unexpected sync operation: ${syncOp}`);
+        res.error = new SyncError(`Unexpected sync operation: ${syncOp}`);
         return res;
       }
     }
   }
 
   _pushItem(syncItem) {
-    const { collection, entityId } = syncItem;
+    const { collection, entityId, state } = syncItem;
+    const syncOp = state.operation;
     return this._getOfflineRepo()
       .then(repo => repo.readById(collection, entityId))
       .catch((err) => {
-        if (err instanceof NotFoundError) {
-          return null;
+        if (!(err instanceof NotFoundError)) {
+          return Promise.reject(err);
         }
-        return Promise.reject(err);
+        if (syncOp !== SyncOperation.Delete) {
+          return this._syncStateManager.removeSyncItemForEntityId(entityId)
+            .then(() => Promise.reject(err));
+        }
+        return null; // we have to make a delete request to the backend
       })
       .then(offlineEntity => this._handlePushOp(syncItem, offlineEntity));
   }
 
   _processSyncItem(syncItem) {
-    let pushResult;
-    return this._pushItem(syncItem) // should never reject
+    return this._pushItem(syncItem)
       .then((result) => {
-        pushResult = result;
-        if (pushResult.error) {
-          return pushResult;
+        if (result.error) {
+          return result;
         }
-        return this._syncStateManager.removeSyncItemForEntityId(syncItem.entityId);
+        return this._syncStateManager.removeSyncItemForEntityId(syncItem.entityId)
+          .then(() => result);
       })
-      .then(() => pushResult);
+      .catch((err) => {
+        const pushResult = this._getPushOpResult(syncItem.entityId, syncItem.state.operation);
+        pushResult.error = err;
+        return pushResult;
+      });
   }
 
   _processSyncItems(syncItems) {
@@ -260,7 +268,7 @@ export class SyncManager {
 
     return forEachAsync(syncItems, (syncItem) => {
       return queue.enqueue(() => {
-        return this._processSyncItem(syncItem)
+        return this._processSyncItem(syncItem) // never rejects
           .then(pushResult => pushResults.push(pushResult));
       });
     })
