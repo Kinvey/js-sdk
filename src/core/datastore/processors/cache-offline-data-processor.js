@@ -142,9 +142,8 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
         .catch(() => []) // backwards compatibility
         .then((offlineResult) => {
           observer.next(offlineResult);
-          return this._syncManager.push(collection); // backwards compatibility
+          return this._ensureCountBeforeRead(collection, 'group entities');
         })
-        .then(() => this._ensureCountBeforeRead(collection, 'group entities'))
         .then(() => this._networkRepository.group(collection, aggregationQuery, options))
         .then(networkResult => observer.next(networkResult));
     });
@@ -216,12 +215,18 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
   _ensureCountBeforeRead(collection, prefix, query) {
     return this._syncManager.getSyncItemCountByEntityQuery(collection, query)
       .then((count) => {
+        if (count > 0) { // backwards compatibility
+          return this._syncManager.push(collection, query)
+            .then(() => this._syncManager.getSyncItemCountByEntityQuery(collection, query));
+        }
+        return count;
+      })
+      .then((count) => {
         if (count === 0) {
           return count;
         }
         const countMsg = `There are ${count} entities that need to be synced.`;
-        const msg = `Unable to ${prefix} on the backend. ${countMsg}`;
-        const err = new KinveyError(msg);
+        const err = new KinveyError(`Unable to ${prefix} on the backend. ${countMsg}`);
         return Promise.reject(err);
       });
   }
