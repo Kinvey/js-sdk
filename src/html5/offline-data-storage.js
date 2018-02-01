@@ -30,11 +30,10 @@ const sessionStorageBuilder = (queue) => {
 
 // TODO: this will grow, refactor
 const repoConstructors = {
-  [storageType.default]: indexedDbBuilder, // TODO: get the default support chain
   [storageType.webSql]: webSqlBuilder,
   [storageType.indexedDb]: indexedDbBuilder,
   [storageType.localStorage]: localStorageBuilder,
   [storageType.sessionStorage]: sessionStorageBuilder
 };
 
-repositoryProvider.setSupportedConstructors(repoConstructors);
+repositoryProvider.setSupportedRepoBuilders(repoConstructors);
