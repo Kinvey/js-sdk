@@ -207,12 +207,6 @@ export class SyncManager {
     const { collection, state, entityId } = syncItem;
     const syncOp = state.operation;
 
-    if (!offlineEntity && syncOp !== SyncOperation.Delete) {
-      const res = this._getPushOpResult(entityId, syncOp);
-      res.error = new SyncError(`Entity with id ${entityId} not found`);
-      return res;
-    }
-
     switch (syncOp) {
       case SyncOperation.Create:
         return this._pushCreate(collection, offlineEntity);
@@ -230,14 +224,13 @@ export class SyncManager {
 
   _pushItem(syncItem) {
     const { collection, entityId, state } = syncItem;
-    const syncOp = state.operation;
     return this._getOfflineRepo()
       .then(repo => repo.readById(collection, entityId))
       .catch((err) => {
         if (!(err instanceof NotFoundError)) {
           return Promise.reject(err);
         }
-        if (syncOp !== SyncOperation.Delete) {
+        if (state.operation !== SyncOperation.Delete) {
           return this._syncStateManager.removeSyncItemForEntityId(entityId)
             .then(() => Promise.reject(err));
         }
