@@ -172,7 +172,7 @@ function testFunc() {
               .then(() => storeToTest.pendingSyncEntities())
               .then((result) => {
                 expect(result.length).to.equal(1);
-                expect(result[0].entityId).to.equal(entity2._id);
+                validateSyncEntity(result[0], 'PUT', entity2._id);
                 done();
               }).catch(done);
           });

@@ -149,22 +149,26 @@ function testFunc() {
         describe('findById()', () => {
           it('should throw a NotFoundError if the id argument does not exist', (done) => {
             const entityId = utilities.randomString();
-            storeToTest.findById(entityId).toPromise()
-              .then(() => done(new Error('Should not be called')))
-              .catch((error) => {
-                expect(error.name).to.contain(notFoundErrorName);
-                done();
-              })
-              .catch(done);
+            const nextHandlerSpy = sinon.spy();
+
+            storeToTest.findById(entityId).subscribe(nextHandlerSpy, (err) => {
+              const expectedCallCount = dataStoreType === Kinvey.DataStoreType.Cache ? 1 : 0;
+              expect(nextHandlerSpy.callCount).to.equal(expectedCallCount);
+              expect(err.name).to.contain(notFoundErrorName);
+              done();
+            }, () => {
+              done(new Error('Should not be called'));
+            });
           });
 
           it('should return undefined if an id is not provided', (done) => {
-            storeToTest.findById().toPromise()
-              .then((result) => {
-                expect(result).to.be.undefined;
-                done();
-              })
-              .catch(done);
+            const spy = sinon.spy();
+            storeToTest.findById().subscribe(spy, done, () => {
+              expect(spy.callCount).to.equal(1);
+              const result = spy.firstCall.args[0];
+              expect(result).to.be.undefined;
+              done();
+            });
           });
 
           it('should return the entity that matches the id argument', (done) => {

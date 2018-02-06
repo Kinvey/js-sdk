@@ -73,6 +73,10 @@ function testFunc() {
               })
               .then(() => {
                 utilities.validateEntity(dataStoreType, collectionName, entity);
+                return cacheStore.removeById(entity._id); // remove the new entity, as it is not used elsewhere
+              })
+              .then((result) => {
+                expect(result).to.deep.equal({ count: 1 });
                 done();
               })
               .catch(done);
