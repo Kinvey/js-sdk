@@ -353,8 +353,7 @@ function testFunc() {
               });
           });
 
-          // should be added back for execution when MLIBZ-2157 is fixed
-          it.skip('query.notEqualTo with null', (done) => {
+          it('query.notEqualTo with null', (done) => {
             query.notEqualTo(textFieldName, null);
             const expectedEntities = entities.filter(entity => entity[textFieldName] !== null);
             storeToTest.find(query)
