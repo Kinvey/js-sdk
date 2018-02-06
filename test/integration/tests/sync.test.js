@@ -67,6 +67,13 @@ function testFunc() {
       });
   };
 
+  const validateSyncEntity = (syncEntity, operationType, expectedEntityIds) => {
+    expect(syncEntity._id).to.exist;
+    expect(utilities.ensureArray(expectedEntityIds)).to.include(syncEntity.entityId);
+    expect(syncEntity.collection).to.equal(collectionName);
+    expect(syncEntity.state).to.deep.equal({ operation: operationType }); // for now, this is all that is kept in the state
+  };
+
   dataStoreTypes.forEach((currentDataStoreType) => {
     describe(`${currentDataStoreType} Sync Tests`, () => {
       const dataStoreType = currentDataStoreType;
@@ -127,6 +134,25 @@ function testFunc() {
               })
               .catch(done);
           });
+
+          // CacheStore should have the same behavior, but it's difficult to simulate, since it only happens when the network request fails
+          if (dataStoreType === Kinvey.DataStoreType.Sync) {
+            // pending fix for MLIBZ-2177
+            it.skip('should return the count of matching entities even if they are deleted', (done) => {
+              storeToTest.removeById(entity1._id)
+                .then((result) => {
+                  expect(result).to.deep.equal({ count: 1 });
+                  const query = new Kinvey.Query();
+                  query.equalTo('_id', entity1._id);
+                  return storeToTest.pendingSyncCount(query);
+                })
+                .then((count) => {
+                  expect(count).to.equal(1);
+                  done();
+                })
+                .catch(done);
+            });
+          }
         });
 
         describe('clearSync()', () => {
@@ -158,12 +184,11 @@ function testFunc() {
               .then((entities) => {
                 expect(entities.length).to.equal(2);
                 entities.forEach((entity) => {
-                  expect(entity.collection).to.equal(collectionName);
-                  expect(entity.state.operation).to.equal('PUT');
-                  expect([entity1._id, entity2._id]).to.include(entity.entityId);
+                  validateSyncEntity(entity, 'PUT', [entity1._id, entity2._id]);
                 });
                 done();
-              }).catch(done);
+              })
+              .catch(done);
           });
 
           it('should return only the entities, matching the query', (done) => {
@@ -172,10 +197,31 @@ function testFunc() {
             storeToTest.pendingSyncEntities(query)
               .then((entities) => {
                 expect(entities.length).to.equal(1);
-                expect(entities[0].entityId).to.equal(entity1._id);
+                validateSyncEntity(entities[0], 'PUT', entity1._id);
                 done();
-              }).catch(done);
+              })
+              .catch(done);
           });
+
+          // CacheStore should have the same behavior, but it's difficult to simulate, since it only happens when the network request fails
+          if (dataStoreType === Kinvey.DataStoreType.Sync) {
+            // pending fix for MLIBZ-2177
+            it.skip('should return the matching entities, even if they are deleted', (done) => {
+              storeToTest.removeById(entity1._id)
+                .then((result) => {
+                  expect(result).to.deep.equal({ count: 1 });
+                  const query = new Kinvey.Query();
+                  query.equalTo('_id', entity1._id);
+                  return storeToTest.pendingSyncEntities(query);
+                })
+                .then((syncEntities) => {
+                  expect(syncEntities.length).to.equal(1);
+                  validateSyncEntity(syncEntities[0], 'DELETE', entity1._id);
+                  done();
+                })
+                .catch(done);
+            });
+          }
 
           it('should return an empty array if there are no entities waiting to be synced', (done) => {
             syncStore.clearSync()
@@ -183,7 +229,8 @@ function testFunc() {
               .then((entities) => {
                 expect(entities).to.be.an.empty.array;
                 done();
-              }).catch(done);
+              })
+              .catch(done);
           });
         });
       });
