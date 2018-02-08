@@ -876,6 +876,16 @@ export class CacheStore extends NetworkStore {
     options = assign({ useDeltaFetch: this.useDeltaFetch }, options);
     return this.syncManager.pull(query, options)
       .then((entities) => {
+        // Remove entities that no longer exist in the backend from the cache
+        const entityIds = entities.map(entity => entity._id);
+        const removeQuery = new Query(query).and().notContainedIn('_id', entityIds);
+        removeQuery.fields = [];
+        removeQuery.skip = 0;
+        removeQuery.limit = null;
+        return this.clear(removeQuery)
+          .then(() => entities);
+      })
+      .then((entities) => {
         // Save network entities to cache
         const saveRequest = new CacheRequest({
           method: RequestMethod.PUT,
@@ -886,11 +896,12 @@ export class CacheStore extends NetworkStore {
           }),
           properties: options.properties,
           body: entities,
-          timeout: options.timeout
+          timeout: options.timeout,
+          tag: this.tag
         });
         return saveRequest.execute()
           .then(() => entities);
-      });
+      })
   }
 
   /**
