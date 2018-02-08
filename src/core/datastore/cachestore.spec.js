@@ -1114,13 +1114,38 @@ describe('CacheStore', () => {
         .get(`/appdata/${store.client.appKey}/${collection}`)
         .reply(200, [entity1, entity2]);
 
-      store.pull()
+      return store.pull()
         .then(() => {
           const syncStore = new SyncStore(collection);
           return syncStore.find().toPromise();
         })
         .then((entities) => {
           expect(entities).toEqual([entity1, entity2]);
+        });
+    });
+
+    it('should remove entities from the cache that no longer exist on the backend', () => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const store = new CacheStore(collection);
+
+      nock(store.client.apiHostname)
+        .get(`/appdata/${store.client.appKey}/${collection}`)
+        .reply(200, [entity1, entity2]);
+
+      return store.pull()
+        .then(() => {
+          nock(store.client.apiHostname)
+            .get(`/appdata/${store.client.appKey}/${collection}`)
+            .reply(200, [entity1]);
+          return store.pull();
+        })
+        .then(() => {
+          const syncStore = new SyncStore(collection);
+          return syncStore.find().toPromise();
+        })
+        .then((entities) => {
+          expect(entities).toEqual([entity1]);
         });
     });
   });
