@@ -153,9 +153,13 @@ function testFunc() {
 
             storeToTest.findById(entityId).subscribe(nextHandlerSpy, (err) => {
               const expectedCallCount = dataStoreType === Kinvey.DataStoreType.Cache ? 1 : 0;
-              expect(nextHandlerSpy.callCount).to.equal(expectedCallCount);
-              expect(err.name).to.contain(notFoundErrorName);
-              done();
+              try {
+                expect(nextHandlerSpy.callCount).to.equal(expectedCallCount);
+                expect(err.name).to.contain(notFoundErrorName);
+              } catch (err) {
+                return done(err);
+              }
+              return done();
             }, () => {
               done(new Error('Should not be called'));
             });
@@ -164,10 +168,14 @@ function testFunc() {
           it('should return undefined if an id is not provided', (done) => {
             const spy = sinon.spy();
             storeToTest.findById().subscribe(spy, done, () => {
-              expect(spy.callCount).to.equal(1);
-              const result = spy.firstCall.args[0];
-              expect(result).to.be.undefined;
-              done();
+              try {
+                expect(spy.callCount).to.equal(1);
+                const result = spy.firstCall.args[0];
+                expect(result).to.be.undefined;
+              } catch (err) {
+                return done(err);
+              }
+              return done();
             });
           });
 

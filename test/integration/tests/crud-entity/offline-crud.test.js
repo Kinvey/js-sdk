@@ -71,10 +71,8 @@ function testFunc() {
                 expect(foundEntity).to.exist;
                 return syncStore.findById(entity._id).toPromise();
               })
-              .then(() => {
-                utilities.validateEntity(dataStoreType, collectionName, entity);
-                return cacheStore.removeById(entity._id); // remove the new entity, as it is not used elsewhere
-              })
+              .then(() => utilities.validateEntity(dataStoreType, collectionName, entity))
+              .then(() => cacheStore.removeById(entity._id)) // remove the new entity, as it is not used elsewhere
               .then((result) => {
                 expect(result).to.deep.equal({ count: 1 });
                 done();
