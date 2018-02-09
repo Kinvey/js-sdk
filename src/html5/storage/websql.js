@@ -19,7 +19,7 @@ export class WebSQL {
     this.name = name;
   }
 
-  openTransaction(collection, query, parameters, write = false) {
+  openTransaction(collection, query, parameters, write = false, db) {
     const escapedCollection = `"${collection}"`;
     const isMaster = collection === masterCollectionName;
     const isMulti = Array.isArray(query);
@@ -27,7 +27,10 @@ export class WebSQL {
 
     return new Promise((resolve, reject) => {
       try {
-        const db = global.openDatabase(this.name, 1, 'Kinvey Cache', size);
+        if (!db) {
+          db = global.openDatabase(this.name, 1, 'Kinvey Cache', size);
+        }
+
         const writeTxn = write || typeof db.readTransaction !== 'function';
 
         db[writeTxn ? 'transaction' : 'readTransaction']((tx) => {
@@ -64,7 +67,6 @@ export class WebSQL {
                 }
 
                 responses.push(response);
-                pending -= 1;
 
                 if (pending === 0) {
                   resolve(isMulti ? responses : responses.shift());

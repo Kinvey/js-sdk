@@ -7,8 +7,9 @@ let isSupported;
 
 class SQLiteAdapter {
   name: string;
+  encryptionKey?: string;
 
-  constructor(name = 'kinvey') {
+  constructor(name = 'kinvey', encryptionKey?: string) {
     if (isDefined(name) === false) {
       throw new Error('A name is required to use the SQLite adapter.');
     }
@@ -18,6 +19,7 @@ class SQLiteAdapter {
     }
 
     this.name = name;
+    this.encryptionKey = encryptionKey;
   }
 
   openTransaction(collection, query, parameters, write = false) {
@@ -26,7 +28,7 @@ class SQLiteAdapter {
     const isMulti = Array.isArray(query);
     query = isMulti ? query : [[query, parameters]];
 
-    return new nativeScriptSQLite(this.name)
+    return new nativeScriptSQLite(this.name, { key: this.encryptionKey })
       .then((db) => {
         // This will set the database to return the results as an array of objects
         db.resultType(nativeScriptSQLite.RESULTSASOBJECT);
@@ -180,8 +182,8 @@ class SQLiteAdapter {
 }
 
 export const sqLite = {
-  load(name) {
-    const db = new SQLiteAdapter(name);
+  load(name, encryptionKey?: string) {
+    const db = new SQLiteAdapter(name, encryptionKey);
 
     if (isDefined(nativeScriptSQLite) === false) {
       return Promise.resolve(undefined);

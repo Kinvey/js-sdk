@@ -6,7 +6,7 @@ import { NotFoundError } from '../../core/errors';
 
 use(require('chai-as-promised'));
 
-describe('WebSQL', () => {
+describe('HTML5 - WebSQL', () => {
   describe('findById()', () => {
     it('should throw a NotFoundError for an id that does not exist', () => {
       const websql = new WebSQL('test');

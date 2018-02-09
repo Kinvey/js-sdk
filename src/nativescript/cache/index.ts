@@ -8,11 +8,13 @@ export const StorageProvider = Object.assign({}, CoreStorageProvider, {
 Object.freeze(StorageProvider);
 
 class Storage extends CoreStorage {
-  name: string;
+  name?: string;
   storageProviders: Array<string>;
+  encryptionKey?: string;
 
-  constructor(name, storageProviders = [StorageProvider.SQLite, StorageProvider.Memory]) {
+  constructor(name?: string, storageProviders = [StorageProvider.SQLite, StorageProvider.Memory], encryptionKey?: string) {
     super(name, storageProviders);
+    this.encryptionKey = encryptionKey;
   }
 
   loadAdapter() {
@@ -24,7 +26,7 @@ class Storage extends CoreStorage {
 
         switch (storageProvider) {
           case StorageProvider.SQLite:
-            return sqLite.load(this.name);
+            return sqLite.load(this.name, this.encryptionKey);
           default:
             return super.loadAdapter();
         }
@@ -34,8 +36,8 @@ class Storage extends CoreStorage {
 }
 
 export class CacheMiddleware extends CoreCacheMiddleware {
-  loadStorage(name, storageProviders) {
-    return new Storage(name, storageProviders);
+  loadStorage(name, storageProviders, encryptionKey) {
+    return new Storage(name, storageProviders, encryptionKey);
   }
 }
 
