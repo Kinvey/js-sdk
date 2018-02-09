@@ -1323,8 +1323,8 @@ describe('Query', () => {
       const query = new Query();
       query.fields = ['desc'];
       expect(query.process(entities)).to.deep.equal([
-        { _id: '0', _acl: 'acl1', _kmd: 'kmd1', desc: 'Desc1' },
-        { _id: '1', _acl: 'acl2', _kmd: 'kmd2', desc: 'Desc2' }
+        { _id: '0', _acl: 'acl1', desc: 'Desc1' },
+        { _id: '1', _acl: 'acl2', desc: 'Desc2' }
       ]);
     });
   });

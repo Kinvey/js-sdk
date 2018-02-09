@@ -4,7 +4,7 @@ import { QueryError } from './errors';
 import { nested, isDefined, isNumber } from './utils';
 import { Log } from './log';
 
-const PROTECTED_FIELDS = ['_id', '_kmd', '_acl'];
+const PROTECTED_FIELDS = ['_id', '_acl'];
 const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
 
 /**
