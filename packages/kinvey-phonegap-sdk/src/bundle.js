@@ -1,12 +1,12 @@
 import { NetworkRack, CacheRack } from '../../../src/core/request';
 import { Html5HttpMiddleware } from '../../../src/html5/http';
-import { Html5CacheMiddleware } from '../../../src/html5/cache';
+import { PhoneGapCacheMiddleware } from '../../../src/phonegap/cache';
 import { MobileIdentityConnect } from '../../../src/core/identity';
 import { Popup } from '../../../src/phonegap/popup';
 import pkg from '../package.json';
 
 // Setup racks
-CacheRack.useCacheMiddleware(new Html5CacheMiddleware());
+CacheRack.useCacheMiddleware(new PhoneGapCacheMiddleware());
 NetworkRack.useHttpMiddleware(new Html5HttpMiddleware(pkg));
 
 // Setup popup
@@ -70,3 +70,4 @@ export {
 } from '../../../src/core';
 export * from '../../../src/html5';
 export { Push } from '../../../src/phonegap/push';
+
