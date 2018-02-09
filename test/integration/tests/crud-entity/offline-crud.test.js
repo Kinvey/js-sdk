@@ -131,6 +131,39 @@ function testFunc() {
             .catch(done);
         });
 
+        it('should remove sync entities only for entities, which match the query', (done) => {
+          const randomId = utilities.randomString();
+          const updatedEntity1 = {
+            _id: entity1._id,
+            someNewProperty: 'any value'
+          };
+
+          syncStore.update({ _id: randomId })
+            .then((result) => {
+              expect(result).to.deep.equal({ _id: randomId });
+              return syncStore.update(updatedEntity1);
+            })
+            .then((result) => {
+              expect(result).to.deep.equal(updatedEntity1);
+              return storeToTest.pendingSyncEntities();
+            })
+            .then((syncEntities) => {
+              expect(syncEntities.map(e => e.entityId).sort()).to.deep.equal([entity1._id, randomId].sort());
+              const query = new Kinvey.Query().equalTo('_id', entity1._id);
+              return storeToTest.clear(query);
+            })
+            .then((result) => {
+              expect(result).to.deep.equal({ count: 1 });
+              return storeToTest.pendingSyncEntities();
+            })
+            .then((result) => {
+              expect(result.length).to.equal(1);
+              expect(result[0].entityId).to.equal(randomId);
+              done();
+            })
+            .catch(done);
+        });
+
         it('should remove all entities only from the cache', (done) => {
           cacheStore.save({})
             .then(() => storeToTest.clear())
