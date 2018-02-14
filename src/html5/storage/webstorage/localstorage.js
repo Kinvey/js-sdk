@@ -7,8 +7,13 @@ const MASTER_COLLECTION = '__master__';
 class LocalStorage extends WebStorage {
   find(collection) {
     try {
-      const entities = JSON.parse(global.localStorage.getItem(`${this.name}.${collection}`));
-      return Promise.resolve(entities || []);
+      const entities = global.localStorage.getItem(`${this.name}.${collection}`);
+
+      if (entities) {
+        return Promise.resolve(JSON.parse(entities));
+      }
+
+      return Promise.resolve([]);
     } catch (error) {
       return Promise.reject(error);
     }

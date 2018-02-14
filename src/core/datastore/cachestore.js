@@ -876,26 +876,32 @@ export class CacheStore extends NetworkStore {
     options = assign({ useDeltaFetch: this.useDeltaFetch }, options);
     return this.syncManager.pull(query, options)
       .then((entities) => {
-        // Clear the cache
-        return this.clear(query, options)
-          .then(() => {
-            // Save network entities to cache
-            const saveRequest = new CacheRequest({
-              method: RequestMethod.PUT,
-              url: url.format({
-                protocol: this.client.apiProtocol,
-                host: this.client.apiHost,
-                pathname: this.pathname
-              }),
-              properties: options.properties,
-              body: entities,
-              timeout: options.timeout,
-              tag: this.tag
-            });
-            return saveRequest.execute();
-          })
+        // Remove entities that no longer exist in the backend from the cache
+        const entityIds = entities.map(entity => entity._id);
+        const removeQuery = new Query(query).and().notContainedIn('_id', entityIds);
+        removeQuery.fields = [];
+        removeQuery.skip = 0;
+        removeQuery.limit = null;
+        return this.clear(removeQuery)
           .then(() => entities);
-      });
+      })
+      .then((entities) => {
+        // Save network entities to cache
+        const saveRequest = new CacheRequest({
+          method: RequestMethod.PUT,
+          url: url.format({
+            protocol: this.client.apiProtocol,
+            host: this.client.apiHost,
+            pathname: this.pathname
+          }),
+          properties: options.properties,
+          body: entities,
+          timeout: options.timeout,
+          tag: this.tag
+        });
+        return saveRequest.execute()
+          .then(() => entities);
+      })
   }
 
   /**
