@@ -544,7 +544,7 @@ interface RequestOptions {
   properties?: Properties;
   timeout?: number;
   useDeltaFetch?: boolean;
-  version?: String;
+  version?: string;
 }
 
 // ClientConfig interface
