@@ -26,6 +26,7 @@ export namespace Kinvey {
     timeout ? : number;
     useDeltaFetch ? : boolean;
     version ? : string;
+    micId? : string;
   }
 
   // ClientConfig interface
@@ -545,6 +546,7 @@ interface RequestOptions {
   timeout?: number;
   useDeltaFetch?: boolean;
   version?: string;
+  micId?: string;
 }
 
 // ClientConfig interface
