@@ -9,6 +9,7 @@ import { RequestMethod } from './request';
 import { KinveyRequest, AuthType } from './network';
 import { repositoryProvider } from '../datastore/repositories';
 import { Client } from '../client';
+import { generateEntityId } from '../datastore/utils';
 
 const QUERY_CACHE_COLLECTION_NAME = '_QueryCache';
 
@@ -51,6 +52,7 @@ export class DeltaFetchRequest extends KinveyRequest {
         return repo.read(QUERY_CACHE_COLLECTION_NAME, queryCacheQuery)
           .then((queries) => {
             let deltaSetQuery = {
+              _id: generateEntityId(),
               collectionName: this._getCollectionFromUrl(),
               query: this.query ? this.query.toQueryString().query : undefined
             };
@@ -71,10 +73,13 @@ export class DeltaFetchRequest extends KinveyRequest {
 
             if (isArray(queries) && queries.length > 0) {
               [deltaSetQuery] = queries;
-              request.url = urljoin(this.url.split('?')[0], url.format({
-                pathname: '_deltaset',
-                query: { since: deltaSetQuery.lastRequest }
-              }), `?${this.url.split('?')[1] || ''}`);
+              if (deltaSetQuery.lastRequest) {
+                const urlParts = this.url.split('?');
+                request.url = urljoin(urlParts[0], url.format({
+                  pathname: '_deltaset',
+                  query: { since: deltaSetQuery.lastRequest }
+                }), urlParts[1] ? `?${urlParts[1]}` : null);
+              }
             }
 
             return request.execute()
