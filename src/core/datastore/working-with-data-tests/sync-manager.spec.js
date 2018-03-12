@@ -312,7 +312,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
         });
     });
 
-    it('should call NetworkRepo.read() to get entities from the backend', () => {
+    it.skip('should call NetworkRepo.read() to get entities from the backend', () => {
       return syncManager.pull(collection, query, options)
         .then(() => {
           validateSpyCalls(networkRepoMock.read, 1, [collection, query, options]);
@@ -354,8 +354,8 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
         networkRepoMock.count = createPromiseSpy(backendEntityCount);
       });
 
-      it.skip('should do a regular deltaset request if useDeltaFetch is true', () => {
-        options.useDeltaFetch = true;
+      it.skip('should do a regular deltaset request if useDeltaSet is true', () => {
+        options.useDeltaSet = true;
         return syncManager.pull(collection, null, options)
           .then(() => {
             validateSpyCalls(utilsMock.splitQueryIntoPages, 0);
@@ -401,7 +401,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           });
       });
 
-      it('should call NetworkRepo.read()', () => {
+      it.skip('should call NetworkRepo.read()', () => {
         const paginatedQueriesMock = [new Query()];
         utilsMock.splitQueryIntoPages.andReturn(paginatedQueriesMock);
         return syncManager.pull(collection, null, options)
