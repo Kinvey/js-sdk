@@ -91,7 +91,7 @@ describe('Data stores delegate correctly to sync manager', () => {
 
             const pullSpy = syncManagerMock.pull;
             validateSyncManagerCall(pullSpy, query, options);
-            expect(pullSpy.calls[0].arguments[2].useDeltaFetch).toBe(store.useDeltaFetch);
+            expect(pullSpy.calls[0].arguments[2].useDeltaSet).toBe(store.useDeltaSet);
           });
       });
 
@@ -102,7 +102,7 @@ describe('Data stores delegate correctly to sync manager', () => {
           .then(() => {
             const spy = syncManagerMock.pull;
             validateSyncManagerCall(spy, query, options);
-            expect(spy.calls[0].arguments[2].useDeltaFetch).toBe(store.useDeltaFetch);
+            expect(spy.calls[0].arguments[2].useDeltaSet).toBe(store.useDeltaSet);
           });
       });
 
@@ -115,8 +115,8 @@ describe('Data stores delegate correctly to sync manager', () => {
           .then(() => {
             validateSyncManagerCall(pushSpy, query, options);
             validateSyncManagerCall(pullSpy, query, options);
-            expect(pushSpy.calls[0].arguments[2].useDeltaFetch).toBe(store.useDeltaFetch);
-            expect(pullSpy.calls[0].arguments[2].useDeltaFetch).toBe(store.useDeltaFetch);
+            expect(pushSpy.calls[0].arguments[2].useDeltaSet).toBe(store.useDeltaSet);
+            expect(pullSpy.calls[0].arguments[2].useDeltaSet).toBe(store.useDeltaSet);
           });
       });
 
@@ -132,7 +132,7 @@ describe('Data stores delegate correctly to sync manager', () => {
           })
           .catch(() => {
             validateSyncManagerCall(pushSpy, query, options);
-            expect(pushSpy.calls[0].arguments[2].useDeltaFetch).toBe(store.useDeltaFetch);
+            expect(pushSpy.calls[0].arguments[2].useDeltaSet).toBe(store.useDeltaSet);
             expect(pullSpy.calls.length).toBe(0);
           });
       });
