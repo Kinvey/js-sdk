@@ -124,6 +124,7 @@ export class MobileIdentityConnect extends Identity {
   }
 
   requestCodeWithPopup(clientId, redirectUri, options = {}) {
+    const popup = new Popup();	
     const promise = Promise.resolve().then(() => {
       return popup.open(url.format({
         protocol: this.client.micProtocol,
