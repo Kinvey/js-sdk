@@ -8,7 +8,7 @@ import { KinveyError, NotFoundError, SyncError } from '../../errors';
 import { getPlatformConfig } from '../../platform-configs';
 import { SyncOperation } from './sync-operation';
 import { maxEntityLimit, defaultPullSortField } from './utils';
-import { isEmpty } from '../utils';
+import { isEmpty, generateEntityId } from '../utils';
 import { repositoryProvider } from '../repositories';
 import { Query } from '../../query';
 import {
@@ -17,6 +17,8 @@ import {
   forEachAsync,
   splitQueryIntoPages
 } from '../../utils';
+
+const QUERY_CACHE_COLLECTION_NAME = '_QueryCache';
 
 // imported for typings
 // import { SyncStateManager } from './sync-state-manager';
@@ -94,13 +96,7 @@ export class SyncManager {
           );
         }
 
-        // TODO: decide on default value of pagination setting
-        if (options && (options.autoPagination && !options.useDeltaFetch)) {
-          return this._paginatedPull(collection, query, options);
-        }
-
-        return this._fetchItemsFromServer(collection, query, options)
-          .then(replacedEntities => replacedEntities.length);
+        return this._fetchItemsFromServer(collection, query, options);
       });
   }
 
@@ -317,27 +313,44 @@ export class SyncManager {
   }
 
   _fetchItemsFromServer(collection, query, options = {}) {
-    return this._networkRepo.read(collection, query, options)
-      .then((data) => {
-        const useDeltaSet = options.useDeltaFetch || false;
+    return this._getOfflineRepo()
+      .then((repo) => {
+        let queryCacheQuery = new Query().equalTo('collectionName', collection);
 
-        if (useDeltaSet) {
-          return this._getOfflineRepo()
-            .then((repo) => {
-              const { deleted } = data;
-
-              if (isArray(deleted) && deleted.length > 0) {
-                const deletedIds = deleted.map((item) => item._id);
-                const deleteQuery = new Query().contains('_id', deletedIds);
-                return repo.delete(collection, deleteQuery).then(() => repo);
-              }
-
-              return repo;
-            })
-            .then(() => this._updateOfflineEntities(collection, data.changed));
+        if (query) {
+          queryCacheQuery = queryCacheQuery.and().equalTo('query', JSON.stringify(query.toQueryString()));
         }
 
-        return this._updateOfflineEntities(collection, data);
+        return repo.read(QUERY_CACHE_COLLECTION_NAME, queryCacheQuery)
+          .then((docs) => {
+            if (docs.length <= 0) {
+              return {
+                _id: generateEntityId(),
+                collectionName: collection,
+                query: query ? JSON.stringify(query.toQueryString()) : undefined
+              };
+            }
+
+            return docs[0];
+          });
+      })
+      .then((queryCacheDoc) => {
+        const responseCallback = (response) => {
+          queryCacheDoc.lastRequest = response.headers.get('X-Kinvey-Request-Start');
+          this._getOfflineRepo()
+            .then((repo) => repo.update(QUERY_CACHE_COLLECTION_NAME, queryCacheDoc));
+        };
+
+        if (options.useDeltaSet && queryCacheDoc.lastRequest) {
+          return this._deltaSetPull(collection, queryCacheDoc.lastRequest, query, options, responseCallback);
+        }
+
+        if (options.autoPagination) {
+          return this._paginatedPull(collection, query, options, responseCallback);
+        }
+
+        return this._fetchAndUpdateEntities(collection, query, options, responseCallback)
+          .then((docs) => docs.length);
       });
   }
 
@@ -423,18 +436,18 @@ export class SyncManager {
     return query;
   }
 
-  _fetchAndUpdateEntities(collection, query, options) {
-    return this._networkRepo.read(collection, query, options)
+  _fetchAndUpdateEntities(collection, query, options, responseCallback) {
+    return this._networkRepo.read(collection, query, options, responseCallback)
       .then((entities) => {
         return this._getOfflineRepo()
           .then(repo => repo.update(collection, entities));
       });
   }
 
-  _executePaginationQueries(collection, queries, options) {
+  _executePaginationQueries(collection, queries, options, responseCallback) {
     let pulledEntityCount = 0;
     return forEachAsync(queries, (query) => {
-      return this._fetchAndUpdateEntities(collection, query, options)
+      return this._fetchAndUpdateEntities(collection, query, options, responseCallback)
         .then((updatedEntities) => {
           pulledEntityCount += updatedEntities.length;
         });
@@ -450,7 +463,28 @@ export class SyncManager {
       });
   }
 
-  _paginatedPull(collection, userQuery, options = {}) {
+  _deltaSetPull(collection, since, query, options = {}, responseCallback) {
+    return this._networkRepo.deltaSet(collection, query, since, options, responseCallback)
+      .then((data) => {
+        const { deleted } = data;
+
+        if (isArray(deleted) && deleted.length > 0) {
+          return this._getOfflineRepo()
+            .then((repo) => {
+              const deletedIds = deleted.map((item) => item._id);
+              const deleteQuery = new Query().contains('_id', deletedIds);
+              return repo.delete(collection, deleteQuery);
+            })
+            .then(() => data);
+        }
+
+        return data;
+      })
+      .then((data) => this._updateOfflineEntities(collection, data.changed))
+      .then((docs) => docs.length);
+  }
+
+  _paginatedPull(collection, userQuery, options = {}, responseCallback) {
     let pullQuery;
     let expectedCount;
     userQuery = userQuery || new Query();
@@ -464,7 +498,7 @@ export class SyncManager {
         const pageSizeSetting = options.autoPagination && options.autoPagination.pageSize;
         const pageSize = pageSizeSetting || maxEntityLimit;
         const paginatedQueries = splitQueryIntoPages(pullQuery, pageSize, expectedCount);
-        return this._executePaginationQueries(collection, paginatedQueries, options);
+        return this._executePaginationQueries(collection, paginatedQueries, options, responseCallback);
       });
   }
 }
