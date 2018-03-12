@@ -27,13 +27,19 @@ export class CacheStore extends NetworkStore {
     /**
      * @type {boolean}
      */
-    this.useDeltaFetch = options.useDeltaFetch === true;
+    this.useDeltaSet = options.useDeltaSet === true || options.useDeltaFetch === true;
+
+    /**
+     * @type {boolean}
+     * @deprecated Deprecated with v3.10.1. Please use useDeltaSet.
+     */
+    this.useDeltaFetch = this.useDeltaSet;
 
     this.syncManager = syncManagerProvider.getSyncManager();
   }
 
   find(query, options = {}) {
-    options = assign({ useDeltaFetch: this.useDeltaFetch }, options);
+    options = assign({ useDeltaSet: this.useDeltaSet }, options);
     return super.find(query, options);
   }
 
@@ -121,7 +127,7 @@ export class CacheStore extends NetworkStore {
    * @return  {Promise.<number>}                                                Promise
    */
   pull(query, options = {}) {
-    options = assign({ useDeltaFetch: this.useDeltaFetch }, options);
+    options = assign({ useDeltaSet: this.useDeltaSet }, options);
     return this.syncManager.pull(this.collection, query, options);
   }
 
@@ -137,7 +143,7 @@ export class CacheStore extends NetworkStore {
    * @return  {Promise.<{push: [], pull: number}>}                              Promise
    */
   sync(query, options) {
-    options = assign({ useDeltaFetch: this.useDeltaFetch }, options);
+    options = assign({ useDeltaSet: this.useDeltaSet }, options);
     const result = {};
     return this.push(query, options)
       .then((pushResult) => {
