@@ -1,10 +1,12 @@
 import { Promise } from 'es6-promise';
+import { format } from 'url';
 
-import { KinveyRequest, RequestMethod, DeltaFetchRequest } from '../../request';
+import { KinveyRequest, RequestMethod } from '../../request';
 import { Aggregation } from '../../aggregation';
 
 import { Repository } from './repository';
 import { ensureArray } from '../../utils';
+import { Client } from '../../client';
 import { buildCollectionUrl } from './utils';
 
 /**
@@ -21,9 +23,22 @@ import { buildCollectionUrl } from './utils';
  */
 
 export class NetworkRepository extends Repository {
-  read(collection, query, options = {}) {
+  read(collection, query, options = {}, responseCallback) {
     const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, null, options);
-    return this._makeHttpRequest(requestConfig, options.useDeltaFetch);
+    return this._makeHttpRequest(requestConfig, responseCallback);
+  }
+
+  deltaSet(collection, query, since, options = {}, responseCallback) {
+    const client = Client.sharedInstance();
+    const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, '_deltaset', null, options);
+    requestConfig.url = format({
+      protocol: client.apiProtocol,
+      host: client.apiHost,
+      pathname: requestConfig.pathname,
+      query: { since }
+    });
+    delete requestConfig.pathname;
+    return this._makeHttpRequest(requestConfig, responseCallback);
   }
 
   readById(collection, entityId, options) {
@@ -74,11 +89,15 @@ export class NetworkRepository extends Repository {
       .then(res => (isSingle ? res && res[0] : res));
   }
 
-  _makeHttpRequest(requestConfig, deltaFetch) {
-    if (deltaFetch) {
-      return DeltaFetchRequest.execute(requestConfig);
-    }
-    return KinveyRequest.execute(requestConfig);
+  _makeHttpRequest(requestConfig, responseCallback) {
+    return KinveyRequest.execute(requestConfig, null, false)
+      .then((response) => {
+        if (typeof responseCallback === 'function') {
+          responseCallback(response);
+        }
+
+        return response.data;
+      });
   }
 
   /**
