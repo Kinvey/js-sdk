@@ -7,7 +7,7 @@ import { KinveyError, NotFoundError, SyncError } from '../../errors';
 
 import { getPlatformConfig } from '../../platform-configs';
 import { SyncOperation } from './sync-operation';
-import { maxEntityLimit, defaultPullSortField } from './utils';
+import { maxEntityLimit, defaultPullSortField, queryCacheCollectionName } from './utils';
 import { isEmpty, generateEntityId } from '../utils';
 import { repositoryProvider } from '../repositories';
 import { Query } from '../../query';
@@ -17,8 +17,6 @@ import {
   forEachAsync,
   splitQueryIntoPages
 } from '../../utils';
-
-const QUERY_CACHE_COLLECTION_NAME = '_QueryCache';
 
 // imported for typings
 // import { SyncStateManager } from './sync-state-manager';
@@ -321,7 +319,7 @@ export class SyncManager {
           queryCacheQuery = queryCacheQuery.and().equalTo('query', JSON.stringify(query.toQueryString()));
         }
 
-        return repo.read(QUERY_CACHE_COLLECTION_NAME, queryCacheQuery)
+        return repo.read(queryCacheCollectionName, queryCacheQuery)
           .then((docs) => {
             if (docs.length <= 0) {
               return {
@@ -338,7 +336,7 @@ export class SyncManager {
         const responseCallback = (response) => {
           queryCacheDoc.lastRequest = response.headers.get('X-Kinvey-Request-Start');
           this._getOfflineRepo()
-            .then((repo) => repo.update(QUERY_CACHE_COLLECTION_NAME, queryCacheDoc));
+            .then((repo) => repo.update(queryCacheCollectionName, queryCacheDoc));
         };
 
         if (options.useDeltaSet && queryCacheDoc.lastRequest) {
