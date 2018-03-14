@@ -291,7 +291,6 @@ export class SyncManager {
   }
 
   _fetchItemsFromServer(collection, query, options) {
-    // TODO: deltaset logic goes here
     return this._networkRepo.read(collection, query, options);
   }
 
