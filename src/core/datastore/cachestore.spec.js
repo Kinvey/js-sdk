@@ -193,7 +193,7 @@ describe('CacheStore', () => {
     it('should perform a delta set request', (done) => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
-      const store = new CacheStore(collection, null, { useDeltaFetch: true });
+      const store = new CacheStore(collection, null, { useDeltaSet: true });
       const onNextSpy = expect.createSpy();
       const lastRequestDate = new Date();
 
@@ -230,7 +230,7 @@ describe('CacheStore', () => {
     it('should perform a delta set request with a tagged datastore', (done) => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
-      const store = new CacheStore(collection, null, { useDeltaFetch: true, tag: randomString() });
+      const store = new CacheStore(collection, null, { useDeltaSet: true, tag: randomString() });
       const onNextSpy = expect.createSpy();
       const lastRequestDate = new Date();
 

@@ -73,7 +73,7 @@ export class SyncManager {
     }
 
     // TODO: decide on default value of pagination setting
-    if (options && (options.autoPagination && !options.useDeltaFetch)) {
+    if (options && (options.autoPagination && !options.useDeltaSet)) {
       return this._paginatedPull(collection, query, options);
     }
 

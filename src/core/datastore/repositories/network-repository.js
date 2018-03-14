@@ -23,7 +23,7 @@ import { buildCollectionUrl } from './utils';
 
 export class NetworkRepository extends Repository {
   read(collection, query, options = {}) {
-    if (options.useDeltaFetch) {
+    if (options.useDeltaSet) {
       return deltaSet(collection, query, options);
     }
 
