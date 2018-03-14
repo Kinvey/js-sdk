@@ -6,6 +6,7 @@ import { repositoryProvider } from '../repositories';
 import { DataProcessor } from './data-processor';
 import { generateEntityId, isEmpty } from '../utils';
 import { ensureArray, isDefined } from '../../utils';
+import { clearDeltaSet } from '../deltaset';
 
 // imported for typings
 // import { SyncManager } from '../sync';
@@ -64,6 +65,7 @@ export class OfflineDataProcessor extends DataProcessor {
 
   _processClear(collection, query, options) {
     return this._syncManager.clearSync(collection, query)
+      .then(() => clearDeltaSet(collection))
       .then(() => this._getRepository())
       .then(repo => repo.delete(collection, query, options));
   }

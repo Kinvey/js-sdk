@@ -64,7 +64,7 @@ export function deltaSet(collectionNameWithTag, query, options) {
             .then((response) => {
               deltaSetQueryDoc.lastRequest = response.headers.get('X-Kinvey-Request-Start');
               return offlineRepo.update(QUERY_CACHE_COLLECTION_NAME, deltaSetQueryDoc)
-                .then((response) => response.data);
+                .then(() => response.data);
             });
         })
         .then((data) => {
@@ -89,4 +89,11 @@ export function deltaSet(collectionNameWithTag, query, options) {
           return offlineRepo.update(collectionNameWithTag, changed);
         });
     });
+}
+
+export function clearDeltaSet(collectionNameWithTag) {
+  const collectionName = stripTagFromCollectionName(collectionNameWithTag);
+  const queryCacheQuery = new Query().equalTo('collectionName', collectionName);
+  return repositoryProvider.getOfflineRepository()
+    .then((offlineRepo) => offlineRepo.delete(QUERY_CACHE_COLLECTION_NAME, queryCacheQuery));
 }
