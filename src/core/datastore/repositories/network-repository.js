@@ -1,7 +1,8 @@
 import { Promise } from 'es6-promise';
 
-import { KinveyRequest, RequestMethod, DeltaFetchRequest } from '../../request';
+import { KinveyRequest, RequestMethod } from '../../request';
 import { Aggregation } from '../../aggregation';
+import { deltaSet } from '../deltaset';
 
 import { Repository } from './repository';
 import { ensureArray } from '../../utils';
@@ -22,8 +23,12 @@ import { buildCollectionUrl } from './utils';
 
 export class NetworkRepository extends Repository {
   read(collection, query, options = {}) {
+    if (options.useDeltaFetch) {
+      return deltaSet(collection, query, options);
+    }
+
     const requestConfig = this._buildRequestConfig(collection, RequestMethod.GET, null, query, null, null, options);
-    return this._makeHttpRequest(requestConfig, options.useDeltaFetch);
+    return this._makeHttpRequest(requestConfig);
   }
 
   readById(collection, entityId, options) {
@@ -74,11 +79,7 @@ export class NetworkRepository extends Repository {
       .then(res => (isSingle ? res && res[0] : res));
   }
 
-  _makeHttpRequest(requestConfig, deltaFetch) {
-    if (deltaFetch) {
-      const request = new DeltaFetchRequest(requestConfig);
-      return request.execute().then(r => r.data);
-    }
+  _makeHttpRequest(requestConfig) {
     return KinveyRequest.execute(requestConfig);
   }
 
