@@ -8,12 +8,12 @@ const webRunTests = (staticPort, runner) =>
 
     if (os.type() === 'Windows_NT') {
       opn(args[0], {
-        app: ['chrome', '--incognito']
+        app: ['chrome', '--incognito', '--disable-web-security', '--user-data-dir']
       })
         .then(resolve)
         .catch(reject);
     } else {
-      const chrome = spawnHeadlessChromium(args);
+      const chrome = spawnHeadlessChromium([args[0], '--user-data-dir']);
       chrome.stderr.on('data', d => reject(d.toString()));
       resolve();
     }
