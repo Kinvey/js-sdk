@@ -3,6 +3,8 @@ import _isEmpty from 'lodash/isEmpty';
 import { isNonemptyString } from '../../utils';
 
 export const dataStoreTagSeparator = '.';
+export const queryCacheCollectionName = '_QueryCache';
+export const xKivneyRequestStartHeader = 'X-Kinvey-Request-Start';
 
 export function generateEntityId(length = 24) {
   const chars = 'abcdef0123456789';
