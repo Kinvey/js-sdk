@@ -77,6 +77,11 @@ export class SyncManager {
       return this._paginatedPull(collection, query, options);
     }
 
+    if (options.useDeltaSet) {
+      return this._fetchItemsFromServer(collection, query, options)
+        .then(entities => entities.length);
+    }
+
     return this._fetchItemsFromServer(collection, query, options)
       .then(entities => this._replaceOfflineEntities(collection, query, entities))
       .then(replacedEntities => replacedEntities.length);
