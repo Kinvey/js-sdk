@@ -6,6 +6,8 @@ export const dataStoreTagSeparator = '.';
 export const queryCacheCollectionName = '_QueryCache';
 export const xKivneyRequestStartHeader = 'X-Kinvey-Request-Start';
 
+export { buildCollectionUrl } from '../repositories/utils';
+
 export function generateEntityId(length = 24) {
   const chars = 'abcdef0123456789';
   let objectId = '';

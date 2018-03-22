@@ -5,79 +5,77 @@ import { KinveyRequest, RequestMethod, AuthType } from '../request';
 import { Client } from '../client';
 import { KinveyError } from '../errors';
 import { repositoryProvider } from './repositories';
-import { buildCollectionUrl } from './repositories/utils';
 import {
-  stripTagFromCollectionName,
+  buildCollectionUrl,
   generateEntityId,
   queryCacheCollectionName,
   xKivneyRequestStartHeader
 } from './utils';
 
-function getDeltaSetQuery(collectionNameWithTag, query) {
+function getCachedQuery(collectionName, query) {
   const serializedQuery = query ? query.toString() : '';
 
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
       const queryCacheQuery = new Query()
-        .equalTo('collectionName', collectionNameWithTag)
+        .equalTo('collectionName', collectionName)
         .and()
         .equalTo('query', serializedQuery);
       return offlineRepo.read(queryCacheCollectionName, queryCacheQuery)
-        .then((deltaSetQueryDocs = []) => {
-          if (deltaSetQueryDocs.length > 0) {
-            return deltaSetQueryDocs[0];
+        .then((cachedQueries = []) => {
+          if (cachedQueries.length > 0) {
+            return cachedQueries[0];
           }
 
           return {
             _id: generateEntityId(),
-            collectionName: collectionNameWithTag,
+            collectionName: collectionName,
             query: serializedQuery
           };
         });
     });
 }
 
-function updateDeltaSetQuery(deltaSetQuery, response) {
+function updateCachedQuery(cachedQuery, lastRequest) {
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
-      deltaSetQuery.lastRequest = response.headers.get(xKivneyRequestStartHeader);
-      return offlineRepo.update(queryCacheCollectionName, deltaSetQuery);
+      cachedQuery.lastRequest = lastRequest;
+      return offlineRepo.update(queryCacheCollectionName, cachedQuery);
     });
 }
 
-function readDocs(collectionNameWithTag, query) {
+function readEntities(collectionName, query) {
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
-      return offlineRepo.read(collectionNameWithTag, query);
+      return offlineRepo.read(collectionName, query);
     });
 }
 
-function deleteDocs(collectionNameWithTag, deleted = []) {
+function entitiesToDelete(collectionName, deleted = []) {
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
       if (isArray(deleted) && deleted.length > 0) {
-        const deletedIds = deleted.map((doc) => doc._id);
+        const deletedIds = deleted.map((entities) => entities._id);
         const deleteQuery = new Query().contains('_id', deletedIds);
-        return offlineRepo.delete(collectionNameWithTag, deleteQuery)
+        return offlineRepo.delete(collectionName, deleteQuery);
       }
 
-      return deleted;
+      return 0;
     });
 }
 
-function updateDocs(collectionNameWithTag, changed = []) {
+function entitiesToUpdate(collectionName, changed = []) {
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
       if (isArray(changed) && changed.length > 0) {
-        return offlineRepo.update(collectionNameWithTag, changed)
+        return offlineRepo.update(collectionName, changed);
       }
 
       return changed;
     });
 }
 
-function makeDeltaSetRequest(collectionNameWithTag, deltaSetQuery, query, options) {
-  const collectionName = stripTagFromCollectionName(collectionNameWithTag);
+function makeDeltaSetRequest(collectionName, since, query, options) {
   const client = Client.sharedInstance();
   const request = new KinveyRequest({
     authType: AuthType.Default,
@@ -85,8 +83,8 @@ function makeDeltaSetRequest(collectionNameWithTag, deltaSetQuery, query, option
     url: format({
       protocol: client.apiProtocol,
       host: client.apiHost,
-      pathname: buildCollectionUrl(collectionName, '_deltaset'),
-      query: { since: deltaSetQuery.lastRequest }
+      pathname: buildCollectionUrl(collectionName, null, '_deltaset'),
+      query: { since }
     }),
     query,
     timeout: options.timeout,
@@ -97,28 +95,10 @@ function makeDeltaSetRequest(collectionNameWithTag, deltaSetQuery, query, option
     trace: options.trace,
     client
   });
-
-  return request.execute()
-    .then((response) => {
-      return updateDeltaSetQuery(deltaSetQuery, response).then(() => response.data);
-    })
-    .then((data) => {
-      return deleteDocs(collectionNameWithTag, data.deleted)
-        .then(() => updateDocs(collectionNameWithTag, data.changed))
-        .then(() => data);
-    });
+  return request.execute();
 }
 
-function makeRequest(collectionNameWithTag, deltaSetQuery, query, options) {
-  if (deltaSetQuery && deltaSetQuery.lastRequest) {
-    if (query && (query.skip != null || query.limit != null)) {
-      throw new KinveyError('You cannot use the skip and limit modifiers on the query when performing a delta set request.');
-    }
-
-    return makeDeltaSetRequest(collectionNameWithTag, deltaSetQuery, query, options);
-  }
-
-  const collectionName = stripTagFromCollectionName(collectionNameWithTag);
+function makeRegularGETRequest(collectionName, query, options) {
   const client = Client.sharedInstance();
   const request = new KinveyRequest({
     authType: AuthType.Default,
@@ -137,23 +117,40 @@ function makeRequest(collectionNameWithTag, deltaSetQuery, query, options) {
     trace: options.trace,
     client
   });
-  return request.execute()
-    .then((response) => {
-      return updateDeltaSetQuery(deltaSetQuery, response).then(() => response.data);
+  return request.execute();
+}
+
+export function deltaSet(collectionName, query, options) {
+  return getCachedQuery(collectionName, query)
+    .then((cachedQuery) => {
+      let promise;
+
+      if (cachedQuery && cachedQuery.lastRequest) {
+        if (query && (query.skip != null || query.limit != null)) {
+          return Promise.reject(new KinveyError('You cannot use the skip and limit modifiers on the query when performing a delta set request.'));
+        }
+
+        promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, query, options);
+      } else {
+        promise = makeRegularGETRequest(collectionName, query, options);
+      }
+
+      return promise
+        .then((response) => {
+          const requestStartDate = response.headers.get(xKivneyRequestStartHeader);
+          return updateCachedQuery(cachedQuery, requestStartDate).then(() => response.data);
+        });
     })
     .then((data) => {
-      return updateDocs(collectionNameWithTag, data);
-    });
+      return entitiesToDelete(collectionName, data.deleted)
+        .then(() => entitiesToUpdate(collectionName, data.changed || data))
+        .then(() => data);
+    })
+    .then(() => readEntities(collectionName, query));
 }
 
-export function deltaSet(collectionNameWithTag, query, options) {
-  return getDeltaSetQuery(collectionNameWithTag, query)
-    .then((deltaSetQuery) => makeRequest(collectionNameWithTag, deltaSetQuery, query, options))
-    .then(() => readDocs(collectionNameWithTag, query))
-}
-
-export function clearDeltaSet(collectionNameWithTag) {
-  const queryCacheQuery = new Query().equalTo('collectionName', collectionNameWithTag);
+export function clearDeltaSet(collectionName) {
+  const queryCacheQuery = new Query().equalTo('collectionName', collectionName);
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => offlineRepo.delete(queryCacheCollectionName, queryCacheQuery));
 }
