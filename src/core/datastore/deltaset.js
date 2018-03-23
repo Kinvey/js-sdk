@@ -9,7 +9,7 @@ import {
   buildCollectionUrl,
   generateEntityId,
   queryCacheCollectionName,
-  xKivneyRequestStartHeader
+  kinveyRequestStartHeader
 } from './utils';
 
 function getCachedQuery(collectionName, query) {
@@ -137,7 +137,7 @@ export function deltaSet(collectionName, query, options) {
 
       return promise
         .then((response) => {
-          const requestStartDate = response.headers.get(xKivneyRequestStartHeader);
+          const requestStartDate = response.headers.get(kinveyRequestStartHeader);
           return updateCachedQuery(cachedQuery, requestStartDate).then(() => response.data);
         });
     })

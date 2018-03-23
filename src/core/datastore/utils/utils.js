@@ -4,7 +4,7 @@ import { isNonemptyString } from '../../utils';
 
 export const dataStoreTagSeparator = '.';
 export const queryCacheCollectionName = '_QueryCache';
-export const xKivneyRequestStartHeader = 'X-Kinvey-Request-Start';
+export const kinveyRequestStartHeader = 'X-Kinvey-Request-Start';
 
 export { buildCollectionUrl } from '../repositories/utils';
 
