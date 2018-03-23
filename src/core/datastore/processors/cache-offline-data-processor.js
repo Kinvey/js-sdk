@@ -76,7 +76,7 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
       });
   }
 
-  _processRead(collection, query, options) {
+  _processRead(collection, query, options = {}) {
     let offlineEntities;
     return wrapInObservable((observer) => {
       return this._ensureCountBeforeRead(collection, 'fetch the entities', query)
@@ -88,7 +88,12 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
         })
         .then((networkEntities) => {
           observer.next(networkEntities);
-          return this._replaceOfflineEntities(collection, offlineEntities, networkEntities);
+
+          if (!options.useDeltaSet) {
+            return this._replaceOfflineEntities(collection, offlineEntities, networkEntities);
+          }
+
+          return networkEntities;
         });
     });
   }
