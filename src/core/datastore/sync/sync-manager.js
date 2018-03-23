@@ -67,7 +67,7 @@ export class SyncManager {
       });
   }
 
-  pull(collection, query, options) {
+  pull(collection, query, options = {}) {
     if (!isNonemptyString(collection)) {
       return Promise.reject(new KinveyError('Invalid or missing collection name'));
     }
