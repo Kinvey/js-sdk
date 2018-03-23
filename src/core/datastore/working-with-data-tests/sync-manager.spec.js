@@ -361,8 +361,6 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
             validateSpyCalls(utilsMock.splitQueryIntoPages, 0);
             validateSpyCalls(networkRepoMock.count, 0);
             validateSpyCalls(networkRepoMock.read, 1, [collection, null, options]);
-            validateSpyCalls(offlineRepoMock.delete, 1, [collection, null]);
-            validateSpyCalls(offlineRepoMock.update, 1, [collection, []]);
           });
       });
 
