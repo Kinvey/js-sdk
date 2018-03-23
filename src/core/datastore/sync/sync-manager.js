@@ -79,7 +79,7 @@ export class SyncManager {
 
     return this._fetchItemsFromServer(collection, query, options)
       .then((entities) => {
-        if (options.useDeltaSet) {
+        if (!options.useDeltaSet) {
           return this._replaceOfflineEntities(collection, query, entities);
         }
 
