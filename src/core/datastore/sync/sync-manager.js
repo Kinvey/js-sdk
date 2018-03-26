@@ -72,7 +72,6 @@ export class SyncManager {
       return Promise.reject(new KinveyError('Invalid or missing collection name'));
     }
 
-    // TODO: decide on default value of pagination setting
     if (options && (options.autoPagination && !options.useDeltaSet)) {
       return this._paginatedPull(collection, query, options);
     }
