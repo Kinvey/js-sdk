@@ -1,4 +1,6 @@
 import isArray from 'lodash/isArray';
+import isNumber from 'lodash/isNumber';
+import isEmpty from 'lodash/isEmpty';
 import { format } from 'url';
 import { Query } from '../query';
 import { KinveyRequest, RequestMethod, AuthType } from '../request';
@@ -13,7 +15,10 @@ import {
 } from './utils';
 
 function getCachedQuery(collectionName, query) {
-  const serializedQuery = query ? query.toString() : '';
+  const queryObject = query ? query.toQueryString() : {};
+  delete queryObject.skip;
+  delete queryObject.limit;
+  const serializedQuery = queryObject && !isEmpty(queryObject) ? JSON.stringify(queryObject) : '';
 
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
@@ -126,7 +131,7 @@ export function deltaSet(collectionName, query, options) {
       let promise;
 
       if (cachedQuery && cachedQuery.lastRequest) {
-        if (query && (query.skip != null || query.limit != null)) {
+        if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
           return Promise.reject(new KinveyError('You cannot use the skip and limit modifiers on the query when performing a delta set request.'));
         }
 

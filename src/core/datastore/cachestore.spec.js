@@ -190,6 +190,64 @@ describe('CacheStore', () => {
         });
     });
 
+    it('should throw an error if skip modifier is used for delta set', (done) => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const store = new CacheStore(collection, null, { useDeltaSet: true });
+      // const onNextSpy = expect.createSpy();
+      const lastRequestDate = new Date();
+
+      nock(store.client.apiHostname)
+        .get(`/appdata/${store.client.appKey}/${collection}`)
+        .reply(200, [entity1, entity2], {
+          'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+        });
+
+      store.pull()
+        .then(() => {
+          const query = new Query();
+          query.skip = 10;
+          store.find(query)
+            .subscribe(null, (error) => {
+              try {
+                expect(error.message).toEqual('You cannot use the skip and limit modifiers on the query when performing a delta set request.');
+                done();
+              } catch (err) {
+                done(err);
+              }
+            });
+        });
+    });
+
+    it('should throw an error if limit modifier is used for delta set', (done) => {
+      const entity1 = { _id: randomString() };
+      const entity2 = { _id: randomString() };
+      const store = new CacheStore(collection, null, { useDeltaSet: true });
+      // const onNextSpy = expect.createSpy();
+      const lastRequestDate = new Date();
+
+      nock(store.client.apiHostname)
+        .get(`/appdata/${store.client.appKey}/${collection}`)
+        .reply(200, [entity1, entity2], {
+          'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+        });
+
+      store.pull()
+        .then(() => {
+          const query = new Query();
+          query.limit = 10;
+          store.find(query)
+            .subscribe(null, (error) => {
+              try {
+                expect(error.message).toEqual('You cannot use the skip and limit modifiers on the query when performing a delta set request.');
+                done();
+              } catch (err) {
+                done(err);
+              }
+            });
+        });
+    });
+
     it('should perform a delta set request', (done) => {
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
@@ -214,6 +272,46 @@ describe('CacheStore', () => {
             });
 
           store.find()
+            .subscribe(onNextSpy, done, () => {
+              try {
+                expect(onNextSpy.calls.length).toEqual(2);
+                expect(onNextSpy.calls[0].arguments).toEqual([[entity1, entity2]]);
+                expect(onNextSpy.calls[1].arguments).toEqual([[changedEntity2]]);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        })
+        .catch(done);
+    });
+
+    it('should perform a delta set request with a query', (done) => {
+      const entity1 = { _id: randomString(), title: 'Test' };
+      const entity2 = { _id: randomString(), title: 'Test' };
+      const store = new CacheStore(collection, null, { useDeltaSet: true });
+      const onNextSpy = expect.createSpy();
+      const lastRequestDate = new Date();
+      const query = new Query().equalTo('title', 'Test');
+
+      nock(store.client.apiHostname)
+        .get(`/appdata/${store.client.appKey}/${collection}`)
+        .query(query.toQueryString())
+        .reply(200, [entity1, entity2], {
+          'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+        });
+
+      store.pull(query)
+        .then(() => {
+          const changedEntity2 = Object.assign({}, entity2, { author: 'Kinvey' });
+          nock(client.apiHostname)
+            .get(`/appdata/${store.client.appKey}/${collection}/_deltaset`)
+            .query(Object.assign({ since: lastRequestDate.toISOString() }, query.toQueryString()))
+            .reply(200, { changed: [changedEntity2], deleted: [{ _id: entity1._id }] }, {
+              'X-Kinvey-Request-Start': new Date().toISOString()
+            });
+
+          store.find(query)
             .subscribe(onNextSpy, done, () => {
               try {
                 expect(onNextSpy.calls.length).toEqual(2);
