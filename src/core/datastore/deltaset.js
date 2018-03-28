@@ -5,7 +5,7 @@ import { format } from 'url';
 import { Query } from '../query';
 import { KinveyRequest, RequestMethod, AuthType } from '../request';
 import { Client } from '../client';
-import { KinveyError } from '../errors';
+import { Log } from '../log';
 import { repositoryProvider } from './repositories';
 import {
   buildCollectionUrl,
@@ -16,8 +16,6 @@ import {
 
 function getCachedQuery(collectionName, query) {
   const queryObject = query ? query.toQueryString() : {};
-  delete queryObject.skip;
-  delete queryObject.limit;
   const serializedQuery = queryObject && !isEmpty(queryObject) ? JSON.stringify(queryObject) : '';
 
   return repositoryProvider.getOfflineRepository()
@@ -126,18 +124,22 @@ function makeRegularGETRequest(collectionName, query, options) {
 }
 
 export function deltaSet(collectionName, query, options) {
-  return getCachedQuery(collectionName, query)
+  const deltaSetQuery = new Query(query);
+
+  if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
+    Log.info('You cannot use the skip and limit modifiers on the query when performing a delta set request.');
+    deltaSetQuery.skip = 0;
+    deltaSetQuery.limit = null;
+  }
+
+  return getCachedQuery(collectionName, deltaSetQuery)
     .then((cachedQuery) => {
       let promise;
 
       if (cachedQuery && cachedQuery.lastRequest) {
-        if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
-          return Promise.reject(new KinveyError('You cannot use the skip and limit modifiers on the query when performing a delta set request.'));
-        }
-
-        promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, query, options);
+        promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, deltaSetQuery, options);
       } else {
-        promise = makeRegularGETRequest(collectionName, query, options);
+        promise = makeRegularGETRequest(collectionName, deltaSetQuery, options);
       }
 
       return promise
