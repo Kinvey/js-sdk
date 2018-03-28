@@ -127,7 +127,7 @@ export function deltaSet(collectionName, query, options) {
   const deltaSetQuery = new Query(query);
 
   if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
-    Log.info('You cannot use the skip and limit modifiers on the query when performing a delta set request.');
+    Log.info('The skip and limit modifiers for a query will be ignored when performing a delta set request.');
     deltaSetQuery.skip = 0;
     deltaSetQuery.limit = null;
   }
