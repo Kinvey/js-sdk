@@ -281,6 +281,7 @@ describe('CacheStore', () => {
 
         nock(store.client.apiHostname)
           .get(`/appdata/${store.client.appKey}/${collection}`)
+          .query(query.toQueryString())
           .reply(200, [entity1, entity2, entity3], {
             'X-Kinvey-Request-Start': lastRequestDate.toISOString()
           });
@@ -322,6 +323,7 @@ describe('CacheStore', () => {
 
         nock(store.client.apiHostname)
           .get(`/appdata/${store.client.appKey}/${collection}`)
+          .query(query.toQueryString())
           .reply(200, [entity1, entity2, entity3], {
             'X-Kinvey-Request-Start': lastRequestDate.toISOString()
           });

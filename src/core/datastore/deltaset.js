@@ -139,7 +139,7 @@ export function deltaSet(collectionName, query, options) {
       if (cachedQuery && cachedQuery.lastRequest) {
         promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, deltaSetQuery, options);
       } else {
-        promise = makeRegularGETRequest(collectionName, deltaSetQuery, options);
+        promise = makeRegularGETRequest(collectionName, query, options);
       }
 
       return promise
