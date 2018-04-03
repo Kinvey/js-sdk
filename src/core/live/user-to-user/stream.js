@@ -1,3 +1,5 @@
+import { Promise } from 'es6-promise';
+
 import { KinveyError } from '../../errors';
 import { Client } from '../../client';
 import { isNonemptyString } from '../../utils';
@@ -255,7 +257,7 @@ export class Stream {
    * @returns {Promise}
    */
   _makeStreamRequest(path, method, body) {
-    return KinveyRequest.executeShort({
+    return KinveyRequest.execute({
       method: method,
       pathname: `/stream/${this._client.appKey}/${this.name}/${path}`,
       body: body

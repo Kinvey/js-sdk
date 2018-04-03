@@ -1,9 +1,11 @@
 import sift from 'sift';
 import isPlainObject from 'lodash/isPlainObject';
+import defaults from 'lodash/defaults';
 import { QueryError } from './errors';
 import { nested, isDefined, isNumber } from './utils';
 import { Log } from './log';
 
+const PROTECTED_FIELDS = ['_id', '_acl'];
 const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
 
 /**
@@ -27,13 +29,13 @@ export class Query {
    * @return {Query} The query.
    */
   constructor(options) {
-    options = Object.assign({
+    options = defaults(options, {
       fields: [],
       filter: {},
       sort: null,
       limit: null,
       skip: 0
-    }, options);
+    });
 
     /**
      * Fields to select.
@@ -197,6 +199,10 @@ export class Query {
         const value = this.filter[key];
         return UNSUPPORTED_CONDITIONS.some((unsupportedConditions) => {
           if (!value) {
+            return true;
+          }
+
+          if (typeof value !== 'object') {
             return true;
           }
 
@@ -799,11 +805,12 @@ export class Query {
 
     // Remove fields
     if (Array.isArray(json.fields) && json.fields.length > 0) {
+      const fields = [].concat(json.fields, PROTECTED_FIELDS);
       Log.debug('Removing fields from data', json.fields);
       data = data.map((item) => {
         const keys = Object.keys(item);
         keys.forEach((key) => {
-          if (json.fields.indexOf(key) === -1) {
+          if (fields.indexOf(key) === -1) {
             delete item[key];
           }
         });

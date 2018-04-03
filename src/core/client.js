@@ -2,9 +2,11 @@ import MemoryCache from 'fast-memory-cache';
 import url from 'url';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
+import isNaN from 'lodash/isNaN';
 import { KinveyError } from './errors';
 import { Log } from './log';
-import { isDefined, uuidv4 } from './utils';
+import { isDefined, uuidv4, isValidStorageProviderValue } from './utils';
+import { StorageProvider } from './datastore';
 
 const DEFAULT_TIMEOUT = 60000;
 const ACTIVE_USER_KEY = 'active_user';
@@ -51,8 +53,9 @@ export class Client {
    * Creates a new instance of the Client class.
    *
    * @param {Object}    options                                            Options
-   * @param {string}    [options.apiHostname='https://baas.kinvey.com']    Host name used for Kinvey API requests
-   * @param {string}    [options.micHostname='https://auth.kinvey.com']    Host name used for Kinvey MIC requests
+   * @param {string}    [options.instanceId='<my-subdomain>']              Custom subdomain for Kinvey API and MIC requests.
+   * @param {string}    [options.apiHostname='https://baas.kinvey.com']    Deprecated: Use the instanceID property instead. Host name used for Kinvey API requests
+   * @param {string}    [options.micHostname='https://auth.kinvey.com']    Deprecated: Use the instanceID property instead. Host name used for Kinvey MIC requests
    * @param {string}    [options.appKey]                                   App Key
    * @param {string}    [options.appSecret]                                App Secret
    * @param {string}    [options.masterSecret]                             App Master Secret
@@ -68,12 +71,30 @@ export class Client {
    */
 
   constructor(config = {}) {
-    let apiHostname = isString(config.apiHostname) ? config.apiHostname : 'https://baas.kinvey.com';
-    if (/^https?:\/\//i.test(apiHostname) === false) {
-      apiHostname = `https://${apiHostname}`;
+    let apiHostname = 'https://baas.kinvey.com';
+    let micHostname = 'https://auth.kinvey.com';
+
+    if (config.instanceId) {
+      const { instanceId } = config;
+
+      if (!isString(instanceId)) {
+        throw new KinveyError('Instance ID must be a string.');
+      }
+
+      apiHostname = `https://${instanceId}-baas.kinvey.com`;
+      micHostname = `https://${instanceId}-auth.kinvey.com`;
+    } else {
+      if (isString(config.apiHostname)) {
+        apiHostname = /^https?:\/\//i.test(config.apiHostname) ? config.apiHostname : `https://${config.apiHostname}`;
+      }
+
+      if (isString(config.micHostname)) {
+        micHostname = /^https?:\/\//i.test(config.micHostname) ? config.micHostname : `https://${config.micHostname}`;
+      }
     }
 
     const apiHostnameParsed = url.parse(apiHostname);
+    const micHostnameParsed = url.parse(micHostname);
 
     /**
      * @type {string}
@@ -89,13 +110,6 @@ export class Client {
      * @type {string}
      */
     this.apiHost = apiHostnameParsed.host;
-
-    let micHostname = isString(config.micHostname) ? config.micHostname : 'https://auth.kinvey.com';
-    if (/^https?:\/\//i.test(micHostname) === false) {
-      micHostname = `https://${micHostname}`;
-    }
-
-    const micHostnameParsed = url.parse(micHostname);
 
     /**
      * @type {string}
@@ -138,14 +152,11 @@ export class Client {
     this.defaultTimeout = isNumber(config.defaultTimeout) && config.defaultTimeout >= 0 ? config.defaultTimeout : DEFAULT_TIMEOUT;
 
     /**
-     * @type {?string[]}
-     */
-    this.storageProviders = config.storage;
-
-    /**
      * @private
      */
     this.activeUserStorage = new ActiveUserStorage();
+
+    this.storage = config.storage || StorageProvider.Memory;
   }
 
   /**
@@ -216,11 +227,23 @@ export class Client {
     }
 
     if (timeout < 0) {
-      Log.info(`Default timeout is less than 0. Setting default timeout to ${defaultTimeout}ms.`);
-      timeout = defaultTimeout;
+      Log.info(`Default timeout is less than 0. Setting default timeout to ${this.defaultTimeout}ms.`);
+      timeout = this.defaultTimeout;
     }
 
     this._defaultTimeout = timeout;
+  }
+
+  get storage() {
+    return this._storage;
+  }
+
+  set storage(value) {
+    if (!isValidStorageProviderValue(value)) {
+      throw new KinveyError('Please provide a valid set of supported storage providers for this platform');
+    }
+
+    this._storage = value;
   }
 
   /**
@@ -242,7 +265,7 @@ export class Client {
       masterSecret: this.masterSecret,
       encryptionKey: this.encryptionKey,
       appVersion: this.appVersion,
-      storageProviders: this.storageProviders
+      storage: this.storage
     };
   }
 
@@ -278,7 +301,7 @@ export class Client {
    * @param {string}    [options.masterSecret]                             App Master Secret
    * @param {string}    [options.encryptionKey]                            App Encryption Key
    * @param {string}    [options.appVersion]                               App Version
-   * @return {Promise}                                                     A promise.
+   * @return {Client}                                                     A promise.
    */
   static init(config) {
     sharedInstance = new Client(config);

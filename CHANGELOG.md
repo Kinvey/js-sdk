@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.10.2](https://github.com/Kinvey/js-sdk/tree/v3.10.2) (2018-03-29)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/v3.10.1...v3.10.2)<br/>
+
+### Enhancements
+- MLIBZ-2399: Use the long form Mobile Identity Connect `clientID` in the auth header for KAS endpoints. [#263](https://github.com/Kinvey/js-sdk/pull/263)
+- MLIBZ-2131: Remove implicit `push()` calls from datastore. [#276](https://github.com/Kinvey/js-sdk/pull/276)
+- MLIBZ-2332: Add support for `instanceId` config option. [#278](https://github.com/Kinvey/js-sdk/pull/278)
+- Add default entitlements plist file to NativeScript SDK. [#281](https://github.com/Kinvey/js-sdk/pull/281)
+
+### Bug Fixes
+- Check that value is an object before calling `Object.keys` in `Query.isSupportedOffline()`. [#245](https://github.com/Kinvey/js-sdk/pull/245)
+- MLIBZ-2133: Use `es6-promise` for promises in live service related files instead of the native promise. [#272](https://github.com/Kinvey/js-sdk/pull/272)
+- MLIBZ-2393: Fix NativeScript Files [#280](https://github.com/Kinvey/js-sdk/pull/280)
+
+### Maintenance
+- MLIBZ-2410: Expose data access classes from core SDK. [#274](https://github.com/Kinvey/js-sdk/pull/274)
+- Refactor IndexedDB and WebSQL persisters. [#277](https://github.com/Kinvey/js-sdk/pull/277)
+
+### Tests
+- QA-176: Add integration tests for Mobile Identity Connect [#279](https://github.com/Kinvey/js-sdk/pull/279)
+
+
+## [3.10.0](https://github.com/Kinvey/js-sdk/tree/v3.10.0) (2018-02-26)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/v3.9.10...v3.10.0)<br/>
+
+### Enhancements
+- DataStore Redesign [#251](https://github.com/Kinvey/js-sdk/pull/251)
+
+### Bug Fixes
+- MLIBZ-2350: Revert removal of caching db connections in WebSQL. [#241](https://github.com/Kinvey/js-sdk/pull/241)
+- Added polyfill for `Number.isNaN()`. [#243](https://github.com/Kinvey/js-sdk/pull/243)
+- MLIBZ-2314: Update typescript definitions to allow anonymouse user signup. [#242](https://github.com/Kinvey/js-sdk/pull/242)
+- Export `LiveServiceFacade` instead of `LiveService`. [#254](https://github.com/Kinvey/js-sdk/pull/254)
+
+### Tests
+- Fix live service unit tests [#255](https://github.com/Kinvey/js-sdk/pull/255)
+- Added PhoneGap Android execution in Travis [#253](https://github.com/Kinvey/js-sdk/pull/253)
+
+### Maintenance
+- Update the package-lock.json to use the new test runner. [#240](https://github.com/Kinvey/js-sdk/pull/240)
+
+## [3.9.10](https://github.com/Kinvey/js-sdk/tree/v3.9.10) (2018-02-09)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/v3.9.9...v3.9.10)<br/>
+
+### Bug Fixes
+- Use correct config property for setting storage providers [#228](https://github.com/Kinvey/js-sdk/pull/228)
+- MLIBZ-2159: Add missing `version` property to `RequestOptions` in the TypeScript definition file [#235](https://github.com/Kinvey/js-sdk/pull/235)
+- MLIBZ-2159: `_id` field not returned when specifying fields for a query [#233](https://github.com/Kinvey/js-sdk/pull/233)
+- MLIBZ-2351: Use `WebView` events to capture redirect on NativeScript [#237](https://github.com/Kinvey/js-sdk/pull/237)
+
+### Maintenance
+- Added integration tests in travis.yml [#230](https://github.com/Kinvey/js-sdk/pull/230)
+
 ## [3.9.9](https://github.com/Kinvey/js-sdk/tree/v3.9.9) (2018-01-26)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/v3.9.6...v3.9.9)<br/>
 

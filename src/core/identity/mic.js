@@ -39,6 +39,21 @@ export class MobileIdentityConnect extends Identity {
     return true;
   }
 
+  _getMicPath(options){
+    let pathname = '/oauth/auth';
+    let version = 3;
+
+    if (options.version) {
+      version = options.version;
+    }
+
+    if (isString(version) === false) {
+      version = String(version);
+    }
+
+    return urljoin(version.indexOf('v') === 0 ? version : `v${version}`, pathname);
+  }
+
   login(redirectUri, authorizationGrant = AuthorizationGrant.AuthorizationCodeLoginPage, options = {}) {
     let clientId = this.client.appKey;
 
@@ -87,18 +102,6 @@ export class MobileIdentityConnect extends Identity {
   }
 
   requestTempLoginUrl(clientId, redirectUri, options = {}) {
-    let pathname = '/oauth/auth';
-
-    if (options.version) {
-      let version = options.version;
-
-      if (isString(version) === false) {
-        version = String(version);
-      }
-
-      pathname = urljoin(version.indexOf('v') === 0 ? version : `v${version}`, pathname);
-    }
-
     const request = new KinveyRequest({
       method: RequestMethod.POST,
       headers: {
@@ -107,7 +110,7 @@ export class MobileIdentityConnect extends Identity {
       url: url.format({
         protocol: this.client.micProtocol,
         host: this.client.micHost,
-        pathname: pathname
+        pathname: this._getMicPath(options)
       }),
       properties: options.properties,
       body: {
@@ -122,27 +125,16 @@ export class MobileIdentityConnect extends Identity {
 
   requestCodeWithPopup(clientId, redirectUri, options = {}) {
     const promise = Promise.resolve().then(() => {
-      let pathname = '/oauth/auth';
       const popup = new Popup();
-
-      if (options.version) {
-        let version = options.version;
-
-        if (!isString(version)) {
-          version = String(version);
-        }
-
-        pathname = urljoin(version.indexOf('v') === 0 ? version : `v${version}`, pathname);
-      }
-
       return popup.open(url.format({
         protocol: this.client.micProtocol,
         host: this.client.micHost,
-        pathname: pathname,
+        pathname: this._getMicPath(options),
         query: {
           client_id: clientId,
           redirect_uri: redirectUri,
-          response_type: 'code'
+          response_type: 'code',
+          scope: 'openid'
         }
       }));
     }).then((popup) => {
@@ -211,9 +203,10 @@ export class MobileIdentityConnect extends Identity {
           redirect_uri: redirectUri,
           response_type: 'code',
           username: options.username,
-          password: options.password
+          password: options.password,
+          scope: 'openid'
         },
-        followRedirect: false
+        followRedirect: false        
       });
       return request.execute();
     }).then((response) => {
@@ -236,7 +229,7 @@ export class MobileIdentityConnect extends Identity {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      authType: AuthType.App,
+      authType: AuthType.Client,
       url: url.format({
         protocol: this.client.micProtocol,
         host: this.client.micHost,
@@ -248,7 +241,8 @@ export class MobileIdentityConnect extends Identity {
         client_id: clientId,
         redirect_uri: redirectUri,
         code: code
-      }
+      },
+      clientId: clientId
     });
     return request.execute().then(response => response.data);
   }
@@ -259,7 +253,7 @@ export class MobileIdentityConnect extends Identity {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      authType: AuthType.App,
+      authType: AuthType.Client,            
       url: url.format({
         protocol: this.client.micProtocol,
         host: this.client.micHost,
@@ -271,6 +265,7 @@ export class MobileIdentityConnect extends Identity {
         redirect_uri: redirectUri,
         refresh_token: token
       },
+      clientId: clientId,
       properties: options.properties,
       timeout: options.timeout
     });
@@ -278,23 +273,7 @@ export class MobileIdentityConnect extends Identity {
   }
 
   logout(user, options = {}) {
-    const request = new KinveyRequest({
-      method: RequestMethod.GET,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      authType: AuthType.App,
-      url: url.format({
-        protocol: this.client.micProtocol,
-        host: this.client.micHost,
-        pathname: '/oauth/invalidate',
-        query: {
-          user: user._id
-        }
-      }),
-      properties: options.properties
-    });
-    return request.execute().then(response => response.data);
+    return Promise.resolve();
   }
 
   /**

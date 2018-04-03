@@ -1,6 +1,8 @@
+import { Promise } from 'es6-promise';
 import PubNub from 'pubnub';
 import isFunction from 'lodash/isFunction';
 import extend from 'lodash/extend';
+
 import { Client } from '../client';
 import { KinveyRequest, RequestMethod, Response } from '../request';
 import { KinveyError, ActiveUserError } from '../errors';
@@ -355,7 +357,7 @@ export class LiveService {
    * @returns {Promise}
    */
   _makeUserManagementRequest(userId, path) {
-    return KinveyRequest.executeShort({
+    return KinveyRequest.execute({
       method: RequestMethod.POST,
       pathname: `/user/${this._client.appKey}/${userId}/${path}`,
       body: { deviceId: this._client.deviceId }

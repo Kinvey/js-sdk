@@ -1,3 +1,5 @@
+import { Promise } from 'es6-promise';
+
 import { Client } from '../../client';
 import { KinveyError } from '../../errors';
 import { KinveyRequest, RequestMethod } from '../../request';
@@ -66,7 +68,7 @@ export class LiveCollectionManager {
    * @param {string} path
    */
   _makeSubscriptionRequest(collectionName, path) {
-    return KinveyRequest.executeShort({
+    return KinveyRequest.execute({
       method: RequestMethod.POST,
       pathname: `/appdata/${this._client.appKey}/${collectionName}/${path}`,
       body: { deviceId: this._client.deviceId }
