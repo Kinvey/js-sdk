@@ -267,10 +267,8 @@ describe('CacheStore', () => {
           .catch(done);
       });
 
-      it('should skip 1 entity', (done) => {
+      it('should not send a delta set request if skip is used', (done) => {
         const entity1 = { _id: randomString() };
-        const entity2 = { _id: randomString() };
-        const entity3 = { _id: randomString() };
         const store = new CacheStore(collection, null, { useDeltaSet: true });
         const onNextSpy = expect.createSpy();
         const lastRequestDate = new Date();
@@ -280,17 +278,16 @@ describe('CacheStore', () => {
         nock(store.client.apiHostname)
           .get(`/appdata/${store.client.appKey}/${collection}`)
           .query(query.toQueryString())
-          .reply(200, [entity1, entity2, entity3], {
+          .reply(200, [entity1], {
             'X-Kinvey-Request-Start': lastRequestDate.toISOString()
           });
 
         store.pull(query)
           .then(() => {
-            const changedEntity3 = Object.assign({}, entity3, { title: 'test' });
             nock(client.apiHostname)
-              .get(`/appdata/${store.client.appKey}/${collection}/_deltaset`)
-              .query({ since: lastRequestDate.toISOString() })
-              .reply(200, { changed: [changedEntity3], deleted: [{ _id: entity1._id }] }, {
+              .get(`/appdata/${store.client.appKey}/${collection}`)
+              .query(query.toQueryString())
+              .reply(200, [entity1], {
                 'X-Kinvey-Request-Start': new Date().toISOString()
               });
 
@@ -298,8 +295,6 @@ describe('CacheStore', () => {
               .subscribe(onNextSpy, done, () => {
                 try {
                   expect(onNextSpy.calls.length).toEqual(2);
-                  expect(onNextSpy.calls[0].arguments).toEqual([[entity2, entity3]]);
-                  expect(onNextSpy.calls[1].arguments).toEqual([[changedEntity3]]);
                   done();
                 } catch (error) {
                   done(error);
@@ -309,10 +304,8 @@ describe('CacheStore', () => {
           .catch(done);
       });
 
-      it('should limit the entities to 1', (done) => {
+      it('should not send a delta set request if limit is used', (done) => {
         const entity1 = { _id: randomString() };
-        const entity2 = { _id: randomString() };
-        const entity3 = { _id: randomString() };
         const store = new CacheStore(collection, null, { useDeltaSet: true });
         const onNextSpy = expect.createSpy();
         const lastRequestDate = new Date();
@@ -322,17 +315,16 @@ describe('CacheStore', () => {
         nock(store.client.apiHostname)
           .get(`/appdata/${store.client.appKey}/${collection}`)
           .query(query.toQueryString())
-          .reply(200, [entity1, entity2, entity3], {
+          .reply(200, [entity1], {
             'X-Kinvey-Request-Start': lastRequestDate.toISOString()
           });
 
         store.pull(query)
           .then(() => {
-            const changedEntity3 = Object.assign({}, entity3, { title: 'test' });
             nock(client.apiHostname)
-              .get(`/appdata/${store.client.appKey}/${collection}/_deltaset`)
-              .query({ since: lastRequestDate.toISOString() })
-              .reply(200, { changed: [changedEntity3], deleted: [{ _id: entity1._id }] }, {
+              .get(`/appdata/${store.client.appKey}/${collection}`)
+              .query(query.toQueryString())
+              .reply(200, [entity1], {
                 'X-Kinvey-Request-Start': new Date().toISOString()
               });
 
@@ -340,8 +332,6 @@ describe('CacheStore', () => {
               .subscribe(onNextSpy, done, () => {
                 try {
                   expect(onNextSpy.calls.length).toEqual(2);
-                  expect(onNextSpy.calls[0].arguments).toEqual([[entity1]]);
-                  expect(onNextSpy.calls[1].arguments).toEqual([[entity2]]);
                   done();
                 } catch (error) {
                   done(error);
