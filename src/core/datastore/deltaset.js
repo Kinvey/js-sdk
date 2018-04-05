@@ -14,6 +14,7 @@ import {
   queryCacheCollectionName,
   kinveyRequestStartHeader
 } from './utils';
+import { ParameterValueOutOfRangeError } from '../errors';
 
 function getCachedQuery(collectionName, query) {
   if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit)))
@@ -129,14 +130,19 @@ function makeRegularGETRequest(collectionName, query, options) {
 }
 
 export function deltaSet(collectionName, query, options) {
-
-
   return getCachedQuery(collectionName, query)
     .then((cachedQuery) => {
       let promise;
 
       if (cachedQuery && cachedQuery.lastRequest) {
         promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, query, options)
+          .catch((error) => {
+            if (error instanceof ParameterValueOutOfRangeError) {
+              return makeRegularGETRequest(collectionName, query, options);
+            }
+
+            return Promise.reject(error);
+          })
       } else {
         promise = makeRegularGETRequest(collectionName, query, options);
       }
