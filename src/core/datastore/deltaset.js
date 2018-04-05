@@ -1,3 +1,4 @@
+import { Promise } from 'es6-promise';
 import isArray from 'lodash/isArray';
 import isNumber from 'lodash/isNumber';
 import isEmpty from 'lodash/isEmpty';
@@ -15,6 +16,10 @@ import {
 } from './utils';
 
 function getCachedQuery(collectionName, query) {
+  if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit)))
+    return Promise.resolve(null);
+  }
+
   const queryObject = query ? query.toQueryString() : {};
   const serializedQuery = queryObject && !isEmpty(queryObject) ? JSON.stringify(queryObject) : '';
 
@@ -124,28 +129,26 @@ function makeRegularGETRequest(collectionName, query, options) {
 }
 
 export function deltaSet(collectionName, query, options) {
-  const deltaSetQuery = new Query(query);
 
-  if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
-    Log.info('The skip and limit modifiers for a query will be ignored when performing a delta set request.');
-    deltaSetQuery.skip = 0;
-    deltaSetQuery.limit = null;
-  }
 
-  return getCachedQuery(collectionName, deltaSetQuery)
+  return getCachedQuery(collectionName, query)
     .then((cachedQuery) => {
       let promise;
 
       if (cachedQuery && cachedQuery.lastRequest) {
-        promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, deltaSetQuery, options);
+        promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, query, options)
       } else {
         promise = makeRegularGETRequest(collectionName, query, options);
       }
 
       return promise
         .then((response) => {
-          const requestStartDate = response.headers.get(kinveyRequestStartHeader);
-          return updateCachedQuery(cachedQuery, requestStartDate).then(() => response.data);
+          if (cachedQuery) {
+            const requestStartDate = response.headers.get(kinveyRequestStartHeader);
+            return updateCachedQuery(cachedQuery, requestStartDate).then(() => response.data);
+          }
+
+          return response.data;
         });
     })
     .then((data) => {
