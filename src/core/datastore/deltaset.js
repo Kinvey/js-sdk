@@ -17,7 +17,7 @@ import {
 import { ParameterValueOutOfRangeError } from '../errors';
 
 function getCachedQuery(collectionName, query) {
-  if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit)))
+  if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
     return Promise.resolve(null);
   }
 
