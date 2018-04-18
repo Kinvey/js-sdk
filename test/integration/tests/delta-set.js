@@ -3,7 +3,7 @@ function testFunc() {
     let deltaCollectionName = externalConfig.deltaCollectionName;
     let deltaNetworkStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Network);
     let syncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync);
-    let cacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStore, Cache);
+    let cacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache);
     let deltaSyncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { useDeltaSet: true });
     let deltaCacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache, { useDeltaSet: true });
 
@@ -46,7 +46,7 @@ function testFunc() {
     }
 
     dataStoreTypes.forEach((currentDataStoreType) => {
-        describe.only(`${currentDataStoreType} Deltaset tests`, () => {
+        describe(`${currentDataStoreType} Deltaset tests`, () => {
             let conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
             describe('pull', () => {
                 const dataStoreType = currentDataStoreType;
