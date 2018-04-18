@@ -982,8 +982,7 @@ function testFunc() {
                 });
             });
 
-            describe('error handling', () => {
-                
+            describe('error handling', () => {                
                 const dataStoreType = currentDataStoreType;
                 const entity1 = utilities.getEntity(utilities.randomString());
                 const entity2 = utilities.getEntity(utilities.randomString());
