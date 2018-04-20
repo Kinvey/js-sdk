@@ -2,23 +2,16 @@ import { Promise } from 'es6-promise';
 import clone from 'lodash/clone';
 
 import { Log } from '../../log';
-import { KinveyError, NotFoundError, SyncError } from '../../errors';
-
+import { KinveyError, NotFoundError, SyncError, InvalidCachedQuery } from '../../errors';
 import { getPlatformConfig } from '../../platform-configs';
 import { SyncOperation } from './sync-operation';
 import { maxEntityLimit, defaultPullSortField } from './utils';
 import { isEmpty } from '../utils';
 import { repositoryProvider } from '../repositories';
 import { Query } from '../../query';
-import {
-  ensureArray,
-  isNonemptyString,
-  forEachAsync,
-  splitQueryIntoPages
-} from '../../utils';
-
-// imported for typings
-// import { SyncStateManager } from './sync-state-manager';
+import { ensureArray, isNonemptyString, forEachAsync, splitQueryIntoPages } from '../../utils';
+import { deltaSet } from '../deltaset';
+import { getCachedQuery, updateCachedQuery } from '../querycache';
 
 const {
   maxConcurrentPullRequests: maxConcurrentPulls,
@@ -68,23 +61,31 @@ export class SyncManager {
   }
 
   pull(collection, query, options = {}) {
-    if (!isNonemptyString(collection)) {
-      return Promise.reject(new KinveyError('Invalid or missing collection name'));
-    }
-
-    if (options && (options.autoPagination && !options.useDeltaSet)) {
-      return this._paginatedPull(collection, query, options);
-    }
-
-    return this._fetchItemsFromServer(collection, query, options)
-      .then((entities) => {
-        if (!options.useDeltaSet) {
-          return this._replaceOfflineEntities(collection, query, entities);
+    return Promise.resolve()
+      .then(() => {
+        if (!isNonemptyString(collection)) {
+          throw new KinveyError('Invalid or missing collection name');
+        }
+      })
+      .then(() => {
+        if (options.useDeltaSet) {
+          return deltaSet(collection, query, options);
+        } else if (options.autoPagination) {
+          return this._paginatedPull(collection, query, options);
         }
 
-        return entities;
+        return this._fetchItemsFromServer(collection, query, options);
       })
-      .then(replacedEntities => replacedEntities.length);
+      .then((data) => {
+        //........
+      })
+      .catch((error) => {
+        if (error instanceof InvalidCachedQuery) {
+          return this.pull(collection, query, Object.assign(options, { useDeltaSet: false }));
+        }
+
+        throw error;
+      });
   }
 
   getSyncItemCount(collection) {
@@ -296,7 +297,15 @@ export class SyncManager {
   }
 
   _fetchItemsFromServer(collection, query, options) {
-    return this._networkRepo.read(collection, query, options);
+    return this._networkRepo.read(collection, query, Object.assign(options, { dataOnly: false }))
+      .then((response) => {
+        return getCachedQuery(collection, query)
+          .then((cachedQuery) => {
+            cachedQuery.lastRequest = response.headers.lastRequest;
+            return updateCachedQuery(cachedQuery);
+          })
+          .then(() => response.data);
+      });
   }
 
   _getOfflineRepo() {
@@ -402,9 +411,12 @@ export class SyncManager {
 
   _getExpectedEntityCount(collection, userQuery) {
     const countQuery = new Query({ filter: userQuery.filter });
-    return this._networkRepo.count(collection, countQuery)
-      .then(totalCount => {
-        return Math.min(totalCount - userQuery.skip, userQuery.limit || Infinity);
+    return this._networkRepo.count(collection, countQuery, { dataOnly: false })
+      .then((response) => {
+        return {
+          lastRequest: response.headers.lastRequest,
+          count: Math.min(response.data.count - userQuery.skip, userQuery.limit || Infinity)
+        };
       });
   }
 
@@ -413,6 +425,14 @@ export class SyncManager {
     let expectedCount;
     userQuery = userQuery || new Query();
     return this._getExpectedEntityCount(collection, userQuery)
+      .then(({ lastRequest, count }) => {
+        return getCachedQuery(collection, userQuery)
+          .then((cachedQuery) => {
+            cachedQuery.lastRequest = lastRequest;
+            return updateCachedQuery(cachedQuery);
+          })
+          .then(() => count);
+      })
       .then((count) => {
         expectedCount = count;
         pullQuery = this._getInternalPullQuery(userQuery, expectedCount);
