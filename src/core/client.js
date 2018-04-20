@@ -5,6 +5,7 @@ import isNumber from 'lodash/isNumber';
 import isNaN from 'lodash/isNaN';
 import { KinveyError } from './errors';
 import { Log } from './log';
+import { Subject } from 'rxjs/Subject';
 import { isDefined, uuidv4, isValidStorageProviderValue } from './utils';
 import { StorageProvider } from './datastore';
 
@@ -157,6 +158,11 @@ export class Client {
     this.activeUserStorage = new ActiveUserStorage();
 
     this.storage = config.storage || StorageProvider.Memory;
+
+    /**
+     * @private
+     */
+    this.refreshUserSubject = new Subject();
   }
 
   /**

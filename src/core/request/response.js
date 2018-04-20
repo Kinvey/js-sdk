@@ -13,6 +13,7 @@ import {
   IndirectCollectionAccessDisallowedError,
   InsufficientCredentialsError,
   InvalidCredentialsError,
+  InvalidGrantError,
   InvalidIdentifierError,
   InvalidQuerySyntaxError,
   JSONParseError,
@@ -166,6 +167,8 @@ export class KinveyResponse extends Response {
       error = new InsufficientCredentialsError(message, debug, code, kinveyRequestId);
     } else if (name === 'InvalidCredentials') {
       error = new InvalidCredentialsError(message, debug, code, kinveyRequestId);
+    } else if (name === 'invalid_grant') {
+      error = new InvalidGrantError(message, debug, code, kinveyRequestId);
     } else if (name === 'InvalidIdentifier') {
       error = new InvalidIdentifierError(message, debug, code, kinveyRequestId);
     } else if (name === 'InvalidQuerySyntax') {
