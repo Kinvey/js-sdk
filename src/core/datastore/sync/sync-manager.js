@@ -301,7 +301,7 @@ export class SyncManager {
       .then((response) => {
         return getCachedQuery(collection, query)
           .then((cachedQuery) => {
-            cachedQuery.lastRequest = response.headers.lastRequest;
+            cachedQuery.lastRequest = response.headers.requestStart;
             return updateCachedQuery(cachedQuery);
           })
           .then(() => response.data);
@@ -414,7 +414,7 @@ export class SyncManager {
     return this._networkRepo.count(collection, countQuery, { dataOnly: false })
       .then((response) => {
         return {
-          lastRequest: response.headers.lastRequest,
+          lastRequest: response.headers.requestStart,
           count: Math.min(response.data.count - userQuery.skip, userQuery.limit || Infinity)
         };
       });
