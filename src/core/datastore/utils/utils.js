@@ -4,8 +4,6 @@ import { KinveyError } from '../../errors';
 import { isNonemptyString } from '../../utils';
 
 export const dataStoreTagSeparator = '.';
-export const queryCacheCollectionName = '_QueryCache';
-export const kinveyRequestStartHeader = 'X-Kinvey-Request-Start';
 
 export { buildCollectionUrl } from '../repositories/utils';
 
