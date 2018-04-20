@@ -11,6 +11,7 @@ export * from './featureUnavailable';
 export * from './incompleteRequestBody';
 export * from './indirectCollectionAccessDisallowed';
 export * from './insufficientCredentials';
+export * from './invalidCachedQuery';
 export * from './invalidCredentials';
 export * from './invalidIdentifier';
 export * from './invalidQuerySyntax';
