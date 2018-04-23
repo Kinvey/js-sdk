@@ -2,12 +2,14 @@ import { Promise } from 'es6-promise';
 import clone from 'lodash/clone';
 
 import { Query } from '../../query';
-import { NotFoundError } from '../../errors';
+import { NotFoundError, InvalidCachedQuery } from '../../errors';
 
 import { OfflineDataProcessor } from './offline-data-processor';
 import { ensureArray } from '../../utils';
 import { wrapInObservable } from '../../observable';
 import { isLocalEntity, isNotEmpty, isEmpty, getEntitiesPendingPushError } from '../utils';
+import { deltaSet } from '../deltaset';
+import { getCachedQuery, updateCachedQuery } from '../querycache';
 
 // imported for type info
 // import { NetworkRepository } from '../repositories';
@@ -78,6 +80,8 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
 
   _processRead(collection, query, options = {}) {
     let offlineEntities;
+    let useDeltaSet = options.useDeltaSet;
+
     return wrapInObservable((observer) => {
       return super._processRead(collection, query, options)
         .then((entities) => {
@@ -85,14 +89,47 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
           observer.next(offlineEntities);
           return this._ensureCountBeforeRead(collection, 'fetch the entities', query);
         })
-        .then(() => this._networkRepository.read(collection, query, options))
-        .then((networkEntities) => {
-          observer.next(networkEntities);
+        .then(() => {
+          if (useDeltaSet) {
+            return deltaSet(collection, query, options)
+              .catch((error) => {
+                if (error instanceof InvalidCachedQuery) {
+                  useDeltaSet = false;
+                  return this._networkRepository.read(collection, query, Object.assign(options, { dataOnly: false }));
+                }
 
-          if (!options.useDeltaSet) {
-            return this._replaceOfflineEntities(collection, offlineEntities, networkEntities);
+                throw error;
+              });
           }
 
+          return this._networkRepository.read(collection, query, Object.assign(options, { dataOnly: false }));
+        })
+        .then((response) => {
+          return getCachedQuery(collection, query)
+            .then((cachedQuery) => {
+              if (cachedQuery) {
+                cachedQuery.lastRequest = response.headers.requestStart;
+                return updateCachedQuery(cachedQuery);
+              }
+
+              return null;
+            })
+            .then(() => response.data);
+        })
+        .then((data) => {
+          if (useDeltaSet) {
+            const deleteQuery = new Query();
+            deleteQuery.containsAll('_id', data.deleted.map((entity) => entity._id));
+            return Promise.all([
+              this._deleteEntitiesOffline(collection, deleteQuery, data.deleted),
+              this._replaceOfflineEntities(collection, data.changed, data.changed)
+            ]).then(() => data.changed);
+          }
+
+          return this._replaceOfflineEntities(collection, offlineEntities, data);
+        })
+        .then((networkEntities) => {
+          observer.next(networkEntities);
           return networkEntities;
         });
     });

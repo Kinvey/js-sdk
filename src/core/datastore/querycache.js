@@ -19,7 +19,7 @@ function serializeQuery(query) {
 export function getCachedQuery(collectionName, query) {
   const serializedQuery = serializeQuery(query);
 
-  if (!serializedQuery) {
+  if (!serializedQuery && serializedQuery !== '') {
     return Promise.resolve(null);
   }
 
@@ -73,9 +73,10 @@ export function updateCachedQuery(cachedQuery) {
     });
 }
 
-export function clearQueryCache() {
+export function clearQueryCache(collectionName) {
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
-      return offlineRepo.clear(queryCacheCollectionName);
+      const query = new Query().equalTo('collectionName', collectionName);
+      return offlineRepo.delete(queryCacheCollectionName, query);
     });
 }

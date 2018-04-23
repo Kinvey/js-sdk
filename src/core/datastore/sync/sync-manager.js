@@ -69,15 +69,57 @@ export class SyncManager {
       })
       .then(() => {
         if (options.useDeltaSet) {
-          return deltaSet(collection, query, options);
+          return deltaSet(collection, query, options)
+            .then((response) => {
+              return getCachedQuery(collection, query)
+                .then((cachedQuery) => {
+                  if (cachedQuery) {
+                    cachedQuery.lastRequest = response.headers.requestStart;
+                    return updateCachedQuery(cachedQuery);
+                  }
+
+                  return null;
+                })
+                .then(() => response.data);
+            });
         } else if (options.autoPagination) {
           return this._paginatedPull(collection, query, options);
         }
 
-        return this._fetchItemsFromServer(collection, query, options);
+        return this._fetchItemsFromServer(collection, query, options)
+          .then((response) => {
+            return getCachedQuery(collection, query)
+              .then((cachedQuery) => {
+                if (cachedQuery) {
+                  cachedQuery.lastRequest = response.headers.requestStart;
+                  return updateCachedQuery(cachedQuery);
+                }
+
+                return null;
+              })
+              .then(() => response.data);
+          });
       })
       .then((data) => {
-        //........
+        if (options.useDeltaSet) {
+          const deleteQuery = new Query();
+          deleteQuery.containsAll('_id', data.deleted.map((entity) => entity._id));
+          return Promise.all([
+            this._deleteOfflineEntities(collection, deleteQuery),
+            this._replaceOfflineEntities(collection, new Query(), data.changed)
+          ]).then(() => data.changed);
+        } else if (options.autoPagination) {
+          return data;
+        }
+
+        return this._replaceOfflineEntities(collection, query, data);
+      })
+      .then((entities) => {
+        if (options.autoPagination) {
+          return entities;
+        }
+
+        return entities.length;
       })
       .catch((error) => {
         if (error instanceof InvalidCachedQuery) {
@@ -297,15 +339,7 @@ export class SyncManager {
   }
 
   _fetchItemsFromServer(collection, query, options) {
-    return this._networkRepo.read(collection, query, Object.assign(options, { dataOnly: false }))
-      .then((response) => {
-        return getCachedQuery(collection, query)
-          .then((cachedQuery) => {
-            cachedQuery.lastRequest = response.headers.requestStart;
-            return updateCachedQuery(cachedQuery);
-          })
-          .then(() => response.data);
-      });
+    return this._networkRepo.read(collection, query, Object.assign(options, { dataOnly: false }));
   }
 
   _getOfflineRepo() {

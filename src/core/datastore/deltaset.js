@@ -1,172 +1,43 @@
-import { Promise } from 'es6-promise';
-import isArray from 'lodash/isArray';
-import isNumber from 'lodash/isNumber';
-import isEmpty from 'lodash/isEmpty';
 import { format } from 'url';
-import { Query } from '../query';
 import { KinveyRequest, RequestMethod, AuthType } from '../request';
 import { Client } from '../client';
-import { Log } from '../log';
-import { repositoryProvider } from './repositories';
-import {
-  buildCollectionUrl,
-  generateEntityId,
-  queryCacheCollectionName,
-  kinveyRequestStartHeader
-} from './utils';
-import { ParameterValueOutOfRangeError } from '../errors';
-
-function getCachedQuery(collectionName, query) {
-  if (query && ((isNumber(query.skip) && query.skip > 0) || isNumber(query.limit))) {
-    return Promise.resolve(null);
-  }
-
-  const queryObject = query ? query.toQueryString() : {};
-  const serializedQuery = queryObject && !isEmpty(queryObject) ? JSON.stringify(queryObject) : '';
-
-  return repositoryProvider.getOfflineRepository()
-    .then((offlineRepo) => {
-      const queryCacheQuery = new Query()
-        .equalTo('collectionName', collectionName)
-        .and()
-        .equalTo('query', serializedQuery);
-      return offlineRepo.read(queryCacheCollectionName, queryCacheQuery)
-        .then((cachedQueries = []) => {
-          if (cachedQueries.length > 0) {
-            return cachedQueries[0];
-          }
-
-          return {
-            _id: generateEntityId(),
-            collectionName: collectionName,
-            query: serializedQuery
-          };
-        });
-    });
-}
-
-function updateCachedQuery(cachedQuery, lastRequest) {
-  return repositoryProvider.getOfflineRepository()
-    .then((offlineRepo) => {
-      cachedQuery.lastRequest = lastRequest;
-      return offlineRepo.update(queryCacheCollectionName, cachedQuery);
-    });
-}
-
-function readEntities(collectionName, query) {
-  return repositoryProvider.getOfflineRepository()
-    .then((offlineRepo) => {
-      return offlineRepo.read(collectionName, query);
-    });
-}
-
-function entitiesToDelete(collectionName, deleted = []) {
-  return repositoryProvider.getOfflineRepository()
-    .then((offlineRepo) => {
-      if (isArray(deleted) && deleted.length > 0) {
-        const deletedIds = deleted.map((entities) => entities._id);
-        const deleteQuery = new Query().contains('_id', deletedIds);
-        return offlineRepo.delete(collectionName, deleteQuery);
-      }
-
-      return 0;
-    });
-}
-
-function entitiesToUpdate(collectionName, changed = []) {
-  return repositoryProvider.getOfflineRepository()
-    .then((offlineRepo) => {
-      if (isArray(changed) && changed.length > 0) {
-        return offlineRepo.update(collectionName, changed);
-      }
-
-      return changed;
-    });
-}
-
-function makeDeltaSetRequest(collectionName, since, query, options) {
-  const client = Client.sharedInstance();
-  const request = new KinveyRequest({
-    authType: AuthType.Default,
-    method: RequestMethod.GET,
-    url: format({
-      protocol: client.apiProtocol,
-      host: client.apiHost,
-      pathname: buildCollectionUrl(collectionName, null, '_deltaset'),
-      query: { since }
-    }),
-    query,
-    timeout: options.timeout,
-    followRedirect: options.followRedirect,
-    cache: options.cache,
-    properties: options.properties,
-    skipBL: options.skipBL,
-    trace: options.trace,
-    client
-  });
-  return request.execute();
-}
-
-function makeRegularGETRequest(collectionName, query, options) {
-  const client = Client.sharedInstance();
-  const request = new KinveyRequest({
-    authType: AuthType.Default,
-    method: RequestMethod.GET,
-    url: format({
-      protocol: client.apiProtocol,
-      host: client.apiHost,
-      pathname: buildCollectionUrl(collectionName)
-    }),
-    query,
-    timeout: options.timeout,
-    followRedirect: options.followRedirect,
-    cache: options.cache,
-    properties: options.properties,
-    skipBL: options.skipBL,
-    trace: options.trace,
-    client
-  });
-  return request.execute();
-}
+import { InvalidCachedQuery, ParameterValueOutOfRangeError } from '../errors';
+import { buildCollectionUrl } from './utils';
+import { getCachedQuery } from './querycache';
 
 export function deltaSet(collectionName, query, options) {
   return getCachedQuery(collectionName, query)
     .then((cachedQuery) => {
-      let promise;
-
-      if (cachedQuery && cachedQuery.lastRequest) {
-        promise = makeDeltaSetRequest(collectionName, cachedQuery.lastRequest, query, options)
-          .catch((error) => {
-            if (error instanceof ParameterValueOutOfRangeError) {
-              return makeRegularGETRequest(collectionName, query, options);
-            }
-
-            return Promise.reject(error);
-          })
-      } else {
-        promise = makeRegularGETRequest(collectionName, query, options);
+      if (!cachedQuery || !cachedQuery.lastRequest) {
+        throw new InvalidCachedQuery();
       }
 
-      return promise
-        .then((response) => {
-          if (cachedQuery) {
-            const requestStartDate = response.headers.get(kinveyRequestStartHeader);
-            return updateCachedQuery(cachedQuery, requestStartDate).then(() => response.data);
+      const client = Client.sharedInstance();
+      const request = new KinveyRequest({
+        authType: AuthType.Default,
+        method: RequestMethod.GET,
+        url: format({
+          protocol: client.apiProtocol,
+          host: client.apiHost,
+          pathname: buildCollectionUrl(collectionName, null, '_deltaset'),
+          query: { since: cachedQuery.lastRequest }
+        }),
+        query,
+        timeout: options.timeout,
+        followRedirect: options.followRedirect,
+        cache: options.cache,
+        properties: options.properties,
+        skipBL: options.skipBL,
+        trace: options.trace,
+        client
+      });
+      return request.execute()
+        .catch((error) => {
+          if (error instanceof ParameterValueOutOfRangeError) {
+            throw new InvalidCachedQuery();
           }
 
-          return response.data;
+          throw error;
         });
-    })
-    .then((data) => {
-      return entitiesToDelete(collectionName, data.deleted)
-        .then(() => entitiesToUpdate(collectionName, data.changed || data))
-        .then(() => data);
-    })
-    .then(() => readEntities(collectionName, query));
-}
-
-export function clearDeltaSet(collectionName) {
-  const queryCacheQuery = new Query().equalTo('collectionName', collectionName);
-  return repositoryProvider.getOfflineRepository()
-    .then((offlineRepo) => offlineRepo.delete(queryCacheCollectionName, queryCacheQuery));
+    });
 }
