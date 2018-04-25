@@ -102,12 +102,18 @@ export class SyncManager {
       })
       .then((data) => {
         if (options.useDeltaSet) {
-          const deleteQuery = new Query();
-          deleteQuery.containsAll('_id', data.deleted.map((entity) => entity._id));
-          return Promise.all([
-            this._deleteOfflineEntities(collection, deleteQuery),
-            this._replaceOfflineEntities(collection, new Query(), data.changed)
-          ]).then(() => data.changed);
+          const promises = [];
+
+          if (data.deleted.length > 0) {
+            const deleteQuery = new Query();
+            deleteQuery.containsAll('_id', data.deleted.map((entity) => entity._id));
+            promises.push(this._deleteOfflineEntities(collection, deleteQuery));
+          }
+
+          if (data.changed.length > 0) {
+            promises.push(this._getOfflineRepo().then((offlineRepo) => offlineRepo.update(collection, data.changed)));
+          }
+          return Promise.all(promises).then(() => data.changed);
         } else if (options.autoPagination) {
           return data;
         }
@@ -462,8 +468,12 @@ export class SyncManager {
       .then(({ lastRequest, count }) => {
         return getCachedQuery(collection, userQuery)
           .then((cachedQuery) => {
-            cachedQuery.lastRequest = lastRequest;
-            return updateCachedQuery(cachedQuery);
+            if (cachedQuery) {
+              cachedQuery.lastRequest = lastRequest;
+              return updateCachedQuery(cachedQuery);
+            }
+
+            return null;
           })
           .then(() => count);
       })
