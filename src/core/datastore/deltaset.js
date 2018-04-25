@@ -1,7 +1,12 @@
 import { format } from 'url';
 import { KinveyRequest, RequestMethod, AuthType } from '../request';
 import { Client } from '../client';
-import { InvalidCachedQuery, ParameterValueOutOfRangeError } from '../errors';
+import {
+  InvalidCachedQuery,
+  ParameterValueOutOfRangeError,
+  ResultSetSizeExceededError,
+  MissingConfigurationError
+} from '../errors';
 import { buildCollectionUrl } from './utils';
 import { getCachedQuery } from './querycache';
 
@@ -33,7 +38,9 @@ export function deltaSet(collectionName, query, options) {
       });
       return request.execute()
         .catch((error) => {
-          if (error instanceof ParameterValueOutOfRangeError) {
+          if (error instanceof ParameterValueOutOfRangeError
+          || error instanceof ResultSetSizeExceededError
+          || error instanceof MissingConfigurationError) {
             throw new InvalidCachedQuery();
           }
 

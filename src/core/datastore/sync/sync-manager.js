@@ -11,7 +11,7 @@ import { repositoryProvider } from '../repositories';
 import { Query } from '../../query';
 import { ensureArray, isNonemptyString, forEachAsync, splitQueryIntoPages } from '../../utils';
 import { deltaSet } from '../deltaset';
-import { getCachedQuery, updateCachedQuery } from '../querycache';
+import { getCachedQuery, updateCachedQuery, deleteCachedQuery } from '../querycache';
 
 const {
   maxConcurrentPullRequests: maxConcurrentPulls,
@@ -129,7 +129,9 @@ export class SyncManager {
       })
       .catch((error) => {
         if (error instanceof InvalidCachedQuery) {
-          return this.pull(collection, query, Object.assign(options, { useDeltaSet: false }));
+          return getCachedQuery(collection, query)
+            .then((cachedQuery) => deleteCachedQuery(cachedQuery))
+            .then(() => this.pull(collection, query, Object.assign(options, { useDeltaSet: false })));
         }
 
         throw error;

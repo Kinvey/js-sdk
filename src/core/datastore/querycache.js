@@ -73,6 +73,17 @@ export function updateCachedQuery(cachedQuery) {
     });
 }
 
+export function deleteCachedQuery(cachedQuery) {
+  if (!cachedQuery) {
+    return Promise.resolve(null);
+  }
+
+  return repositoryProvider.getOfflineRepository()
+    .then((offlineRepo) => {
+      return offlineRepo.deleteById(queryCacheCollectionName, cachedQuery._id);
+    });
+}
+
 export function clearQueryCache(collectionName) {
   return repositoryProvider.getOfflineRepository()
     .then((offlineRepo) => {
