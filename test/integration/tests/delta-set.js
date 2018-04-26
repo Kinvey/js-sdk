@@ -51,7 +51,7 @@ function testFunc() {
     }
 
     dataStoreTypes.forEach((currentDataStoreType) => {
-        describe(`${currentDataStoreType} Deltaset tests`, () => {
+        describe.only(`${currentDataStoreType} Deltaset tests`, () => {
             let conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
             describe('pull', () => {
                 const dataStoreType = currentDataStoreType;
