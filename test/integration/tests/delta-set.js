@@ -12,8 +12,7 @@ function testFunc() {
 
     const validatePullOperation = (result, expectedItems, expectedPulledItemsCount, tagStore) => {
         expect(result).to.equal(expectedPulledItemsCount || expectedItems.length);
-        debugger;
-        let storeToFind = tagStore?Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, {tag:tagStore}):syncStore;
+        let storeToFind = tagStore ? Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }) : syncStore;
         return storeToFind.find().toPromise()
             .then((result) => {
                 expectedItems.forEach((entity) => {
@@ -23,11 +22,13 @@ function testFunc() {
             });
     }
 
-    const validateNewPullOperation = (result, expectedPulledItems, expectedDeletedItems) => {
+    const validateNewPullOperation = (result, expectedPulledItems, expectedDeletedItems, tagStore) => {
         expect(result).to.equal(expectedDeletedItems.length + expectedPulledItems.length);
-        return syncStore.find().toPromise()
+        let storeToFind = tagStore ? Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }) : syncStore;
+        return storeToFind.find().toPromise()
             .then((result) => {
                 expectedPulledItems.forEach((entity) => {
+                    debugger;
                     const cachedEntity = _.find(result, e => e._id === entity._id);
                     expect(utilities.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
                 });
@@ -51,7 +52,7 @@ function testFunc() {
     }
 
     dataStoreTypes.forEach((currentDataStoreType) => {
-        describe.only(`${currentDataStoreType} Deltaset tests`, () => {
+        describe(`${currentDataStoreType} Deltaset tests`, () => {
             let conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
             describe('pull', () => {
                 const dataStoreType = currentDataStoreType;
@@ -60,7 +61,7 @@ function testFunc() {
                 const entity3 = utilities.getEntity(utilities.randomString());
                 const createdUserIds = [];
                 let deltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true });
-                let taggedDeltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true, tag: tagStore});
+                let taggedDeltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true, tag: tagStore });
 
                 before((done) => {
                     utilities.cleanUpAppData(deltaCollectionName, createdUserIds)
@@ -90,13 +91,13 @@ function testFunc() {
                     deltaStoreToTest.pull()
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then((result) => validateNewPullOperation(result, [], []))
                         .then(() => done())
-                        .catch(done);
+                        .catch((error) => done(error));
                 });
 
                 it('should return correct number of items with disabled deltaset', (done) => {
-                    let deisabledDeltaSetStore = currentDataStoreType === Kinvey.DataStoreType.Cache?cacheStore:syncStore;
+                    let deisabledDeltaSetStore = currentDataStoreType === Kinvey.DataStoreType.Cache ? cacheStore : syncStore;
                     deisabledDeltaSetStore.pull()
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deisabledDeltaSetStore.pull())
@@ -110,7 +111,7 @@ function testFunc() {
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                        .then((result) => validateNewPullOperation(result, [entity3], []))
                         .then(() => done())
                         .catch(done);
                 });
@@ -121,20 +122,20 @@ function testFunc() {
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                        .then((result) => validateNewPullOperation(result, [entity3], []))
                         .then(() => deltaNetworkStore.save(entity4))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                        .then((result) => validateNewPullOperation(result, [entity4], []))
                         .then(() => done())
                         .catch(done);
                 });
-
-                it('should return correct number of items with auto-pagination', (done) => {
+                //Bug https://kinvey.atlassian.net/browse/MLIBZ-2478
+                it.skip('should return correct number of items with auto-pagination', (done) => {
                     deltaStoreToTest.pull(new Kinvey.Query(), { autoPagination: true })
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => deltaStoreToTest.pull(new Kinvey.Query(), { autoPagination: true }))
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                        .then((result) => validateNewPullOperation(result, [entity3], []))
                         .then(() => done())
                         .catch(done);
                 });
@@ -146,20 +147,20 @@ function testFunc() {
                         .then((result) => validatePullOperation(result, [entity1, entity2], 2, tagStore))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => taggedDeltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3], 3, tagStore))
+                        .then((result) => validateNewPullOperation(result, [entity3], [], tagStore))
                         .then(() => deltaNetworkStore.removeById(entity1._id))
                         .then(() => taggedDeltaStoreToTest.pull())
-                        .then((result) => {validatePullOperation(result, [entity2, entity3], 2, tagStore)})
+                        .then((result) => { validateNewPullOperation(result, [entity1], [], tagStore) })
                         .then(() => {
                             syncStore.find()
-                            .subscribe(onNextSpy, done, ()=>{
-                                try{
-                                    utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity1]);
-                                    done();
-                                } catch(error){
-                                    done(error);
-                                }
-                            })
+                                .subscribe(onNextSpy, done, () => {
+                                    try {
+                                        utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity1]);
+                                        done();
+                                    } catch (error) {
+                                        done(error);
+                                    }
+                                })
                         })
                         .catch(done);
                 });
@@ -169,7 +170,7 @@ function testFunc() {
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaNetworkStore.removeById(entity2._id))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1]))
+                        .then((result) => validateNewPullOperation(result, [], [entity2]))
                         .then(() => done())
                         .catch(done);
                 });
@@ -181,7 +182,7 @@ function testFunc() {
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(updatedEntity))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, updatedEntity]))
+                        .then((result) => validateNewPullOperation(result, [updatedEntity], []))
                         .then(() => done())
                         .catch(done);
                 });
@@ -194,7 +195,7 @@ function testFunc() {
                         .then(() => deltaNetworkStore.save(updatedEntity))
                         .then(() => deltaNetworkStore.removeById(entity1._id))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [updatedEntity]))
+                        .then((result) => validateNewPullOperation(result, [updatedEntity], [entity1]))
                         .then(() => done())
                         .catch(done);
                 });
@@ -214,7 +215,7 @@ function testFunc() {
                             .then((result) => validatePullOperation(result, [entity4, entity5, entity6]))
                             .then(() => deltaNetworkStore.save(updatedEntity))
                             .then(() => deltaStoreToTest.pull(query))
-                            .then((result) => validatePullOperation(result, [entity4, updatedEntity, entity6]))
+                            .then((result) => validateNewPullOperation(result, [updatedEntity], []))
                             .then(() => done()))
                         .catch(done);
                 });
@@ -232,28 +233,28 @@ function testFunc() {
                             .then((result) => validatePullOperation(result, [entity4, entity5, entity6]))
                             .then(() => deltaNetworkStore.removeById(entity5._id))
                             .then(() => deltaStoreToTest.pull(query))
-                            .then((result) => validatePullOperation(result, [entity4, entity6]))
+                            .then((result) => validateNewPullOperation(result, [], [entity5]))
                             .then(() => done()))
                         .catch(done);
                 });
 
-                it('should not use deltaset with skip and limit query', (done) =>{
+                it('should not use deltaset with skip and limit query', (done) => {
                     let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     let query = new Kinvey.Query();
-                    query.limit = 1;
-                    query.skip = 2;
+                    query.limit = 2;
+                    query.skip = 1;
                     query.equalTo('textField', 'queryValue');
                     deltaNetworkStore.save(entity4)
-                    .then(() => deltaNetworkStore.save(entity5))
-                    .then(() => deltaNetworkStore.save(entity6))
-                    .then(() => deltaStoreToTest.pull(query))
+                        .then(() => deltaNetworkStore.save(entity5))
+                        .then(() => deltaNetworkStore.save(entity6))
+                        .then(() => deltaStoreToTest.pull(query))
                         .then((result) => validatePullOperation(result, [entity5, entity6]))
                         .then(() => deltaStoreToTest.pull(query))
                         .then((result) => validatePullOperation(result, [entity5, entity6]))
                         .then(() => done())
-                    .catch(done);
+                        .catch(done);
 
                 });
             });
@@ -265,7 +266,7 @@ function testFunc() {
                 const entity3 = utilities.getEntity(utilities.randomString());
                 const createdUserIds = [];
                 let deltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true });
-                let taggedDeltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true, tag: tagStore});
+                let taggedDeltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true, tag: tagStore });
 
                 before((done) => {
                     utilities.cleanUpAppData(deltaCollectionName, createdUserIds)
@@ -295,13 +296,13 @@ function testFunc() {
                     deltaStoreToTest.sync()
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then((result) => validateNewPullOperation(result, [], []))
                         .then(() => done())
                         .catch(done);
                 });
 
                 it('should return correct number of items with disabled deltaset', (done) => {
-                    let deisabledDeltaSetStore = currentDataStoreType === Kinvey.DataStoreType.Cache?cacheStore:syncStore;
+                    let deisabledDeltaSetStore = currentDataStoreType === Kinvey.DataStoreType.Cache ? cacheStore : syncStore;
                     deisabledDeltaSetStore.sync()
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deisabledDeltaSetStore.sync())
@@ -317,20 +318,20 @@ function testFunc() {
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2], 2, tagStore))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => taggedDeltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [entity1, entity2, entity3], 3, tagStore))
+                        .then((result) => validateNewPullOperation(result.pull, [entity3], [], tagStore))
                         .then(() => deltaNetworkStore.removeById(entity1._id))
                         .then(() => taggedDeltaStoreToTest.sync())
-                        .then((result) => {validatePullOperation(result.pull, [entity2, entity3], 2, tagStore)})
+                        .then((result) => { validateNewPullOperation(result.pull, [], [entity1], tagStore) })
                         .then(() => {
                             syncStore.find()
-                            .subscribe(onNextSpy, done, ()=>{
-                                try{
-                                    utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity1]);
-                                    done();
-                                } catch(error){
-                                    done(error);
-                                }
-                            })
+                                .subscribe(onNextSpy, done, () => {
+                                    try {
+                                        utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity1]);
+                                        done();
+                                    } catch (error) {
+                                        done(error);
+                                    }
+                                })
                         })
                         .catch(done);
                 });
@@ -340,7 +341,7 @@ function testFunc() {
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => deltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [entity1, entity2, entity3]))
+                        .then((result) => validateNewPullOperation(result.pull, [entity3], []))
                         .then(() => done())
                         .catch(done);
                 });
@@ -351,21 +352,46 @@ function testFunc() {
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => deltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [entity1, entity2, entity3]))
+                        .then((result) => validateNewPullOperation(result.pull, [entity3], []))
                         .then(() => deltaNetworkStore.save(entity4))
                         .then(() => deltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [entity1, entity2, entity3, entity4]))
+                        .then((result) => validateNewPullOperation(result.pull, [entity4], []))
                         .then(() => done())
                         .catch(done);
                 });
-
-                it('should return correct number of items with auto-pagination', (done) => {
+                // Bug https://kinvey.atlassian.net/browse/MLIBZ-2478
+                it.skip('should return correct number of items with auto-pagination', (done) => {
                     deltaStoreToTest.sync(new Kinvey.Query(), { autoPagination: true })
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
                         .then(() => deltaStoreToTest.sync(new Kinvey.Query(), { autoPagination: true }))
-                        .then((result) => validatePullOperation(result.pull, [entity1, entity2, entity3]))
+                        .then((result) => validateNewPullOperation(result.pull, [entity3], []))
                         .then(() => done())
+                        .catch(done);
+                });
+
+                it('should return correct number of items with tagged dataStore', (done) => {
+                    const onNextSpy = sinon.spy();
+                    syncStore.save(entity1)
+                        .then(() => taggedDeltaStoreToTest.sync())
+                        .then((result) => validatePullOperation(result.pull, [entity1, entity2], 2, tagStore))
+                        .then(() => deltaNetworkStore.save(entity3))
+                        .then(() => taggedDeltaStoreToTest.sync())
+                        .then((result) => validateNewPullOperation(result.pull, [entity3], [], tagStore))
+                        .then(() => deltaNetworkStore.removeById(entity1._id))
+                        .then(() => taggedDeltaStoreToTest.sync())
+                        .then((result) => { validateNewPullOperation(result.pull, [entity1], [], tagStore) })
+                        .then(() => {
+                            syncStore.find()
+                                .subscribe(onNextSpy, done, () => {
+                                    try {
+                                        utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity1]);
+                                        done();
+                                    } catch (error) {
+                                        done(error);
+                                    }
+                                })
+                        })
                         .catch(done);
                 });
 
@@ -374,7 +400,7 @@ function testFunc() {
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaNetworkStore.removeById(entity2._id))
                         .then(() => deltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [entity1]))
+                        .then((result) => validateNewPullOperation(result.pull, [], [entity2]))
                         .then(() => done())
                         .catch(done);
                 });
@@ -386,7 +412,7 @@ function testFunc() {
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(updatedEntity))
                         .then(() => deltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [entity1, updatedEntity]))
+                        .then((result) => validateNewPullOperation(result.pull, [updatedEntity], []))
                         .then(() => done())
                         .catch(done);
                 });
@@ -399,7 +425,7 @@ function testFunc() {
                         .then(() => deltaNetworkStore.save(updatedEntity))
                         .then(() => deltaNetworkStore.removeById(entity1._id))
                         .then(() => deltaStoreToTest.sync())
-                        .then((result) => validatePullOperation(result.pull, [updatedEntity]))
+                        .then((result) => validateNewPullOperation(result.pull, [updatedEntity], [entity1]))
                         .then(() => done())
                         .catch(done);
                 });
@@ -419,7 +445,7 @@ function testFunc() {
                             .then((result) => validatePullOperation(result.pull, [entity4, entity5, entity6]))
                             .then(() => deltaNetworkStore.save(updatedEntity))
                             .then(() => deltaStoreToTest.sync(query))
-                            .then((result) => validatePullOperation(result.pull, [entity4, updatedEntity, entity6]))
+                            .then((result) => validateNewPullOperation(result.pull, [updatedEntity], []))
                             .then(() => done()))
                         .catch(done);
                 });
@@ -437,7 +463,7 @@ function testFunc() {
                             .then((result) => validatePullOperation(result.pull, [entity4, entity5, entity6]))
                             .then(() => deltaNetworkStore.removeById(entity5._id))
                             .then(() => deltaStoreToTest.sync(query))
-                            .then((result) => validatePullOperation(result.pull, [entity4, entity6]))
+                            .then((result) => validateNewPullOperation(result.pull, [], [entity5]))
                             .then(() => done()))
                         .catch(done);
                 });
@@ -460,7 +486,7 @@ function testFunc() {
                             .then(() => done()))
                         .catch(done);
                 });
-                
+
             });
 
             conditionalDescribe('find', () => {
@@ -587,12 +613,12 @@ function testFunc() {
                                                 const yetAnotherSpy = sinon.spy();
                                                 deltaNetworkStore.save(entity4)
                                                     .then(() => deltaStoreToTest.find()
-                                                        .subscribe(yetAnotherSpy, done, () =>{
-                                                            try{
+                                                        .subscribe(yetAnotherSpy, done, () => {
+                                                            try {
                                                                 utilities.validateReadResult(currentDataStoreType, yetAnotherSpy, [entity1, entity2, entity3], [entity1, entity2, entity3, entity4]);
                                                                 done();
                                                             }
-                                                            catch (error){
+                                                            catch (error) {
                                                                 done(error);
                                                             }
                                                         }))
@@ -816,7 +842,8 @@ function testFunc() {
                                 catch (error) {
                                     done(error);
                                 }
-                            }));
+                            }))
+                        .catch(done);
                 });
             });
 
@@ -859,10 +886,10 @@ function testFunc() {
                             .then((result) => validatePullOperation(result, [entity1, entity2]))
                             .then(() => deltaNetworkStore.save(entity3))
                             .then(() => deltaStoreToTest.pull())
-                            .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                            .then((result) => validateNewPullOperation(result, [entity3], []))
                             .then(() => deltaNetworkStore.save(entity4))
                             .then(() => deltaCacheStore.pull())
-                            .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                            .then((result) => validateNewPullOperation(result, [entity4], []))
                             .then(() => done())
                             .catch(done);
                     });
@@ -874,10 +901,10 @@ function testFunc() {
                             .then((result) => validatePullOperation(result, [entity1, entity2]))
                             .then(() => deltaNetworkStore.save(entity3))
                             .then(() => deltaStoreToTest.pull())
-                            .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                            .then((result) => validateNewPullOperation(result, [entity3], []))
                             .then(() => deltaNetworkStore.save(entity4))
                             .then(() => deltaSyncStore.pull())
-                            .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                            .then((result) => validateNewPullOperation(result, [entity4], []))
                             .then(() => done())
                             .catch(done);
                     });
@@ -895,7 +922,7 @@ function testFunc() {
                                         .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
                                         .then(() => deltaNetworkStore.save(entity4))
                                         .then(() => deltaSyncStore.pull())
-                                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                                        .then((result) => validateNewPullOperation(result, [entity4], []))
                                         .then(() => done())
                                         .catch(done);
                                 }
@@ -918,7 +945,7 @@ function testFunc() {
                                         .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
                                         .then(() => deltaNetworkStore.save(entity4))
                                         .then(() => deltaSyncStore.pull())
-                                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                                        .then((result) => validateNewPullOperation(result, [entity4], []))
                                         .then(() => done())
                                         .catch(done);
                                 }
@@ -963,27 +990,27 @@ function testFunc() {
                         .catch(done);
                 });
 
-                // bug - MLIBZ-2449
-                it('should send regular GET after clearCache()', (done)=>{
+                // bug - MLIBZ-2449 for WebSQL and MLIBZ-2450 for local storage
+                it.skip('should send regular GET after clearCache()', (done) => {
                     deltaStoreToTest.pull()
-                    .then((result) => validatePullOperation(result, [entity1, entity2]))
-                    .then(() => deltaNetworkStore.save(entity3))
-                    .then(() => deltaStoreToTest.pull())
-                    .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
-                    .then(() => Kinvey.DataStore.clearCache())
-                    .then(() => deltaNetworkStore.save(entity4))
-                    .then(() => deltaStoreToTest.pull())
-                    .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
-                    .then(() => deltaNetworkStore.removeById(entity3._id))
-                    .then(() => deltaStoreToTest.pull())
-                    .then((result) => validatePullOperation(result, [entity1, entity2, entity4]))
-                    .then(() => done())
-                    .catch(done);
+                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then(() => deltaNetworkStore.save(entity3))
+                        .then(() => deltaStoreToTest.pull())
+                        .then((result) => validateNewPullOperation(result, [entity3], []))
+                        .then(() => Kinvey.DataStore.clearCache())
+                        .then(() => deltaNetworkStore.save(entity4))
+                        .then(() => deltaStoreToTest.pull())
+                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                        .then(() => deltaNetworkStore.removeById(entity3._id))
+                        .then(() => deltaStoreToTest.pull())
+                        .then((result) => validateNewPullOperation(result, [], [entity3]))
+                        .then(() => done())
+                        .catch((error) => done(error));
                 });
             });
 
             describe('error handling', () => {
-                
+
                 const dataStoreType = currentDataStoreType;
                 const entity1 = utilities.getEntity(utilities.randomString());
                 const entity2 = utilities.getEntity(utilities.randomString());
@@ -991,7 +1018,7 @@ function testFunc() {
                 const entity4 = utilities.getEntity(utilities.randomString());
                 const createdUserIds = [];
                 let deltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true });
-                let NonDeltaStoreToTest = Kinvey.DataStore.collection(collectionWithoutDelta, currentDataStoreType, { useDeltaSet: true });
+                let nonDeltaStoreToTest = Kinvey.DataStore.collection(collectionWithoutDelta, currentDataStoreType, { useDeltaSet: true });
                 let nonDeltaNetworkStore = Kinvey.DataStore.collection(collectionWithoutDelta, Kinvey.DataStoreType.Network);
 
                 before((done) => {
@@ -1006,7 +1033,7 @@ function testFunc() {
                 });
 
                 beforeEach((done) => {
-                    
+
                     utilities.cleanUpCollectionData(deltaCollectionName)
                         .then(() => utilities.cleanUpCollectionData(collectionWithoutDelta))
                         .then(() => nonDeltaNetworkStore.save(entity1))
@@ -1023,51 +1050,50 @@ function testFunc() {
                         .catch(done);
                 });
 
-                //not implemented yet - MLIBZ-2457
-                it.skip('should send regular GET after failure for missing configuration', (done)=>{
+                it('should send regular GET after failure for missing configuration', (done) => {
                     syncStore = Kinvey.DataStore.collection(collectionWithoutDelta, Kinvey.DataStoreType.Sync);
-                    NonDeltaStoreToTest.pull()
-                    .then((result) => validatePullOperation(result, [entity1, entity2]))
-                    .then(() => nonDeltaNetworkStore.save(entity3))
-                    .then(() => NonDeltaStoreToTest.pull())
-                    .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
-                    .then(() => nonDeltaNetworkStore.save(entity4))
-                    .then(() => NonDeltaStoreToTest.pull())
-                    .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
-                    .then(() => done())
-                    .catch(done);
+                    nonDeltaStoreToTest.pull()
+                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then(() => nonDeltaNetworkStore.save(entity3))
+                        .then(() => nonDeltaStoreToTest.pull())
+                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                        .then(() => nonDeltaNetworkStore.save(entity4))
+                        .then(() => nonDeltaStoreToTest.pull())
+                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                        .then(() => done())
+                        .catch(done);
                 });
-
-                it.skip('should send regular GET after fail for outdated since param', (done)=>{
-                    let db = window.openDatabase('kid_Hkl56bqcf', 1,'Kinvey Cache', 20000);
+                //Only on WebSQL
+                it.skip('should send regular GET after fail for outdated since param', (done) => {
+                    let db = window.openDatabase('kid_Hkl56bqcf', 1, 'Kinvey Cache', 20000);
                     deltaStoreToTest.pull()
-                    .then((result) => validatePullOperation(result, [entity1, entity2]))
-                    .then(()=>{
-                        db.transaction((tx)=>{
-                            try{
-                            tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet)=>{
-                                let item = resultSet.rows[0];
-                                let queryParsed = JSON.parse(item.value);
-                                let lastRequest = queryParsed.lastRequest;
-                                let lastRequestDateObject = new Date(lastRequest);
-                                lastRequestDateObject.setDate(lastRequestDateObject.getDate()-31);
-                                let outdatedTimeToString = lastRequestDateObject.toISOString();
-                                queryParsed.lastRequest=outdatedTimeToString;
-                                tx.executeSql(`UPDATE _QueryCache SET value = ? WHERE value LIKE '%"query":""%'`,[JSON.stringify(queryParsed)], ()=>{
-                                    deltaStoreToTest.pull()
-                                    .then((result) => validatePullOperation(result, [entity1, entity2]))
-                                    .then(() => done())
-                                    .catch(done);
-                                });
+                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then(() => {
+                            db.transaction((tx) => {
+                                try {
+                                    tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
+                                        let item = resultSet.rows[0];
+                                        let queryParsed = JSON.parse(item.value);
+                                        let lastRequest = queryParsed.lastRequest;
+                                        let lastRequestDateObject = new Date(lastRequest);
+                                        lastRequestDateObject.setDate(lastRequestDateObject.getDate() - 31);
+                                        let outdatedTimeToString = lastRequestDateObject.toISOString();
+                                        queryParsed.lastRequest = outdatedTimeToString;
+                                        tx.executeSql(`UPDATE _QueryCache SET value = ? WHERE value LIKE '%"query":""%'`, [JSON.stringify(queryParsed)], () => {
+                                            deltaStoreToTest.pull()
+                                                .then((result) => validatePullOperation(result, [entity1, entity2]))
+                                                .then(() => done())
+                                                .catch(done);
+                                        });
 
+                                    })
+                                }
+                                catch (error) {
+                                    done(error);
+                                }
                             })
-                        }
-                        catch(error){
-                            done(error);
-                        }
                         })
-                    })                    
-                    .catch(done);
+                        .catch(done);
                 });
             });
         });

@@ -469,7 +469,7 @@ describe('CacheStore', () => {
           .catch(done);
     });
 
-    it('should send regular GET request when configuration is missing on the backend', function (done){
+    it.skip('should send regular GET request when configuration is missing on the backend', function (done){
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
       const store = new CacheStore(collection, null, { useDeltaSet: true});
@@ -1505,7 +1505,7 @@ describe('pull()', () => {
     .catch(done);
   });
 
-  it('should send regular GET request when configuration is missing on the backend', function (done){
+  it.skip('should send regular GET request when configuration is missing on the backend', function (done){
     const entity1 = { _id: randomString() };
     const entity2 = { _id: randomString() };
     const store = new CacheStore(collection, null, { useDeltaSet: true});
@@ -1548,7 +1548,7 @@ describe('pull()', () => {
       .catch(done);
   });
 
-  it.only('should return error if more than 10000 items are changed', function (){
+  it('should return error if more than 10000 items are changed', function (){
     const entity1 = { _id: randomString() };
     const entity2 = { _id: randomString() };
     const store = new CacheStore(collection, null, { useDeltaSet: true});
