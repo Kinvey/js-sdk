@@ -13,6 +13,7 @@ export * from './indirectCollectionAccessDisallowed';
 export * from './insufficientCredentials';
 export * from './invalidCredentials';
 export * from './invalidIdentifier';
+export * from './invalidGrant';
 export * from './invalidQuerySyntax';
 export * from './jsonParse';
 export * from './kinveyInternalErrorRetry';
