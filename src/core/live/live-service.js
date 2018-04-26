@@ -1,5 +1,5 @@
 import { Promise } from 'es6-promise';
-import PubNub from 'pubnub-react';
+import PubNub from 'pubnub';
 import isFunction from 'lodash/isFunction';
 import extend from 'lodash/extend';
 

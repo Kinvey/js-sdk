@@ -3021,12 +3021,6 @@ ignore@^3.3.3, ignore@^3.3.5:
   version "3.3.7"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.7.tgz#612289bfb3c220e186a58118618d5be8c1bab021"
 
-immutability-helper@^2.2.0:
-  version "2.6.6"
-  resolved "https://registry.yarnpkg.com/immutability-helper/-/immutability-helper-2.6.6.tgz#9b384c240d65257133c155086e16f678ca563b05"
-  dependencies:
-    invariant "^2.2.0"
-
 imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
@@ -4602,16 +4596,9 @@ public-encrypt@^4.0.0:
     parse-asn1 "^5.0.0"
     randombytes "^2.0.1"
 
-pubnub-react@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/pubnub-react/-/pubnub-react-1.2.0.tgz#85ffa87964cd59bbb355739d18b8ce6286973a2f"
-  dependencies:
-    immutability-helper "^2.2.0"
-    pubnub "^4.10.0"
-
-pubnub@^4.10.0:
+pubnub@cbre360/javascript:
   version "4.20.2"
-  resolved "https://registry.yarnpkg.com/pubnub/-/pubnub-4.20.2.tgz#c2af1ebf2e2262eadf466aee462632d0d2f28c26"
+  resolved "https://codeload.github.com/cbre360/javascript/tar.gz/0a3ec2d7703bd277d9abe70c044dfb08791894de"
   dependencies:
     agentkeepalive "^3.1.0"
     lil-uuid "^0.1.1"
