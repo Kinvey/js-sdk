@@ -1,6 +1,6 @@
 
 function testFunc() {
-    let dataStoreTypes = [Kinvey.DataStoreType.Cache];
+    let dataStoreTypes = [Kinvey.DataStoreType.Sync];
     let deltaCollectionName = externalConfig.deltaCollectionName;
     let collectionWithoutDelta = externalConfig.collectionName;
     let deltaNetworkStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Network);
@@ -52,7 +52,7 @@ function testFunc() {
     }
 
     dataStoreTypes.forEach((currentDataStoreType) => {
-        describe(`${currentDataStoreType} Deltaset tests`, () => {
+        describe.only(`${currentDataStoreType} Deltaset tests`, () => {
             let conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
             describe('pull', () => {
                 const dataStoreType = currentDataStoreType;
@@ -486,7 +486,6 @@ function testFunc() {
                             .then(() => done()))
                         .catch(done);
                 });
-
             });
 
             conditionalDescribe('find', () => {
@@ -1010,7 +1009,6 @@ function testFunc() {
             });
 
             describe('error handling', () => {
-
                 const dataStoreType = currentDataStoreType;
                 const entity1 = utilities.getEntity(utilities.randomString());
                 const entity2 = utilities.getEntity(utilities.randomString());
@@ -1033,7 +1031,6 @@ function testFunc() {
                 });
 
                 beforeEach((done) => {
-
                     utilities.cleanUpCollectionData(deltaCollectionName)
                         .then(() => utilities.cleanUpCollectionData(collectionWithoutDelta))
                         .then(() => nonDeltaNetworkStore.save(entity1))
