@@ -1,7 +1,7 @@
 
 const testsConfig = {
   collectionName: 'Books',
-  deltaCollectionName: 'BooksDelta', 
+  deltaCollectionName: 'BooksDelta',
   fbEmail: process.env.FACEBOOK_EMAIL,
   fbPassword: process.env.FACEBOOK_PASSWORD,
 
