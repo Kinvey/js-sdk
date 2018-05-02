@@ -23,7 +23,7 @@ function testFunc() {
     }
 
     const validateNewPullOperation = (result, expectedPulledItems, expectedDeletedItems, tagStore) => {
-        expect(result).to.equal(expectedDeletedItems.length + expectedPulledItems.length);
+        expect(result).to.equal(expectedPulledItems.length);
         let storeToFind = tagStore ? Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }) : syncStore;
         return storeToFind.find().toPromise()
             .then((result) => {
@@ -150,7 +150,7 @@ function testFunc() {
                         .then((result) => validateNewPullOperation(result, [entity3], [], tagStore))
                         .then(() => deltaNetworkStore.removeById(entity1._id))
                         .then(() => taggedDeltaStoreToTest.pull())
-                        .then((result) => { validateNewPullOperation(result, [entity1], [], tagStore) })
+                        .then((result) => { validateNewPullOperation(result, [], [entity1], tagStore) })
                         .then(() => {
                             syncStore.find()
                                 .subscribe(onNextSpy, done, () => {
@@ -239,10 +239,11 @@ function testFunc() {
                 });
 
                 it('should not use deltaset with skip and limit query', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
-                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
-                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue',1);
+                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue',2);
+                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue',3);
                     let query = new Kinvey.Query();
+                    query.ascending('numberField');
                     query.limit = 2;
                     query.skip = 1;
                     query.equalTo('textField', 'queryValue');
@@ -380,7 +381,7 @@ function testFunc() {
                         .then((result) => validateNewPullOperation(result.pull, [entity3], [], tagStore))
                         .then(() => deltaNetworkStore.removeById(entity1._id))
                         .then(() => taggedDeltaStoreToTest.sync())
-                        .then((result) => { validateNewPullOperation(result.pull, [entity1], [], tagStore) })
+                        .then((result) => { validateNewPullOperation(result.pull, [], [entity1], tagStore) })
                         .then(() => {
                             syncStore.find()
                                 .subscribe(onNextSpy, done, () => {
@@ -469,10 +470,11 @@ function testFunc() {
                 });
 
                 it('should not use deltaset when limit and skip are used', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
+                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue",1);
+                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue",2);
+                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue",3);
                     let query = new Kinvey.Query();
+                    query.ascending('numberField')
                     query.limit = 2;
                     query.skip = 1;
                     query.equalTo('textField', 'queryValue');
@@ -615,7 +617,7 @@ function testFunc() {
                                                     .then(() => deltaStoreToTest.find()
                                                         .subscribe(yetAnotherSpy, done, () => {
                                                             try {
-                                                                utilities.validateReadResult(currentDataStoreType, yetAnotherSpy, [entity1, entity2, entity3], [entity1, entity2, entity3, entity4]);
+                                                                utilities.validateReadResult(currentDataStoreType, yetAnotherSpy, [entity1, entity2, entity3], [entity1, entity2, entity3, entity4], true);
                                                                 done();
                                                             }
                                                             catch (error) {
@@ -810,12 +812,13 @@ function testFunc() {
                 });
 
                 it('should not use deltaset when using limit and skip', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
+                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue", 1);
+                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue", 2);
+                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue", 3);
                     let updatedEntity = _.clone(entity5);
                     updatedEntity.numberField = 5;
                     let query = new Kinvey.Query();
+                    query.ascending('numberField');
                     query.limit = 2;
                     query.skip = 1;
                     query.equalTo('textField', 'queryValue');
