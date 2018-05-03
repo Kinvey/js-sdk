@@ -1,6 +1,10 @@
 
 function testFunc() {
+<<<<<<< HEAD
     let dataStoreTypes = [Kinvey.DataStoreType.Cache];
+=======
+    let dataStoreTypes = [Kinvey.DataStoreType.Sync];
+>>>>>>> 622040a9a33ab8360c6318706460c14647309c53
     let deltaCollectionName = externalConfig.deltaCollectionName;
     let collectionWithoutDelta = externalConfig.collectionName;
     let deltaNetworkStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Network);
@@ -488,7 +492,6 @@ function testFunc() {
                             .then(() => done()))
                         .catch(done);
                 });
-
             });
 
             conditionalDescribe('find', () => {
@@ -1035,7 +1038,6 @@ function testFunc() {
                 });
 
                 beforeEach((done) => {
-
                     utilities.cleanUpCollectionData(deltaCollectionName)
                         .then(() => utilities.cleanUpCollectionData(collectionWithoutDelta))
                         .then(() => nonDeltaNetworkStore.save(entity1))
