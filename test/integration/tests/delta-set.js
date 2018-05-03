@@ -1,10 +1,6 @@
 
 function testFunc() {
-<<<<<<< HEAD
-    let dataStoreTypes = [Kinvey.DataStoreType.Cache];
-=======
     let dataStoreTypes = [Kinvey.DataStoreType.Sync];
->>>>>>> 622040a9a33ab8360c6318706460c14647309c53
     let deltaCollectionName = externalConfig.deltaCollectionName;
     let collectionWithoutDelta = externalConfig.collectionName;
     let deltaNetworkStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Network);
@@ -32,7 +28,6 @@ function testFunc() {
         return storeToFind.find().toPromise()
             .then((result) => {
                 expectedPulledItems.forEach((entity) => {
-                    debugger;
                     const cachedEntity = _.find(result, e => e._id === entity._id);
                     expect(utilities.deleteEntityMetadata(cachedEntity)).to.deep.equal(entity);
                 });
