@@ -90,14 +90,14 @@ export class SyncManager {
           .then((response) => {
             return getCachedQuery(collection, query)
               .then((cachedQuery) => {
-                if (cachedQuery) {
+                if (cachedQuery && response.headers) {
                   cachedQuery.lastRequest = response.headers.requestStart;
                   return updateCachedQuery(cachedQuery);
                 }
 
                 return null;
               })
-              .then(() => response.data);
+              .then(() => response.data ? response.data : response);
           });
       })
       .then((data) => {
@@ -456,8 +456,10 @@ export class SyncManager {
     return this._networkRepo.count(collection, countQuery, { dataOnly: false })
       .then((response) => {
         return {
-          lastRequest: response.headers.requestStart,
-          count: Math.min(response.data.count - userQuery.skip, userQuery.limit || Infinity)
+          lastRequest: response.headers ? response.headers.requestStart : undefined,
+          count: response.data
+            ? Math.min(response.data.count - userQuery.skip, userQuery.limit || Infinity)
+            : Math.min(response - userQuery.skip, userQuery.limit || Infinity)
         };
       });
   }
