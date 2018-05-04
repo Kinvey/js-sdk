@@ -17,6 +17,8 @@ import { buildCollectionUrl } from './utils';
  * @property {Object} [options.properties]
  * @property {Boolean} [options.skipBL]
  * @property {Boolean} [options.trace]
+ * @property {Number} [options.kinveyFileTTL]
+ * @property {Boolean} [options.kinveyFileTLS]
  */
 
 export class NetworkRepository extends Repository {
@@ -99,7 +101,9 @@ export class NetworkRepository extends Repository {
       timeout: options.timeout,
       properties: options.properties,
       trace: options.trace,
-      skipBL: options.skipBL
+      skipBL: options.skipBL,
+      kinveyFileTTL: options.kinveyFileTTL,
+      kinveyFileTLS: options.kinveyFileTLS
     };
 
     if (data) {

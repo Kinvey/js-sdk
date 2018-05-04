@@ -109,14 +109,14 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
         .then((response) => {
           return getCachedQuery(collection, query)
             .then((cachedQuery) => {
-              if (cachedQuery) {
+              if (cachedQuery && response.headers) {
                 cachedQuery.lastRequest = response.headers.requestStart;
                 return updateCachedQuery(cachedQuery);
               }
 
               return null;
             })
-            .then(() => response.data);
+            .then(() => response.data ? response.data : response);
         })
         .then((data) => {
           if (useDeltaSet) {

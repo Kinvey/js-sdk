@@ -426,6 +426,53 @@ describe('CacheStore', () => {
         });
     });
 
+    it('should add kinveyfile_ttl query parameter', () => {
+      const store = new CacheStore('comecollection');
+      const entity1 = { _id: randomString() };
+
+      nock(client.apiHostname)
+        .get(store.pathname)
+        .query({ kinveyfile_ttl: 3600 })
+        .reply(200, [entity1]);
+
+      return store.find(null, { kinveyFileTTL: 3600 }).toPromise()
+        .then((entities) => {
+          expect(entities).toEqual([entity1]);
+        });
+    });
+
+    it('should add kinveyfile_tls query parameter', () => {
+      const store = new CacheStore('comecollection');
+      const entity1 = { _id: randomString() };
+
+      nock(client.apiHostname)
+        .get(store.pathname)
+        .query({ kinveyfile_tls: true })
+        .reply(200, [entity1]);
+
+      return store.find(null, { kinveyFileTLS: true }).toPromise()
+        .then((entities) => {
+          expect(entities).toEqual([entity1]);
+        });
+    });
+  });
+
+  describe('findById()', () => {
+    it('should return undefined if an id is not provided', (done) => {
+      const store = new CacheStore(collection);
+      const onNextSpy = expect.createSpy();
+      store.findById()
+        .subscribe(onNextSpy, done, () => {
+          try {
+            expect(onNextSpy.calls.length).toEqual(1);
+            expect(onNextSpy.calls[0].arguments).toEqual([undefined]);
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+    });
+
     it('should send regular GET request with outdated lastRequest', function (done){
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };

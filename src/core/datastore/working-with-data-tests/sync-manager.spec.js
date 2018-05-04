@@ -312,21 +312,21 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
         });
     });
 
-    it.skip('should call NetworkRepo.read() to get entities from the backend', () => {
+    it('should call NetworkRepo.read() to get entities from the backend', () => {
       return syncManager.pull(collection, query, options)
         .then(() => {
           validateSpyCalls(networkRepoMock.read, 1, [collection, query, options]);
         });
     });
 
-    it.skip('should call OfflineRepo.delete() to reflect deleted entities locally', () => {
+    it('should call OfflineRepo.delete() to reflect deleted entities locally', () => {
       return syncManager.pull(collection, query, options)
         .then(() => {
           validateSpyCalls(offlineRepoMock.delete, 1, [collection, query]);
         });
     });
 
-    it.skip('should call OfflineRepo.update() to upsert entities available locally', () => {
+    it('should call OfflineRepo.update() to upsert entities available locally', () => {
       const serverItemsMock = [{ _id: randomString() }, { _id: randomString() }];
       networkRepoMock.read = createPromiseSpy(serverItemsMock);
       return syncManager.pull(collection, query, options)
@@ -335,7 +335,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
         });
     });
 
-    it.skip('should return the number of entities pulled', () => {
+    it('should return the number of entities pulled', () => {
       const serverItemsMock = [{ _id: randomString() }, { _id: randomString() }];
       networkRepoMock.read = createPromiseSpy(serverItemsMock);
       offlineRepoMock.update = createPromiseSpy(serverItemsMock);
@@ -354,41 +354,31 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
         networkRepoMock.count = createPromiseSpy(backendEntityCount);
       });
 
-      it.skip('should do a regular deltaset request if useDeltaSet is true', () => {
-        options.useDeltaSet = true;
+      it('should do a paginated request, when autoPagination is true', () => {
         return syncManager.pull(collection, null, options)
           .then(() => {
-            validateSpyCalls(utilsMock.splitQueryIntoPages, 0);
-            validateSpyCalls(networkRepoMock.count, 0);
-            validateSpyCalls(networkRepoMock.read, 1, [collection, null, options]);
+            validateSpyCalls(networkRepoMock.count, 1, [collection, new Query(), { dataOnly: false }]);
           });
       });
 
-      it.skip('should do a paginated request, when autoPagination is true', () => {
-        return syncManager.pull(collection, null, options)
-          .then(() => {
-            validateSpyCalls(networkRepoMock.count, 1, [collection, new Query()]);
-          });
-      });
-
-      it.skip('should do a paginated request, when autoPagination is an object', () => {
+      it('should do a paginated request, when autoPagination is an object', () => {
         return syncManager.pull(collection, null, { autoPagination: { pageSize: 14 } })
           .then(() => {
-            validateSpyCalls(networkRepoMock.count, 1, [collection, new Query()]);
+            validateSpyCalls(networkRepoMock.count, 1, [collection, new Query(), { dataOnly: false }]);
           });
       });
 
-      it.skip('should call NetworkRepo.count()', () => {
+      it('should call NetworkRepo.count()', () => {
         utilsMock.splitQueryIntoPages = expect.createSpy().andReturn([]);
         const query = new Query();
         query.ascending(randomString()); // check that sort is ignored
         return syncManager.pull(collection, query, options)
           .then(() => {
-            validateSpyCalls(networkRepoMock.count, 1, [collection, new Query()]);
+            validateSpyCalls(networkRepoMock.count, 1, [collection, new Query(), { dataOnly: false }]);
           });
       });
 
-      it.skip('should call OfflineRepo.delete() with the internal pull query', () => {
+      it('should call OfflineRepo.delete() with the internal pull query', () => {
         utilsMock.splitQueryIntoPages = expect.createSpy().andReturn([]);
         return syncManager.pull(collection, null, options)
           .then(() => {
@@ -399,7 +389,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           });
       });
 
-      it.skip('should call NetworkRepo.read()', () => {
+      it('should call NetworkRepo.read()', () => {
         const paginatedQueriesMock = [new Query()];
         utilsMock.splitQueryIntoPages.andReturn(paginatedQueriesMock);
         return syncManager.pull(collection, null, options)
@@ -408,7 +398,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           });
       });
 
-      it.skip('should call OfflineRepo.update()', () => {
+      it('should call OfflineRepo.update()', () => {
         const serverResponse = [{ _id: randomString() }, { _id: randomString() }];
         utilsMock.splitQueryIntoPages.andReturn([new Query()]);
         networkRepoMock.read = createPromiseSpy(serverResponse);
@@ -418,7 +408,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           });
       });
 
-      it.skip('should respect the pageSize setting', () => {
+      it('should respect the pageSize setting', () => {
         const pageSize = 13;
         const options = { autoPagination: { pageSize } };
         return syncManager.pull(collection, null, options)
@@ -430,7 +420,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           });
       });
 
-      it.skip('should return the number of pulled entities', () => {
+      it('should return the number of pulled entities', () => {
         const serverResponse = [{ _id: randomString() }, { _id: randomString() }];
         utilsMock.splitQueryIntoPages.andReturn([new Query()]);
         networkRepoMock.read = createPromiseSpy(serverResponse);
@@ -449,7 +439,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           utilsMock.splitQueryIntoPages.andReturn([]);
         });
 
-        it.skip('should reflect user query sort', () => {
+        it('should reflect user query sort', () => {
           const query = new Query();
           const sortFieldName = randomString();
           query.ascending(sortFieldName);
@@ -462,7 +452,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
             });
         });
 
-        it.skip('should reflect user query skip', () => {
+        it('should reflect user query skip', () => {
           const query = new Query();
           query.skip = 123;
           return syncManager.pull(collection, query, options)
@@ -475,7 +465,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
             });
         });
 
-        it.skip('should reflect user query limit', () => {
+        it('should reflect user query limit', () => {
           const query = new Query();
           query.limit = 4321;
           return syncManager.pull(collection, query, options)
@@ -488,7 +478,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
             });
         });
 
-        it.skip('should have a limit value equal to the total entity count, if total count is less than userQuery.limit', () => {
+        it('should have a limit value equal to the total entity count, if total count is less than userQuery.limit', () => {
           const query = new Query();
           query.limit = 1e10;
           return syncManager.pull(collection, query, options)
@@ -501,7 +491,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
             });
         });
 
-        it.skip('should have a limit value equal to the userQuery.limit, if total count is greater than userQuery.limit', () => {
+        it('should have a limit value equal to the userQuery.limit, if total count is greater than userQuery.limit', () => {
           const query = new Query();
           query.limit = 3;
           return syncManager.pull(collection, query, options)
@@ -514,7 +504,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
             });
         });
 
-        it.skip('should calculate the total entity count to pull, considering the userQuery.skip value', () => {
+        it('should calculate the total entity count to pull, considering the userQuery.skip value', () => {
           const query = new Query();
           query.skip = 12;
           return syncManager.pull(collection, query, options)
