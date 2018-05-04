@@ -516,7 +516,7 @@ describe('CacheStore', () => {
           .catch(done);
     });
 
-    it.skip('should send regular GET request when configuration is missing on the backend', function (done){
+    it('should send regular GET request when configuration is missing on the backend', function (done){
       const entity1 = { _id: randomString() };
       const entity2 = { _id: randomString() };
       const store = new CacheStore(collection, null, { useDeltaSet: true});
@@ -525,7 +525,7 @@ describe('CacheStore', () => {
 
       const firstNock = nock(store.client.apiHostname)
       .get(`/appdata/${store.client.appKey}/${collection}`)
-      .reply(400, [entity1, entity2], {
+      .reply(200, [entity1, entity2], {
         'X-Kinvey-Request-Start': lastRequestDate.toISOString()
       });
 
@@ -543,7 +543,7 @@ describe('CacheStore', () => {
 
             const thirdNock = nock(store.client.apiHostname)
             .get(`/appdata/${store.client.appKey}/${collection}`)
-            .reply(403, [entity1, entity2], {
+            .reply(200, [entity1, entity2], {
               'X-Kinvey-Request-Start': lastRequestDate.toISOString()
             });
             store.find()
@@ -1552,16 +1552,15 @@ describe('pull()', () => {
     .catch(done);
   });
 
-  it.skip('should send regular GET request when configuration is missing on the backend', function (done){
+  it('should send regular GET request when configuration is missing on the backend', function (done){
     const entity1 = { _id: randomString() };
     const entity2 = { _id: randomString() };
     const store = new CacheStore(collection, null, { useDeltaSet: true});
-    const onNextSpy = expect.createSpy();
     const lastRequestDate = new Date();
 
     const firstNock = nock(store.client.apiHostname)
     .get(`/appdata/${store.client.appKey}/${collection}`)
-    .reply(403, [entity1, entity2], {
+    .reply(200, [entity1, entity2], {
       'X-Kinvey-Request-Start': lastRequestDate.toISOString()
     });
 
@@ -1579,18 +1578,16 @@ describe('pull()', () => {
 
         const thirdNock = nock(store.client.apiHostname)
         .get(`/appdata/${store.client.appKey}/${collection}`)
-        .reply(403, [entity1, entity2], {
+        .reply(200, [entity1, entity2], {
           'X-Kinvey-Request-Start': lastRequestDate.toISOString()
         });
-        return store.pull();
-      })
-      .then((result) =>{
-        secondNock.done();
-        thirdNock.done();
-        expect(onNextSpy.calls.length).toEqual(2);
-        expect(onNextSpy.calls[0].arguments).toEqual([[entity1, entity2]]);
-        expect(onNextSpy.calls[1].arguments).toEqual([[entity1, entity2]]);
-        done();
+        return store.pull()
+          .then((result) =>{
+            secondNock.done();
+            thirdNock.done();
+            expect(result).toEqual(2);
+            done();
+          });
       })
       .catch(done);
   });
