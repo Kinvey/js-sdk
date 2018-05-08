@@ -97,6 +97,13 @@ export class CacheOfflineDataProcessor extends OfflineDataProcessor {
                   useDeltaSet = false;
                   return getCachedQuery(collection, query)
                     .then((cachedQuery) => deleteCachedQuery(cachedQuery))
+                    .catch((error) => {
+                      if (error instanceof NotFoundError) {
+                        return null;
+                      }
+
+                      throw error;
+                    })
                     .then(() => this._networkRepository.read(collection, query, Object.assign(options, { dataOnly: false })));
                 }
 

@@ -125,6 +125,13 @@ export class SyncManager {
         if (error instanceof InvalidCachedQuery) {
           return getCachedQuery(collection, query)
             .then((cachedQuery) => deleteCachedQuery(cachedQuery))
+            .catch((error) => {
+              if (error instanceof NotFoundError) {
+                return null;
+              }
+
+              throw error;
+            })
             .then(() => this.pull(collection, query, Object.assign(options, { useDeltaSet: false })));
         }
 
