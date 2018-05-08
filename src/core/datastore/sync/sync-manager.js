@@ -113,19 +113,13 @@ export class SyncManager {
           if (data.changed.length > 0) {
             promises.push(this._getOfflineRepo().then((offlineRepo) => offlineRepo.update(collection, data.changed)));
           }
-          return Promise.all(promises).then(() => data.changed);
+          return Promise.all(promises).then(() => data.changed.length);
         } else if (options.autoPagination) {
           return data;
         }
 
-        return this._replaceOfflineEntities(collection, query, data);
-      })
-      .then((entities) => {
-        if (options.autoPagination) {
-          return entities;
-        }
-
-        return entities.length;
+        return this._replaceOfflineEntities(collection, query, data)
+          .then((data) => data.length);
       })
       .catch((error) => {
         if (error instanceof InvalidCachedQuery) {
