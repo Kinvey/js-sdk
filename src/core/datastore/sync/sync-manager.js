@@ -458,9 +458,7 @@ export class SyncManager {
       .then((response) => {
         return {
           lastRequest: response.headers ? response.headers.requestStart : undefined,
-          count: response.data
-            ? Math.min(response.data.count - userQuery.skip, userQuery.limit || Infinity)
-            : Math.min(response - userQuery.skip, userQuery.limit || Infinity)
+          count: response.data ? response.data.count : response
         };
       });
   }
