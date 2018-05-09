@@ -81,6 +81,25 @@ export class SyncManager {
                   return null;
                 })
                 .then(() => response.data);
+            })
+            .then((data) => {
+              if (data.deleted.length > 0) {
+                const deleteQuery = new Query();
+                deleteQuery.containsAll('_id', data.deleted.map((entity) => entity._id));
+                return this._deleteOfflineEntities(collection, deleteQuery)
+                  .then(() => data);
+              }
+
+              return data;
+            })
+            .then((data) => {
+              if (data.changed.length > 0) {
+                return this._getOfflineRepo()
+                  .then((offlineRepo) => offlineRepo.update(collection, data.changed))
+                  .then(() => data.changed.length);
+              }
+
+              return 0;
             });
         } else if (options.autoPagination) {
           return this._paginatedPull(collection, query, options);
@@ -98,28 +117,8 @@ export class SyncManager {
                 return null;
               })
               .then(() => response.data ? response.data : response);
-          });
-      })
-      .then((data) => {
-        if (options.useDeltaSet) {
-          const promises = [];
-
-          if (data.deleted.length > 0) {
-            const deleteQuery = new Query();
-            deleteQuery.containsAll('_id', data.deleted.map((entity) => entity._id));
-            promises.push(this._deleteOfflineEntities(collection, deleteQuery));
-          }
-
-          if (data.changed.length > 0) {
-            promises.push(this._getOfflineRepo().then((offlineRepo) => offlineRepo.update(collection, data.changed)));
-          }
-          return Promise.all(promises).then(() => data.changed.length);
-        } else if (options.autoPagination) {
-          return data;
-        }
-
-        return this._replaceOfflineEntities(collection, query, data)
-          .then((data) => data.length);
+          })
+          .then((data) => this._replaceOfflineEntities(collection, query, data).then((data) => data.length));
       })
       .catch((error) => {
         if (error instanceof InvalidCachedQuery) {
