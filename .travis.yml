@@ -112,7 +112,7 @@ matrix:
         - npm i -g cordova@${INTEGRATION_TESTS_CORDOVA_VERSION}
         - npm i
       script:
-        - node ${RUN_INTEGRATION_TESTS_FILE_LOCATION} --platform phonegap --os ios
+        - travis_wait node ${RUN_INTEGRATION_TESTS_FILE_LOCATION} --platform phonegap --os ios
 
 
     - stage: deploy
