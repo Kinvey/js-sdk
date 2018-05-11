@@ -207,6 +207,11 @@ export class SyncManager {
   _replaceOfflineEntities(collection, deleteOfflineQuery, networkEntities = []) {
     // TODO: this can potentially be deleteOfflineQuery.and().notIn(networkEntitiesIds)
     // but inmemory filtering with this filter seems to take too long
+    if (deleteOfflineQuery && (deleteOfflineQuery.hasSkip() || deleteOfflineQuery.hasLimit())) {
+      return this._getOfflineRepo()
+        .then((repo) => repo.update(collection, networkEntities));
+    }
+
     return this._deleteOfflineEntities(collection, deleteOfflineQuery)
       .then(() => this._getOfflineRepo())
       .then(repo => repo.update(collection, networkEntities));
