@@ -422,7 +422,7 @@ describe('CacheStore', () => {
             .catch(done);
       });
 
-      it.only('should send regular GET request when configuration is missing on the backend', function (done){
+      it('should send regular GET request when configuration is missing on the backend', function (done){
         const entity1 = { _id: randomString() };
         const entity2 = { _id: randomString() };
         const store = new CacheStore(collection, null, { useDeltaSet: true});
