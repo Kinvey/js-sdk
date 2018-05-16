@@ -51,7 +51,7 @@ function testFunc() {
     }
 
     dataStoreTypes.forEach((currentDataStoreType) => {
-        describe(`${currentDataStoreType} Deltaset tests`, () => {
+        describe.only(`${currentDataStoreType} Deltaset tests`, () => {
             let conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
             describe('pull', () => {
                 const dataStoreType = currentDataStoreType;
@@ -1068,79 +1068,80 @@ function testFunc() {
                         .then(() => done())
                         .catch(done);
                 });
-
-                it('should send regular GET after fail for outdated since param', (done) => {
-                    let db = window.openDatabase(externalConfig.appKey, 1, 'Kinvey Cache', 20000);
-                    deltaStoreToTest.pull()
-                        .then((result) => validatePullOperation(result, [entity1, entity2]))
-                        .then(() => {
-                            db.transaction((tx) => {
-                                try {
-                                    tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
-                                        try{
-                                            let item = resultSet.rows[0];
-                                            let queryParsed = JSON.parse(item.value);
-                                            let lastRequest = queryParsed.lastRequest;
-                                            let lastRequestDateObject = new Date(lastRequest);
-                                            lastRequestDateObject.setDate(lastRequestDateObject.getDate() - 31);
-                                            let outdatedTimeToString = lastRequestDateObject.toISOString();
-                                            queryParsed.lastRequest = outdatedTimeToString;
-                                            tx.executeSql(`UPDATE _QueryCache SET value = ? WHERE value LIKE '%"query":""%'`, [JSON.stringify(queryParsed)], () => {
-                                                deltaStoreToTest.pull()
-                                                    .then((result) => validatePullOperation(result, [entity1, entity2]))
-                                                    .then(() => done())
-                                                    .catch((error)=>done(error));
-                                            });
-                                        }
-                                        catch(error){
-                                            done(error);
-                                        }
-                                    });
-                                }
-                                catch (error) {
-                                    done(error);
-                                }
+                if(runner.isDesktopApp()){
+                    it('should send regular GET after fail for outdated since param', (done) => {
+                        let db = window.openDatabase(externalConfig.appKey, 1, 'Kinvey Cache', 20000);
+                        deltaStoreToTest.pull()
+                            .then((result) => validatePullOperation(result, [entity1, entity2]))
+                            .then(() => {
+                                db.transaction((tx) => {
+                                    try {
+                                        tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
+                                            try{
+                                                let item = resultSet.rows[0];
+                                                let queryParsed = JSON.parse(item.value);
+                                                let lastRequest = queryParsed.lastRequest;
+                                                let lastRequestDateObject = new Date(lastRequest);
+                                                lastRequestDateObject.setDate(lastRequestDateObject.getDate() - 31);
+                                                let outdatedTimeToString = lastRequestDateObject.toISOString();
+                                                queryParsed.lastRequest = outdatedTimeToString;
+                                                tx.executeSql(`UPDATE _QueryCache SET value = ? WHERE value LIKE '%"query":""%'`, [JSON.stringify(queryParsed)], () => {
+                                                    deltaStoreToTest.pull()
+                                                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                                                        .then(() => done())
+                                                        .catch((error)=>done(error));
+                                                });
+                                            }
+                                            catch(error){
+                                                done(error);
+                                            }
+                                        });
+                                    }
+                                    catch (error) {
+                                        done(error);
+                                    }
+                                })
                             })
-                        })
-                        .catch((error)=>done(error));
-                });
+                            .catch((error)=>done(error));
+                    });
 
-                it('with outdated since param subsequent pull should delete items in the cache', (done) => {
-                    let db = window.openDatabase(externalConfig.appKey, 1, 'Kinvey Cache', 20000);
-                    deltaStoreToTest.pull()
-                        .then((result) => validatePullOperation(result, [entity1, entity2]))
-                        .then(() => deltaNetworkStore.removeById(entity1._id))
-                        .then(() => {
-                            db.transaction((tx) => {
-                                try {
-                                    tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
-                                        try{
-                                            let item = resultSet.rows[0];
-                                            let queryParsed = JSON.parse(item.value);
-                                            let lastRequest = queryParsed.lastRequest;
-                                            let lastRequestDateObject = new Date(lastRequest);
-                                            lastRequestDateObject.setDate(lastRequestDateObject.getDate() - 31);
-                                            let outdatedTimeToString = lastRequestDateObject.toISOString();
-                                            queryParsed.lastRequest = outdatedTimeToString;
-                                            tx.executeSql(`UPDATE _QueryCache SET value = ? WHERE value LIKE '%"query":""%'`, [JSON.stringify(queryParsed)], () => {
-                                                deltaStoreToTest.pull()
-                                                    .then((result) => validatePullOperation(result, [entity2]))
-                                                    .then(() => done())
-                                                    .catch((error)=>done(error));
-                                            });
-                                        }
-                                        catch(error){
-                                            done(error);
-                                        }
-                                    });
-                                }
-                                catch (error) {
-                                    done(error);
-                                }
+                    it('with outdated since param subsequent pull should delete items in the cache', (done) => {
+                        let db = window.openDatabase(externalConfig.appKey, 1, 'Kinvey Cache', 20000);
+                        deltaStoreToTest.pull()
+                            .then((result) => validatePullOperation(result, [entity1, entity2]))
+                            .then(() => deltaNetworkStore.removeById(entity1._id))
+                            .then(() => {
+                                db.transaction((tx) => {
+                                    try {
+                                        tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
+                                            try{
+                                                let item = resultSet.rows[0];
+                                                let queryParsed = JSON.parse(item.value);
+                                                let lastRequest = queryParsed.lastRequest;
+                                                let lastRequestDateObject = new Date(lastRequest);
+                                                lastRequestDateObject.setDate(lastRequestDateObject.getDate() - 31);
+                                                let outdatedTimeToString = lastRequestDateObject.toISOString();
+                                                queryParsed.lastRequest = outdatedTimeToString;
+                                                tx.executeSql(`UPDATE _QueryCache SET value = ? WHERE value LIKE '%"query":""%'`, [JSON.stringify(queryParsed)], () => {
+                                                    deltaStoreToTest.pull()
+                                                        .then((result) => validatePullOperation(result, [entity2]))
+                                                        .then(() => done())
+                                                        .catch((error)=>done(error));
+                                                });
+                                            }
+                                            catch(error){
+                                                done(error);
+                                            }
+                                        });
+                                    }
+                                    catch (error) {
+                                        done(error);
+                                    }
+                                })
                             })
-                        })
-                        .catch((error)=>done(error));
-                });
+                            .catch((error)=>done(error));
+                    });
+                }
             });
         });
     });
