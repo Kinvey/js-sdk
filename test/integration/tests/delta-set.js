@@ -1,18 +1,21 @@
 
 function testFunc() {
-    let dataStoreTypes = [Kinvey.DataStoreType.Sync, Kinvey.DataStoreType.Cache];
-    let deltaCollectionName = externalConfig.deltaCollectionName;
-    let collectionWithoutDelta = externalConfig.collectionName;
-    let deltaNetworkStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Network);
-    let syncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync);
-    let cacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache);
-    let deltaSyncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { useDeltaSet: true });
-    let deltaCacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache, { useDeltaSet: true });
-    let tagStore = "kinveyTest"
+    const dataStoreTypes = [Kinvey.DataStoreType.Cache, Kinvey.DataStoreType.Sync];
+    const deltaCollectionName = externalConfig.deltaCollectionName;
+    const collectionWithoutDelta = externalConfig.collectionName;
+    const deltaNetworkStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Network);
+    const syncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync);
+    const cacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache);
+    const deltaSyncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { useDeltaSet: true });
+    const deltaCacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache, { useDeltaSet: true });
+    const tagStore = 'kinveyTest';
 
-    const validatePullOperation = (result, expectedItems, expectedPulledItemsCount, tagStore) => {
+    const validatePullOperation = (result, expectedItems, expectedPulledItemsCount, tagStore, collectionName) => {
+        const collectioNameForStore = collectionName?collectionName:deltaCollectionName;
+        const taggedDataStore = tagStore?Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }):null;
+        const syncStoreToFind = Kinvey.DataStore.collection(collectioNameForStore, Kinvey.DataStoreType.Sync)
         expect(result).to.equal(expectedPulledItemsCount || expectedItems.length);
-        let storeToFind = tagStore ? Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }) : syncStore;
+        const storeToFind = tagStore ? taggedDataStore:syncStoreToFind;
         return storeToFind.find().toPromise()
             .then((result) => {
                 expectedItems.forEach((entity) => {
@@ -24,7 +27,7 @@ function testFunc() {
 
     const validateNewPullOperation = (result, expectedPulledItems, expectedDeletedItems, tagStore) => {
         expect(result).to.equal(expectedPulledItems.length);
-        let storeToFind = tagStore ? Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }) : syncStore;
+        const storeToFind = tagStore ? Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync, { tag: tagStore }) : syncStore;
         return storeToFind.find().toPromise()
             .then((result) => {
                 expectedPulledItems.forEach((entity) => {
@@ -39,28 +42,16 @@ function testFunc() {
             });
     }
 
-    const validateFindOperation = (result, expectedItems, query) => {
-        expect(result.length).to.equal(expectedItems.length);
-        return syncStore.find(query || new Kinvey.Query()).toPromise()
-            .then((result) => {
-                expectedItems.forEach((entity) => {
-                    const cachedEntity = _.find(result, e.e._id === entity._id);
-                    expect(utilities.deleteEntityMetadata(cachedEntity).to.deep.equal(entity));
-                });
-            });
-    }
-
     dataStoreTypes.forEach((currentDataStoreType) => {
         describe(`${currentDataStoreType} Deltaset tests`, () => {
-            let conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
+            const conditionalDescribe = currentDataStoreType === Kinvey.DataStoreType.Sync ? describe.skip : describe;
             describe('pull', () => {
-                const dataStoreType = currentDataStoreType;
                 const entity1 = utilities.getEntity(utilities.randomString());
                 const entity2 = utilities.getEntity(utilities.randomString());
                 const entity3 = utilities.getEntity(utilities.randomString());
                 const createdUserIds = [];
-                let deltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true });
-                let taggedDeltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true, tag: tagStore });
+                const deltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true });
+                const taggedDeltaStoreToTest = Kinvey.DataStore.collection(deltaCollectionName, currentDataStoreType, { useDeltaSet: true, tag: tagStore });
 
                 before((done) => {
                     utilities.cleanUpAppData(deltaCollectionName, createdUserIds)
@@ -96,10 +87,10 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with disabled deltaset', (done) => {
-                    let deisabledDeltaSetStore = currentDataStoreType === Kinvey.DataStoreType.Cache ? cacheStore : syncStore;
-                    deisabledDeltaSetStore.pull()
+                    const disabledDeltaSetStore = currentDataStoreType === Kinvey.DataStoreType.Cache ? cacheStore : syncStore;
+                    disabledDeltaSetStore.pull()
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
-                        .then(() => deisabledDeltaSetStore.pull())
+                        .then(() => disabledDeltaSetStore.pull())
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => done())
                         .catch(done);
@@ -116,7 +107,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with created item with 3rd request', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString());
+                    const entity4 = utilities.getEntity(utilities.randomString());
                     deltaStoreToTest.pull()
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
@@ -175,7 +166,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with updated item', (done) => {
-                    let updatedEntity = _.clone(entity2);
+                    const updatedEntity = _.clone(entity2);
                     updatedEntity.textField = utilities.randomString();
                     deltaStoreToTest.pull()
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
@@ -187,7 +178,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with updated and deleted item', (done) => {
-                    let updatedEntity = _.clone(entity2);
+                    const updatedEntity = _.clone(entity2);
                     updatedEntity.textField = utilities.randomString();
                     deltaStoreToTest.pull()
                         .then((result) => validatePullOperation(result, [entity1, entity2]))
@@ -200,12 +191,12 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with query with updated item', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let updatedEntity = _.clone(entity5);
+                    const entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const updatedEntity = _.clone(entity5);
                     updatedEntity.numberField = 5;
-                    let query = new Kinvey.Query();
+                    const query = new Kinvey.Query();
                     query.equalTo('textField', 'queryValue');
                     deltaNetworkStore.save(entity4)
                         .then(() => deltaNetworkStore.save(entity5))
@@ -220,10 +211,10 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with query with deleted item', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let query = new Kinvey.Query();
+                    const entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const query = new Kinvey.Query();
                     query.equalTo('textField', 'queryValue');
                     deltaNetworkStore.save(entity4)
                         .then(() => deltaNetworkStore.save(entity5))
@@ -238,16 +229,16 @@ function testFunc() {
                 });
 
                 it('should not use deltaset with skip and limit query and should not record X-Kinvey-Request-Start', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue',1);
-                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue',2);
-                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue',3);
-                    let query = new Kinvey.Query();
+                    const entity4 = utilities.getEntity(utilities.randomString(), 'queryValue', 1);
+                    const entity5 = utilities.getEntity(utilities.randomString(), 'queryValue', 2);
+                    const entity6 = utilities.getEntity(utilities.randomString(), 'queryValue', 3);
+                    const query = new Kinvey.Query();
                     query.ascending('numberField');
                     query.limit = 1;
                     query.skip = 1;
                     query.equalTo('textField', 'queryValue');
-                    let queryWithoutModifiers = new Kinvey.Query();
-                    queryWithoutModifiers.equalTo('textField', 'queryValue')
+                    const queryWithoutModifiers = new Kinvey.Query();
+                    queryWithoutModifiers.equalTo('textField', 'queryValue');
                     deltaNetworkStore.save(entity4)
                         .then(() => deltaNetworkStore.save(entity5))
                         .then(() => deltaNetworkStore.save(entity6))
@@ -267,7 +258,7 @@ function testFunc() {
 
                 it('limit and skip query should not delete data', (done) => {
                     const onNextSpy = sinon.spy();
-                    let query = new Kinvey.Query();
+                    const query = new Kinvey.Query();
                     query.limit = 2;
                     query.skip = 1;
                     deltaNetworkStore.save(entity3)
@@ -281,7 +272,6 @@ function testFunc() {
                             syncStore.find()
                                 .subscribe(onNextSpy, done, () => {
                                     try {
-                                        debugger;
                                         utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity1, entity2, entity3], [], true);
                                         done();
                                     } catch (error) {
@@ -382,7 +372,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with created item with 3rd request', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString());
+                    const entity4 = utilities.getEntity(utilities.randomString());
                     deltaStoreToTest.sync()
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
                         .then(() => deltaNetworkStore.save(entity3))
@@ -441,7 +431,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with updated item', (done) => {
-                    let updatedEntity = _.clone(entity2);
+                    const updatedEntity = _.clone(entity2);
                     updatedEntity.textField = utilities.randomString();
                     deltaStoreToTest.sync()
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
@@ -453,7 +443,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with updated and deleted item', (done) => {
-                    let updatedEntity = _.clone(entity2);
+                    const updatedEntity = _.clone(entity2);
                     updatedEntity.textField = utilities.randomString();
                     deltaStoreToTest.sync()
                         .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
@@ -466,12 +456,12 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with query with updated item', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let updatedEntity = _.clone(entity5);
+                    const entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    const updatedEntity = _.clone(entity5);
                     updatedEntity.numberField = 5;
-                    let query = new Kinvey.Query();
+                    const query = new Kinvey.Query();
                     query.equalTo('textField', 'queryValue');
                     deltaNetworkStore.save(entity4)
                         .then(() => deltaNetworkStore.save(entity5))
@@ -486,9 +476,9 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with query with deleted item', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
+                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     let query = new Kinvey.Query();
                     query.equalTo('textField', 'queryValue');
                     deltaNetworkStore.save(entity4)
@@ -504,15 +494,15 @@ function testFunc() {
                 });
 
                 it('should not use deltaset with skip and limit query and should not record X-Kinvey-Request-Start', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue',1);
-                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue',2);
-                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue',3);
-                    let query = new Kinvey.Query();
+                    const entity4 = utilities.getEntity(utilities.randomString(), 'queryValue', 1);
+                    const entity5 = utilities.getEntity(utilities.randomString(), 'queryValue', 2);
+                    const entity6 = utilities.getEntity(utilities.randomString(), 'queryValue', 3);
+                    const query = new Kinvey.Query();
                     query.ascending('numberField');
                     query.limit = 1;
                     query.skip = 1;
                     query.equalTo('textField', 'queryValue');
-                    let queryWithoutModifiers = new Kinvey.Query();
+                    const queryWithoutModifiers = new Kinvey.Query();
                     queryWithoutModifiers.equalTo('textField', 'queryValue')
                     deltaNetworkStore.save(entity4)
                         .then(() => deltaNetworkStore.save(entity5))
@@ -641,7 +631,7 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with created item with third request', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
+                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     const onNextSpy = sinon.spy();
                     deltaStoreToTest.find()
                         .subscribe(onNextSpy, done, () => {
@@ -783,9 +773,9 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with query with updated item', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
+                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     let updatedEntity = _.clone(entity5);
                     updatedEntity.numberField = 5;
                     let query = new Kinvey.Query();
@@ -818,9 +808,9 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with query with deleted item', (done) => {
-                    let entity4 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity5 = utilities.getEntity(utilities.randomString(), "queryValue");
-                    let entity6 = utilities.getEntity(utilities.randomString(), "queryValue");
+                    let entity4 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity5 = utilities.getEntity(utilities.randomString(), 'queryValue');
+                    let entity6 = utilities.getEntity(utilities.randomString(), 'queryValue');
                     let updatedEntity = _.clone(entity5);
                     updatedEntity.numberField = 5;
                     let query = new Kinvey.Query();
@@ -1014,7 +1004,7 @@ function testFunc() {
                 });
             });
 
-            describe('error handling', () => {                
+            describe('error handling', function () {
                 const dataStoreType = currentDataStoreType;
                 const entity1 = utilities.getEntity(utilities.randomString());
                 const entity2 = utilities.getEntity(utilities.randomString());
@@ -1038,7 +1028,6 @@ function testFunc() {
 
                 beforeEach((done) => {
                     utilities.cleanUpCollectionData(deltaCollectionName)
-                        .then(() => {syncStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Sync);})
                         .then(() => utilities.cleanUpCollectionData(collectionWithoutDelta))
                         .then(() => utilities.cleanUpCollectionData(deltaCollectionName))
                         .then(() => nonDeltaNetworkStore.save(entity1))
@@ -1056,20 +1045,20 @@ function testFunc() {
                 });
 
                 it('should send regular GET after failure for missing configuration', (done) => {
-                    syncStore = Kinvey.DataStore.collection(collectionWithoutDelta, Kinvey.DataStoreType.Sync);
                     nonDeltaStoreToTest.pull()
-                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then((result) => validatePullOperation(result, [entity1, entity2], null, null, collectionWithoutDelta))
                         .then(() => nonDeltaNetworkStore.save(entity3))
                         .then(() => nonDeltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
+                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3], null, null, collectionWithoutDelta))
                         .then(() => nonDeltaNetworkStore.save(entity4))
                         .then(() => nonDeltaStoreToTest.pull())
-                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4]))
+                        .then((result) => validatePullOperation(result, [entity1, entity2, entity3, entity4], null, null, collectionWithoutDelta))
                         .then(() => done())
                         .catch(done);
                 });
-                if(runner.isDesktopApp()){
-                    it('should send regular GET after fail for outdated since param', (done) => {
+
+                if (runner.isDesktopApp()) {
+                    it('should send regular GET after fail for outdated since param', function (done) {
                         let db = window.openDatabase(externalConfig.appKey, 1, 'Kinvey Cache', 20000);
                         deltaStoreToTest.pull()
                             .then((result) => validatePullOperation(result, [entity1, entity2]))
@@ -1077,7 +1066,7 @@ function testFunc() {
                                 db.transaction((tx) => {
                                     try {
                                         tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
-                                            try{
+                                            try {
                                                 let item = resultSet.rows[0];
                                                 let queryParsed = JSON.parse(item.value);
                                                 let lastRequest = queryParsed.lastRequest;
@@ -1089,10 +1078,10 @@ function testFunc() {
                                                     deltaStoreToTest.pull()
                                                         .then((result) => validatePullOperation(result, [entity1, entity2]))
                                                         .then(() => done())
-                                                        .catch((error)=>done(error));
+                                                        .catch((error) => done(error));
                                                 });
                                             }
-                                            catch(error){
+                                            catch (error) {
                                                 done(error);
                                             }
                                         });
@@ -1102,7 +1091,7 @@ function testFunc() {
                                     }
                                 })
                             })
-                            .catch((error)=>done(error));
+                            .catch((error) => done(error));
                     });
 
                     it('with outdated since param subsequent pull should delete items in the cache', (done) => {
@@ -1114,7 +1103,7 @@ function testFunc() {
                                 db.transaction((tx) => {
                                     try {
                                         tx.executeSql(`SELECT * FROM _QueryCache WHERE value LIKE '%"query":""%'`, [], (tx1, resultSet) => {
-                                            try{
+                                            try {
                                                 let item = resultSet.rows[0];
                                                 let queryParsed = JSON.parse(item.value);
                                                 let lastRequest = queryParsed.lastRequest;
@@ -1126,10 +1115,10 @@ function testFunc() {
                                                     deltaStoreToTest.pull()
                                                         .then((result) => validatePullOperation(result, [entity2]))
                                                         .then(() => done())
-                                                        .catch((error)=>done(error));
+                                                        .catch((error) => done(error));
                                                 });
                                             }
-                                            catch(error){
+                                            catch (error) {
                                                 done(error);
                                             }
                                         });
@@ -1139,9 +1128,10 @@ function testFunc() {
                                     }
                                 })
                             })
-                            .catch((error)=>done(error));
+                            .catch((error) => done(error));
                     });
                 }
+
             });
         });
     });
