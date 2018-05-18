@@ -130,6 +130,7 @@ function testFunc() {
                         .catch(done);
                 });
 
+<<<<<<< HEAD
                 it('should return correct number of items with auto-pagination and skip and limit', (done) => {
                     const query = new Kinvey.Query();
                     query.skip = 1;
@@ -143,6 +144,8 @@ function testFunc() {
                         .catch(done);
                 });
 
+=======
+>>>>>>> 24e4eef93ccf9678d2cb88d4e040db4c146ebc77
                 it('should return correct number of items with tagged dataStore', (done) => {
                     const onNextSpy = sinon.spy();
                     syncStore.save(entity1)
@@ -408,6 +411,7 @@ function testFunc() {
                         .catch(done);
                 });
 
+<<<<<<< HEAD
                 it('should return correct number of items with auto-pagination and skip and limit', (done) => {
                     const query = new Kinvey.Query();
                     query.skip = 1;
@@ -422,6 +426,8 @@ function testFunc() {
                 });
 
 
+=======
+>>>>>>> 24e4eef93ccf9678d2cb88d4e040db4c146ebc77
                 it('should return correct number of items with tagged dataStore', (done) => {
                     const onNextSpy = sinon.spy();
                     syncStore.save(entity1)
