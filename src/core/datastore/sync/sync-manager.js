@@ -427,8 +427,8 @@ export class SyncManager {
 
   _getInternalPullQuery(userQuery, totalCount) {
     userQuery = userQuery || {};
-    const { filter, sort, fields, skip } = userQuery;
-    const query = new Query({ filter, sort, fields, skip });
+    const { filter, sort, fields } = userQuery;
+    const query = new Query({ filter, sort, fields });
     query.limit = totalCount;
 
     if (!sort || isEmpty(sort)) {
@@ -469,17 +469,15 @@ export class SyncManager {
 
   _paginatedPull(collection, userQuery, options = {}) {
     let pullQuery;
-    let expectedCount;
     userQuery = userQuery || new Query();
     return this._getExpectedEntityCount(collection, userQuery)
       .then(({ lastRequest, count }) => {
-        expectedCount = count;
-        pullQuery = this._getInternalPullQuery(userQuery, expectedCount);
+        pullQuery = this._getInternalPullQuery(userQuery, count);
         return this._deleteOfflineEntities(collection, pullQuery)
           .then(() => {
             const pageSizeSetting = options.autoPagination && options.autoPagination.pageSize;
             const pageSize = pageSizeSetting || maxEntityLimit;
-            const paginatedQueries = splitQueryIntoPages(pullQuery, pageSize, expectedCount);
+            const paginatedQueries = splitQueryIntoPages(pullQuery, pageSize, count);
             return this._executePaginationQueries(collection, paginatedQueries, options);
           })
           .then((result) => {
