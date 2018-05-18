@@ -40,7 +40,7 @@ function testFunc() {
       });
   };
 
-  describe.only('User tests', () => {
+  describe('User tests', () => {
     const missingCredentialsError = 'Username and/or password missing';
     const createdUserIds = [];
 
