@@ -386,13 +386,13 @@ describe('CacheStore', () => {
         const onNextSpy = expect.createSpy();
         const lastRequestDate = new Date();
         lastRequestDate.setDate(new Date().getDate()-31);
-  
+
         nock(store.client.apiHostname)
         .get(`/appdata/${store.client.appKey}/${collection}`)
         .reply(200, [entity1, entity2], {
           'X-Kinvey-Request-Start': lastRequestDate.toISOString()
         });
-  
+
           store.pull()
             .then(()=>{
               nock(store.client.apiHostname)
@@ -401,7 +401,7 @@ describe('CacheStore', () => {
                 .reply(400, {debug: "The 'since' timestamp must be within the past 1 days.",
                   description: "The value specified for one of the request parameters is out of range",
                   error: "ParameterValueOutOfRange"});
-  
+
               nock(store.client.apiHostname)
               .get(`/appdata/${store.client.appKey}/${collection}`)
               .reply(200, [entity1, entity2], {
@@ -421,7 +421,7 @@ describe('CacheStore', () => {
             })
             .catch(done);
       });
-  
+
       it('should send regular GET request when configuration is missing on the backend', function (done){
         const entity1 = { _id: randomString() };
         const entity2 = { _id: randomString() };
@@ -429,11 +429,11 @@ describe('CacheStore', () => {
         const onNextSpy = expect.createSpy();
         const lastRequestDate = new Date();
         const firstNock = nock(store.client.apiHostname)
-        .get(`/appdata/${store.client.appKey}/${collection}`)
-        .reply(200, [entity1, entity2], {
-          'X-Kinvey-Request-Start': lastRequestDate.toISOString()
-        });
-  
+          .get(`/appdata/${store.client.appKey}/${collection}`)
+          .reply(200, [entity1, entity2], {
+            'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+          });
+
           store.pull()
             .then(()=>{
               firstNock.done();
@@ -445,12 +445,12 @@ describe('CacheStore', () => {
                   "description": "This feature is not properly configured for this app backend. Please configure it through the console first, or contact support for more information.",
                   "debug": "This collection has not been configured for Delta Set access."
                 });
-  
+
               const thirdNock = nock(store.client.apiHostname)
-              .get(`/appdata/${store.client.appKey}/${collection}`)
-              .reply(403, [entity1, entity2], {
-                'X-Kinvey-Request-Start': lastRequestDate.toISOString()
-              });
+                .get(`/appdata/${store.client.appKey}/${collection}`)
+                .reply(200, [entity1, entity2], {
+                  'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+                });
               store.find()
                 .subscribe(onNextSpy, done, ()=>{
                   try{
@@ -467,20 +467,20 @@ describe('CacheStore', () => {
             })
             .catch(done);
       });
-  
+
       it('should return error if more than 10000 items are changed', function (done){
         const entity1 = { _id: randomString() };
         const entity2 = { _id: randomString() };
         const store = new CacheStore(collection, null, { useDeltaSet: true});
         const onNextSpy = expect.createSpy();
         const lastRequestDate = new Date();
-  
+
         nock(store.client.apiHostname)
         .get(`/appdata/${store.client.appKey}/${collection}`)
         .reply(200, [entity1, entity2], {
           'X-Kinvey-Request-Start': lastRequestDate.toISOString()
         });
-  
+
           store.pull()
             .then(()=>{
               nock(store.client.apiHostname)
