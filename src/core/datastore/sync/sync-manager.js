@@ -473,27 +473,27 @@ export class SyncManager {
     userQuery = userQuery || new Query();
     return this._getExpectedEntityCount(collection, userQuery)
       .then(({ lastRequest, count }) => {
-        return getCachedQuery(collection, userQuery)
-          .then((cachedQuery) => {
-            if (cachedQuery) {
-              cachedQuery.lastRequest = lastRequest;
-              return updateCachedQuery(cachedQuery);
-            }
-
-            return null;
-          })
-          .then(() => count);
-      })
-      .then((count) => {
         expectedCount = count;
         pullQuery = this._getInternalPullQuery(userQuery, expectedCount);
-        return this._deleteOfflineEntities(collection, pullQuery);
-      })
-      .then(() => {
-        const pageSizeSetting = options.autoPagination && options.autoPagination.pageSize;
-        const pageSize = pageSizeSetting || maxEntityLimit;
-        const paginatedQueries = splitQueryIntoPages(pullQuery, pageSize, expectedCount);
-        return this._executePaginationQueries(collection, paginatedQueries, options);
+        return this._deleteOfflineEntities(collection, pullQuery)
+          .then(() => {
+            const pageSizeSetting = options.autoPagination && options.autoPagination.pageSize;
+            const pageSize = pageSizeSetting || maxEntityLimit;
+            const paginatedQueries = splitQueryIntoPages(pullQuery, pageSize, expectedCount);
+            return this._executePaginationQueries(collection, paginatedQueries, options);
+          })
+          .then((result) => {
+            return getCachedQuery(collection, userQuery)
+              .then((cachedQuery) => {
+                if (cachedQuery) {
+                  cachedQuery.lastRequest = lastRequest;
+                  return updateCachedQuery(cachedQuery);
+                }
+
+                return null;
+              })
+              .then(() => result);
+          });
       });
   }
 }
