@@ -429,10 +429,10 @@ describe('CacheStore', () => {
         const onNextSpy = expect.createSpy();
         const lastRequestDate = new Date();
         const firstNock = nock(store.client.apiHostname)
-        .get(`/appdata/${store.client.appKey}/${collection}`)
-        .reply(200, [entity1, entity2], {
-          'X-Kinvey-Request-Start': lastRequestDate.toISOString()
-        });
+          .get(`/appdata/${store.client.appKey}/${collection}`)
+          .reply(200, [entity1, entity2], {
+            'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+          });
 
           store.pull()
             .then(()=>{
@@ -447,10 +447,10 @@ describe('CacheStore', () => {
                 });
 
               const thirdNock = nock(store.client.apiHostname)
-              .get(`/appdata/${store.client.appKey}/${collection}`)
-              .reply(403, [entity1, entity2], {
-                'X-Kinvey-Request-Start': lastRequestDate.toISOString()
-              });
+                .get(`/appdata/${store.client.appKey}/${collection}`)
+                .reply(200, [entity1, entity2], {
+                  'X-Kinvey-Request-Start': lastRequestDate.toISOString()
+                });
               store.find()
                 .subscribe(onNextSpy, done, ()=>{
                   try{
