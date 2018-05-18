@@ -458,7 +458,7 @@ describe('SyncManager delegating to repos and SyncStateManager', () => {
           return syncManager.pull(collection, query, options)
             .then(() => {
               const expectedQuery = new Query();
-              expectedQuery.skip = query.skip;
+              expectedQuery.skip = 0;
               expectedQuery.limit = backendEntityCount;
               expectedQuery.ascending(defaultSortField);
               validateSpyCalls(utilsMock.splitQueryIntoPages, 1, [expectedQuery, pageSize, backendEntityCount]);
