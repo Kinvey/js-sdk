@@ -130,6 +130,19 @@ function testFunc() {
                         .catch(done);
                 });
 
+                it('should return correct number of items with auto-pagination and skip and limit', (done) => {
+                    const query = new Kinvey.Query();
+                    query.skip = 1;
+                    query.limit = 2;
+                    deltaStoreToTest.pull(query, { autoPagination: true })
+                        .then((result) => validatePullOperation(result, [entity1, entity2]))
+                        .then(() => deltaNetworkStore.save(entity3))
+                        .then(() => deltaStoreToTest.pull(query, { autoPagination: true }))
+                        .then((result) => validateNewPullOperation(result, [entity3], []))
+                        .then(() => done())
+                        .catch(done);
+                });
+
                 it('should return correct number of items with tagged dataStore', (done) => {
                     const onNextSpy = sinon.spy();
                     syncStore.save(entity1)
@@ -394,6 +407,20 @@ function testFunc() {
                         .then(() => done())
                         .catch(done);
                 });
+
+                it('should return correct number of items with auto-pagination and skip and limit', (done) => {
+                    const query = new Kinvey.Query();
+                    query.skip = 1;
+                    query.limit = 2;
+                    deltaStoreToTest.sync(query, { autoPagination: true })
+                        .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
+                        .then(() => deltaNetworkStore.save(entity3))
+                        .then(() => deltaStoreToTest.sync(query, { autoPagination: true }))
+                        .then((result) => validateNewPullOperation(result.pull, [entity3], []))
+                        .then(() => done())
+                        .catch(done);
+                });
+
 
                 it('should return correct number of items with tagged dataStore', (done) => {
                     const onNextSpy = sinon.spy();
