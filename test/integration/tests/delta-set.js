@@ -784,30 +784,32 @@ function testFunc() {
                 });
 
                 it('should return correct number of items with deleted item', (done) => {
+                    const entity4 = utilities.getEntity(utilities.randomString())
                     const onNextSpy = sinon.spy();
                     deltaNetworkStore.save(entity3)
+                        .then(() => deltaNetworkStore.save(entity4))
                         .then(() => deltaStoreToTest.find()
                         .subscribe(onNextSpy, done, () => {
                             try {
-                                utilities.validateReadResult(currentDataStoreType, onNextSpy, [entity1], [entity1, entity2, entity3], true);
+                                utilities.validateReadResult(currentDataStoreType, onNextSpy, [entity1], [entity1, entity2, entity3, entity4], true);
                                 onNextSpy.reset();
                                 deltaNetworkStore.removeById(entity1._id)
                                     .then(() => deltaStoreToTest.find()
                                         .subscribe(onNextSpy, done, () => {
                                             try {
-                                                utilities.validateReadResult(currentDataStoreType, onNextSpy, [entity1, entity2, entity3], [entity2, entity3], true);
+                                                utilities.validateReadResult(currentDataStoreType, onNextSpy, [entity1, entity2, entity3, entity4], [entity2, entity3, entity4], true);
                                                 const secondSpy = sinon.spy();
                                                 deltaNetworkStore.removeById(entity2._id)
                                                     .then(() => deltaNetworkStore.removeById(entity3._id))
                                                     .then(() => deltaStoreToTest.find()
                                                         .subscribe(secondSpy, done, () => {
                                                             try {
-                                                                utilities.validateReadResult(currentDataStoreType, secondSpy, [entity2, entity3], [], true);
+                                                                utilities.validateReadResult(currentDataStoreType, secondSpy, [entity2, entity3, entity4], [entity4], true);
                                                                 onNextSpy.reset();
                                                                 syncStore.find()
                                                                     .subscribe(onNextSpy, done, () => {
                                                                         try {
-                                                                            utilities.validateReadResult(syncStore, onNextSpy, [])
+                                                                            utilities.validateReadResult(Kinvey.DataStoreType.Sync, onNextSpy, [entity4])
                                                                             done();
                                                                         } catch (error) {
                                                                             done(error)
