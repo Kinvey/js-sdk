@@ -474,7 +474,7 @@ export class SyncManager {
       .then(({ lastRequest, count }) => {
         pullQuery = this._getInternalPullQuery(userQuery, count);
         return this._deleteOfflineEntities(collection)
-          .then(() => {@
+          .then(() => {
             const pageSizeSetting = options.autoPagination && options.autoPagination.pageSize;
             const pageSize = pageSizeSetting || maxEntityLimit;
             const paginatedQueries = splitQueryIntoPages(pullQuery, pageSize, count);
