@@ -352,8 +352,8 @@ function testFunc() {
       })
 
       it('should be able to upload if the submitted size is correct', (done) => {
-        const metadata = { size: fileToUpload1.length };
-        utilities.testFileUpload(fileToUpload1, metadata, metadata, fileToUpload1, undefined, done);
+        const metadata = { size: fileContent1.length };
+        utilities.testFileUpload(fileToUpload1, metadata, metadata, fileContent1, undefined, done);
       })
 
       it('should return an error if the submitted size does not match the content length', (done) => {
