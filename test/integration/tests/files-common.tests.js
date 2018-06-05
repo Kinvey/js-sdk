@@ -2,8 +2,6 @@ function testFunc() {
 
   const notFoundErrorName = 'NotFoundError';
   const notFoundErrorMessage = 'This blob not found for this app backend.';
-  const timeoutErrorName = 'TimeoutError';
-  const timeoutErrorMessage = 'The network request timed out.';
   const plainTextMimeType = 'text/plain';
   const octetStreamMimeType = 'application/octet-stream'
   const shouldNotBeCalledMessage = 'Should not be called';
@@ -384,11 +382,12 @@ function testFunc() {
         utilities.testFileUpload(fileToUpload1, { public: true }, { _public: true }, fileContent1, undefined, done);
       })
 
-      it('should set options.timeout', (done) => {
+      it('should set options.timeout', (done) => { 
         Kinvey.Files.upload(fileToUpload1, undefined, { timeout: 1 })
           .then(() => done(new Error(shouldNotBeCalledMessage)))
           .catch((error) => {
-            utilities.assertError(error, timeoutErrorName, timeoutErrorMessage);
+            // Currently the error is different for Web and {N}
+            expect(error.name === 'TimeoutError' || error.message.includes('SocketTimeoutException')).to.be.true;
             done();
           })
           .catch(done)
