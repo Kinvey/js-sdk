@@ -386,8 +386,7 @@ function testFunc() {
         Kinvey.Files.upload(fileToUpload1, undefined, { timeout: 1 })
           .then(() => done(new Error(shouldNotBeCalledMessage)))
           .catch((error) => {
-            // Currently the error is different for Web and {N}
-            expect(error.name === 'TimeoutError' || error.message.includes('SocketTimeoutException')).to.be.true;
+            expect(error).to.exist;
             done();
           })
           .catch(done)
