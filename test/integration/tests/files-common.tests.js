@@ -353,9 +353,20 @@ function testFunc() {
         utilities.testFileUpload(fileToUpload1, metadata, metadata, fileContent1, undefined, done);
       })
 
-      it('should send size to the server', (done) => {
-        const metadata = { size: 0 };
-        utilities.testFileUpload(fileToUpload1, metadata, metadata, null, undefined, done);
+      it('should be able to upload with if the submitted size is correct', (done) => {
+        const metadata = { size: fileToUpload1.length };
+        utilities.testFileUpload(fileToUpload1, metadata, metadata, fileToUpload1, undefined, done);
+      })
+
+      it('should return an error if the submitted size does not match the content length', (done) => {
+        const metadata = { size: fileToUpload1.length + 1 };
+        Kinvey.Files.upload(fileToUpload1, metadata)      
+        .then(() => done(new Error(shouldNotBeCalledMessage)))
+        .catch((error) => {
+          expect(error).to.exist;
+          done();
+        })
+        .catch(done);
       })
 
       it('should set _acl', (done) => {
