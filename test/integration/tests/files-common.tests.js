@@ -357,14 +357,14 @@ function testFunc() {
       })
 
       it('should return an error if the submitted size does not match the content length', (done) => {
-        const metadata = { size: fileToUpload1.length + 1 };
-        Kinvey.Files.upload(fileToUpload1, metadata)      
-        .then(() => done(new Error(shouldNotBeCalledMessage)))
-        .catch((error) => {
-          expect(error).to.exist;
-          done();
-        })
-        .catch(done);
+        const metadata = { size: fileContent1.length + 100 };
+        Kinvey.Files.upload(fileToUpload1, metadata)
+          .then(() => done(new Error(shouldNotBeCalledMessage)))
+          .catch((error) => {
+            expect(error).to.exist;
+            done();
+          })
+          .catch(done);
       })
 
       it('should set _acl', (done) => {
