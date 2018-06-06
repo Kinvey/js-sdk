@@ -387,7 +387,7 @@ function testFunc() {
           .then(() => done(new Error(shouldNotBeCalledMessage)))
           .catch((error) => {
             // Currently the error message is different for Web and {N}
-            const isErrorMessageCorrect = error.message.includes('request timed out') || error.message.includes('SocketTimeoutException');
+            const isErrorMessageCorrect = _.includes(error.message, 'request timed out') || _.includes(error.message, 'SocketTimeoutException');
             expect(isErrorMessageCorrect).to.be.true;
             done();
           })
