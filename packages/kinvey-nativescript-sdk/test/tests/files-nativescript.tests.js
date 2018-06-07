@@ -38,7 +38,9 @@ function testFunc() {
         Kinvey.Files.upload(fileTestTimeoutPath, undefined, { timeout: 100 })
           .then(() => done(new Error('Should not be called')))
           .catch((error) => {
-            expect(error.message).to.contain('SocketTimeoutException');
+            // Currently the error message is different for Android and iOS
+            const isErrorMessageCorrect = _.includes(error.message, 'request timed out') || _.includes(error.message, 'SocketTimeoutException');
+            expect(isErrorMessageCorrect).to.be.true;
             done();
           })
           .catch(done)
