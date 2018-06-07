@@ -382,18 +382,6 @@ function testFunc() {
         utilities.testFileUpload(fileToUpload1, { public: true }, { _public: true }, fileContent1, undefined, done);
       })
 
-      it('should set options.timeout', (done) => {
-        Kinvey.Files.upload(fileToUpload1, undefined, { timeout: 1 })
-          .then(() => done(new Error(shouldNotBeCalledMessage)))
-          .catch((error) => {
-            // Currently the error message is different for Web and {N}
-            const isErrorMessageCorrect = _.includes(error.message, 'request timed out') || _.includes(error.message, 'SocketTimeoutException');
-            expect(isErrorMessageCorrect).to.be.true;
-            done();
-          })
-          .catch(done)
-      })
-
       it('should update the content and the metadata of an existing file', (done) => {
         const query = new Kinvey.Query();
         const updatedmetadata = {
