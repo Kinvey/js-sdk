@@ -260,4 +260,16 @@ export default class CacheStore {
     const sync = new Sync(this.appKey, this.collectionName, this.tag);
     return sync.clear(query);
   }
+
+  async subscribe(receiver) {
+    const sync = new Sync(this.appKey, this.collectionName, this.tag);
+    await sync.subscribe(receiver);
+    return this;
+  }
+
+  async unsubscribe(receiver) {
+    const sync = new Sync(this.appKey, this.collectionName, this.tag);
+    await sync.unsubscribe(receiver);
+    return this;
+  }
 }

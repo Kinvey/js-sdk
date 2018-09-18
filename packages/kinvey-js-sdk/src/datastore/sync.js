@@ -6,6 +6,7 @@ import { execute, formatKinveyBaasUrl, KinveyRequest, RequestMethod, Auth } from
 import { KinveyHeaders } from '../http/headers';
 import NetworkStore from './networkstore';
 import Cache from './cache';
+import Live from './live';
 
 const SYNC_CACHE_TAG = 'kinvey-sync';
 const QUERY_CACHE_TAG = 'kinvey-query';
@@ -371,5 +372,17 @@ export default class Sync {
       return syncCache.remove(query);
     }
     return syncCache.clear();
+  }
+
+  async subscribe(receiver) {
+    const live = new Live(this.appKey, this.collectionName);
+    await live.subscribe(receiver);
+    return this;
+  }
+
+  async unsubscribe() {
+    const live = new Live(this.appKey, this.collectionName);
+    await live.unsubscribe();
+    return this;
   }
 }

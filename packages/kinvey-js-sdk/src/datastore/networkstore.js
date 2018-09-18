@@ -6,6 +6,7 @@ import {
   RequestMethod,
   Auth
 } from '../http';
+import Live from './live';
 
 const NAMESPACE = 'appdata';
 
@@ -145,5 +146,15 @@ export default class NetworkStore {
     }
 
     return response.data;
+  }
+
+  async subscribe(receiver) {
+    const live = new Live(this.appKey, this.collectionName);
+    await live.subscribe(receiver);
+  }
+
+  async unsubscribe() {
+    const live = new Live(this.appKey, this.collectionName);
+    await live.unsubscribe();
   }
 }
