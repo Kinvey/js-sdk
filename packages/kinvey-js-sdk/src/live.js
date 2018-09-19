@@ -19,19 +19,24 @@ function isValidReceiver(receiver) {
 
 class Listener extends EventEmitter {
   message(m) {
-    this.emit(m.channel, m.message);
+    this.emit(m.channel, m);
   }
 
   status(s) {
     const { affectedChannels = [], affectedChannelGroups = [] } = s;
-    const allEvents = affectedChannels.concat(affectedChannelGroups);
+    const allChannels = affectedChannels.concat(affectedChannelGroups);
+    const data = {
+      error: s.error,
+      category: s.category,
+      operation: s.operation
+    };
 
-    if (allEvents.length > 0) {
-      allEvents.forEach((channelOrGroup) => {
-        this.emit(`${STATUS_PREFIX}${channelOrGroup}`, s);
+    if (allChannels.length > 0) {
+      allChannels.forEach((channelOrGroup) => {
+        this.emit(`${STATUS_PREFIX}${channelOrGroup}`, data);
       });
     } else {
-      this.emit(UNCLASSIFIED_EVENTS, s);
+      this.emit(UNCLASSIFIED_EVENTS, data);
     }
   }
 }

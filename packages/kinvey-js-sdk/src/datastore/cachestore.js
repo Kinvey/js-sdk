@@ -2,6 +2,7 @@ import { KinveyObservable } from '../observable';
 import Query from '../query';
 import Cache from './cache';
 import Sync from './sync';
+import NetworkStore from './networkstore';
 
 export default class CacheStore {
   constructor(appKey, collectionName, tag, options = { useDeltaSet: false, useAutoPagination: false, autoSync: true }) {
@@ -262,14 +263,14 @@ export default class CacheStore {
   }
 
   async subscribe(receiver) {
-    const sync = new Sync(this.appKey, this.collectionName, this.tag);
-    await sync.subscribe(receiver);
+    const network = new NetworkStore(this.appKey, this.collectionName);
+    await network.subscribe(receiver);
     return this;
   }
 
-  async unsubscribe(receiver) {
-    const sync = new Sync(this.appKey, this.collectionName, this.tag);
-    await sync.unsubscribe(receiver);
+  async unsubscribe() {
+    const network = new NetworkStore(this.appKey, this.collectionName);
+    await network.unsubscribe();
     return this;
   }
 }
