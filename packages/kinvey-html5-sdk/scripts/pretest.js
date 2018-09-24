@@ -20,8 +20,15 @@ const files = klawSync(SHARED_TESTS_PATH);
 
 // Replace __SDK__ with the node sdk and write the file
 files.map((file) => {
+  const extension = path.extname(file.path);
   const data = fs.readFileSync(file.path, 'utf8');
-  const newData = data.replace(/__SDK__/i, SDK_PATH);
+
   fs.ensureDirSync(SDK_TESTS_PATH);
-  fs.writeFileSync(path.join(SDK_TESTS_PATH, path.basename(file.path)), newData);
+
+  if (extension === '.js' || extension === '.ts') {
+    const newData = data.replace(/__SDK__/i, SDK_PATH);
+    fs.writeFileSync(path.join(SDK_TESTS_PATH, path.basename(file.path)), newData);
+  } else {
+    fs.copySync(file.path, path.join(SDK_TESTS_PATH, path.basename(file.path)));
+  }
 });

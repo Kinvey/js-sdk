@@ -10,6 +10,7 @@ import Query from './query';
 import { use as usePopup } from './identity/popup';
 import { AuthorizationGrant } from './identity/mic';
 import * as User from './identity/user';
+import * as Files from './files';
 
 export default function sdk(http, sessionStore, popup, cacheStore) {
   // Use the provided http adapter
@@ -37,6 +38,9 @@ export default function sdk(http, sessionStore, popup, cacheStore) {
     // DataStore
     DataStore,
     DataStoreType: DataStore.DataStoreType,
+
+    // Files
+    Files,
 
     // Kmd
     Kmd,

@@ -50,16 +50,30 @@ export async function find(query = new Query(), options = {}) {
   return files;
 }
 
-export async function download(id) {
+export async function findById(id, options) {
+  const { tls = true, ttl } = options;
+  const queryStringObject = Object.assign({}, { tls: tls === true });
 
+  if (isNumber(ttl)) {
+    queryStringObject.ttl_in_seconds = parseInt(ttl, 10);
+  }
+
+  const request = new KinveyRequest({
+    method: RequestMethod.GET,
+    auth: Auth.Default,
+    url: formatKinveyBaasUrl(`/${NAMESPACE}/appKey/${id}`, queryStringObject)
+  });
+  const response = await execute(request);
+  return response.data;
 }
 
-export async function findById(id, options) {
-  return download(id, options);
+export async function download(id, options = {}) {
+  const file = await findById(id, options);
+  return downloadByUrl(file._downloadURL);
 }
 
 export async function stream(id, options = {}) {
-  return download(id, Object.assign(options, { stream: true }));
+  return findById(id, options);
 }
 
 function transformMetadata(file = {}, metadata = {}) {
@@ -76,7 +90,7 @@ function transformMetadata(file = {}, metadata = {}) {
   return fileMetadata;
 }
 
-async function saveFileMetadata(metadata, options = {}) {
+async function saveFileMetadata(metadata) {
   if (metadata.size <= 0) {
     throw new Error('Unable to create a file with a size of 0.');
   }
@@ -104,7 +118,7 @@ function checkUploadStatus(url, headers, metadata, timeout) {
     url,
     timeout
   });
-  return execute(request);
+  return execute(request, true);
 }
 
 function getStartIndex(rangeHeader, max) {
@@ -127,36 +141,30 @@ async function uploadFile(url, file, metadata, options) {
     method: RequestMethod.PUT,
     headers: requestHeaders,
     url,
-    body: isFunction(file.slice) ? file.slice(options.start) : file,
-    timeout: options.timeout
+    body: file.slice(options.start, metadata.size)
   });
-  const response = await execute(request);
+  const response = await execute(request, true);
 
   if (!response.isSuccess()) {
-    throw response.error;
-  }
+    // An error occurred. We should retry uploading the file after some time has passed
+    if (response.statusCode >= 500 && response.statusCode < 600) {
+      const backoff = (2 ** options.count) + randomInt(1, 1001); // Calculate the exponential backoff
 
-  let backoff = 0;
-
-  // We should retry uploading the file
-  if (response.isServerError()) {
-    backoff = (2 ** options.count) + randomInt(1, 1001); // Calculate the exponential backoff
-
-    if (backoff >= options.maxBackoff) {
-      throw response.error;
+      if (backoff < options.maxBackoff) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, backoff);
+        });
+        return uploadFile(url, file, metadata, { count: count + 1, start, maxBackoff });
+      }
     }
 
-    setTimeout(() => {
-      uploadFile(url, file, metadata, { count: count + 1, start, maxBackoff });
-    }, backoff);
+    throw response.error;
   }
 
   // The upload isn't complete and we must upload the rest of the file
   if (response.statusCode === 308) {
-    start = getStartIndex(response.headers.get('range'), metadata.size);
-    setTimeout(() => {
-      uploadFile(url, file, metadata, { count: 0, start, maxBackoff });
-    }, backoff);
+    start = getStartIndex(response.headers.get('Range'), metadata.size);
+    return uploadFile(url, file, metadata, { count: 0, start, maxBackoff });
   }
 
   return response.data;
@@ -178,7 +186,7 @@ export async function upload(file = {}, metadata = {}, options = {}) {
     }
 
     const uploadOptions = {
-      start: getStartIndex(uploadStatusResponse.headers.get('range'), metadata.size),
+      start: getStartIndex(uploadStatusResponse.headers.get('Range'), metadata.size),
       timeout: options.timeout,
       maxBackoff: options.maxBackoff,
       headers: kinveyFile._requiredHeaders
@@ -189,7 +197,7 @@ export async function upload(file = {}, metadata = {}, options = {}) {
   delete kinveyFile._expiresAt;
   delete kinveyFile._requiredHeaders;
   delete kinveyFile._uploadURL;
-  // kinveyFileData._data = file;
+  kinveyFile._data = file;
   return kinveyFile;
 }
 
