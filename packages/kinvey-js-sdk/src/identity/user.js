@@ -6,6 +6,8 @@ import * as MIC from './mic';
 import { clearCache } from '../datastore';
 import Acl from '../acl';
 import Kmd from '../kmd';
+import { getConfig } from '../client';
+import LiveService from '../live';
 import {
   execute,
   formatKinveyBaasUrl,
@@ -111,6 +113,49 @@ class User {
 
     if (this.isActive()) {
       setSession(this.data);
+    }
+
+    return this;
+  }
+
+  async registerForLiveService() {
+    const { device } = getConfig();
+
+    if (!this.isActive()) {
+      throw new Error('Please login before you register for Live Service.');
+    }
+
+    if (!LiveService.isRegistered()) {
+      const request = new KinveyRequest({
+        method: RequestMethod.POST,
+        auth: Auth.Session,
+        url: formatKinveyBaasUrl(`/${USER_NAMESPACE}/appKey/${this._id}/register-realtime`),
+        body: { deviceId: device.id }
+      });
+      const response = await execute(request);
+      const config = Object.assign(response.data, { ssl: true, authKey: this._kmd.authtoken });
+      LiveService.register(config);
+    }
+
+    return this;
+  }
+
+  async unregisterFromLiveService() {
+    const { device } = getConfig();
+
+    if (!this.isActive()) {
+      throw new Error('Please login before you unregister from Live Service.');
+    }
+
+    if (LiveService.isRegistered()) {
+      const request = new KinveyRequest({
+        method: RequestMethod.POST,
+        auth: Auth.Session,
+        url: formatKinveyBaasUrl(`/${USER_NAMESPACE}/appKey/${this._id}/unregister-realtime`),
+        body: { deviceId: device.id }
+      });
+      await execute(request);
+      LiveService.unregister();
     }
 
     return this;
