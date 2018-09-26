@@ -50,6 +50,8 @@ export function formatKinveyBaasUrl(pathname, query) {
 
 export const Auth = {
   App: 'App',
+  Default: 'Default',
+  MasterSecret: 'MasterSecret',
   Session: 'Session'
 };
 
@@ -61,12 +63,24 @@ export class KinveyRequest extends Request {
   }
 
   set auth(auth) {
+    if (auth === Auth.Default) {
+      try {
+        this.auth = Auth.Session;
+      } catch (error) {
+        this.auth = Auth.MasterSecret;
+      }
+    }
+
     if (isFunction(auth)) {
       const value = auth();
       this.headers.setAuthorization(value);
     } else if (auth === Auth.App) {
       const { appKey, appSecret } = getConfig();
       const credentials = Buffer.from(`${appKey}:${appSecret}`).toString('base64');
+      this.headers.setAuthorization(`Basic ${credentials}`);
+    } else if (auth === Auth.MasterSecret) {
+      const { appKey, masterSecret } = getConfig();
+      const credentials = Buffer.from(`${appKey}:${masterSecret}`).toString('base64');
       this.headers.setAuthorization(`Basic ${credentials}`);
     } else if (auth === Auth.Session) {
       const session = getSession();
@@ -75,7 +89,7 @@ export class KinveyRequest extends Request {
         throw new Error('There is no active user to authorize the request. Please login and retry the request.');
       }
 
-      const kmd = new Kmd(session);
+      const kmd = new Kmd(session._kmd);
       this.headers.setAuthorization(`Kinvey ${kmd.authtoken}`);
     }
   }

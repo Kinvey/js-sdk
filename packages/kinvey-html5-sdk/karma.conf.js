@@ -1,5 +1,8 @@
 /* eslint-disable */
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
+const merge = require('webpack-merge');
+const webpackConfig = require('./webpack.config');
 
 module.exports = function (config) {
   config.set({
@@ -72,8 +75,8 @@ module.exports = function (config) {
     },
 
     // Webpack config
-    webpack: {
-      devtool: 'eval',
+    webpack: merge(webpackConfig, {
+      devtool: 'inline-source-map',
       module: {
         rules: [
           {
@@ -85,8 +88,10 @@ module.exports = function (config) {
           }
         ]
       },
-      node: { fs: 'empty' }
-    },
+      plugins: [
+        new Dotenv()
+      ]
+    }),
     webpackMiddleware: {
       stats: 'errors-only'
     }

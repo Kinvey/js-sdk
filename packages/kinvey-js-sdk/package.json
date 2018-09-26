@@ -9,7 +9,7 @@
   "main": "lib/index.js",
   "scripts": {
     "prebuild": "del lib",
-    "build": "babel src -d lib --source-maps",
+    "build": "babel src -d lib",
     "lint": "eslint src",
     "test": "mocha -R spec -r @babel/register 'tests/**/*.spec.js'",
     "prepublishOnly": "node scripts/prepublish.js"
@@ -19,6 +19,7 @@
     "lodash": "^4.17.10",
     "loglevel": "^1.6.1",
     "loglevel-plugin-prefix": "^0.8.3",
+    "pubnub": "4.21.5",
     "rxjs": "^6.2.2",
     "url-join": "^4.0.0"
   },

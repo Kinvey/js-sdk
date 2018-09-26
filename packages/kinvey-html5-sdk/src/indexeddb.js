@@ -1,32 +1,49 @@
 import Dexie from 'dexie';
+import sift from 'sift';
 import findIndex from 'lodash/findIndex';
+import isEmpty from 'lodash/isEmpty';
 
-const DB_CACHE = {};
+const dbVersions = {};
 
-function applyQueryAddon(db) {
+function findAddOn(db) {
   // Makes it possible to use applyQuery() on collections.
   // eslint-disable-next-line no-param-reassign
-  db.Collection.prototype.applyQuery = function applyQuery(query) {
-    if (query) {
-      const queryObject = query.toQueryObject();
-      const { limit, skip } = queryObject;
-      // const filter = queryObject.query;
+  db.Table.prototype.find = function find(query) {
+    let collection = this.toCollection();
 
-      if (limit) {
-        this.limit(limit);
+    if (query) {
+      const {
+        filter,
+        // sort,
+        limit,
+        skip
+      } = query;
+      // let { fields } = query;
+
+      if (filter) {
+        if (!isEmpty(filter)) {
+          collection = collection.filter((doc) => {
+            const sifter = sift(filter);
+            return sifter([doc]);
+          });
+        }
       }
 
-      if (skip) {
-        this.skip(skip);
+      if (skip > 0) {
+        collection = collection.offset(skip);
+      }
+
+      if (limit < Infinity) {
+        collection = collection.limit(limit);
       }
     }
 
-    return this;
+    return collection;
   };
 }
 
 // Register the addon to be included by default (optional)
-Dexie.addons.push(applyQueryAddon);
+Dexie.addons.push(findAddOn);
 
 class IndexedDB extends Dexie {
   hasTable(tableName) {
@@ -35,7 +52,7 @@ class IndexedDB extends Dexie {
   }
 
   static async open(dbName, tableName) {
-    const db = DB_CACHE[dbName] || new IndexedDB(dbName);
+    const db = new IndexedDB(dbName);
 
     // Open the database
     if (!db.isOpen()) {
@@ -50,27 +67,30 @@ class IndexedDB extends Dexie {
 
     // Add table
     if (!db.hasTable(tableName)) {
+      const nextVersion = db.verno + 1;
+
       // Close the database
       db.close();
 
       // Create the new schema
-      const schema = {};
-      schema[tableName] = '_id';
+      const newSchema = {};
+      newSchema[tableName] = '_id';
+      const versions = dbVersions[db.name] || {};
+      versions[nextVersion] = newSchema;
+      dbVersions[db.name] = versions;
+
 
       // Upgrade the database
       const upgradedDB = new IndexedDB(db.name);
-      upgradedDB.version(db.verno + 1).stores(schema);
+      Object.keys(versions).forEach((version) => {
+        const schema = versions[version];
+        upgradedDB.version(parseInt(version, 10)).stores(schema);
+      });
       await upgradedDB.open();
-
-      // Update the database cache
-      DB_CACHE[dbName] = upgradedDB;
 
       // Return the upgraded database
       return upgradedDB;
     }
-
-    // Update the database cache
-    DB_CACHE[dbName] = db;
 
     return db;
   }
@@ -78,39 +98,43 @@ class IndexedDB extends Dexie {
 
 export async function find(dbName, tableName, query) {
   const db = await IndexedDB.open(dbName, tableName);
-  const collection = db.table(tableName).toCollection();
-  collection.applyQuery(query);
-  return collection.toArray();
+  const table = db.table(tableName);
+  const docs = await table.find(query).toArray();
+  db.close();
+  return docs;
 }
 
 export async function count(dbName, tableName, query) {
   const db = await IndexedDB.open(dbName, tableName);
-  const collection = db.table(tableName).toCollection();
-  collection.applyQuery(query);
-  return collection.count();
+  const table = db.table(tableName);
+  const count = await table.find(query).count();
+  db.close();
+  return count;
 }
 
 export async function findById(dbName, tableName, id) {
   const db = await IndexedDB.open(dbName, tableName);
   const table = db.table(tableName);
-  return table.get(id);
+  const doc = await table.get(id);
+  db.close();
+  return doc;
 }
 
 export async function save(dbName, tableName, docs = []) {
   const db = await IndexedDB.open(dbName, tableName);
   const table = db.table(tableName);
   await table.bulkPut(docs);
+  db.close();
   return docs;
 }
 
 export async function remove(dbName, tableName, query) {
   const db = await IndexedDB.open(dbName, tableName);
   const table = db.table(tableName);
-  const collection = table.toCollection();
-  collection.applyQuery(query);
-  const docs = collection.toArray();
+  const docs = await table.find(query).toArray();
   const keys = docs.map(doc => doc._id);
   await table.bulkDelete(keys);
+  db.close();
   return docs.length;
 }
 
@@ -118,13 +142,16 @@ export async function removeById(dbName, tableName, id) {
   const db = await IndexedDB.open(dbName, tableName);
   const table = db.table(tableName);
   await table.delete(id);
+  db.close();
   return 1;
 }
 
 export async function clear(dbName, tableName) {
   const db = await IndexedDB.open(dbName, tableName);
   const table = db.table(tableName);
-  return table.clear();
+  await table.clear();
+  db.close();
+  return true;
 }
 
 export async function clearAll(appKey) {
