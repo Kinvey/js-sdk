@@ -10,6 +10,7 @@ import Query from './query';
 import { use as usePopup } from './identity/popup';
 import { AuthorizationGrant } from './identity/mic';
 import * as User from './identity/user';
+import * as Files from './files';
 import endpoint from './endpoint';
 
 export default function sdk(http, sessionStore, popup, cacheStore) {
@@ -42,6 +43,9 @@ export default function sdk(http, sessionStore, popup, cacheStore) {
     // Custom Endpoint
     endpoint,
     CustomEndpoint: { execute: endpoint },
+    
+    // Files
+    Files,
 
     // Kmd
     Kmd,

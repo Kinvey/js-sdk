@@ -16,7 +16,7 @@ export function use(httpAdapter) {
 /**
  * @private
  */
-export async function execute(request) {
+export async function execute(request, ignoreError = false) {
   // Serialize request
   const serializedRequest = await serialize(request);
 
@@ -41,7 +41,7 @@ export async function execute(request) {
   // Handle 401
   // const response = await handle401(parsedResponse);
 
-  if (parsedResponse.isSuccess()) {
+  if (parsedResponse.isSuccess() || ignoreError === true) {
     return parsedResponse;
   }
 
@@ -49,6 +49,10 @@ export async function execute(request) {
 }
 
 // Export
+export {
+  Headers,
+  KinveyHeaders
+} from './headers';
 export {
   Auth,
   Request,
