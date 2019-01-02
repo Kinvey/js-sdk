@@ -497,7 +497,7 @@ export class KinveyRequest extends NetworkRequest {
               .find(sessionKey => socialIdentity[sessionKey].identity === 'kinveyAuth');
             const oldSession = socialIdentity[sessionKey];
 
-            if (isDefined(oldSession)) {
+            if (isDefined(oldSession) && oldSession.refresh_token && oldSession.redirect_uri) {
               const request = new KinveyRequest({
                 method: RequestMethod.POST,
                 headers: {

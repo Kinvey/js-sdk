@@ -15,6 +15,8 @@ let Popup = CorePopup;
  * Enum for Mobile Identity Connect authorization grants.
  * @property  {string}    AuthorizationCodeLoginPage   AuthorizationCodeLoginPage grant
  * @property  {string}    AuthorizationCodeAPI         AuthorizationCodeAPI grant
+ *
+ * @deprecated AuthorizationCodeAPI
  */
 export const AuthorizationGrant = {
   AuthorizationCodeLoginPage: 'AuthorizationCodeLoginPage',
@@ -42,7 +44,7 @@ export class MobileIdentityConnect extends Identity {
     return true;
   }
 
-  _getMicPath(options){
+  _getMicPath(options) {
     let pathname = '/oauth/auth';
     let version = 3;
 
@@ -93,6 +95,23 @@ export class MobileIdentityConnect extends Identity {
       });
 
     return promise;
+  }
+
+  loginWithUsernamePassword(username, password, options = {}) {
+    let clientId = this.client.appKey;
+
+    if (isString(options.micId)) {
+      clientId = `${clientId}.${options.micId}`;
+    }
+
+    return this.requestTokenWithUsernamePassword(username, password, clientId, options)
+      .then((session) => {
+        session.identity = MobileIdentityConnect.identity;
+        session.client_id = clientId;
+        session.protocol = this.client.micProtocol;
+        session.host = this.client.micHost;
+        return session;
+      });
   }
 
   refresh(token, clientId, redirectUri, options = {}) {
@@ -276,6 +295,29 @@ export class MobileIdentityConnect extends Identity {
         client_id: clientId,
         redirect_uri: redirectUri,
         code: code
+      },
+      clientId: clientId
+    });
+    return request.execute().then(response => response.data);
+  }
+
+  requestTokenWithUsernamePassword(username, password, clientId, options = {}) {
+    const request = new KinveyRequest({
+      method: RequestMethod.POST,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      authType: AuthType.Client,
+      url: url.format({
+        protocol: this.client.micProtocol,
+        host: this.client.micHost,
+        pathname: '/oauth/token'
+      }),
+      properties: options.properties,
+      body: {
+        grant_type: 'password',
+        username,
+        password
       },
       clientId: clientId
     });

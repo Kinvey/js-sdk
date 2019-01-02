@@ -293,6 +293,44 @@ export class User {
   }
 
   /**
+   * Login using Mobile Identity Connect.
+   *
+   * @param {string} username Username.
+   * @param {string} password Password.
+   * @param {Object} [options] Options
+   * @return {Promise<User>} The user.
+   */
+  loginWithMICUsingUsernamePassword(username, password, options = {}) {
+    const isActive = this.isActive();
+    const activeUser = User.getActiveUser(this.client);
+
+    if (isActive) {
+      return Promise.reject(new ActiveUserError('This user is already the active user.'));
+    }
+
+    if (isDefined(activeUser)) {
+      return Promise.reject(new ActiveUserError('An active user already exists. Please logout the active user before you login.'));
+    }
+
+    const mic = new MobileIdentityConnect({ client: this.client });
+    return mic.loginWithUsernamePassword(username, password, options)
+      .then(session => this.connectIdentity(MobileIdentityConnect.identity, session, options));
+  }
+
+  /**
+   * Login using Mobile Identity Connect.
+   *
+   * @param {string} username Username.
+   * @param {string} password Password.
+   * @param {Object} [options] Options
+   * @return {Promise<User>} The user.
+   */
+  static loginWithMICUsingUsernamePassword(username, password, options = {}) {
+    const user = new this({}, options);
+    return user.loginWithMIC(username, password, options);
+  }
+
+  /**
    * Connect a social identity.
    *
    * @param {string} identity Social identity.
