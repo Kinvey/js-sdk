@@ -1,6 +1,6 @@
 import isArray from 'lodash/isArray';
+import isFunction from 'lodash/isFunction';
 import times from 'lodash/times';
-import { Observable } from 'rxjs';
 import Query from '../query';
 import { get as getConfig } from '../kinvey/config';
 import { formatKinveyUrl } from '../http/utils';
@@ -47,108 +47,79 @@ export class CacheStore {
     return `/${NAMESPACE}/${appKey}/${this.collectionName}`;
   }
 
-  find(query, options = {}) {
+  async find(query, options = {}) {
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
-    const stream = Observable.create(async (observer) => {
-      try {
-        const cachedDocs = await cache.find(query);
-        observer.next(cachedDocs);
 
-        if (autoSync) {
-          await this.pull(query, options);
-          const docs = await cache.find(query);
-          observer.next(docs);
-        }
+    if (isFunction(options.callback)) {
+      const cachedDocs = await cache.find(query);
+      options.callBack(cachedDocs);
+    }
 
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-    return stream;
+    if (autoSync) {
+      await this.pull(query, options);
+    }
+
+    return cache.find(query);
   }
 
-  count(query, options = {}) {
+  async count(query, options = {}) {
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
-    const stream = Observable.create(async (observer) => {
-      try {
-        const cacheCount = await cache.count(query);
-        observer.next(cacheCount);
 
-        if (autoSync) {
-          const network = new NetworkStore(this.collectionName);
-          const count = await network.count(query, options).toPromise();
-          observer.next(count);
-        }
+    if (isFunction(options.callback)) {
+      const cacheCount = await cache.count(query);
+      options.callback(cacheCount);
+    }
 
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-    return stream;
+    if (autoSync) {
+      const network = new NetworkStore(this.collectionName);
+      return network.count(query, options);
+    }
+
+    return cache.count(query);
   }
 
-  group(aggregation, options = {}) {
+  async group(aggregation, options = {}) {
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
-    const stream = Observable.create(async (observer) => {
-      try {
-        const cacheResult = await cache.group(aggregation);
-        observer.next(cacheResult);
 
-        if (autoSync) {
-          const network = new NetworkStore(this.collectionName);
-          const networkResult = await network.group(aggregation, options).toPromise();
-          observer.next(networkResult);
-        }
+    if (isFunction(options.callback)) {
+      const cacheResult = await cache.group(aggregation);
+      options.callback(cacheResult);
+    }
 
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-    return stream;
+    if (autoSync) {
+      const network = new NetworkStore(this.collectionName);
+      return network.group(aggregation, options);
+    }
+
+    return cache.group(aggregation);
   }
 
-  findById(id, options = {}) {
-    const stream = Observable.create(async (observer) => {
-      try {
-        // if (!id) {
-        //   throw new Error('No id was provided. A valid id is required.');
-        // }
+  async findById(id, options = {}) {
+    const autoSync = options.autoSync === true || this.autoSync;
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const cachedDoc = await cache.findById(id);
 
-        if (!id) {
-          observer.next(undefined);
-        } else {
-          const autoSync = options.autoSync === true || this.autoSync;
-          const cache = new DataStoreCache(this.collectionName, this.tag);
-          const cachedDoc = await cache.findById(id);
-
-          if (!cachedDoc) {
-            if (!autoSync) {
-              throw new NotFoundError();
-            }
-
-            observer.next(undefined);
-          } else {
-            observer.next(cachedDoc);
-          }
-
-          if (autoSync) {
-            const doc = await this.pullById(id, options);
-            observer.next(doc);
-          }
-        }
-
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
+    if (!cachedDoc) {
+      if (!autoSync) {
+        throw new NotFoundError();
       }
-    });
-    return stream;
+
+      if (isFunction(options.callback)) {
+        options.callback(undefined);
+      }
+    } else if (isFunction(options.callback)) {
+      options.callback(cachedDoc);
+    }
+
+    if (autoSync) {
+      const doc = await this.pullById(id, options);
+      return doc;
+    }
+
+    return cache.findById(id);
   }
 
   async create(doc, options = {}) {
@@ -390,7 +361,7 @@ export class CacheStore {
       await cache.clear();
 
       // Get the total count of docs
-      const response = await network.count(query, Object.assign({}, options, { rawResponse: true })).toPromise();
+      const response = await network.count(query, Object.assign({}, options, { rawResponse: true }));
       const count = 'count' in response.data ? response.data.count : Infinity;
 
       // Create the pages
@@ -405,7 +376,7 @@ export class CacheStore {
 
       // Process the pages
       const pagePromises = pageQueries.map((pageQuery) => {
-        return network.find(pageQuery, options).toPromise()
+        return network.find(pageQuery, options)
           .then(docs => cache.save(docs))
           .then(docs => docs.length);
       });
@@ -420,7 +391,7 @@ export class CacheStore {
     }
 
     // Find the docs on the backend
-    const response = await network.find(query, Object.assign({}, options, { rawResponse: true })).toPromise();
+    const response = await network.find(query, Object.assign({}, options, { rawResponse: true }));
     const docs = response.data;
 
     // Clear the cache if a query was not provided
@@ -462,7 +433,7 @@ export class CacheStore {
 
     try {
       // Find the doc on the backend
-      const doc = await network.findById(id, options).toPromise();
+      const doc = await network.findById(id, options);
 
       // Update the doc in the cache
       await cache.save(doc);

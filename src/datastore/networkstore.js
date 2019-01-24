@@ -1,5 +1,4 @@
 import isArray from 'lodash/isArray';
-import { Observable } from 'rxjs';
 import { get as getConfig } from '../kinvey/config';
 import { getId as getDeviceId } from '../kinvey/device';
 import { get as getSession } from '../session';
@@ -49,156 +48,116 @@ export class NetworkStore {
     return `${this.channelName}.u-${session._id}`;
   }
 
-  find(query, options = {}) {
-    const stream = Observable.create(async (observer) => {
-      try {
-        if (query && !(query instanceof Query)) {
-          throw new KinveyError('Invalid query. It must be an instance of the Query class.');
-        }
+  async find(query, options = {}) {
+    if (query && !(query instanceof Query)) {
+      throw new KinveyError('Invalid query. It must be an instance of the Query class.');
+    }
 
-        const { apiProtocol, apiHost } = getConfig();
-        const {
-          rawResponse = false,
-          timeout,
-          properties,
-          trace,
-          skipBL,
-          kinveyFileTTL,
-          kinveyFileTLS,
-        } = options;
-        const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, { kinveyfile_ttl: kinveyFileTTL, kinveyfile_tls: kinveyFileTLS });
-        const url = formatKinveyUrl(apiProtocol, apiHost, this.pathname, queryObject);
-        const request = createRequest(RequestMethod.GET, url);
-        request.headers.customRequestProperties = properties;
-        request.timeout = timeout;
-        const response = await request.execute();
+    const { apiProtocol, apiHost } = getConfig();
+    const {
+      rawResponse = false,
+      timeout,
+      properties,
+      trace,
+      skipBL,
+      kinveyFileTTL,
+      kinveyFileTLS,
+    } = options;
+    const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, { kinveyfile_ttl: kinveyFileTTL, kinveyfile_tls: kinveyFileTLS });
+    const url = formatKinveyUrl(apiProtocol, apiHost, this.pathname, queryObject);
+    const request = createRequest(RequestMethod.GET, url);
+    request.headers.customRequestProperties = properties;
+    request.timeout = timeout;
+    const response = await request.execute();
 
-        if (rawResponse === true) {
-          observer.next(response);
-        } else {
-          observer.next(response.data);
-        }
+    if (rawResponse === true) {
+      return response;
+    }
 
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-    return stream;
+    return response.data;
   }
 
-  count(query, options = {}) {
-    const stream = Observable.create(async (observer) => {
-      try {
-        if (query && !(query instanceof Query)) {
-          throw new KinveyError('Invalid query. It must be an instance of the Query class.');
-        }
+  async count(query, options = {}) {
+    if (query && !(query instanceof Query)) {
+      throw new KinveyError('Invalid query. It must be an instance of the Query class.');
+    }
 
-        const { apiProtocol, apiHost } = getConfig();
-        const {
-          rawResponse = false,
-          timeout,
-          properties,
-          trace,
-          skipBL
-        } = options;
-        const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, {});
-        const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/_count`, queryObject);
-        const request = createRequest(RequestMethod.GET, url);
-        request.headers.customRequestProperties = properties;
-        request.timeout = timeout;
-        const response = await request.execute();
+    const { apiProtocol, apiHost } = getConfig();
+    const {
+      rawResponse = false,
+      timeout,
+      properties,
+      trace,
+      skipBL
+    } = options;
+    const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, {});
+    const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/_count`, queryObject);
+    const request = createRequest(RequestMethod.GET, url);
+    request.headers.customRequestProperties = properties;
+    request.timeout = timeout;
+    const response = await request.execute();
 
-        if (rawResponse === true) {
-          observer.next(response);
-        } else {
-          observer.next(response.data.count);
-        }
+    if (rawResponse === true) {
+      return response;
+    }
 
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-    return stream;
+    return response.data.count;
   }
 
-  group(aggregation, options = {}) {
-    const stream = Observable.create(async (observer) => {
-      try {
-        if (!(aggregation instanceof Aggregation)) {
-          throw new KinveyError('Invalid aggregation. It must be an instance of the Aggregation class.');
-        }
+  async group(aggregation, options = {}) {
+    if (!(aggregation instanceof Aggregation)) {
+      throw new KinveyError('Invalid aggregation. It must be an instance of the Aggregation class.');
+    }
 
-        const { apiProtocol, apiHost } = getConfig();
-        const {
-          rawResponse = false,
-          timeout,
-          properties,
-          trace,
-          skipBL
-        } = options;
-        const queryObject = {};
-        const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/_group`, queryObject);
-        const request = createRequest(RequestMethod.POST, url, aggregation.toPlainObject());
-        request.headers.customRequestProperties = properties;
-        request.timeout = timeout;
-        const response = await request.execute();
+    const { apiProtocol, apiHost } = getConfig();
+    const {
+      rawResponse = false,
+      timeout,
+      properties,
+      trace,
+      skipBL
+    } = options;
+    const queryObject = {};
+    const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/_group`, queryObject);
+    const request = createRequest(RequestMethod.POST, url, aggregation.toPlainObject());
+    request.headers.customRequestProperties = properties;
+    request.timeout = timeout;
+    const response = await request.execute();
 
-        if (rawResponse === true) {
-          observer.next(response);
-        } else {
-          observer.next(response.data);
-        }
+    if (rawResponse === true) {
+      return response;
+    }
 
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-    return stream;
+    return response.data;
   }
 
-  findById(id, options = {}) {
-    const stream = Observable.create(async (observer) => {
-      try {
-        // if (!id) {
-        //   throw new Error('No id was provided. A valid id is required.');
-        // }
+  async findById(id, options = {}) {
+    if (id) {
+      const { apiProtocol, apiHost } = getConfig();
+      const {
+        rawResponse = false,
+        timeout,
+        properties,
+        trace,
+        skipBL,
+        kinveyFileTTL,
+        kinveyFileTLS,
+      } = options;
+      const queryObject = { kinveyfile_ttl: kinveyFileTTL, kinveyfile_tls: kinveyFileTLS };
+      const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/${id}`, queryObject);
+      const request = createRequest(RequestMethod.GET, url);
+      request.headers.customRequestProperties = properties;
+      request.timeout = timeout;
+      const response = await request.execute();
 
-        if (id) {
-          const { apiProtocol, apiHost } = getConfig();
-          const {
-            rawResponse = false,
-            timeout,
-            properties,
-            trace,
-            skipBL,
-            kinveyFileTTL,
-            kinveyFileTLS,
-          } = options;
-          const queryObject = { kinveyfile_ttl: kinveyFileTTL, kinveyfile_tls: kinveyFileTLS };
-          const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/${id}`, queryObject);
-          const request = createRequest(RequestMethod.GET, url);
-          request.headers.customRequestProperties = properties;
-          request.timeout = timeout;
-          const response = await request.execute();
-
-          if (rawResponse === true) {
-            observer.next(response);
-          } else {
-            observer.next(response.data);
-          }
-        } else {
-          observer.next(undefined);
-        }
-
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
+      if (rawResponse === true) {
+        return response;
       }
-    });
-    return stream;
+
+      return response.data;
+    }
+
+    return undefined;
   }
 
   async create(doc, options = {}) {
