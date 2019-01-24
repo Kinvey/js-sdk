@@ -66,7 +66,7 @@ export function saveEntities(collectionName, entities) {
     return networkStore.save(entity);
   }))
     .then(() => syncStore.pull())
-    .then(() => syncStore.find().toPromise())
+    .then(() => syncStore.find())
     .then(result => _.sortBy(deleteEntityMetadata(result), '_id'));
 }
 
@@ -126,7 +126,7 @@ export function retrieveEntity(collectionName, dataStoreType, entity, searchFiel
   const query = new Kinvey.Query();
   const propertyToSearchBy = searchField || '_id';
   query.equalTo(propertyToSearchBy, entity[propertyToSearchBy]);
-  return store.find(query).toPromise()
+  return store.find(query)
     .then(result => result[0]);
 }
 
@@ -176,7 +176,7 @@ export function validateEntity(dataStoreType, collectionName, expectedEntity, se
 export function cleanUpCollectionData(collectionName) {
   const networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
   const syncStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
-  return networkStore.find().toPromise()
+  return networkStore.find()
     .then((entities) => {
       if (entities && entities.length > 0) {
         const query = new Kinvey.Query();

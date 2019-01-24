@@ -54,6 +54,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
         .then(() => done())
         .catch(done);
     });
+
     describe('find and count operations', () => {
       before((done) => {
         networkStore.save(entity1)
@@ -70,29 +71,31 @@ dataStoreTypes.forEach((currentDataStoreType) => {
       });
 
       describe('count()', () => {
-        it('should throw an error for an invalid query', (done) => {
-          storeToTest.count({})
-            .subscribe(null, (error) => {
-              try {
-                expect(error.message).to.equal(invalidQueryMessage);
-                done();
-              } catch (e) {
-                done(e);
-              }
-            });
+        it('should throw an error for an invalid query', async () => {
+          try {
+            await storeToTest.count({});
+          } catch (error) {
+            expect(error.message).to.equal(invalidQueryMessage);
+          }
         });
 
-        it('should return the count for the collection', (done) => {
-          const onNextSpy = sinon.spy();
-          storeToTest.count()
-            .subscribe(onNextSpy, done, () => {
-              try {
-                utilities.validateReadResult(dataStoreType, onNextSpy, 2, 3);
-                done();
-              } catch (error) {
-                done(error);
-              }
-            });
+        it.only('should return the count for the collection', async () => {
+          let count;
+
+          if (dataStoreType === Kinvey.DataStoreType.Cache) {
+            const callback = sinon.spy();
+            count = await storeToTest.count(null, { callback });
+            expect(callback.calledOnce).to.be.true;
+            expect(callback.firstCall.calledWith(2)).to.be.true;
+          } else {
+            count = await storeToTest.count();
+          }
+
+          if (dataStoreType === Kinvey.DataStoreType.Sync) {
+            expect(count).to.equal(2);
+          } else {
+            expect(count).to.equal(3);
+          }
         });
 
         it('should return the count of the entities that match the query', (done) => {
@@ -1197,7 +1200,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
                 .subscribe(onNextSpy, done, () => {
                   try {
                     utilities.validateReadResult(dataStoreType, onNextSpy, 0, 0);
-                    return storeToTest.count().toPromise()
+                    return storeToTest.count()
                       .then((count) => {
                         expect(count).to.equal(2);
                         done();
@@ -1236,7 +1239,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           query.equalTo(textFieldName, newEntity[textFieldName]);
           let initialCount;
           utilities.saveEntities(collectionName, [newEntity, newEntity])
-            .then(() => storeToTest.count().toPromise())
+            .then(() => storeToTest.count())
             .then((count) => {
               initialCount = count;
               return storeToTest.remove(query);
@@ -1248,7 +1251,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
                 .subscribe(onNextSpy, done, () => {
                   try {
                     utilities.validateReadResult(dataStoreType, onNextSpy, 0, 0);
-                    return storeToTest.count().toPromise()
+                    return storeToTest.count()
                       .then((count) => {
                         expect(count).to.equal(initialCount - 2);
                         done();
