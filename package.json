@@ -12,7 +12,7 @@
     "build:nativescript": "node scripts/build/build.nativescript.js",
     "build:node": "node scripts/build/build.node.js",
     "test": "mocha -r @babel/register \"src/**/*.spec.js\"",
-    "test:integration:html5": "karma start tests/karma-html5.local.js",
+    "test:integration:html5": "npm run build:html5 && karma start tests/karma-html5.local.js",
     "test:integration:node": "mocha --require @babel/register --require tests/register-node-sdk.js --opts tests/mocha.opts \"tests/specs/shared/**/*.spec.js\""
   },
   "dependencies": {
@@ -27,7 +27,6 @@
     "p-queue": "3.0.0",
     "pubnub": "4.21.6",
     "request": "2.88.0",
-    "rxjs": "6.3.3",
     "sift": "7.0.1",
     "tslib": "1.9.3",
     "url-join": "4.0.0"
