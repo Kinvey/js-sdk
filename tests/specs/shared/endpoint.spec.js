@@ -26,8 +26,8 @@ describe('Endpoint', () => {
 
       it('should send body properties and return the result', (done) => {
           var argsValue = {
-              property1='sentProperty1',
-              property2='sentProperty2'
+              property1:'sentProperty1',
+              property2:'sentProperty2'
           }
           Kinvey.CustomEndpoint.execute('testEndpointReturnsArgs', argsValue)
             .then((res) => {

@@ -53,7 +53,7 @@ export class CacheStore {
 
     if (isFunction(options.callback)) {
       const cachedDocs = await cache.find(query);
-      options.callBack(cachedDocs);
+      options.callback(cachedDocs);
     }
 
     if (autoSync) {
@@ -98,6 +98,10 @@ export class CacheStore {
   }
 
   async findById(id, options = {}) {
+    if (!id) {
+      return undefined;
+    }
+
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const cachedDoc = await cache.findById(id);
