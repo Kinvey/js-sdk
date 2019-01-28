@@ -1,5 +1,4 @@
 import isArray from 'lodash/isArray';
-import isFunction from 'lodash/isFunction';
 import times from 'lodash/times';
 import Query from '../query';
 import { get as getConfig } from '../kinvey/config';
@@ -33,13 +32,12 @@ export default class InvalidDeltaSetQueryError extends BaseError {
   }
 }
 
-export class CacheStore {
-  constructor(collectionName, options = { tag: undefined, useDeltaSet: false, useAutoPagination: false, autoSync: true }) {
+export class SyncStore {
+  constructor(collectionName, options = { tag: undefined, useDeltaSet: false, useAutoPagination: false }) {
     this.collectionName = collectionName;
     this.tag = options.tag;
     this.useDeltaSet = options.useDeltaSet === true;
     this.useAutoPagination = options.useAutoPagination === true || options.autoPagination;
-    this.autoSync = options.autoSync === true;
   }
 
   get pathname() {
@@ -47,112 +45,39 @@ export class CacheStore {
     return `/${NAMESPACE}/${appKey}/${this.collectionName}`;
   }
 
-  async find(query, options = {}) {
-    const autoSync = options.autoSync === true || this.autoSync;
+  async find(query) {
     const cache = new DataStoreCache(this.collectionName, this.tag);
-
-    if (isFunction(options.callback)) {
-      const cachedDocs = await cache.find(query);
-      options.callback(cachedDocs);
-    }
-
-    if (autoSync) {
-      await this.pull(query, options);
-    }
-
     return cache.find(query);
   }
 
-  async count(query, options = {}) {
-    const autoSync = options.autoSync === true || this.autoSync;
+  async count(query) {
     const cache = new DataStoreCache(this.collectionName, this.tag);
-
-    if (isFunction(options.callback)) {
-      const cacheCount = await cache.count(query);
-      options.callback(cacheCount);
-    }
-
-    if (autoSync) {
-      const network = new NetworkStore(this.collectionName);
-      return network.count(query, options);
-    }
-
     return cache.count(query);
   }
 
-  async group(aggregation, options = {}) {
-    const autoSync = options.autoSync === true || this.autoSync;
+  async group(aggregation) {
     const cache = new DataStoreCache(this.collectionName, this.tag);
-
-    if (isFunction(options.callback)) {
-      const cacheResult = await cache.group(aggregation);
-      options.callback(cacheResult);
-    }
-
-    if (autoSync) {
-      const network = new NetworkStore(this.collectionName);
-      return network.group(aggregation, options);
-    }
-
     return cache.group(aggregation);
   }
 
-  async findById(id, options = {}) {
-    if (!id) {
-      return undefined;
-    }
-
-    const autoSync = options.autoSync === true || this.autoSync;
+  async findById(id) {
     const cache = new DataStoreCache(this.collectionName, this.tag);
-    const cachedDoc = await cache.findById(id);
-
-    if (!cachedDoc) {
-      if (!autoSync) {
-        throw new NotFoundError();
-      }
-
-      if (isFunction(options.callback)) {
-        options.callback(undefined);
-      }
-    } else if (isFunction(options.callback)) {
-      options.callback(cachedDoc);
-    }
-
-    if (autoSync) {
-      const doc = await this.pullById(id, options);
-      return doc;
-    }
-
     return cache.findById(id);
   }
 
-  async create(doc, options = {}) {
+  async create(doc) {
     if (isArray(doc)) {
       throw new KinveyError('Unable to create an array of entities.', 'Please create entities one by one.');
     }
 
-    const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const sync = new Sync(this.collectionName, this.tag);
     const cachedDoc = await cache.save(doc);
-    const syncDoc = await sync.addCreateSyncEvent(cachedDoc);
-
-    if (autoSync) {
-      const query = new Query().equalTo('_id', syncDoc._id);
-      const pushResults = await sync.push(query, options);
-      const pushResult = pushResults.shift();
-
-      if (pushResult.error) {
-        throw pushResult.error;
-      }
-
-      return pushResult.entity;
-    }
-
+    await sync.addCreateSyncEvent(cachedDoc);
     return cachedDoc;
   }
 
-  async update(doc, options = {}) {
+  async update(doc) {
     if (isArray(doc)) {
       throw new KinveyError('Unable to update an array of entities.', 'Please update entities one by one.');
     }
@@ -161,24 +86,10 @@ export class CacheStore {
       throw new KinveyError('The entity provided does not contain an _id. An _id is required to update the entity.', doc);
     }
 
-    const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const sync = new Sync(this.collectionName, this.tag);
     const cachedDoc = await cache.save(doc);
-    const syncDoc = await sync.addUpdateSyncEvent(cachedDoc);
-
-    if (autoSync) {
-      const query = new Query().equalTo('_id', syncDoc._id);
-      const pushResults = await sync.push(query, options);
-      const pushResult = pushResults.shift();
-
-      if (pushResult.error) {
-        throw pushResult.error;
-      }
-
-      return pushResult.entity;
-    }
-
+    sync.addUpdateSyncEvent(cachedDoc);
     return cachedDoc;
   }
 
@@ -190,8 +101,7 @@ export class CacheStore {
     return this.create(doc, options);
   }
 
-  async remove(query, options = {}) {
-    const autoSync = options.autoSync === true || this.autoSync;
+  async remove(query) {
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const sync = new Sync(this.collectionName, this.tag);
     let count = 0;
@@ -207,29 +117,10 @@ export class CacheStore {
       await sync.addDeleteSyncEvent(docs);
     }
 
-    // Remove the docs from the backend
-    if (autoSync) {
-      const findQuery = queryToSyncQuery(query, this.collectionName);
-      const syncDocs = await sync.find(findQuery);
-
-      if (syncDocs.length > 0) {
-        const pushQuery = new Query().contains('_id', syncDocs.map(doc => doc._id));
-        const pushResults = await sync.push(pushQuery);
-        count = pushResults.reduce((count, pushResult) => {
-          if (pushResult.error) {
-            return count - 1;
-          }
-
-          return count;
-        }, count || syncDocs.length);
-      }
-    }
-
     return { count };
   }
 
-  async removeById(id, options = {}) {
-    const autoSync = options.autoSync === true || this.autoSync;
+  async removeById(id) {
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const sync = new Sync(this.collectionName, this.tag);
     let count = 0;
@@ -243,22 +134,7 @@ export class CacheStore {
         count = await cache.removeById(id);
 
         // Add delete event for the removed doc to sync
-        const syncDoc = await sync.addDeleteSyncEvent(doc);
-
-        // Remove the doc from the backend
-        if (autoSync && syncDoc) {
-          const query = new Query().equalTo('_id', syncDoc._id);
-          const pushResults = await sync.push(query);
-
-          if (pushResults.length > 0) {
-            const pushResult = pushResults.shift();
-            if (pushResult.error) {
-              count -= 1;
-            }
-          }
-        } else {
-          count = 1;
-        }
+        await sync.addDeleteSyncEvent(doc);
       } else {
         throw new NotFoundError();
       }
