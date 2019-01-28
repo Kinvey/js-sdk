@@ -5,7 +5,6 @@ import { NetworkStore } from './networkstore';
 import { CacheStore } from './cachestore';
 
 export const DataStoreType = {
-  Cache: 'Cache',
   Network: 'Network',
   Sync: 'Sync'
 };
@@ -27,8 +26,6 @@ export function collection(collectionName, type = DataStoreType.Cache, options =
     }
 
     datastore = new NetworkStore(collectionName);
-  } else if (type === DataStoreType.Cache) {
-    datastore = new CacheStore(collectionName, Object.assign({}, options, { autoSync: true }));
   } else if (type === DataStoreType.Sync) {
     datastore = new CacheStore(collectionName, Object.assign({}, options, { autoSync: false }));
   } else {
