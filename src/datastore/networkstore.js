@@ -1,27 +1,17 @@
-import isArray from 'lodash/isArray';
 import { get as getConfig } from '../kinvey/config';
 import { getId as getDeviceId } from '../kinvey/device';
 import { get as getSession } from '../session';
-import Aggregation from '../aggregation';
 import * as Live from '../live';
-import Query from '../query';
 import { formatKinveyUrl } from '../http/utils';
 import { KinveyRequest, RequestMethod } from '../http/request';
 import { Auth } from '../http/auth';
 import KinveyError from '../errors/kinvey';
 
+import * as Network from './network';
+
 const NAMESPACE = 'appdata';
 
-export function createRequest(method, url, body) {
-  return new KinveyRequest({
-    method,
-    auth: Auth.Session,
-    url,
-    body
-  });
-}
-
-export class NetworkStore {
+export default class NetworkStore {
   constructor(collectionName) {
     this.collectionName = collectionName;
   }
@@ -48,174 +38,28 @@ export class NetworkStore {
     return `${this.channelName}.u-${session._id}`;
   }
 
-  async find(query, options = {}) {
-    if (query && !(query instanceof Query)) {
-      throw new KinveyError('Invalid query. It must be an instance of the Query class.');
-    }
-
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL,
-      kinveyFileTTL,
-      kinveyFileTLS,
-    } = options;
-    const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, { kinveyfile_ttl: kinveyFileTTL, kinveyfile_tls: kinveyFileTLS });
-    const url = formatKinveyUrl(apiProtocol, apiHost, this.pathname, queryObject);
-    const request = createRequest(RequestMethod.GET, url);
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data;
+  find(query, options) {
+    return Network.find(this.pathname, query, options);
   }
 
-  async count(query, options = {}) {
-    if (query && !(query instanceof Query)) {
-      throw new KinveyError('Invalid query. It must be an instance of the Query class.');
-    }
-
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL
-    } = options;
-    const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, {});
-    const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/_count`, queryObject);
-    const request = createRequest(RequestMethod.GET, url);
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data.count;
+  count(query, options) {
+    return Network.count(this.pathname, query, options);
   }
 
-  async group(aggregation, options = {}) {
-    if (!(aggregation instanceof Aggregation)) {
-      throw new KinveyError('Invalid aggregation. It must be an instance of the Aggregation class.');
-    }
-
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL
-    } = options;
-    const queryObject = {};
-    const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/_group`, queryObject);
-    const request = createRequest(RequestMethod.POST, url, aggregation.toPlainObject());
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data;
+  group(aggregation, options) {
+    return Network.group(this.pathname, aggregation, options);
   }
 
-  async findById(id, options = {}) {
-    if (id) {
-      const { apiProtocol, apiHost } = getConfig();
-      const {
-        rawResponse = false,
-        timeout,
-        properties,
-        trace,
-        skipBL,
-        kinveyFileTTL,
-        kinveyFileTLS,
-      } = options;
-      const queryObject = { kinveyfile_ttl: kinveyFileTTL, kinveyfile_tls: kinveyFileTLS };
-      const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/${id}`, queryObject);
-      const request = createRequest(RequestMethod.GET, url);
-      request.headers.customRequestProperties = properties;
-      request.timeout = timeout;
-      const response = await request.execute();
-
-      if (rawResponse === true) {
-        return response;
-      }
-
-      return response.data;
-    }
-
-    return undefined;
+  findById(id, options) {
+    return Network.findById(this.pathname, id, options);
   }
 
-  async create(doc, options = {}) {
-    if (isArray(doc)) {
-      throw new KinveyError('Unable to create an array of entities.', 'Please create entities one by one.');
-    }
-
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL
-    } = options;
-    const queryObject = {};
-    const url = formatKinveyUrl(apiProtocol, apiHost, this.pathname, queryObject);
-    const request = createRequest(RequestMethod.POST, url, doc);
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data;
+  create(doc, options) {
+    return Network.create(this.pathname, doc, options);
   }
 
-  async update(doc, options = {}) {
-    if (isArray(doc)) {
-      throw new KinveyError('Unable to update an array of entities.', 'Please update entities one by one.');
-    }
-
-    if (!doc._id) {
-      throw new KinveyError('The entity provided does not contain an _id. An _id is required to update the entity.', doc);
-    }
-
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL
-    } = options;
-    const queryObject = {};
-    const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/${doc._id}`, queryObject);
-    const request = createRequest(RequestMethod.PUT, url, doc);
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data;
+  update(doc, options) {
+    return Network.update(this.pathname, doc, options);
   }
 
   save(doc, options) {
@@ -226,54 +70,12 @@ export class NetworkStore {
     return this.create(doc, options);
   }
 
-  async remove(query, options = {}) {
-    if (query && !(query instanceof Query)) {
-      throw new KinveyError('Invalid query. It must be an instance of the Query class.');
-    }
-
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL
-    } = options;
-    const queryObject = Object.assign({}, query ? query.toQueryObject() : {}, {});
-    const url = formatKinveyUrl(apiProtocol, apiHost, this.pathname, queryObject);
-    const request = createRequest(RequestMethod.DELETE, url);
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data;
+  remove(query, options) {
+    return Network.remove(this.pathname, query, options);
   }
 
-  async removeById(id, options = {}) {
-    const { apiProtocol, apiHost } = getConfig();
-    const {
-      rawResponse = false,
-      timeout,
-      properties,
-      trace,
-      skipBL
-    } = options;
-    const queryObject = {};
-    const url = formatKinveyUrl(apiProtocol, apiHost, `${this.pathname}/${id}`, queryObject);
-    const request = createRequest(RequestMethod.DELETE, url);
-    request.headers.customRequestProperties = properties;
-    request.timeout = timeout;
-    const response = await request.execute();
-
-    if (rawResponse === true) {
-      return response;
-    }
-
-    return response.data;
+  removeById(id, options) {
+    return Network.removeById(this.pathname, id, options);
   }
 
   async subscribe(receiver) {

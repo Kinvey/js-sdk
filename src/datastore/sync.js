@@ -4,7 +4,6 @@ import NotFoundError from '../errors/notFound';
 import { NetworkStore } from './networkstore';
 import { DataStoreCache } from './cache';
 
-const SYNC_CACHE_TAG = 'kinvey_sync';
 const PUSH_IN_PROGRESS = {};
 
 function markPushStart(collectionName) {
@@ -43,12 +42,6 @@ export const SyncEvent = {
   Update: 'PUT',
   Delete: 'DELETE'
 };
-
-class SyncCache extends DataStoreCache {
-  constructor(tag) {
-    super(SYNC_CACHE_TAG, tag);
-  }
-}
 
 export class Sync {
   constructor(collectionName, tag) {

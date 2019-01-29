@@ -46,8 +46,9 @@ const StatusCode = {
   NotFound: 404,
   ServerError: 500
 };
+export { StatusCode };
 
-export default class Response {
+export class Response {
   constructor(response) {
     this.statusCode = response.statusCode;
     this.headers = response.headers;

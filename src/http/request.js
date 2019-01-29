@@ -8,7 +8,7 @@ import { get as getSession, set as setSession, remove as removeSession } from '.
 import { clear } from '../cache';
 import { Headers, KinveyHeaders } from './headers';
 import { serialize, formatKinveyUrl } from './utils';
-import Response from './response';
+import { Response } from './response';
 import { app, master, session as sessionAuth, basic, defaultAuth, all, Auth } from './auth';
 import http from './http';
 
