@@ -1,5 +1,6 @@
 import isArray from 'lodash/isArray';
 import KinveyError from '../errors/kinvey';
+import NetworkConnectionError from '../errors/networkConnection';
 import Query from '../query';
 import Network from './network';
 import Cache from './cache';
@@ -22,8 +23,11 @@ export default class AutoStore {
       await this.pull(query, options);
       return cache.find(query);
     } catch (error) {
-      // TODO: Log the error
-      return cache.find(query);
+      if (error instanceof NetworkConnectionError) {
+        return cache.find(query);
+      }
+
+      throw error;
     }
   }
 
@@ -32,9 +36,12 @@ export default class AutoStore {
       const network = new Network(this.collectionName);
       return network.count(query, options);
     } catch (error) {
-      // TODO: Log the error
-      const cache = new Cache(this.collectionName, this.tag);
-      return cache.count(query);
+      if (error instanceof NetworkConnectionError) {
+        const cache = new Cache(this.collectionName, this.tag);
+        return cache.count(query);
+      }
+
+      throw error;
     }
   }
 
@@ -43,9 +50,12 @@ export default class AutoStore {
       const network = new Network(this.collectionName);
       return network.group(aggregation, options);
     } catch (error) {
-      // TODO: Log the error
-      const cache = new Cache(this.collectionName, this.tag);
-      return cache.group(aggregation);
+      if (error instanceof NetworkConnectionError) {
+        const cache = new Cache(this.collectionName, this.tag);
+        return cache.group(aggregation);
+      }
+
+      throw error;
     }
   }
 
@@ -57,8 +67,11 @@ export default class AutoStore {
       await sync.pullById(id, options);
       return cache.findById(id);
     } catch (error) {
-      // TODO: Log the error
-      return cache.findById(id);
+      if (error instanceof NetworkConnectionError) {
+        return cache.findById(id);
+      }
+
+      throw error;
     }
   }
 

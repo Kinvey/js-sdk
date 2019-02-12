@@ -1,37 +1,7 @@
 import axios from 'axios';
 import TimeoutError from '../errors/timeout';
 import NetworkConnectionError from '../errors/networkConnection';
-
-export default async function http(request) {
-  let response;
-
-  try {
-    response = await axios({
-      headers: request.headers,
-      method: request.method,
-      url: request.url,
-      data: request.body,
-      timeout: request.timeout
-    });
-  } catch (error) {
-    if (error.response) {
-      // eslint-disable-next-line prefer-destructuring
-      response = error.response;
-    } else if (error.request) {
-      if (error.code === 'ESOCKETTIMEDOUT' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
-        throw new TimeoutError('The network request timed out.');
-      } else if (error.code === 'ENOENT') {
-        throw new NetworkConnectionError('You do not have a network connection.');
-      }
-
-      throw error;
-    } else {
-      throw error;
-    }
-  }
-
-  return { statusCode: response.status, headers: response.headers, data: response.data };
-}
+import pkg from '../../package.json';
 
 function browserDetect(ua) {
   // Cast arguments.
@@ -48,8 +18,8 @@ function browserDetect(ua) {
     rOpera.exec(userAgent) || rSafari.exec(userAgent) || [];
 }
 
-function deviceInformation(sdkInfo = {}) {
-  const { name = 'SDK unknown (kinvey-http-web)', version = 'unknown' } = sdkInfo;
+function deviceInformation() {
+  const { name, version } = pkg;
   const libraries = [];
   let browser;
   let platform;
@@ -100,15 +70,49 @@ function deviceInformation(sdkInfo = {}) {
   }).join(' ');
 }
 
-function deviceInfo(sdkInfo) {
+function deviceInfo() {
   return {
     hv: 1,
     os: window.navigator.appVersion,
     ov: window.navigator.appVersion,
-    sdk: sdkInfo || {
-      name: 'SDK unknown (kinvey-http-web)',
-      version: 'unknown'
+    sdk: {
+      name: pkg.name,
+      version: pkg.version
     },
     pv: window.navigator.userAgent
   };
+}
+
+export default async function http(request) {
+  let response;
+
+  try {
+    response = await axios({
+      headers: Object.assign({
+        'X-Kinvey-Device-Information': deviceInformation(),
+        'X-Kinvey-Device-Info': deviceInfo()
+      }, request.headers),
+      method: request.method,
+      url: request.url,
+      data: request.body,
+      timeout: request.timeout
+    });
+  } catch (error) {
+    if (error.response) {
+      // eslint-disable-next-line prefer-destructuring
+      response = error.response;
+    } else if (error.request) {
+      if (error.code === 'ESOCKETTIMEDOUT' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+        throw new TimeoutError('The network request timed out.');
+      } else if (error.code === 'ENOENT') {
+        throw new NetworkConnectionError('You do not have a network connection.');
+      }
+
+      throw error;
+    } else {
+      throw error;
+    }
+  }
+
+  return { statusCode: response.status, headers: response.headers, data: response.data };
 }
