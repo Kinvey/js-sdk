@@ -1,0 +1,8 @@
+{
+  "extends": [
+    "@kinveysdk/eslint-config"
+  ],
+  "rules": {
+    "class-methods-use-this": "off"
+  }
+}

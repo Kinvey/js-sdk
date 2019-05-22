@@ -1,0 +1,53 @@
+{
+  "name": "@kinveysdk/http-node",
+  "description": "Kinvey JavaScript SDK Node http adapter.",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Thomas Conner",
+    "email": "thomas.conner@progress.com"
+  },
+  "keywords": [
+    "Kinvey",
+    "JavaScript"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib && npm run lint",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint \"src/**\"",
+    "test": "ava --verbose src/http.spec.ts"
+  },
+  "dependencies": {
+    "@kinveysdk/errors": "^0.0.1",
+    "@kinveysdk/http": "^0.0.1",
+    "axios": "^0.18.0"
+  },
+  "devDependencies": {
+    "@kinveysdk/eslint-config": "^0.0.1",
+    "@kinveysdk/typescript-config": "^0.0.1",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "ava": "^1.4.1",
+    "del-cli": "^1.1.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.17.2",
+    "prettier": "^1.17.1",
+    "ts-node": "^8.1.0",
+    "typescript": "~3.4.5"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "ava": {
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  }
+}

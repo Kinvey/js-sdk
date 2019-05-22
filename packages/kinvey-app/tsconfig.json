@@ -1,0 +1,6 @@
+{
+  "extends": "@kinveysdk/typescript-config",
+  "compilerOptions": {
+    "outDir": "lib"
+  }
+}
