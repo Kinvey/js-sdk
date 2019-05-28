@@ -3,7 +3,7 @@ import { HttpRequest } from './request';
 import { HttpResponse } from './response';
 
 export interface HttpAdapter {
-  send: (request: HttpRequest) => Promise<HttpResponse>;
+  send(request: HttpRequest): Promise<HttpResponse>;
 }
 
 let adapter: HttpAdapter = {
@@ -16,7 +16,7 @@ export function setHttpAdapter(_adapter: HttpAdapter): void {
   adapter = _adapter;
 }
 
-function getHttpAdapter(): HttpAdapter {
+export function getHttpAdapter(): HttpAdapter {
   return adapter;
 }
 

@@ -1,7 +1,7 @@
 import isPlainObject from 'lodash/isPlainObject';
 import { format } from 'url';
 import urlJoin from 'url-join';
-import { getBaasProtocol, getBaasHost, getAppKey } from '@kinveysdk/kinvey-app';
+import { getInstanceId, getAppKey } from '@kinveysdk/app';
 
 export function clean(value: { [key: string]: any }): { [key: string]: any } {
   return Object.keys(value)
@@ -20,6 +20,34 @@ export function clean(value: { [key: string]: any }): { [key: string]: any } {
     }, {});
 }
 
+export function getKinveyBaasProtocol(): string {
+  return 'https';
+}
+
+export function getKinveyBaasHost(): string {
+  const instanceId = getInstanceId();
+
+  if (instanceId) {
+    return `${instanceId}-baas.kinvey.com`;
+  }
+
+  return 'baas.kinvey.com';
+}
+
+export function getKinveyAuthProtocol(): string {
+  return 'https';
+}
+
+export function getKinveyAuthHost(): string {
+  const instanceId = getInstanceId();
+
+  if (instanceId) {
+    return `${instanceId}-auth.kinvey.com`;
+  }
+
+  return 'auth.kinvey.com';
+}
+
 export enum KinveyBaasNamespace {
   AppData = 'appdata',
   Blob = 'blob',
@@ -30,8 +58,8 @@ export enum KinveyBaasNamespace {
 
 export function formatKinveyBaasUrl(namespace: KinveyBaasNamespace, path?: string, query?: { [key: string]: any }): string {
   return format({
-    protocol: getBaasProtocol(),
-    host: getBaasHost(),
+    protocol: getKinveyBaasProtocol(),
+    host: getKinveyBaasHost(),
     pathname: path ? urlJoin(namespace, getAppKey(), path) : urlJoin(namespace, getAppKey()),
     query: query ? clean(query) : undefined
   });

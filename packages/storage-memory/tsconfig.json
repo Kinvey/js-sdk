@@ -2,5 +2,9 @@
   "extends": "@kinveysdk/typescript-config",
   "compilerOptions": {
     "outDir": "lib"
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var headers_1 = require("./headers");
 var HttpRequestMethod;
 (function (HttpRequestMethod) {
     HttpRequestMethod["GET"] = "GET";
@@ -12,7 +13,7 @@ var HttpRequest = /** @class */ (function () {
     function HttpRequest(config) {
         this.method = HttpRequestMethod.GET;
         if (config) {
-            this.headers = config.headers;
+            this.headers = new headers_1.HttpHeaders(config.headers);
             if (config.method) {
                 this.method = config.method;
             }
@@ -24,3 +25,4 @@ var HttpRequest = /** @class */ (function () {
     return HttpRequest;
 }());
 exports.HttpRequest = HttpRequest;
+//# sourceMappingURL=request.js.map

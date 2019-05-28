@@ -25,3 +25,4 @@ var NetworkConnectionError = /** @class */ (function (_super) {
     return NetworkConnectionError;
 }(kinvey_1.KinveyError));
 exports.NetworkConnectionError = NetworkConnectionError;
+//# sourceMappingURL=networkConnection.js.map

@@ -12,7 +12,7 @@ function parseJSON(data?: any): any {
 }
 
 export function parse(contentType: string, data?: any): any {
-  if (contentType.indexOf('application/json') !== -1) {
+  if (isString(contentType) && contentType.indexOf('application/json') !== -1) {
     return parseJSON(data);
   }
   return data;

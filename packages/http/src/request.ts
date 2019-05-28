@@ -8,7 +8,7 @@ export enum HttpRequestMethod {
 };
 
 export interface HttpRequestConfig {
-  headers?: any;
+  headers?: { [name: string]: string | string[] | (() => string | string[]) };
   method: HttpRequestMethod;
   url: string;
   body?: string | object;
@@ -24,7 +24,7 @@ export class HttpRequest {
 
   constructor(config?: HttpRequestConfig) {
     if (config) {
-      this.headers = config.headers;
+      this.headers = new HttpHeaders(config.headers);
 
       if (config.method) {
         this.method = config.method;

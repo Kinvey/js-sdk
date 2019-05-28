@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var headers_1 = require("./headers");
 var parse_1 = require("./parse");
 var HttpStatusCode;
 (function (HttpStatusCode) {
@@ -20,7 +21,7 @@ var HttpResponse = /** @class */ (function () {
     function HttpResponse(config) {
         if (config) {
             this.statusCode = config.statusCode;
-            this.headers = config.headers;
+            this.headers = new headers_1.HttpHeaders(config.headers);
             this.data = parse_1.parse(this.headers.contentType, config.data);
         }
     }
@@ -35,3 +36,4 @@ var HttpResponse = /** @class */ (function () {
     return HttpResponse;
 }());
 exports.HttpResponse = HttpResponse;
+//# sourceMappingURL=response.js.map

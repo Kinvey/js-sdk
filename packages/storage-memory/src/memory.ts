@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-explicit-any: "off" */
+
 import { Storage, StorageAdapter, Doc } from '@kinveysdk/storage';
 
 const store = new Map<string, Map<string, any>>();

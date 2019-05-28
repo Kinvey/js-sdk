@@ -1,3 +1,5 @@
+/* eslint no-useless-constructor: "off" */
+
 import isFunction from 'lodash/isFunction';
 import isArray from 'lodash/isArray';
 
@@ -5,7 +7,21 @@ export class HttpHeaders {
   private headers: Map<string, string> = new Map();
   private normalizedNames: Map<string, string> = new Map();
 
-  get contentType(): undefined | string {
+  constructor(headers?: HttpHeaders)
+  constructor(headers?: { [name: string]: string | string[] | (() => string | string[]) })
+  constructor(headers?: any) {
+    if (headers) {
+      if (headers instanceof HttpHeaders) {
+        this.join(headers);
+      } else {
+        Object.keys(headers).forEach((name): void => {
+          this.set(name, headers[name]);
+        });
+      }
+    }
+  }
+
+  get contentType(): string | undefined {
     return this.get('Content-Type');
   }
 
@@ -13,8 +29,8 @@ export class HttpHeaders {
     return this.headers.has(name.toLowerCase());
   }
 
-  get(name: string): undefined | string {
-    return this.headers.get(name.toLowerCase()) || undefined;
+  get(name: string): string | undefined {
+    return this.headers.get(name.toLowerCase());
   }
 
   keys(): string[] {

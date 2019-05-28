@@ -34,14 +34,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var PQueue = require("p-queue");
+var p_queue_1 = __importDefault(require("p-queue"));
 var errors_1 = require("@kinveysdk/errors");
 var utils_1 = require("./utils");
-var queue = new PQueue({ concurrency: 1 });
+var queue = new p_queue_1.default({ concurrency: 1 });
 var Storage = /** @class */ (function () {
-    function Storage(dbName, collectionName) {
-        this.dbName = dbName;
+    function Storage(namespace, collectionName) {
+        this.namespace = namespace;
         this.collectionName = collectionName;
     }
     Object.defineProperty(Storage.prototype, "storageAdapter", {
@@ -51,13 +54,17 @@ var Storage = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Storage.prototype.count = function () {
+        var _this = this;
+        return queue.add(function () { return _this.storageAdapter.count(_this.namespace, _this.collectionName); });
+    };
     Storage.prototype.find = function () {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.find(_this.dbName, _this.collectionName); });
+        return queue.add(function () { return _this.storageAdapter.find(_this.namespace, _this.collectionName); });
     };
     Storage.prototype.findById = function (id) {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.findById(_this.dbName, _this.collectionName, id); });
+        return queue.add(function () { return _this.storageAdapter.findById(_this.namespace, _this.collectionName, id); });
     };
     Storage.prototype.save = function (docsToSave) {
         var _this = this;
@@ -79,7 +86,7 @@ var Storage = /** @class */ (function () {
                                 return doc;
                             });
                         }
-                        return [4 /*yield*/, this.storageAdapter.save(this.dbName, this.collectionName, docs)];
+                        return [4 /*yield*/, this.storageAdapter.save(this.namespace, this.collectionName, docs)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/, docs];
@@ -113,12 +120,13 @@ var Storage = /** @class */ (function () {
     };
     Storage.prototype.removeById = function (id) {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.removeById(_this.dbName, _this.collectionName, id); });
+        return queue.add(function () { return _this.storageAdapter.removeById(_this.namespace, _this.collectionName, id); });
     };
     Storage.prototype.clear = function () {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.clear(_this.dbName, _this.collectionName); });
+        return queue.add(function () { return _this.storageAdapter.clear(_this.namespace, _this.collectionName); });
     };
     return Storage;
 }());
 exports.Storage = Storage;
+//# sourceMappingURL=storage.js.map

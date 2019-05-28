@@ -1,9 +1,13 @@
 export declare class HttpHeaders {
     private headers;
     private normalizedNames;
-    readonly contentType: undefined | string;
+    constructor(headers?: HttpHeaders);
+    constructor(headers?: {
+        [name: string]: string | string[] | (() => string | string[]);
+    });
+    readonly contentType: string | undefined;
     has(name: string): boolean;
-    get(name: string): undefined | string;
+    get(name: string): string | undefined;
     keys(): string[];
     set(name: string, value: string): HttpHeaders;
     set(name: string, value: string[]): HttpHeaders;

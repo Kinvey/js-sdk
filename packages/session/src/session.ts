@@ -1,4 +1,4 @@
-import { getAppKey } from '@kinveysdk/sdk-config';
+import { getAppKey } from '@kinveysdk/app';
 import { get, set, remove } from './store';
 
 function getSessionKey(): string {
@@ -7,9 +7,12 @@ function getSessionKey(): string {
 
 export interface SessionObject {
   _id: string;
+  _kmd: {
+    authtoken: string;
+  }
 }
 
-export function getSession(): null | SessionObject {
+export function getSession(): SessionObject | null {
   const key = getSessionKey();
   const session = get(key);
   if (session) {
@@ -18,12 +21,9 @@ export function getSession(): null | SessionObject {
   return null;
 }
 
-export function setSession(session: SessionObject): boolean {
-  if (session) {
-    const key = getSessionKey();
-    return set(key, JSON.stringify(session));
-  }
-  return false;
+export function setSession(session: SessionObject): void {
+  const key = getSessionKey();
+  set(key, JSON.stringify(session));
 }
 
 export function removeSession(): boolean {

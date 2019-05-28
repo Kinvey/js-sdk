@@ -1,0 +1,22 @@
+# Build
+lib
+
+# Coverage
+.nyc_output
+coverage
+
+# Dependency directories
+node_modules
+
+# Output of 'npm pack'
+*.tgz
+
+# dotenv environment variables file
+.env
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store

@@ -22,6 +22,7 @@
     "p-queue": "^5.0.0"
   },
   "devDependencies": {
+    "@types/node": "^12.0.2",
     "@kinveysdk/eslint-config": "^0.0.1",
     "@kinveysdk/typescript-config": "^0.0.1",
     "del-cli": "^1.1.0",

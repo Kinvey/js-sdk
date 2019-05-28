@@ -1,23 +1,44 @@
-import { getConfig, ConfigKey } from '@kinveysdk/sdk-config';
-
 export interface SessionStore {
   get(key: string): string | null;
-  set(key: string, session: string): boolean;
+  set(key: string, session: string): void;
   remove(key: string): boolean;
 }
 
-function getStore(): SessionStore {
-  return getConfig<SessionStore>(ConfigKey.SessionStorageAdapter);
+class DefaultSessionStore {
+  private store = new Map<string, string>();
+
+  get(key: string): string | null {
+    return this.store.get(key);
+  }
+
+  set(key: string, session: string): void {
+    this.store.set(key, session);
+  }
+
+  remove(key: string): boolean {
+    return this.store.delete(key);
+  }
+}
+
+let store: SessionStore = new DefaultSessionStore();
+
+
+export function getSessionStore(): SessionStore {
+  return store;
+}
+
+export function setSessionStore(_store: SessionStore): void {
+  store = _store;
 }
 
 export function get(key: string): null | string {
-  return getStore().get(key);
+  return getSessionStore().get(key);
 }
 
-export function set(key: string, session: string): boolean {
-  return getStore().set(key, session);
+export function set(key: string, session: string): void {
+  getSessionStore().set(key, session);
 }
 
 export function remove(key: string): boolean {
-  return getStore().remove(key);
+  return getSessionStore().remove(key);
 }

@@ -1,11 +1,26 @@
 "use strict";
+/* eslint no-useless-constructor: "off" */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var isFunction_1 = require("lodash/isFunction");
-var isArray_1 = require("lodash/isArray");
+var isFunction_1 = __importDefault(require("lodash/isFunction"));
+var isArray_1 = __importDefault(require("lodash/isArray"));
 var HttpHeaders = /** @class */ (function () {
-    function HttpHeaders() {
+    function HttpHeaders(headers) {
+        var _this = this;
         this.headers = new Map();
         this.normalizedNames = new Map();
+        if (headers) {
+            if (headers instanceof HttpHeaders) {
+                this.join(headers);
+            }
+            else {
+                Object.keys(headers).forEach(function (name) {
+                    _this.set(name, headers[name]);
+                });
+            }
+        }
     }
     Object.defineProperty(HttpHeaders.prototype, "contentType", {
         get: function () {
@@ -18,7 +33,7 @@ var HttpHeaders = /** @class */ (function () {
         return this.headers.has(name.toLowerCase());
     };
     HttpHeaders.prototype.get = function (name) {
-        return this.headers.get(name.toLowerCase()) || undefined;
+        return this.headers.get(name.toLowerCase());
     };
     HttpHeaders.prototype.keys = function () {
         return Array.from(this.normalizedNames.values());
@@ -82,3 +97,4 @@ var HttpHeaders = /** @class */ (function () {
     return HttpHeaders;
 }());
 exports.HttpHeaders = HttpHeaders;
+//# sourceMappingURL=headers.js.map

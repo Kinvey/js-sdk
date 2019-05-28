@@ -30,7 +30,7 @@ export class HttpResponse {
   constructor(config?: HttpResponseConfig) {
     if (config) {
       this.statusCode = config.statusCode;
-      this.headers = config.headers;
+      this.headers = new HttpHeaders(config.headers);
       this.data = parse(this.headers.contentType, config.data);
     }
   }

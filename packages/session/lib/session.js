@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var sdk_config_1 = require("@kinveysdk/sdk-config");
+var app_1 = require("@kinveysdk/app");
 var store_1 = require("./store");
 function getSessionKey() {
-    return sdk_config_1.getAppKey() + ".active_user";
+    return app_1.getAppKey() + ".active_user";
 }
 function getSession() {
     var key = getSessionKey();
@@ -15,11 +15,8 @@ function getSession() {
 }
 exports.getSession = getSession;
 function setSession(session) {
-    if (session) {
-        var key = getSessionKey();
-        return store_1.set(key, JSON.stringify(session));
-    }
-    return false;
+    var key = getSessionKey();
+    store_1.set(key, JSON.stringify(session));
 }
 exports.setSession = setSession;
 function removeSession() {
@@ -27,3 +24,4 @@ function removeSession() {
     return store_1.remove(key);
 }
 exports.removeSession = removeSession;
+//# sourceMappingURL=session.js.map

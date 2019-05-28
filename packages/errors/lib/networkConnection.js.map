@@ -1,0 +1,1 @@
+{"version":3,"file":"networkConnection.js","sourceRoot":"","sources":["../src/networkConnection.ts"],"names":[],"mappings":";;;;;;;;;;;;;;;AAAA,mCAAuC;AAEvC;IAA4C,0CAAW;IACrD,gCAAY,OAAyD,EAAE,KAAc;QAAzE,wBAAA,EAAA,yDAAyD;QAArE,YACE,kBAAM,OAAO,EAAE,KAAK,CAAC,SAEtB;QADC,KAAI,CAAC,IAAI,GAAG,wBAAwB,CAAC;;IACvC,CAAC;IACH,6BAAC;AAAD,CAAC,AALD,CAA4C,oBAAW,GAKtD;AALY,wDAAsB"}

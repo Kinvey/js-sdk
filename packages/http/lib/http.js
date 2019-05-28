@@ -52,6 +52,7 @@ exports.setHttpAdapter = setHttpAdapter;
 function getHttpAdapter() {
     return adapter;
 }
+exports.getHttpAdapter = getHttpAdapter;
 function send(request) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -60,3 +61,4 @@ function send(request) {
     });
 }
 exports.send = send;
+//# sourceMappingURL=http.js.map

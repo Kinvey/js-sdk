@@ -1,6 +1,9 @@
 export interface SessionObject {
     _id: string;
+    _kmd: {
+        authtoken: string;
+    };
 }
-export declare function getSession(): null | SessionObject;
-export declare function setSession(session: SessionObject): boolean;
+export declare function getSession(): SessionObject | null;
+export declare function setSession(session: SessionObject): void;
 export declare function removeSession(): boolean;

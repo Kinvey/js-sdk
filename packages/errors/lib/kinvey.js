@@ -28,3 +28,4 @@ var KinveyError = /** @class */ (function (_super) {
     return KinveyError;
 }(Error));
 exports.KinveyError = KinveyError;
+//# sourceMappingURL=kinvey.js.map

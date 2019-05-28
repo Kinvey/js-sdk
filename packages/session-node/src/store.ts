@@ -1,18 +1,13 @@
-import { SessionStore } from '@kinveysdk/session';
-
 const store = new Map<string, string>();
 
-export class NodeSessionStore implements SessionStore {
-  get(key: string): string {
-    return store.get(key);
-  }
+export function get(key: string): string {
+  return store.get(key);
+}
 
-  set(key: string, session: string): boolean {
-    store.set(key, session);
-    return true;
-  }
+export function set(key: string, session: string): void {
+  store.set(key, session);
+}
 
-  remove(key: string): boolean {
-    return store.delete(key);
-  }
+export function remove(key: string): boolean {
+  return store.delete(key);
 }

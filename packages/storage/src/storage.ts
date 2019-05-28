@@ -1,4 +1,4 @@
-import PQueue = require('p-queue');
+import PQueue from 'p-queue';
 import { KinveyError } from '@kinveysdk/errors';
 import { generateId } from './utils';
 

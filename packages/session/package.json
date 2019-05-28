@@ -17,7 +17,9 @@
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "@kinveysdk/app": "^0.0.1"
+  },
   "devDependencies": {
     "@kinveysdk/eslint-config": "^0.0.1",
     "@kinveysdk/typescript-config": "^0.0.1",

@@ -6,7 +6,9 @@ export declare enum HttpRequestMethod {
     DELETE = "DELETE"
 }
 export interface HttpRequestConfig {
-    headers?: any;
+    headers?: {
+        [name: string]: string | string[] | (() => string | string[]);
+    };
     method: HttpRequestMethod;
     url: string;
     body?: string | object;

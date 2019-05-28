@@ -3,6 +3,6 @@
     "@kinveysdk/eslint-config"
   ],
   "rules": {
-    "class-methods-use-this": "off"
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }

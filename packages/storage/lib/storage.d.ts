@@ -5,19 +5,20 @@ export interface Doc {
     };
 }
 export interface StorageAdapter<T extends Doc> {
-    find(dbName: string, collectionName: string): Promise<T[]>;
-    count(dbName: string, collectionName: string): Promise<number>;
-    findById(dbName: string, collectionName: string, id: string): Promise<T>;
-    save(dbName: string, collectionName: string, docs: T[]): Promise<T[]>;
-    removeById(dbName: string, collectionName: string, id: string): Promise<number>;
-    clear(dbName: string, collectionName: string): Promise<number>;
-    clearDatabase(dbName: string, exclude?: string[]): Promise<void>;
+    count(namespace: string, collectionName: string): Promise<number>;
+    find(namespace: string, collectionName: string): Promise<T[]>;
+    findById(namespace: string, collectionName: string, id: string): Promise<T>;
+    save(namespace: string, collectionName: string, docs: T[]): Promise<T[]>;
+    removeById(namespace: string, collectionName: string, id: string): Promise<number>;
+    clear(namespace: string, collectionName: string): Promise<number>;
+    clearDatabase(namespace: string, exclude?: string[]): Promise<void>;
 }
 export declare class Storage<T extends Doc> {
-    dbName: string;
+    namespace: string;
     collectionName: string;
-    constructor(dbName: string, collectionName: string);
+    constructor(namespace: string, collectionName: string);
     readonly storageAdapter: StorageAdapter<T>;
+    count(): Promise<number>;
     find(): Promise<T[]>;
     findById(id: string): Promise<T>;
     save(docsToSave: T[]): Promise<T[]>;
