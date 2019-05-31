@@ -1,5 +1,11 @@
+import isPlainObject from 'lodash/isPlainObject';
+import {
+  KinveyError,
+  InvalidCredentialsError
+} from '@kinveysdk/errors';
 import { HttpHeaders } from './headers';
 import { parse } from './parse';
+
 
 export enum HttpStatusCode {
   Ok = 200,
@@ -18,8 +24,12 @@ export enum HttpStatusCode {
 
 export interface HttpResponseConfig {
   statusCode: HttpStatusCode;
-  headers: HttpHeaders;
+  headers: { [name: string]: string | string[] | (() => string | string[]) };
   data?: string;
+}
+
+export interface HttpResponseObject extends HttpResponseConfig {
+  headers: { [name: string]: string }
 }
 
 export class HttpResponse {
@@ -42,5 +52,35 @@ export class HttpResponse {
       || this.statusCode === HttpStatusCode.NotModified
       || this.statusCode === HttpStatusCode.TemporaryRedirect
       || this.statusCode === HttpStatusCode.PermanentRedirect;
+  }
+
+  toPlainObject(): HttpResponseObject {
+    return Object.assign({}, {
+      statusCode: this.statusCode,
+      headers: this.headers.toPlainObject(),
+      data: this.data
+    });
+  }
+}
+
+export class KinveyHttpResponse extends HttpResponse {
+  get error(): KinveyError | null {
+    if (!this.isSuccess()) {
+      if (isPlainObject(this.data)) {
+        const message = this.data.message || this.data.description;
+        const name = this.data.name || this.data.error;
+        const { debug } = this.data;
+
+        if (name === 'InvalidCredentials') {
+          return new InvalidCredentialsError(message, debug);
+        }
+
+        return new KinveyError(message, debug);
+      }
+
+      return new KinveyError();
+    }
+
+    return null;
   }
 }

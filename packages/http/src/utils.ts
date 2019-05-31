@@ -64,3 +64,12 @@ export function formatKinveyBaasUrl(namespace: KinveyBaasNamespace, path?: strin
     query: query ? clean(query) : undefined
   });
 }
+
+export function formatKinveyAuthUrl(path?: string, query?: { [key: string]: any }): string {
+  return format({
+    protocol: getKinveyAuthProtocol(),
+    host: getKinveyAuthHost(),
+    pathname: path,
+    query: query ? clean(query) : undefined
+  });
+}

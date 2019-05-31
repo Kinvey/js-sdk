@@ -1,3 +1,3 @@
-export declare function kinveyAppAuth(): string;
-export declare function kinveySessionAuth(): string;
-export declare function kinveySessionOrAppAuth(): string;
+export declare function kinveyAppAuth(): Promise<string>;
+export declare function kinveySessionAuth(): Promise<string>;
+export declare function kinveySessionOrAppAuth(): Promise<string>;

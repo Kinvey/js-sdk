@@ -2,11 +2,10 @@ import isString from 'lodash/isString';
 import isEmpty from 'lodash/isEmpty';
 import { KinveyError } from '@kinveysdk/errors';
 import {
-  HttpRequest,
+  KinveyHttpRequest,
   HttpRequestMethod,
   formatKinveyBaasUrl,
   KinveyBaasNamespace,
-  send,
   kinveyAppAuth
 } from '@kinveysdk/http';
 import { setSession } from '@kinveysdk/session';
@@ -28,15 +27,13 @@ export async function login(username: string, password: string): Promise<User> {
     throw new KinveyError('Username and/or password missing. Please provide both a username and password to login.');
   }
 
-  const request = new HttpRequest({
+  const request = new KinveyHttpRequest({
     method: HttpRequestMethod.POST,
-    headers: {
-      'Authorization': kinveyAppAuth
-    },
+    auth: kinveyAppAuth,
     url: formatKinveyBaasUrl(KinveyBaasNamespace.User, '/login'),
     body: { username, password }
   });
-  const response = await send(request);
+  const response = await request.execute();
   const session = response.data;
 
   // Remove sensitive data

@@ -41,7 +41,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var p_queue_1 = __importDefault(require("p-queue"));
 var errors_1 = require("@kinveysdk/errors");
 var utils_1 = require("./utils");
-var queue = new p_queue_1.default({ concurrency: 1 });
+var QUEUE = new p_queue_1.default({ concurrency: 1 });
 var Storage = /** @class */ (function () {
     function Storage(namespace, collectionName) {
         this.namespace = namespace;
@@ -56,19 +56,19 @@ var Storage = /** @class */ (function () {
     });
     Storage.prototype.count = function () {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.count(_this.namespace, _this.collectionName); });
+        return QUEUE.add(function () { return _this.storageAdapter.count(_this.namespace, _this.collectionName); });
     };
     Storage.prototype.find = function () {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.find(_this.namespace, _this.collectionName); });
+        return QUEUE.add(function () { return _this.storageAdapter.find(_this.namespace, _this.collectionName); });
     };
     Storage.prototype.findById = function (id) {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.findById(_this.namespace, _this.collectionName, id); });
+        return QUEUE.add(function () { return _this.storageAdapter.findById(_this.namespace, _this.collectionName, id); });
     };
     Storage.prototype.save = function (docsToSave) {
         var _this = this;
-        return queue.add(function () { return __awaiter(_this, void 0, void 0, function () {
+        return QUEUE.add(function () { return __awaiter(_this, void 0, void 0, function () {
             var docs;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -98,7 +98,7 @@ var Storage = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                return [2 /*return*/, queue.add(function () { return __awaiter(_this, void 0, void 0, function () {
+                return [2 /*return*/, QUEUE.add(function () { return __awaiter(_this, void 0, void 0, function () {
                         var results;
                         var _this = this;
                         return __generator(this, function (_a) {
@@ -120,11 +120,11 @@ var Storage = /** @class */ (function () {
     };
     Storage.prototype.removeById = function (id) {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.removeById(_this.namespace, _this.collectionName, id); });
+        return QUEUE.add(function () { return _this.storageAdapter.removeById(_this.namespace, _this.collectionName, id); });
     };
     Storage.prototype.clear = function () {
         var _this = this;
-        return queue.add(function () { return _this.storageAdapter.clear(_this.namespace, _this.collectionName); });
+        return QUEUE.add(function () { return _this.storageAdapter.clear(_this.namespace, _this.collectionName); });
     };
     return Storage;
 }());

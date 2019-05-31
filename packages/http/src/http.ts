@@ -1,6 +1,18 @@
 import { KinveyError } from '@kinveysdk/errors';
-import { HttpRequest } from './request';
-import { HttpResponse } from './response';
+
+interface HttpRequest {
+  headers?: { [name: string]: string };
+  method: string;
+  url: string;
+  body?: string | object;
+  timeout?: number;
+}
+
+interface HttpResponse {
+  statusCode: number;
+  headers: { [name: string]: string };
+  data?: string;
+}
 
 export interface HttpAdapter {
   send(request: HttpRequest): Promise<HttpResponse>;
@@ -20,6 +32,6 @@ export function getHttpAdapter(): HttpAdapter {
   return adapter;
 }
 
-export async function send(request: HttpRequest): Promise<HttpResponse> {
+export function send(request: HttpRequest): Promise<HttpResponse> {
   return getHttpAdapter().send(request);
 }

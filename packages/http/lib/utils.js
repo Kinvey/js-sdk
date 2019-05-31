@@ -63,4 +63,13 @@ function formatKinveyBaasUrl(namespace, path, query) {
     });
 }
 exports.formatKinveyBaasUrl = formatKinveyBaasUrl;
+function formatKinveyAuthUrl(path, query) {
+    return url_1.format({
+        protocol: getKinveyAuthProtocol(),
+        host: getKinveyAuthHost(),
+        pathname: path,
+        query: query ? clean(query) : undefined
+    });
+}
+exports.formatKinveyAuthUrl = formatKinveyAuthUrl;
 //# sourceMappingURL=utils.js.map

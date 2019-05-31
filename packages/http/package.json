@@ -26,6 +26,7 @@
     "@kinveysdk/session": "^0.0.1",
     "js-base64": "^2.5.1",
     "lodash": "^4.17.11",
+    "p-queue": "^5.0.0",
     "url": "^0.11.0",
     "url-join": "^4.0.0"
   },

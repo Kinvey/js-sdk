@@ -50,15 +50,13 @@ function endpoint(endpointPath, args) {
                     if (!isString_1.default(endpointPath)) {
                         throw new errors_1.KinveyError('You must provide an endpoint as a string.');
                     }
-                    request = new http_1.HttpRequest({
+                    request = new http_1.KinveyHttpRequest({
                         method: http_1.HttpRequestMethod.POST,
-                        headers: {
-                            'Authorization': http_1.kinveySessionOrAppAuth
-                        },
+                        auth: http_1.kinveySessionOrAppAuth,
                         url: http_1.formatKinveyBaasUrl(http_1.KinveyBaasNamespace.Rpc, "/custom/" + endpointPath),
                         body: args
                     });
-                    return [4 /*yield*/, http_1.send(request)];
+                    return [4 /*yield*/, request.execute()];
                 case 1:
                     response = _a.sent();
                     return [2 /*return*/, response.data];

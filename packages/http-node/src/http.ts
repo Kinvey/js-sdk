@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { HttpHeaders, HttpRequest, HttpResponse } from '@kinveysdk/http';
+import { HttpRequestObject, HttpResponseObject } from '@kinveysdk/http';
 import { NetworkConnectionError, KinveyError } from '@kinveysdk/errors';
 
-export async function send(request: HttpRequest): Promise<HttpResponse> {
+export async function send(request: HttpRequestObject): Promise<HttpResponseObject> {
   const { url, method, headers, body, timeout } = request;
   let axiosResponse;
 
   try {
     axiosResponse = await axios({
-      headers: headers.toPlainObject(),
+      headers,
       method,
       url,
       data: body,
@@ -24,9 +24,9 @@ export async function send(request: HttpRequest): Promise<HttpResponse> {
     }
   }
 
-  return new HttpResponse({
+  return {
     statusCode: axiosResponse.status,
-    headers: HttpHeaders.fromHeaders(axiosResponse.headers),
+    headers: axiosResponse.headers,
     data: axiosResponse.data
-  });
+  };
 }

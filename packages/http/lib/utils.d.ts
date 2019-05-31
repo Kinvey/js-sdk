@@ -17,3 +17,6 @@ export declare enum KinveyBaasNamespace {
 export declare function formatKinveyBaasUrl(namespace: KinveyBaasNamespace, path?: string, query?: {
     [key: string]: any;
 }): string;
+export declare function formatKinveyAuthUrl(path?: string, query?: {
+    [key: string]: any;
+}): string;

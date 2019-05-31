@@ -25,6 +25,14 @@ export class HttpHeaders {
     return this.get('Content-Type');
   }
 
+  get authorization(): string | undefined {
+    return this.get('Authorization');
+  }
+
+  set authorization(value: string) {
+    this.set('Authorization', value);
+  }
+
   has(name: string): boolean {
     return this.headers.has(name.toLowerCase());
   }

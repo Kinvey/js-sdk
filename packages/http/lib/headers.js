@@ -29,6 +29,16 @@ var HttpHeaders = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(HttpHeaders.prototype, "authorization", {
+        get: function () {
+            return this.get('Authorization');
+        },
+        set: function (value) {
+            this.set('Authorization', value);
+        },
+        enumerable: true,
+        configurable: true
+    });
     HttpHeaders.prototype.has = function (name) {
         return this.headers.has(name.toLowerCase());
     };

@@ -61,15 +61,13 @@ function login(username, password) {
                     if (isEmpty_1.default(username) || isEmpty_1.default(password)) {
                         throw new errors_1.KinveyError('Username and/or password missing. Please provide both a username and password to login.');
                     }
-                    request = new http_1.HttpRequest({
+                    request = new http_1.KinveyHttpRequest({
                         method: http_1.HttpRequestMethod.POST,
-                        headers: {
-                            'Authorization': http_1.kinveyAppAuth
-                        },
+                        auth: http_1.kinveyAppAuth,
                         url: http_1.formatKinveyBaasUrl(http_1.KinveyBaasNamespace.User, '/login'),
                         body: { username: username, password: password }
                     });
-                    return [4 /*yield*/, http_1.send(request)];
+                    return [4 /*yield*/, request.execute()];
                 case 1:
                     response = _a.sent();
                     session = response.data;

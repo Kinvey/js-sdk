@@ -2,7 +2,7 @@ import PQueue from 'p-queue';
 import { KinveyError } from '@kinveysdk/errors';
 import { generateId } from './utils';
 
-const queue = new PQueue({ concurrency: 1 });
+const QUEUE = new PQueue({ concurrency: 1 });
 
 export interface Doc {
   _id?: string;
@@ -35,19 +35,19 @@ export class Storage<T extends Doc> {
   }
 
   count(): Promise<number> {
-    return queue.add((): Promise<number> => this.storageAdapter.count(this.namespace, this.collectionName));
+    return QUEUE.add((): Promise<number> => this.storageAdapter.count(this.namespace, this.collectionName));
   }
 
   find(): Promise<T[]> {
-    return queue.add((): Promise<T[]> => this.storageAdapter.find(this.namespace, this.collectionName));
+    return QUEUE.add((): Promise<T[]> => this.storageAdapter.find(this.namespace, this.collectionName));
   }
 
   findById(id: string): Promise<T> {
-    return queue.add((): Promise<T> => this.storageAdapter.findById(this.namespace, this.collectionName, id));
+    return QUEUE.add((): Promise<T> => this.storageAdapter.findById(this.namespace, this.collectionName, id));
   }
 
   save(docsToSave: T[]): Promise<T[]> {
-    return queue.add(async (): Promise<T[]> => {
+    return QUEUE.add(async (): Promise<T[]> => {
       // Clone the docs
       let docs = docsToSave.slice(0, docsToSave.length);
 
@@ -70,7 +70,7 @@ export class Storage<T extends Doc> {
   }
 
   async remove(docs: T[]): Promise<number> {
-    return queue.add(async (): Promise<number> => {
+    return QUEUE.add(async (): Promise<number> => {
       const results = await Promise.all(docs.map((doc): Promise<number> => {
         if (!doc._id) {
           throw new KinveyError(`Unable to remove doc ${JSON.stringify(doc)}`, 'This is missing an _id.');
@@ -82,10 +82,10 @@ export class Storage<T extends Doc> {
   }
 
   removeById(id: string): Promise<number> {
-    return queue.add((): Promise<number> => this.storageAdapter.removeById(this.namespace, this.collectionName, id));
+    return QUEUE.add((): Promise<number> => this.storageAdapter.removeById(this.namespace, this.collectionName, id));
   }
 
   clear(): Promise<number> {
-    return queue.add((): Promise<number> => this.storageAdapter.clear(this.namespace, this.collectionName));
+    return QUEUE.add((): Promise<number> => this.storageAdapter.clear(this.namespace, this.collectionName));
   }
 }

@@ -6,6 +6,7 @@ export declare class HttpHeaders {
         [name: string]: string | string[] | (() => string | string[]);
     });
     readonly contentType: string | undefined;
+    authorization: string | undefined;
     has(name: string): boolean;
     get(name: string): string | undefined;
     keys(): string[];

@@ -54,11 +54,7 @@ function getHttpAdapter() {
 }
 exports.getHttpAdapter = getHttpAdapter;
 function send(request) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, getHttpAdapter().send(request)];
-        });
-    });
+    return getHttpAdapter().send(request);
 }
 exports.send = send;
 //# sourceMappingURL=http.js.map

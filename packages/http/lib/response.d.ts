@@ -1,3 +1,4 @@
+import { KinveyError } from '@kinveysdk/errors';
 import { HttpHeaders } from './headers';
 export declare enum HttpStatusCode {
     Ok = 200,
@@ -15,8 +16,15 @@ export declare enum HttpStatusCode {
 }
 export interface HttpResponseConfig {
     statusCode: HttpStatusCode;
-    headers: HttpHeaders;
+    headers: {
+        [name: string]: string | string[] | (() => string | string[]);
+    };
     data?: string;
+}
+export interface HttpResponseObject extends HttpResponseConfig {
+    headers: {
+        [name: string]: string;
+    };
 }
 export declare class HttpResponse {
     statusCode: HttpStatusCode;
@@ -24,4 +32,8 @@ export declare class HttpResponse {
     data?: any;
     constructor(config?: HttpResponseConfig);
     isSuccess(): boolean;
+    toPlainObject(): HttpResponseObject;
+}
+export declare class KinveyHttpResponse extends HttpResponse {
+    readonly error: KinveyError | null;
 }

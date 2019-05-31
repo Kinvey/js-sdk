@@ -2,15 +2,15 @@
 
 import { getAppKey, getAppSecret } from '@kinveysdk/app';
 import { getSession } from '@kinveysdk/session';
-import { Base64 } from 'js-base64';
 import { KinveyError } from '@kinveysdk/errors';
+import { Base64 } from 'js-base64';
 
-export function kinveyAppAuth(): string {
+export async function kinveyAppAuth(): Promise<string> {
   const credentials = Base64.encode(`${getAppKey()}:${getAppSecret()}`);
   return `Basic ${credentials}`;
 }
 
-export function kinveySessionAuth(): string {
+export async function kinveySessionAuth(): Promise<string> {
   const session = getSession();
 
   if (!session) {
@@ -20,7 +20,7 @@ export function kinveySessionAuth(): string {
   return `Kinvey ${session._kmd.authtoken}`;
 }
 
-export function kinveySessionOrAppAuth(): string {
+export function kinveySessionOrAppAuth(): Promise<string> {
   try {
     return kinveySessionAuth();
   } catch (error) {
