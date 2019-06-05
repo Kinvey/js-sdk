@@ -1,14 +1,15 @@
 import PQueue from 'p-queue';
 import { KinveyError } from '@kinveysdk/errors';
+import { KmdObject } from '@kinveysdk/kmd';
+import { AclObject } from '@kinveysdk/acl';
 import { generateId } from './utils';
 
 const QUEUE = new PQueue({ concurrency: 1 });
 
 export interface Doc {
   _id?: string;
-  _kmd?: {
-    local?: boolean
-  }
+  _acl?: AclObject;
+  _kmd?: KmdObject;
 }
 
 export interface StorageAdapter<T extends Doc> {
@@ -66,18 +67,6 @@ export class Storage<T extends Doc> {
 
       await this.storageAdapter.save(this.namespace, this.collectionName, docs);
       return docs;
-    });
-  }
-
-  async remove(docs: T[]): Promise<number> {
-    return QUEUE.add(async (): Promise<number> => {
-      const results = await Promise.all(docs.map((doc): Promise<number> => {
-        if (!doc._id) {
-          throw new KinveyError(`Unable to remove doc ${JSON.stringify(doc)}`, 'This is missing an _id.');
-        }
-        return this.removeById(doc._id);
-      }));
-      return results.reduce((totalCount: number, count: number): number => totalCount + count, 0);
     });
   }
 

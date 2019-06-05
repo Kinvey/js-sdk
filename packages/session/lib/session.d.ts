@@ -1,3 +1,4 @@
+import { KmdObject } from '@kinveysdk/kmd';
 interface MICSession {
     client_id: string;
     redirect_uri?: string;
@@ -6,9 +7,7 @@ interface MICSession {
 }
 export interface Session {
     _id: string;
-    _kmd: {
-        authtoken: string;
-    };
+    _kmd: KmdObject;
     _socialIdentity?: {
         kinveyAuth?: MICSession;
     };

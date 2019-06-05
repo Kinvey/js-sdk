@@ -1,3 +1,4 @@
 export * from './invalidCredentials';
 export * from './kinvey';
-export * from './networkConnection';
+export * from './network';
+export * from './notFound';

@@ -20,3 +20,4 @@ export declare function formatKinveyBaasUrl(namespace: KinveyBaasNamespace, path
 export declare function formatKinveyAuthUrl(path?: string, query?: {
     [key: string]: any;
 }): string;
+export declare function byteCount(str: string): number;

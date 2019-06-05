@@ -1,0 +1,53 @@
+{
+  "name": "@kinveysdk/default",
+  "description": "Kinvey JavaScript SDK Node kmd.",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Thomas Conner",
+    "email": "thomas.conner@progress.com"
+  },
+  "keywords": [
+    "Kinvey",
+    "JavaScript"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib && npm run lint",
+    "build": "tsc -p tsconfig.json",
+    "coverage": "nyc mocha",
+    "lint": "eslint \"src/**\"",
+    "test": "mocha",
+    "test:watch": "mocha --watch --watch-extensions ts"
+  },
+  "dependencies": {
+    "@kinveysdk/errors": "^0.0.1",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^0.1.3",
+    "@kinveysdk/eslint-config": "^0.0.1",
+    "@kinveysdk/typescript-config": "^0.0.1",
+    "@types/chai": "^4.1.7",
+    "@types/lodash": "^4.14.133",
+    "@types/mocha": "^5.2.6",
+    "@types/nock": "^10.0.3",
+    "del-cli": "^1.1.0",
+    "typescript": "^3.5.1",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint": "^5.16.0",
+    "prettier": "^1.17.1",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
+    "source-map-support": "^0.5.12",
+    "ts-node": "^8.1.0"
+  },
+  "files": [
+    "lib/**/*"
+  ]
+}

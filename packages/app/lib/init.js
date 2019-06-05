@@ -57,4 +57,11 @@ function getEncryptionKey() {
     return config.encryptionKey;
 }
 exports.getEncryptionKey = getEncryptionKey;
+function getApiVersion() {
+    if (config && isNumber_1.default(config.apiVersion)) {
+        return config.apiVersion;
+    }
+    return 4;
+}
+exports.getApiVersion = getApiVersion;
 //# sourceMappingURL=init.js.map

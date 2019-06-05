@@ -10,9 +10,9 @@ import {
 } from '@kinveysdk/http';
 import { setSession } from '@kinveysdk/session';
 import { getActiveUser } from './getActiveUser';
-import { User } from './user';
+import { User, UserData } from './user';
 
-export async function login(username: string, password: string): Promise<User> {
+export async function login<T extends UserData>(username: string, password: string): Promise<User<T>> {
   const activeUser = getActiveUser();
 
   if (activeUser) {
@@ -42,5 +42,5 @@ export async function login(username: string, password: string): Promise<User> {
   // Store the active session
   setSession(session);
 
-  return new User(session);
+  return new User<T>(session);
 }

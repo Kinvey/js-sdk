@@ -72,4 +72,17 @@ function formatKinveyAuthUrl(path, query) {
     });
 }
 exports.formatKinveyAuthUrl = formatKinveyAuthUrl;
+function byteCount(str) {
+    if (str) {
+        var count = 0;
+        var stringLength = str.length;
+        for (var i = 0; i < stringLength; i += 1) {
+            var partCount = encodeURI(str[i]).split('%').length;
+            count += partCount === 1 ? 1 : partCount - 1;
+        }
+        return count;
+    }
+    return 0;
+}
+exports.byteCount = byteCount;
 //# sourceMappingURL=utils.js.map

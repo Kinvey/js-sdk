@@ -1,4 +1,4 @@
-import { HttpHeaders } from './headers';
+import { HttpHeaders, KinveyHttpHeaders } from './headers';
 import { HttpResponse, KinveyHttpResponse } from './response';
 export declare enum HttpRequestMethod {
     GET = "GET",
@@ -32,9 +32,16 @@ export declare class HttpRequest {
 }
 export interface KinveyHttpRequestConfig extends HttpRequestConfig {
     auth?: () => Promise<string>;
+    skipBL?: boolean;
+    trace?: boolean;
+    properties?: any;
 }
 export declare class KinveyHttpRequest extends HttpRequest {
+    headers: KinveyHttpHeaders;
     auth: () => Promise<string>;
     constructor(config: KinveyHttpRequestConfig);
+    skipBusinessLogic(value: boolean): KinveyHttpRequest;
+    trace(value: boolean): KinveyHttpRequest;
+    customRequestPropertes(properties: any): KinveyHttpRequest;
     execute(refresh?: boolean): Promise<KinveyHttpResponse>;
 }

@@ -1,7 +1,10 @@
+/* eslint spaced-comment: "off" */
 /* eslint func-names: "off" */
 /* eslint no-undef: "off" */
 /* eslint @typescript-eslint/explicit-function-return-type: "off" */
 /* eslint import/no-extraneous-dependencies: "off" */
+
+/// <reference types="mocha" />
 
 import { HttpRequest, HttpRequestMethod } from '@kinveysdk/http';
 import { NetworkConnectionError, KinveyError } from '@kinveysdk/errors';

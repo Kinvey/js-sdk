@@ -1,4 +1,4 @@
 import { KinveyError } from './kinvey';
-export declare class NetworkConnectionError extends KinveyError {
+export declare class NotFoundError extends KinveyError {
     constructor(message?: string, debug?: string);
 }

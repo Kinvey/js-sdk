@@ -2,6 +2,7 @@
 
 import isFunction from 'lodash/isFunction';
 import isArray from 'lodash/isArray';
+import { getApiVersion } from '@kinveysdk/app';
 
 export class HttpHeaders {
   private headers: Map<string, string> = new Map();
@@ -111,5 +112,32 @@ export class HttpHeaders {
     }
 
     return httpHeaders;
+  }
+}
+
+export class KinveyHttpHeaders extends HttpHeaders {
+  constructor(headers?: KinveyHttpHeaders)
+  constructor(headers?: { [name: string]: string | string[] | (() => string | string[]) })
+  constructor(headers?: any) {
+    super(headers);
+
+    // Add the Accept header
+    if (!this.has('Accept')) {
+      this.set('Accept', 'application/json; charset=utf-8');
+    }
+
+    // Add Content-Type header
+    if (!this.has('Content-Type')) {
+      this.set('Content-Type', 'application/json; charset=utf-8');
+    }
+
+    // Add the X-Kinvey-API-Version header
+    if (!this.has('X-Kinvey-Api-Version')) {
+      this.set('X-Kinvey-Api-Version', String(getApiVersion()));
+    }
+  }
+
+  get requestStart(): string | undefined {
+    return this.get('X-Kinvey-Request-Start');
   }
 }

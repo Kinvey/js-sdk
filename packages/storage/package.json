@@ -18,7 +18,9 @@
     "lint": "eslint \"src/**\""
   },
   "dependencies": {
+    "@kinveysdk/acl": "^0.0.1",
     "@kinveysdk/errors": "^0.0.1",
+    "@kinveysdk/kmd": "^0.0.1",
     "p-queue": "^5.0.0"
   },
   "devDependencies": {

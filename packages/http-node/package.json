@@ -30,7 +30,7 @@
     "@kinveysdk/eslint-config": "^0.0.1",
     "@kinveysdk/typescript-config": "^0.0.1",
     "@types/chai": "^4.1.7",
-    "@types/mocha": "^5.2.6",
+    "@types/mocha": "^5.2.7",
     "@types/nock": "^10.0.3",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.9.0",

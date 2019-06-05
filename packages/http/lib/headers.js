@@ -1,11 +1,28 @@
 "use strict";
 /* eslint no-useless-constructor: "off" */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var isFunction_1 = __importDefault(require("lodash/isFunction"));
 var isArray_1 = __importDefault(require("lodash/isArray"));
+var isEmpty_1 = __importDefault(require("lodash/isEmpty"));
+var app_1 = require("@kinveysdk/app");
+var errors_1 = require("@kinveysdk/errors");
+var utils_1 = require("./utils");
 var HttpHeaders = /** @class */ (function () {
     function HttpHeaders(headers) {
         var _this = this;
@@ -107,4 +124,49 @@ var HttpHeaders = /** @class */ (function () {
     return HttpHeaders;
 }());
 exports.HttpHeaders = HttpHeaders;
+var KinveyHttpHeaders = /** @class */ (function (_super) {
+    __extends(KinveyHttpHeaders, _super);
+    function KinveyHttpHeaders(headers) {
+        var _this = _super.call(this, headers) || this;
+        // Add the Accept header
+        if (!_this.has('Accept')) {
+            _this.set('Accept', 'application/json; charset=utf-8');
+        }
+        // Add Content-Type header
+        if (!_this.has('Content-Type')) {
+            _this.set('Content-Type', 'application/json; charset=utf-8');
+        }
+        // Add the X-Kinvey-API-Version header
+        if (!_this.has('X-Kinvey-Api-Version')) {
+            _this.set('X-Kinvey-Api-Version', String(app_1.getApiVersion()));
+        }
+        return _this;
+    }
+    Object.defineProperty(KinveyHttpHeaders.prototype, "requestStart", {
+        get: function () {
+            return this.get('X-Kinvey-Request-Start');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(KinveyHttpHeaders.prototype, "customRequestProperties", {
+        set: function (properties) {
+            var customRequestPropertiesVal = JSON.stringify(properties);
+            if (!isEmpty_1.default(customRequestPropertiesVal)) {
+                var customRequestPropertiesByteCount = utils_1.byteCount(customRequestPropertiesVal);
+                if (customRequestPropertiesByteCount >= 2000) {
+                    throw new errors_1.KinveyError("The custom properties are " + customRequestPropertiesByteCount + " bytes. They must be less then 2000 bytes.");
+                }
+                this.set('X-Kinvey-Custom-Request-Properties', customRequestPropertiesVal);
+            }
+            else {
+                this.delete('X-Kinvey-Custom-Request-Properties');
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return KinveyHttpHeaders;
+}(HttpHeaders));
+exports.KinveyHttpHeaders = KinveyHttpHeaders;
 //# sourceMappingURL=headers.js.map

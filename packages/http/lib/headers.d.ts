@@ -23,3 +23,11 @@ export declare class HttpHeaders {
     }): HttpHeaders;
     static fromHeaders(headers?: HttpHeaders): HttpHeaders;
 }
+export declare class KinveyHttpHeaders extends HttpHeaders {
+    constructor(headers?: KinveyHttpHeaders);
+    constructor(headers?: {
+        [name: string]: string | string[] | (() => string | string[]);
+    });
+    readonly requestStart: string | undefined;
+    customRequestProperties: any;
+}

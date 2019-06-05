@@ -1,6 +1,7 @@
 /* eslint no-underscore-dangle: "off" */
 
 import { getAppKey } from '@kinveysdk/app';
+import { KmdObject } from '@kinveysdk/kmd';
 import { get, set, remove } from './store';
 
 const MIC_IDENTITY = 'kinveyAuth';
@@ -17,10 +18,8 @@ interface MICSession {
 }
 
 export interface Session {
-  _id: string
-  _kmd: {
-    authtoken: string
-  },
+  _id: string,
+  _kmd: KmdObject,
   _socialIdentity?: {
     kinveyAuth?: MICSession
   }

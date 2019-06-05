@@ -94,30 +94,6 @@ var Storage = /** @class */ (function () {
             });
         }); });
     };
-    Storage.prototype.remove = function (docs) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
-            return __generator(this, function (_a) {
-                return [2 /*return*/, QUEUE.add(function () { return __awaiter(_this, void 0, void 0, function () {
-                        var results;
-                        var _this = this;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, Promise.all(docs.map(function (doc) {
-                                        if (!doc._id) {
-                                            throw new errors_1.KinveyError("Unable to remove doc " + JSON.stringify(doc), 'This is missing an _id.');
-                                        }
-                                        return _this.removeById(doc._id);
-                                    }))];
-                                case 1:
-                                    results = _a.sent();
-                                    return [2 /*return*/, results.reduce(function (totalCount, count) { return totalCount + count; }, 0)];
-                            }
-                        });
-                    }); })];
-            });
-        });
-    };
     Storage.prototype.removeById = function (id) {
         var _this = this;
         return QUEUE.add(function () { return _this.storageAdapter.removeById(_this.namespace, _this.collectionName, id); });

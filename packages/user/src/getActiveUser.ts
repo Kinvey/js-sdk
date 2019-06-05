@@ -1,10 +1,10 @@
 import { getSession } from '@kinveysdk/session';
-import { User } from './user';
+import { User, UserData } from './user';
 
-export function getActiveUser(): User | null {
+export function getActiveUser<T extends UserData>(): User<T> | null {
   const session = getSession();
   if (session) {
-    return new User(session);
+    return new User<T>(session as T);
   }
   return null;
 }

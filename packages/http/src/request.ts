@@ -1,17 +1,18 @@
 /* eslint no-underscore-dangle: "off" */
 /* eslint @typescript-eslint/camelcase: "off" */
 
+import isEmpty from 'lodash/isEmpty';
 import PQueue from 'p-queue';
-import { InvalidCredentialsError } from '@kinveysdk/errors';
+import { InvalidCredentialsError, KinveyError } from '@kinveysdk/errors';
 import { getMICSession, setMICSession, getSession, setSession } from '@kinveysdk/session';
 import { getAppSecret } from '@kinveysdk/app';
 import { Base64 } from 'js-base64';
-import { HttpHeaders } from './headers';
+import { HttpHeaders, KinveyHttpHeaders } from './headers';
 import { HttpResponse, KinveyHttpResponse } from './response';
 import { send } from './http';
 import { serialize } from './serialize';
 import { kinveyAppAuth } from './auth';
-import { formatKinveyAuthUrl, formatKinveyBaasUrl, KinveyBaasNamespace } from './utils';
+import { formatKinveyAuthUrl, formatKinveyBaasUrl, KinveyBaasNamespace, byteCount } from './utils';
 
 export enum HttpRequestMethod {
   GET = 'GET',
@@ -71,6 +72,9 @@ export class HttpRequest {
 
 export interface KinveyHttpRequestConfig extends HttpRequestConfig {
   auth?: () => Promise<string>;
+  skipBL?: boolean;
+  trace?: boolean;
+  properties?: any;
 }
 
 const REQUEST_QUEUE = new PQueue();
@@ -88,11 +92,54 @@ function stopRefreshProcess(): void {
 }
 
 export class KinveyHttpRequest extends HttpRequest {
+  public headers: KinveyHttpHeaders;
   public auth: () => Promise<string>;
 
   constructor(config: KinveyHttpRequestConfig) {
     super(config);
+    this.headers = new KinveyHttpHeaders(this.headers);
     this.auth = config.auth;
+    this.skipBusinessLogic(config.skipBL);
+    this.trace(config.trace);
+    this.customRequestPropertes(config.properties);
+  }
+
+  skipBusinessLogic(value: boolean): KinveyHttpRequest {
+    if (value) {
+      this.headers.set('X-Kinvey-Skip-Business-Logic', 'true');
+    } else {
+      this.headers.delete('X-Kinvey-Skip-Business-Logic');
+    }
+    return this;
+  }
+
+  trace(value: boolean): KinveyHttpRequest {
+    if (value) {
+      this.headers.set('X-Kinvey-Include-Headers-In-Response', 'X-Kinvey-Request-Id');
+      this.headers.set('X-Kinvey-ResponseWrapper', 'true');
+    } else {
+      this.headers.delete('X-Kinvey-Include-Headers-In-Response');
+      this.headers.delete('X-Kinvey-ResponseWrapper');
+    }
+    return this;
+  }
+
+  customRequestPropertes(properties: any): KinveyHttpRequest {
+    const customRequestPropertiesVal = JSON.stringify(properties);
+
+    if (!isEmpty(customRequestPropertiesVal)) {
+      const customRequestPropertiesByteCount = byteCount(customRequestPropertiesVal);
+
+      if (customRequestPropertiesByteCount >= 2000) {
+        throw new KinveyError(`The custom properties are ${customRequestPropertiesByteCount} bytes. They must be less then 2000 bytes.`);
+      }
+
+      this.headers.set('X-Kinvey-Custom-Request-Properties', customRequestPropertiesVal);
+    } else {
+      this.headers.delete('X-Kinvey-Custom-Request-Properties');
+    }
+
+    return this;
   }
 
   async execute(refresh = true): Promise<KinveyHttpResponse> {

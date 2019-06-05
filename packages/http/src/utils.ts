@@ -73,3 +73,19 @@ export function formatKinveyAuthUrl(path?: string, query?: { [key: string]: any 
     query: query ? clean(query) : undefined
   });
 }
+
+export function byteCount(str: string): number {
+  if (str) {
+    let count = 0;
+    const stringLength = str.length;
+
+    for (let i = 0; i < stringLength; i += 1) {
+      const partCount = encodeURI(str[i]).split('%').length;
+      count += partCount === 1 ? 1 : partCount - 1;
+    }
+
+    return count;
+  }
+
+  return 0;
+}

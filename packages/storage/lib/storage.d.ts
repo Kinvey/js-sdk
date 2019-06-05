@@ -1,8 +1,9 @@
+import { KmdObject } from '@kinveysdk/kmd';
+import { AclObject } from '@kinveysdk/acl';
 export interface Doc {
     _id?: string;
-    _kmd?: {
-        local?: boolean;
-    };
+    _acl?: AclObject;
+    _kmd?: KmdObject;
 }
 export interface StorageAdapter<T extends Doc> {
     count(namespace: string, collectionName: string): Promise<number>;
@@ -22,7 +23,6 @@ export declare class Storage<T extends Doc> {
     find(): Promise<T[]>;
     findById(id: string): Promise<T>;
     save(docsToSave: T[]): Promise<T[]>;
-    remove(docs: T[]): Promise<number>;
     removeById(id: string): Promise<number>;
     clear(): Promise<number>;
 }

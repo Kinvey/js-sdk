@@ -18,7 +18,8 @@
     "lint": "eslint \"src/**\""
   },
   "dependencies": {
-    "@kinveysdk/app": "^0.0.1"
+    "@kinveysdk/app": "^0.0.1",
+    "@kinveysdk/kmd": "^0.0.1"
   },
   "devDependencies": {
     "@kinveysdk/eslint-config": "^0.0.1",

@@ -8,6 +8,7 @@ export interface KinveyAppConfig {
   instanceId?: string;
   defaultTimeout?: number;
   encryptionKey?: string;
+  apiVersion?: number;
 }
 
 let config: KinveyAppConfig = null;
@@ -64,4 +65,11 @@ export function getEncryptionKey(): string | undefined {
     throw new KinveyError('The Kinvey JavaScript SDK has not been initialized.');
   }
   return config.encryptionKey;
+}
+
+export function getApiVersion(): number {
+  if (config && isNumber(config.apiVersion)) {
+    return config.apiVersion;
+  }
+  return 4;
 }

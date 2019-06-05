@@ -14,15 +14,15 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var kinvey_1 = require("./kinvey");
-var NetworkConnectionError = /** @class */ (function (_super) {
-    __extends(NetworkConnectionError, _super);
-    function NetworkConnectionError(message, debug) {
-        if (message === void 0) { message = 'There was an error connecting to the network.'; }
+var NetworkError = /** @class */ (function (_super) {
+    __extends(NetworkError, _super);
+    function NetworkError(message, debug) {
+        if (message === void 0) { message = 'There was an error with the network.'; }
         var _this = _super.call(this, message, debug) || this;
-        _this.name = 'NetworkConnectionError';
+        _this.name = 'NetworkError';
         return _this;
     }
-    return NetworkConnectionError;
+    return NetworkError;
 }(kinvey_1.KinveyError));
-exports.NetworkConnectionError = NetworkConnectionError;
-//# sourceMappingURL=networkConnection.js.map
+exports.NetworkError = NetworkError;
+//# sourceMappingURL=network.js.map

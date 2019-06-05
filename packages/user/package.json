@@ -21,6 +21,7 @@
     "test:watch": "mocha --watch --watch-extensions ts"
   },
   "dependencies": {
+    "@kinveysdk/acl": "^0.0.1",
     "@kinveysdk/errors": "^0.0.1",
     "@kinveysdk/http": "^0.0.1",
     "@kinveysdk/session": "^0.0.1",

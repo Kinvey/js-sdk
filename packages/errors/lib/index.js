@@ -5,5 +5,6 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./invalidCredentials"));
 __export(require("./kinvey"));
-__export(require("./networkConnection"));
+__export(require("./network"));
+__export(require("./notFound"));
 //# sourceMappingURL=index.js.map

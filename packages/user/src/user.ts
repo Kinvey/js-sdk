@@ -1,7 +1,17 @@
-export class User {
-  public data: any;
+import { Session } from '@kinveysdk/session';
+import { AclObject } from '@kinveysdk/acl';
 
-  constructor(data: any) {
+export interface UserData extends Session {
+  _acl?: AclObject;
+  email?: string;
+  username?: string;
+  password?: string;
+}
+
+export class User<T extends UserData> {
+  public data: T;
+
+  constructor(data: T) {
     this.data = data;
   }
 }
