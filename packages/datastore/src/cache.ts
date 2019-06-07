@@ -7,7 +7,7 @@ import { KinveyError } from '@kinveysdk/errors';
 import { Query } from '@kinveysdk/query';
 import { isArray } from 'util';
 
-const SYNC_CACHE_COLLECTION_NAME = '__KinveySync';
+const SYNC_CACHE_COLLECTION_NAME = 'Sync';
 
 export function isValidTag(tag: string): boolean {
   const regexp = /^[a-z0-9-]+$/i;
@@ -38,18 +38,12 @@ export class DataStoreCache<T extends Doc> extends Storage<T> {
   save(doc: T): Promise<T>
   save(docs: T[]): Promise<T[]>
   async save(docs: any): Promise<any> {
-    let docsToSave;
-    let singular = false;
-
-    if (isArray(docs)) {
-      docsToSave = [].concat(docs);
-    } else {
-      docsToSave = [].concat([docs]);
-      singular = true;
+    if (!isArray(docs)) {
+      const savedDocs = await this.save([docs]);
+      return savedDocs.shift();
     }
 
-    const savedDocs = await super.save(docsToSave);
-    return singular ? savedDocs.shift() : savedDocs;
+    return super.save(docs);
   }
 
   async remove(query?: Query<T>): Promise<number> {
@@ -72,14 +66,21 @@ export enum SyncOperation {
 
 export interface SyncDoc extends Doc {
   doc: Doc;
-  collectionName: string;
   state: {
     operation: SyncOperation;
   }
 }
 
 export class SyncCache extends DataStoreCache<SyncDoc> {
-  constructor() {
-    super(SYNC_CACHE_COLLECTION_NAME);
+  constructor(collectionName: string, tag?: string) {
+    if (tag && !isValidTag(tag)) {
+      throw new KinveyError('A tag can only contain letters, numbers, and "-".');
+    }
+
+    if (tag) {
+      super(getAppKey(), `${SYNC_CACHE_COLLECTION_NAME}.${collectionName}.${tag}`);
+    } else {
+      super(getAppKey(), `${SYNC_CACHE_COLLECTION_NAME}.${collectionName}`);
+    }
   }
 }

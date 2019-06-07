@@ -7,7 +7,6 @@ import { SyncDoc, SyncOperation, SyncCache, DataStoreCache } from './cache';
 import { DataStoreNetwork, NetworkOptions } from './network';
 
 export interface SyncPushResult {
-  _id: string;
   operation: SyncOperation;
   doc: Doc;
   error?: KinveyError
@@ -20,6 +19,11 @@ export class Sync {
   constructor(collectionName: string, tag?: string) {
     this.collectionName = collectionName;
     this.tag = tag;
+  }
+
+  find(): Promise<SyncDoc[]> {
+    const syncCache = new SyncCache(this.collectionName, this.tag);
+    return syncCache.find();
   }
 
   addCreateSyncOperation(docs: Doc[]): Promise<SyncDoc[]> {
@@ -35,7 +39,7 @@ export class Sync {
   }
 
   async addSyncOperation(operation: SyncOperation, docs: Doc[]): Promise<SyncDoc[]> {
-    const syncCache = new SyncCache();
+    const syncCache = new SyncCache(this.collectionName, this.tag);
     let docsToSync: Doc[] = [].concat(docs);
     let syncDocs: SyncDoc[] = [];
 
@@ -46,7 +50,7 @@ export class Sync {
       }
 
       // Remove existing sync events that match the docs
-      await this.remove(new Query<SyncDoc>().contains('entityId', docsToSync.map((doc): string => doc._id)));
+      await syncCache.remove(new Query<SyncDoc>().contains('doc._id', docsToSync.map((doc): string => doc._id)));
 
       // Don't add delete operations for docs that were created offline
       if (operation === SyncOperation.Delete) {
@@ -62,7 +66,6 @@ export class Sync {
       syncDocs = await syncCache.save(docsToSync.map((doc): SyncDoc => {
         return {
           doc,
-          collectionName: this.collectionName,
           state: {
             operation
           }
@@ -73,19 +76,17 @@ export class Sync {
     return syncDocs;
   }
 
-  async push(query?: Query<SyncDoc>, options?: NetworkOptions): Promise<SyncPushResult[]> {
+  async push(docs: SyncDoc[] = [], options?: NetworkOptions): Promise<SyncPushResult[]> {
     const network = new DataStoreNetwork(this.collectionName);
     const cache = new DataStoreCache<Doc>(this.collectionName, this.tag);
-    const syncCache = new SyncCache();
-
+    const syncCache = new SyncCache(this.collectionName, this.tag);
     const batchSize = 100;
-    const syncDocs = await syncCache.find(new Query<SyncDoc>(query).equalTo('collectionName', this.collectionName));
 
-    if (syncDocs.length > 0) {
+    if (docs.length > 0) {
       let i = 0;
 
       const batchPush = async (pushResults: SyncPushResult[] = []): Promise<SyncPushResult[]> => {
-        const batch = syncDocs.slice(i, i + batchSize);
+        const batch = docs.slice(i, i + batchSize);
         i += batchSize;
 
         const results = await Promise.all(batch.map(async (syncDoc): Promise<SyncPushResult> => {
@@ -109,14 +110,12 @@ export class Sync {
 
               // Return a result
               return {
-                _id: doc._id,
                 doc,
                 operation
               };
             } catch (error) {
               // Return a result with the error
               return {
-                _id: doc._id,
                 doc,
                 operation,
                 error
@@ -155,14 +154,12 @@ export class Sync {
 
               // Return a result
               return {
-                _id: doc._id,
                 doc: savedDoc,
                 operation
               };
             } catch (error) {
               // Return a result with the error
               return {
-                _id: doc._id,
                 doc: savedDoc,
                 operation,
                 error
@@ -172,10 +169,9 @@ export class Sync {
 
           // Return a default result
           return {
-            _id: doc._id,
             doc,
             operation,
-            error: new KinveyError('Unable to push item in sync table because the operation was not recognized.')
+            error: new KinveyError('Unable to push item in sync collection because the operation was not recognized.')
           };
         }));
 
@@ -187,11 +183,6 @@ export class Sync {
     }
 
     return [];
-  }
-
-  remove(query?: Query<SyncDoc>): Promise<number> {
-    const syncCache = new SyncCache();
-    return syncCache.remove(new Query(query).equalTo('collectionName', this.collectionName));
   }
 }
 

@@ -1,11 +1,21 @@
+import isArray from 'lodash/isArray';
 import { Doc } from '@kinveysdk/storage';
-import { NetworkError } from '@kinveysdk/errors';
+import { NetworkError, KinveyError } from '@kinveysdk/errors';
 import { Query } from '@kinveysdk/query';
+import { getApiVersion } from '@kinveysdk/app';
 import { NetworkStore } from './networkstore';
-import { DataStoreNetwork, FindNetworkOptions } from './network';
-import { DataStoreCache } from './cache';
+import { DataStoreNetwork, FindNetworkOptions, NetworkOptions } from './network';
+import { DataStoreCache, SyncOperation } from './cache';
+import { Sync, SyncPushResult } from './sync';
 
 export class AutoStore<T extends Doc> extends NetworkStore<T> {
+  public tag?: string;
+
+  constructor(collectionName: string, tag?: string) {
+    super(collectionName);
+    this.tag = tag;
+  }
+
   async find(query?: Query<T>, options?: FindNetworkOptions): Promise<T[]> {
     const cache = new DataStoreCache<T>(this.collectionName);
 
@@ -35,12 +45,43 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     }
   }
 
-  async pull(query?: Query<T>, options: FindNetworkOptions = {}): Promise<number> {
+  create(doc: T, options?: NetworkOptions): Promise<SyncPushResult>
+  create(docs: T[], options?: NetworkOptions): Promise<SyncPushResult[]>
+  async create(docs: any, options?: NetworkOptions): Promise<any> {
+    const apiVersion = getApiVersion();
+
+    if (apiVersion < 5 && isArray(docs)) {
+      throw new KinveyError('Unable to create an array of docs. Please create docs one by one.');
+    }
+
+    if (!isArray()) {
+      const results = await this.create([docs], options);
+      return results.shift();
+    }
+
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const sync = new Sync(this.collectionName, this.tag);
+
+    // Save the docs to the cache
+    const cachedDocs = await cache.save(docs as T[]);
+
+    // Attempt to sync the docs with the backend
+    const syncDocs = await sync.addCreateSyncOperation(cachedDocs);
+    return sync.push(syncDocs, options);
+  }
+
+  async pull(query?: Query<T>, options?: FindNetworkOptions): Promise<number> {
     const network = new DataStoreNetwork(this.collectionName);
     const cache = new DataStoreCache<T>(this.collectionName);
     const response = await network.find(query, options);
     const docs = response.data;
     await cache.save(docs);
     return docs.length;
+  }
+
+  async push(options?: NetworkOptions): Promise<SyncPushResult[]> {
+    const sync = new Sync(this.collectionName, this.tag);
+    const syncDocs = await sync.find();
+    return sync.push(syncDocs, options);
   }
 }
