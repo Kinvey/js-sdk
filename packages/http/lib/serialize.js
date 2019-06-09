@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var isString_1 = __importDefault(require("lodash/isString"));
 function serialize(contentType, body) {
+    if (contentType === void 0) { contentType = 'application/json'; }
     if (body && !isString_1.default(body)) {
         if (contentType.indexOf('application/x-www-form-urlencoded') === 0) {
             var str = Object

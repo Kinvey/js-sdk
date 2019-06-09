@@ -23,7 +23,7 @@ export interface QueryObject {
   skip?: number;
 }
 
-export interface HttpQuery {
+export interface HttpQueryObject {
   query?: string;
   fields?: string;
   sort?: string;
@@ -42,11 +42,13 @@ export class Query<T extends Doc> {
   constructor(query?: Query<T>)
   constructor(query?: QueryObject)
   constructor(query?: any) {
-    this.fields = query.fields;
-    this.filter = query.filter;
-    this.sort = query.sort;
-    this.limit = query.limit;
-    this.skip = query.skip;
+    if (query instanceof Query || isPlainObject(query)) {
+      this.fields = query.fields;
+      this.filter = query.filter;
+      this.sort = query.sort;
+      this.limit = query.limit;
+      this.skip = query.skip;
+    }
   }
 
   isSupportedOffline(): boolean {
@@ -256,7 +258,7 @@ export class Query<T extends Doc> {
   }
 
   private addFilter(field: string, condition: string, value: any): Query<T> {
-    this.filter[field] = Object.assign(this.filter[field], { [condition]: value });
+    this.filter[field] = Object.assign({}, this.filter[field], { [condition]: value });
     return this;
   }
 
@@ -445,7 +447,7 @@ export class Query<T extends Doc> {
     });
   }
 
-  toHttpQuery(): HttpQuery {
+  toHttpQueryObject(): HttpQueryObject {
     const queryObject = this.toPlainObject();
     const httpQueryObject: any = {};
 
@@ -469,8 +471,8 @@ export class Query<T extends Doc> {
       httpQueryObject.sort = queryObject.sort;
     }
 
-    Object.keys(queryObject).forEach((key): any => {
-      httpQueryObject[key] = isString(queryObject[key]) ? queryObject[key] : JSON.stringify(queryObject[key]);
+    Object.keys(httpQueryObject).forEach((key): any => {
+      httpQueryObject[key] = isString(httpQueryObject[key]) ? httpQueryObject[key] : JSON.stringify(httpQueryObject[key]);
     });
 
     return httpQueryObject;

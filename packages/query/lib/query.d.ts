@@ -12,7 +12,7 @@ export interface QueryObject {
     limit?: number;
     skip?: number;
 }
-export interface HttpQuery {
+export interface HttpQueryObject {
     query?: string;
     fields?: string;
     sort?: string;
@@ -65,5 +65,5 @@ export declare class Query<T extends Doc> {
     descending(field: string): Query<T>;
     process(docs?: T[]): T[];
     toPlainObject(): QueryObject;
-    toHttpQuery(): HttpQuery;
+    toHttpQueryObject(): HttpQueryObject;
 }

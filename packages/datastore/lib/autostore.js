@@ -50,13 +50,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var errors_1 = require("@kinveysdk/errors");
 var query_1 = require("@kinveysdk/query");
+// import { getApiVersion } from '@kinveysdk/app';
 var networkstore_1 = require("./networkstore");
 var network_1 = require("./network");
 var cache_1 = require("./cache");
+var sync_1 = require("./sync");
 var AutoStore = /** @class */ (function (_super) {
     __extends(AutoStore, _super);
-    function AutoStore() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function AutoStore(collectionName, tag) {
+        var _this = _super.call(this, collectionName) || this;
+        if (tag && !cache_1.isValidTag(tag)) {
+            throw new errors_1.KinveyError('The provided tag is not valid.', 'A tag can only contain letters, numbers, and "-".');
+        }
+        _this.tag = tag;
+        return _this;
     }
     AutoStore.prototype.find = function (query, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -109,8 +116,39 @@ var AutoStore = /** @class */ (function (_super) {
             });
         });
     };
+    // create(doc: T, options?: NetworkOptions): Promise<SyncPushResult>
+    // create(docs: T[], options?: NetworkOptions): Promise<SyncPushResult[]>
+    // async create(docs: any, options?: NetworkOptions): Promise<any> {
+    //   const apiVersion = getApiVersion();
+    //   if (apiVersion < 5 && isArray(docs)) {
+    //     throw new KinveyError('Unable to create an array of docs. Please create docs one by one.');
+    //   }
+    //   if (!isArray()) {
+    //     const results = await this.create([docs], options);
+    //     return results.shift();
+    //   }
+    //   const cache = new DataStoreCache(this.collectionName, this.tag);
+    //   const sync = new Sync(this.collectionName, this.tag);
+    //   // Save the docs to the cache
+    //   const cachedDocs = await cache.save(docs as T[]);
+    //   // Attempt to sync the docs with the backend
+    //   const syncDocs = await sync.addCreateSyncOperation(cachedDocs);
+    //   return sync.push(syncDocs, options);
+    // }
+    // async update(doc: T, options?: NetworkOptions): Promise<SyncPushResult> {
+    //   if (isArray(doc)) {
+    //     throw new KinveyError('Unable to update an array of docs. Please update docs one by one.');
+    //   }
+    //   const cache = new DataStoreCache(this.collectionName, this.tag);
+    //   const sync = new Sync(this.collectionName, this.tag);
+    //   // Save the doc to the cache
+    //   const cachedDoc = await cache.save(doc);
+    //   // Attempt to sync the docs with the backend
+    //   const syncDocs = await sync.addCreateSyncOperation([cachedDoc]);
+    //   const results = await sync.push(syncDocs, options);
+    //   return results.shift();
+    // }
     AutoStore.prototype.pull = function (query, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var network, cache, response, docs;
             return __generator(this, function (_a) {
@@ -126,6 +164,21 @@ var AutoStore = /** @class */ (function (_super) {
                     case 2:
                         _a.sent();
                         return [2 /*return*/, docs.length];
+                }
+            });
+        });
+    };
+    AutoStore.prototype.push = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sync, syncDocs;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sync = new sync_1.Sync(this.collectionName, this.tag);
+                        return [4 /*yield*/, sync.find()];
+                    case 1:
+                        syncDocs = _a.sent();
+                        return [2 /*return*/, sync.push(syncDocs, options)];
                 }
             });
         });

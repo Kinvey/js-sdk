@@ -45,6 +45,10 @@ var Sync = /** @class */ (function () {
         this.collectionName = collectionName;
         this.tag = tag;
     }
+    Sync.prototype.find = function () {
+        var syncCache = new cache_1.SyncCache(this.collectionName, this.tag);
+        return syncCache.find();
+    };
     Sync.prototype.addCreateSyncOperation = function (docs) {
         return this.addSyncOperation(cache_1.SyncOperation.Create, docs);
     };
@@ -57,11 +61,10 @@ var Sync = /** @class */ (function () {
     Sync.prototype.addSyncOperation = function (operation, docs) {
         return __awaiter(this, void 0, void 0, function () {
             var syncCache, docsToSync, syncDocs, docWithNoId;
-            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        syncCache = new cache_1.SyncCache();
+                        syncCache = new cache_1.SyncCache(this.collectionName, this.tag);
                         docsToSync = [].concat(docs);
                         syncDocs = [];
                         if (!(docsToSync.length > 0)) return [3 /*break*/, 3];
@@ -70,7 +73,7 @@ var Sync = /** @class */ (function () {
                             throw new errors_1.KinveyError('A doc is missing an _id. All docs must have an _id in order to be added to the Kinvey sync collection.');
                         }
                         // Remove existing sync events that match the docs
-                        return [4 /*yield*/, this.remove(new query_1.Query().contains('entityId', docsToSync.map(function (doc) { return doc._id; })))];
+                        return [4 /*yield*/, syncCache.remove(new query_1.Query().contains('doc._id', docsToSync.map(function (doc) { return doc._id; })))];
                     case 1:
                         // Remove existing sync events that match the docs
                         _a.sent();
@@ -86,7 +89,6 @@ var Sync = /** @class */ (function () {
                         return [4 /*yield*/, syncCache.save(docsToSync.map(function (doc) {
                                 return {
                                     doc: doc,
-                                    collectionName: _this.collectionName,
                                     state: {
                                         operation: operation
                                     }
@@ -101,165 +103,151 @@ var Sync = /** @class */ (function () {
             });
         });
     };
-    Sync.prototype.push = function (query, options) {
+    Sync.prototype.push = function (docs, options) {
+        if (docs === void 0) { docs = []; }
         return __awaiter(this, void 0, void 0, function () {
-            var network, cache, syncCache, batchSize, syncDocs, i_1, batchPush_1;
+            var network, cache, syncCache, batchSize, i_1, batchPush_1;
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        network = new network_1.DataStoreNetwork(this.collectionName);
-                        cache = new cache_1.DataStoreCache(this.collectionName, this.tag);
-                        syncCache = new cache_1.SyncCache();
-                        batchSize = 100;
-                        return [4 /*yield*/, syncCache.find(new query_1.Query(query).equalTo('collectionName', this.collectionName))];
-                    case 1:
-                        syncDocs = _a.sent();
-                        if (syncDocs.length > 0) {
-                            i_1 = 0;
-                            batchPush_1 = function (pushResults) {
-                                if (pushResults === void 0) { pushResults = []; }
-                                return __awaiter(_this, void 0, void 0, function () {
-                                    var batch, results;
-                                    var _this = this;
-                                    return __generator(this, function (_a) {
-                                        switch (_a.label) {
-                                            case 0:
-                                                batch = syncDocs.slice(i_1, i_1 + batchSize);
-                                                i_1 += batchSize;
-                                                return [4 /*yield*/, Promise.all(batch.map(function (syncDoc) { return __awaiter(_this, void 0, void 0, function () {
-                                                        var _id, doc, state, operation, error_1, error_2, local, savedDoc, response, response, error_3;
-                                                        return __generator(this, function (_a) {
-                                                            switch (_a.label) {
-                                                                case 0:
-                                                                    _id = syncDoc._id, doc = syncDoc.doc, state = syncDoc.state;
-                                                                    operation = state.operation;
-                                                                    if (!(operation === cache_1.SyncOperation.Delete)) return [3 /*break*/, 9];
-                                                                    _a.label = 1;
-                                                                case 1:
-                                                                    _a.trys.push([1, 7, , 8]);
-                                                                    _a.label = 2;
-                                                                case 2:
-                                                                    _a.trys.push([2, 4, , 5]);
-                                                                    // Remove the doc from the backend
-                                                                    return [4 /*yield*/, network.removeById(doc._id, options)];
-                                                                case 3:
-                                                                    // Remove the doc from the backend
-                                                                    _a.sent();
-                                                                    return [3 /*break*/, 5];
-                                                                case 4:
-                                                                    error_1 = _a.sent();
-                                                                    // Rethrow the error if it is not a NotFoundError
-                                                                    if (!(error_1 instanceof errors_1.NotFoundError)) {
-                                                                        throw error_1;
-                                                                    }
-                                                                    return [3 /*break*/, 5];
-                                                                case 5: 
-                                                                // Remove the sync doc
-                                                                return [4 /*yield*/, syncCache.removeById(_id)];
-                                                                case 6:
-                                                                    // Remove the sync doc
-                                                                    _a.sent();
-                                                                    // Return a result
-                                                                    return [2 /*return*/, {
-                                                                            _id: doc._id,
-                                                                            doc: doc,
-                                                                            operation: operation
-                                                                        }];
-                                                                case 7:
-                                                                    error_2 = _a.sent();
-                                                                    // Return a result with the error
-                                                                    return [2 /*return*/, {
-                                                                            _id: doc._id,
-                                                                            doc: doc,
-                                                                            operation: operation,
-                                                                            error: error_2
-                                                                        }];
-                                                                case 8: return [3 /*break*/, 20];
-                                                                case 9:
-                                                                    if (!(operation === cache_1.SyncOperation.Create || cache_1.SyncOperation.Update)) return [3 /*break*/, 20];
-                                                                    local = false;
-                                                                    savedDoc = void 0;
-                                                                    _a.label = 10;
-                                                                case 10:
-                                                                    _a.trys.push([10, 19, , 20]);
-                                                                    if (!(operation === cache_1.SyncOperation.Create)) return [3 /*break*/, 12];
-                                                                    if (doc._kmd && doc._kmd.local === true) {
-                                                                        local = true;
-                                                                        delete doc._id;
-                                                                        delete doc._kmd.local;
-                                                                    }
-                                                                    return [4 /*yield*/, network.create(doc, options)];
-                                                                case 11:
-                                                                    response = _a.sent();
-                                                                    savedDoc = response.data;
-                                                                    return [3 /*break*/, 14];
-                                                                case 12: return [4 /*yield*/, network.update(doc, options)];
-                                                                case 13:
-                                                                    response = _a.sent();
-                                                                    savedDoc = response.data;
-                                                                    _a.label = 14;
-                                                                case 14: 
-                                                                // Remove the sync doc
-                                                                return [4 /*yield*/, syncCache.removeById(_id)];
-                                                                case 15:
-                                                                    // Remove the sync doc
-                                                                    _a.sent();
-                                                                    // Save the doc to cache
-                                                                    return [4 /*yield*/, cache.save(savedDoc)];
-                                                                case 16:
-                                                                    // Save the doc to cache
-                                                                    _a.sent();
-                                                                    if (!local) return [3 /*break*/, 18];
-                                                                    return [4 /*yield*/, cache.removeById(doc._id)];
-                                                                case 17:
-                                                                    _a.sent();
-                                                                    _a.label = 18;
-                                                                case 18: 
-                                                                // Return a result
-                                                                return [2 /*return*/, {
-                                                                        _id: doc._id,
-                                                                        doc: savedDoc,
-                                                                        operation: operation
-                                                                    }];
-                                                                case 19:
-                                                                    error_3 = _a.sent();
-                                                                    // Return a result with the error
-                                                                    return [2 /*return*/, {
-                                                                            _id: doc._id,
-                                                                            doc: savedDoc,
-                                                                            operation: operation,
-                                                                            error: error_3
-                                                                        }];
-                                                                case 20: 
-                                                                // Return a default result
-                                                                return [2 /*return*/, {
-                                                                        _id: doc._id,
-                                                                        doc: doc,
-                                                                        operation: operation,
-                                                                        error: new errors_1.KinveyError('Unable to push item in sync table because the operation was not recognized.')
-                                                                    }];
+                network = new network_1.DataStoreNetwork(this.collectionName);
+                cache = new cache_1.DataStoreCache(this.collectionName, this.tag);
+                syncCache = new cache_1.SyncCache(this.collectionName, this.tag);
+                batchSize = 100;
+                if (docs.length > 0) {
+                    i_1 = 0;
+                    batchPush_1 = function (pushResults) {
+                        if (pushResults === void 0) { pushResults = []; }
+                        return __awaiter(_this, void 0, void 0, function () {
+                            var batch, results;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        batch = docs.slice(i_1, i_1 + batchSize);
+                                        i_1 += batchSize;
+                                        return [4 /*yield*/, Promise.all(batch.map(function (syncDoc) { return __awaiter(_this, void 0, void 0, function () {
+                                                var _id, doc, state, operation, error_1, error_2, local, savedDoc, response, response, error_3;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            _id = syncDoc._id, doc = syncDoc.doc, state = syncDoc.state;
+                                                            operation = state.operation;
+                                                            if (!(operation === cache_1.SyncOperation.Delete)) return [3 /*break*/, 9];
+                                                            _a.label = 1;
+                                                        case 1:
+                                                            _a.trys.push([1, 7, , 8]);
+                                                            _a.label = 2;
+                                                        case 2:
+                                                            _a.trys.push([2, 4, , 5]);
+                                                            // Remove the doc from the backend
+                                                            return [4 /*yield*/, network.removeById(doc._id, options)];
+                                                        case 3:
+                                                            // Remove the doc from the backend
+                                                            _a.sent();
+                                                            return [3 /*break*/, 5];
+                                                        case 4:
+                                                            error_1 = _a.sent();
+                                                            // Rethrow the error if it is not a NotFoundError
+                                                            if (!(error_1 instanceof errors_1.NotFoundError)) {
+                                                                throw error_1;
                                                             }
-                                                        });
-                                                    }); }))];
-                                            case 1:
-                                                results = _a.sent();
-                                                // Push remaining docs
-                                                return [2 /*return*/, batchPush_1(pushResults.concat(results))];
-                                        }
-                                    });
-                                });
-                            };
-                            return [2 /*return*/, batchPush_1([])];
-                        }
-                        return [2 /*return*/, []];
+                                                            return [3 /*break*/, 5];
+                                                        case 5: 
+                                                        // Remove the sync doc
+                                                        return [4 /*yield*/, syncCache.removeById(_id)];
+                                                        case 6:
+                                                            // Remove the sync doc
+                                                            _a.sent();
+                                                            // Return a result
+                                                            return [2 /*return*/, {
+                                                                    doc: doc,
+                                                                    operation: operation
+                                                                }];
+                                                        case 7:
+                                                            error_2 = _a.sent();
+                                                            // Return a result with the error
+                                                            return [2 /*return*/, {
+                                                                    doc: doc,
+                                                                    operation: operation,
+                                                                    error: error_2
+                                                                }];
+                                                        case 8: return [3 /*break*/, 20];
+                                                        case 9:
+                                                            if (!(operation === cache_1.SyncOperation.Create || cache_1.SyncOperation.Update)) return [3 /*break*/, 20];
+                                                            local = false;
+                                                            savedDoc = void 0;
+                                                            _a.label = 10;
+                                                        case 10:
+                                                            _a.trys.push([10, 19, , 20]);
+                                                            if (!(operation === cache_1.SyncOperation.Create)) return [3 /*break*/, 12];
+                                                            if (doc._kmd && doc._kmd.local === true) {
+                                                                local = true;
+                                                                delete doc._id;
+                                                                delete doc._kmd.local;
+                                                            }
+                                                            return [4 /*yield*/, network.create(doc, options)];
+                                                        case 11:
+                                                            response = _a.sent();
+                                                            savedDoc = response.data;
+                                                            return [3 /*break*/, 14];
+                                                        case 12: return [4 /*yield*/, network.update(doc, options)];
+                                                        case 13:
+                                                            response = _a.sent();
+                                                            savedDoc = response.data;
+                                                            _a.label = 14;
+                                                        case 14: 
+                                                        // Remove the sync doc
+                                                        return [4 /*yield*/, syncCache.removeById(_id)];
+                                                        case 15:
+                                                            // Remove the sync doc
+                                                            _a.sent();
+                                                            // Save the doc to cache
+                                                            return [4 /*yield*/, cache.save(savedDoc)];
+                                                        case 16:
+                                                            // Save the doc to cache
+                                                            _a.sent();
+                                                            if (!local) return [3 /*break*/, 18];
+                                                            return [4 /*yield*/, cache.removeById(doc._id)];
+                                                        case 17:
+                                                            _a.sent();
+                                                            _a.label = 18;
+                                                        case 18: 
+                                                        // Return a result
+                                                        return [2 /*return*/, {
+                                                                doc: savedDoc,
+                                                                operation: operation
+                                                            }];
+                                                        case 19:
+                                                            error_3 = _a.sent();
+                                                            // Return a result with the error
+                                                            return [2 /*return*/, {
+                                                                    doc: savedDoc,
+                                                                    operation: operation,
+                                                                    error: error_3
+                                                                }];
+                                                        case 20: 
+                                                        // Return a default result
+                                                        return [2 /*return*/, {
+                                                                doc: doc,
+                                                                operation: operation,
+                                                                error: new errors_1.KinveyError('Unable to push item in sync collection because the operation was not recognized.')
+                                                            }];
+                                                    }
+                                                });
+                                            }); }))];
+                                    case 1:
+                                        results = _a.sent();
+                                        // Push remaining docs
+                                        return [2 /*return*/, batchPush_1(pushResults.concat(results))];
+                                }
+                            });
+                        });
+                    };
+                    return [2 /*return*/, batchPush_1([])];
                 }
+                return [2 /*return*/, []];
             });
         });
-    };
-    Sync.prototype.remove = function (query) {
-        var syncCache = new cache_1.SyncCache();
-        return syncCache.remove(new query_1.Query(query).equalTo('collectionName', this.collectionName));
     };
     return Sync;
 }());

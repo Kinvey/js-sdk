@@ -10,14 +10,15 @@ export interface FindNetworkOptions extends NetworkOptions {
     kinveyFileTTL?: number;
     kinveyFileTLS?: boolean;
 }
-export declare class DataStoreNetwork<T extends Doc> {
+export declare class DataStoreNetwork {
     collectionName: string;
     constructor(collectionName: string);
-    find(query?: Query<T>, options?: FindNetworkOptions): Promise<KinveyHttpResponse>;
+    find(query?: Query<Doc>, options?: FindNetworkOptions): Promise<KinveyHttpResponse>;
     findById(id: string, options?: FindNetworkOptions): Promise<KinveyHttpResponse>;
-    count(query?: Query<T>, options?: FindNetworkOptions): Promise<KinveyHttpResponse>;
-    create(doc: T, options?: NetworkOptions): Promise<KinveyHttpResponse>;
-    update(doc: T, options?: NetworkOptions): Promise<KinveyHttpResponse>;
-    remove(query?: Query<T>, options?: NetworkOptions): Promise<KinveyHttpResponse>;
+    count(query?: Query<Doc>, options?: FindNetworkOptions): Promise<KinveyHttpResponse>;
+    create(doc: Doc, options?: NetworkOptions): Promise<KinveyHttpResponse>;
+    create(docs: Doc[], options?: NetworkOptions): Promise<KinveyHttpResponse>;
+    update(doc: Doc, options?: NetworkOptions): Promise<KinveyHttpResponse>;
+    remove(query?: Query<Doc>, options?: NetworkOptions): Promise<KinveyHttpResponse>;
     removeById(id: string, options?: NetworkOptions): Promise<KinveyHttpResponse>;
 }

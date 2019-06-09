@@ -15,11 +15,10 @@ export declare enum SyncOperation {
 }
 export interface SyncDoc extends Doc {
     doc: Doc;
-    collectionName: string;
     state: {
         operation: SyncOperation;
     };
 }
 export declare class SyncCache extends DataStoreCache<SyncDoc> {
-    constructor();
+    constructor(collectionName: string, tag?: string);
 }

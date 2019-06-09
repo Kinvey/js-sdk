@@ -29,5 +29,4 @@ export declare class KinveyHttpHeaders extends HttpHeaders {
         [name: string]: string | string[] | (() => string | string[]);
     });
     readonly requestStart: string | undefined;
-    customRequestProperties: any;
 }

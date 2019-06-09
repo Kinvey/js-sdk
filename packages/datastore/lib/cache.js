@@ -57,7 +57,7 @@ var storage_1 = require("@kinveysdk/storage");
 var app_1 = require("@kinveysdk/app");
 var errors_1 = require("@kinveysdk/errors");
 var util_1 = require("util");
-var SYNC_CACHE_COLLECTION_NAME = '__KinveySync';
+var SYNC_CACHE_COLLECTION_NAME = 'Sync';
 function isValidTag(tag) {
     var regexp = /^[a-z0-9-]+$/i;
     return isString_1.default(tag) && regexp.test(tag);
@@ -96,22 +96,16 @@ var DataStoreCache = /** @class */ (function (_super) {
     };
     DataStoreCache.prototype.save = function (docs) {
         return __awaiter(this, void 0, void 0, function () {
-            var docsToSave, singular, savedDocs;
+            var savedDocs;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        singular = false;
-                        if (util_1.isArray(docs)) {
-                            docsToSave = [].concat(docs);
-                        }
-                        else {
-                            docsToSave = [].concat([docs]);
-                            singular = true;
-                        }
-                        return [4 /*yield*/, _super.prototype.save.call(this, docsToSave)];
+                        if (!!util_1.isArray(docs)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.save([docs])];
                     case 1:
                         savedDocs = _a.sent();
-                        return [2 /*return*/, singular ? savedDocs.shift() : savedDocs];
+                        return [2 /*return*/, savedDocs.shift()];
+                    case 2: return [2 /*return*/, _super.prototype.save.call(this, docs)];
                 }
             });
         });
@@ -150,8 +144,18 @@ var SyncOperation;
 ;
 var SyncCache = /** @class */ (function (_super) {
     __extends(SyncCache, _super);
-    function SyncCache() {
-        return _super.call(this, SYNC_CACHE_COLLECTION_NAME) || this;
+    function SyncCache(collectionName, tag) {
+        var _this = this;
+        if (tag && !isValidTag(tag)) {
+            throw new errors_1.KinveyError('A tag can only contain letters, numbers, and "-".');
+        }
+        if (tag) {
+            _this = _super.call(this, app_1.getAppKey(), SYNC_CACHE_COLLECTION_NAME + "." + collectionName + "." + tag) || this;
+        }
+        else {
+            _this = _super.call(this, app_1.getAppKey(), SYNC_CACHE_COLLECTION_NAME + "." + collectionName) || this;
+        }
+        return _this;
     }
     return SyncCache;
 }(DataStoreCache));

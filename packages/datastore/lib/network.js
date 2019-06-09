@@ -11,7 +11,7 @@ var DataStoreNetwork = /** @class */ (function () {
     }
     DataStoreNetwork.prototype.find = function (query, options) {
         if (options === void 0) { options = {}; }
-        var queryObject = Object.assign(query ? query.toHttpQuery() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+        var queryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
         var request = new http_1.KinveyHttpRequest({
             method: http_1.HttpRequestMethod.GET,
             auth: http_1.kinveySessionAuth,
@@ -37,7 +37,7 @@ var DataStoreNetwork = /** @class */ (function () {
     };
     DataStoreNetwork.prototype.count = function (query, options) {
         if (options === void 0) { options = {}; }
-        var queryObject = Object.assign(query ? query.toHttpQuery() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+        var queryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
         var request = new http_1.KinveyHttpRequest({
             method: http_1.HttpRequestMethod.GET,
             auth: http_1.kinveySessionAuth,
@@ -48,13 +48,13 @@ var DataStoreNetwork = /** @class */ (function () {
         });
         return request.execute();
     };
-    DataStoreNetwork.prototype.create = function (doc, options) {
+    DataStoreNetwork.prototype.create = function (docs, options) {
         if (options === void 0) { options = {}; }
         var request = new http_1.KinveyHttpRequest({
             method: http_1.HttpRequestMethod.POST,
             auth: http_1.kinveySessionAuth,
             url: http_1.formatKinveyBaasUrl(http_1.KinveyBaasNamespace.AppData, "/" + this.collectionName),
-            body: doc,
+            body: docs,
             skipBL: options.skipBL,
             trace: options.trace,
             properties: options.properties
@@ -79,7 +79,7 @@ var DataStoreNetwork = /** @class */ (function () {
     };
     DataStoreNetwork.prototype.remove = function (query, options) {
         if (options === void 0) { options = {}; }
-        var queryObject = Object.assign(query ? query.toHttpQuery() : {});
+        var queryObject = Object.assign(query ? query.toHttpQueryObject() : {});
         var request = new http_1.KinveyHttpRequest({
             method: http_1.HttpRequestMethod.DELETE,
             auth: http_1.kinveySessionAuth,

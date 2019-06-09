@@ -19,10 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var isFunction_1 = __importDefault(require("lodash/isFunction"));
 var isArray_1 = __importDefault(require("lodash/isArray"));
-var isEmpty_1 = __importDefault(require("lodash/isEmpty"));
 var app_1 = require("@kinveysdk/app");
-var errors_1 = require("@kinveysdk/errors");
-var utils_1 = require("./utils");
 var HttpHeaders = /** @class */ (function () {
     function HttpHeaders(headers) {
         var _this = this;
@@ -145,23 +142,6 @@ var KinveyHttpHeaders = /** @class */ (function (_super) {
     Object.defineProperty(KinveyHttpHeaders.prototype, "requestStart", {
         get: function () {
             return this.get('X-Kinvey-Request-Start');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(KinveyHttpHeaders.prototype, "customRequestProperties", {
-        set: function (properties) {
-            var customRequestPropertiesVal = JSON.stringify(properties);
-            if (!isEmpty_1.default(customRequestPropertiesVal)) {
-                var customRequestPropertiesByteCount = utils_1.byteCount(customRequestPropertiesVal);
-                if (customRequestPropertiesByteCount >= 2000) {
-                    throw new errors_1.KinveyError("The custom properties are " + customRequestPropertiesByteCount + " bytes. They must be less then 2000 bytes.");
-                }
-                this.set('X-Kinvey-Custom-Request-Properties', customRequestPropertiesVal);
-            }
-            else {
-                this.delete('X-Kinvey-Custom-Request-Properties');
-            }
         },
         enumerable: true,
         configurable: true

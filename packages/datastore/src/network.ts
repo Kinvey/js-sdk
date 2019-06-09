@@ -24,15 +24,15 @@ export interface FindNetworkOptions extends NetworkOptions {
   kinveyFileTLS?: boolean;
 }
 
-export class DataStoreNetwork<T extends Doc> {
+export class DataStoreNetwork {
   public collectionName: string;
 
   constructor(collectionName: string) {
     this.collectionName = collectionName;
   }
 
-  find(query?: Query<T>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign(query ? query.toHttpQuery() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+  find(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
+    const queryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
@@ -57,8 +57,8 @@ export class DataStoreNetwork<T extends Doc> {
     return request.execute();
   }
 
-  count(query?: Query<T>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign(query ? query.toHttpQuery() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+  count(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
+    const queryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
@@ -70,12 +70,14 @@ export class DataStoreNetwork<T extends Doc> {
     return request.execute();
   }
 
-  create(doc: T, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
+  create(doc: Doc, options?: NetworkOptions): Promise<KinveyHttpResponse>
+  create(docs: Doc[], options?: NetworkOptions): Promise<KinveyHttpResponse>
+  create(docs: any, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.POST,
       auth: kinveySessionAuth,
       url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}`),
-      body: doc,
+      body: docs,
       skipBL: options.skipBL,
       trace: options.trace,
       properties: options.properties
@@ -83,7 +85,7 @@ export class DataStoreNetwork<T extends Doc> {
     return request.execute();
   }
 
-  update(doc: T, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
+  update(doc: Doc, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
     if (!doc._id) {
       throw new KinveyError('The doc provided does not contain an _id. An _id is required to update the doc.');
     }
@@ -100,8 +102,8 @@ export class DataStoreNetwork<T extends Doc> {
     return request.execute();
   }
 
-  remove(query?: Query<T>, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign(query ? query.toHttpQuery() : {});
+  remove(query?: Query<Doc>, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
+    const queryObject = Object.assign(query ? query.toHttpQueryObject() : {});
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.DELETE,
       auth: kinveySessionAuth,

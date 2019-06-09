@@ -21,11 +21,13 @@ var Query = /** @class */ (function () {
         this.filter = {};
         this.fields = [];
         this.sort = {};
-        this.fields = query.fields;
-        this.filter = query.filter;
-        this.sort = query.sort;
-        this.limit = query.limit;
-        this.skip = query.skip;
+        if (query instanceof Query || isPlainObject_1.default(query)) {
+            this.fields = query.fields;
+            this.filter = query.filter;
+            this.sort = query.sort;
+            this.limit = query.limit;
+            this.skip = query.skip;
+        }
     }
     Query.prototype.isSupportedOffline = function () {
         var _this = this;
@@ -190,7 +192,7 @@ var Query = /** @class */ (function () {
     };
     Query.prototype.addFilter = function (field, condition, value) {
         var _a;
-        this.filter[field] = Object.assign(this.filter[field], (_a = {}, _a[condition] = value, _a));
+        this.filter[field] = Object.assign({}, this.filter[field], (_a = {}, _a[condition] = value, _a));
         return this;
     };
     Query.prototype.and = function () {
@@ -376,7 +378,7 @@ var Query = /** @class */ (function () {
             limit: this.limit
         });
     };
-    Query.prototype.toHttpQuery = function () {
+    Query.prototype.toHttpQueryObject = function () {
         var queryObject = this.toPlainObject();
         var httpQueryObject = {};
         if (Object.keys(queryObject.filter).length > 0) {
@@ -394,8 +396,8 @@ var Query = /** @class */ (function () {
         if (queryObject.sort && Object.keys(queryObject.sort).length > 0) {
             httpQueryObject.sort = queryObject.sort;
         }
-        Object.keys(queryObject).forEach(function (key) {
-            httpQueryObject[key] = isString_1.default(queryObject[key]) ? queryObject[key] : JSON.stringify(queryObject[key]);
+        Object.keys(httpQueryObject).forEach(function (key) {
+            httpQueryObject[key] = isString_1.default(httpQueryObject[key]) ? httpQueryObject[key] : JSON.stringify(httpQueryObject[key]);
         });
         return httpQueryObject;
     };
