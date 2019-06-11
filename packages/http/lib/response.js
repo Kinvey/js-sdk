@@ -37,6 +37,7 @@ var HttpStatusCode;
 })(HttpStatusCode = exports.HttpStatusCode || (exports.HttpStatusCode = {}));
 var HttpResponse = /** @class */ (function () {
     function HttpResponse(config) {
+        this.headers = new headers_1.HttpHeaders();
         if (config) {
             this.statusCode = config.statusCode;
             this.headers = new headers_1.HttpHeaders(config.headers);
@@ -63,8 +64,13 @@ var HttpResponse = /** @class */ (function () {
 exports.HttpResponse = HttpResponse;
 var KinveyHttpResponse = /** @class */ (function (_super) {
     __extends(KinveyHttpResponse, _super);
-    function KinveyHttpResponse() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function KinveyHttpResponse(config) {
+        var _this = _super.call(this, config) || this;
+        _this.headers = new headers_1.KinveyHttpHeaders();
+        if (config) {
+            _this.headers = new headers_1.KinveyHttpHeaders(config.headers);
+        }
+        return _this;
     }
     Object.defineProperty(KinveyHttpResponse.prototype, "error", {
         get: function () {

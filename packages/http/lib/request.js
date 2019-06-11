@@ -75,6 +75,7 @@ var HttpRequestMethod;
 ;
 var HttpRequest = /** @class */ (function () {
     function HttpRequest(config) {
+        this.headers = new headers_1.HttpHeaders();
         this.method = HttpRequestMethod.GET;
         if (config) {
             this.headers = new headers_1.HttpHeaders(config.headers);
@@ -125,11 +126,17 @@ var KinveyHttpRequest = /** @class */ (function (_super) {
     __extends(KinveyHttpRequest, _super);
     function KinveyHttpRequest(config) {
         var _this = _super.call(this, config) || this;
-        _this.headers = new headers_1.KinveyHttpHeaders(_this.headers);
-        _this.auth = config.auth;
-        _this.skipBusinessLogic(config.skipBL);
-        _this.trace(config.trace);
-        _this.customRequestPropertes(config.properties);
+        _this.headers = new headers_1.KinveyHttpHeaders();
+        _this.auth = function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2 /*return*/, null];
+        }); }); };
+        if (config) {
+            _this.headers = new headers_1.KinveyHttpHeaders(config.headers);
+            _this.auth = config.auth;
+            _this.skipBusinessLogic(config.skipBL);
+            _this.trace(config.trace);
+            _this.customRequestPropertes(config.properties);
+        }
         return _this;
     }
     KinveyHttpRequest.prototype.skipBusinessLogic = function (value) {

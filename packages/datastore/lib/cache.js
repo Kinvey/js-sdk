@@ -58,6 +58,7 @@ var app_1 = require("@kinveysdk/app");
 var errors_1 = require("@kinveysdk/errors");
 var util_1 = require("util");
 var SYNC_CACHE_COLLECTION_NAME = 'Sync';
+var QUERY_CACHE_COLLECTION_NAME = 'Query';
 function isValidTag(tag) {
     var regexp = /^[a-z0-9-]+$/i;
     return isString_1.default(tag) && regexp.test(tag);
@@ -145,19 +146,17 @@ var SyncOperation;
 var SyncCache = /** @class */ (function (_super) {
     __extends(SyncCache, _super);
     function SyncCache(collectionName, tag) {
-        var _this = this;
-        if (tag && !isValidTag(tag)) {
-            throw new errors_1.KinveyError('A tag can only contain letters, numbers, and "-".');
-        }
-        if (tag) {
-            _this = _super.call(this, app_1.getAppKey(), SYNC_CACHE_COLLECTION_NAME + "." + collectionName + "." + tag) || this;
-        }
-        else {
-            _this = _super.call(this, app_1.getAppKey(), SYNC_CACHE_COLLECTION_NAME + "." + collectionName) || this;
-        }
-        return _this;
+        return _super.call(this, SYNC_CACHE_COLLECTION_NAME + "." + collectionName, tag) || this;
     }
     return SyncCache;
 }(DataStoreCache));
 exports.SyncCache = SyncCache;
+var QueryCache = /** @class */ (function (_super) {
+    __extends(QueryCache, _super);
+    function QueryCache(collectionName, tag) {
+        return _super.call(this, QUERY_CACHE_COLLECTION_NAME + "." + collectionName, tag) || this;
+    }
+    return QueryCache;
+}(DataStoreCache));
+exports.QueryCache = QueryCache;
 //# sourceMappingURL=cache.js.map

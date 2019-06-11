@@ -22,3 +22,11 @@ export interface SyncDoc extends Doc {
 export declare class SyncCache extends DataStoreCache<SyncDoc> {
     constructor(collectionName: string, tag?: string);
 }
+export interface QueryDoc extends Doc {
+    collectionName: string;
+    query: string;
+    lastRequest?: string;
+}
+export declare class QueryCache extends DataStoreCache<QueryDoc> {
+    constructor(collectionName: string, tag?: string);
+}

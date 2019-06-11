@@ -8,6 +8,7 @@ import { Query } from '@kinveysdk/query';
 import { isArray } from 'util';
 
 const SYNC_CACHE_COLLECTION_NAME = 'Sync';
+const QUERY_CACHE_COLLECTION_NAME = 'Query';
 
 export function isValidTag(tag: string): boolean {
   const regexp = /^[a-z0-9-]+$/i;
@@ -73,14 +74,18 @@ export interface SyncDoc extends Doc {
 
 export class SyncCache extends DataStoreCache<SyncDoc> {
   constructor(collectionName: string, tag?: string) {
-    if (tag && !isValidTag(tag)) {
-      throw new KinveyError('A tag can only contain letters, numbers, and "-".');
-    }
+    super(`${SYNC_CACHE_COLLECTION_NAME}.${collectionName}`, tag);
+  }
+}
 
-    if (tag) {
-      super(getAppKey(), `${SYNC_CACHE_COLLECTION_NAME}.${collectionName}.${tag}`);
-    } else {
-      super(getAppKey(), `${SYNC_CACHE_COLLECTION_NAME}.${collectionName}`);
-    }
+export interface QueryDoc extends Doc {
+  collectionName: string;
+  query: string;
+  lastRequest?: string;
+}
+
+export class QueryCache extends DataStoreCache<QueryDoc> {
+  constructor(collectionName: string, tag?: string) {
+    super(`${QUERY_CACHE_COLLECTION_NAME}.${collectionName}`, tag);
   }
 }

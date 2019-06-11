@@ -1,4 +1,5 @@
 "use strict";
+/* eslint no-underscore-dangle: "off" */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -47,10 +48,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var isArray_1 = __importDefault(require("lodash/isArray"));
 var errors_1 = require("@kinveysdk/errors");
 var query_1 = require("@kinveysdk/query");
-// import { getApiVersion } from '@kinveysdk/app';
+var app_1 = require("@kinveysdk/app");
 var networkstore_1 = require("./networkstore");
 var network_1 = require("./network");
 var cache_1 = require("./cache");
@@ -116,53 +121,142 @@ var AutoStore = /** @class */ (function (_super) {
             });
         });
     };
-    // create(doc: T, options?: NetworkOptions): Promise<SyncPushResult>
-    // create(docs: T[], options?: NetworkOptions): Promise<SyncPushResult[]>
-    // async create(docs: any, options?: NetworkOptions): Promise<any> {
-    //   const apiVersion = getApiVersion();
-    //   if (apiVersion < 5 && isArray(docs)) {
-    //     throw new KinveyError('Unable to create an array of docs. Please create docs one by one.');
-    //   }
-    //   if (!isArray()) {
-    //     const results = await this.create([docs], options);
-    //     return results.shift();
-    //   }
-    //   const cache = new DataStoreCache(this.collectionName, this.tag);
-    //   const sync = new Sync(this.collectionName, this.tag);
-    //   // Save the docs to the cache
-    //   const cachedDocs = await cache.save(docs as T[]);
-    //   // Attempt to sync the docs with the backend
-    //   const syncDocs = await sync.addCreateSyncOperation(cachedDocs);
-    //   return sync.push(syncDocs, options);
-    // }
-    // async update(doc: T, options?: NetworkOptions): Promise<SyncPushResult> {
-    //   if (isArray(doc)) {
-    //     throw new KinveyError('Unable to update an array of docs. Please update docs one by one.');
-    //   }
-    //   const cache = new DataStoreCache(this.collectionName, this.tag);
-    //   const sync = new Sync(this.collectionName, this.tag);
-    //   // Save the doc to the cache
-    //   const cachedDoc = await cache.save(doc);
-    //   // Attempt to sync the docs with the backend
-    //   const syncDocs = await sync.addCreateSyncOperation([cachedDoc]);
-    //   const results = await sync.push(syncDocs, options);
-    //   return results.shift();
-    // }
-    AutoStore.prototype.pull = function (query, options) {
+    AutoStore.prototype.create = function (docs, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var network, cache, response, docs;
+            var apiVersion, result, error, cache, sync, cachedDocs, syncDocs, results;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        network = new network_1.DataStoreNetwork(this.collectionName);
-                        cache = new cache_1.DataStoreCache(this.collectionName);
-                        return [4 /*yield*/, network.find(query, options)];
+                        apiVersion = app_1.getApiVersion();
+                        if (apiVersion < 5 && isArray_1.default(docs)) {
+                            throw new errors_1.KinveyError('Unable to create an array of docs. Please create docs one by one.');
+                        }
+                        if (!!isArray_1.default()) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.create([docs], options)];
                     case 1:
-                        response = _a.sent();
-                        docs = response.data;
+                        result = _a.sent();
+                        error = result.errors.shift();
+                        if (error) {
+                            throw error;
+                        }
+                        return [2 /*return*/, result.entities.shift()];
+                    case 2:
+                        cache = new cache_1.DataStoreCache(this.collectionName, this.tag);
+                        sync = new sync_1.Sync(this.collectionName, this.tag);
                         return [4 /*yield*/, cache.save(docs)];
+                    case 3:
+                        cachedDocs = _a.sent();
+                        return [4 /*yield*/, sync.addCreateSyncOperation(cachedDocs)];
+                    case 4:
+                        syncDocs = _a.sent();
+                        return [4 /*yield*/, sync.push(syncDocs, options)];
+                    case 5:
+                        results = _a.sent();
+                        return [2 /*return*/, results.reduce(function (multiInsertResult, result) {
+                                multiInsertResult.entities.push(result.doc);
+                                multiInsertResult.errors.push(result.error);
+                                return multiInsertResult;
+                            }, { entities: [], errors: [] })];
+                }
+            });
+        });
+    };
+    AutoStore.prototype.update = function (doc, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var cache, sync, cachedDoc, syncDocs, results, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (isArray_1.default(doc)) {
+                            throw new errors_1.KinveyError('Unable to update an array of docs. Please update docs one by one.');
+                        }
+                        if (!doc._id) {
+                            throw new errors_1.KinveyError('Doc is missing _id.');
+                        }
+                        cache = new cache_1.DataStoreCache(this.collectionName, this.tag);
+                        sync = new sync_1.Sync(this.collectionName, this.tag);
+                        return [4 /*yield*/, cache.save(doc)];
+                    case 1:
+                        cachedDoc = _a.sent();
+                        return [4 /*yield*/, sync.addCreateSyncOperation([cachedDoc])];
+                    case 2:
+                        syncDocs = _a.sent();
+                        return [4 /*yield*/, sync.push(syncDocs, options)];
+                    case 3:
+                        results = _a.sent();
+                        result = results.shift();
+                        if (result.error) {
+                            throw result.error;
+                        }
+                        return [2 /*return*/, result.doc];
+                }
+            });
+        });
+    };
+    AutoStore.prototype.pendingSyncDocs = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var sync;
+            return __generator(this, function (_a) {
+                sync = new sync_1.Sync(this.collectionName, this.tag);
+                return [2 /*return*/, sync.find()];
+            });
+        });
+    };
+    AutoStore.prototype.pendingSyncCount = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var syncDocs;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.pendingSyncDocs()];
+                    case 1:
+                        syncDocs = _a.sent();
+                        return [2 /*return*/, syncDocs.length];
+                }
+            });
+        });
+    };
+    AutoStore.prototype.pull = function (query, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var pullQuery, network, cache, queryCache, sync, count, response, docs;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        pullQuery = new query_1.Query({ filter: query.filter });
+                        network = new network_1.DataStoreNetwork(this.collectionName);
+                        cache = new cache_1.DataStoreCache(this.collectionName, this.tag);
+                        queryCache = new cache_1.QueryCache(this.collectionName, this.tag);
+                        sync = new sync_1.Sync(this.collectionName, this.tag);
+                        return [4 /*yield*/, this.pendingSyncCount()];
+                    case 1:
+                        count = _a.sent();
+                        if (!(count > 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, sync.push()];
                     case 2:
                         _a.sent();
+                        return [2 /*return*/, this.pull(query, options)];
+                    case 3: return [4 /*yield*/, network.find(pullQuery, options)];
+                    case 4:
+                        response = _a.sent();
+                        docs = response.data;
+                        if (!pullQuery) return [3 /*break*/, 6];
+                        return [4 /*yield*/, cache.remove(pullQuery)];
+                    case 5:
+                        _a.sent();
+                        return [3 /*break*/, 8];
+                    case 6: return [4 /*yield*/, cache.remove()];
+                    case 7:
+                        _a.sent();
+                        _a.label = 8;
+                    case 8: 
+                    // Update the cache
+                    return [4 /*yield*/, cache.save(docs)];
+                    case 9:
+                        // Update the cache
+                        _a.sent();
+                        // /// Update the query cache
+                        // queryCacheDoc.lastRequest = response.headers.requestStart;
+                        // await queryCache.save(queryCacheDoc);
+                        // Return the number of docs
                         return [2 /*return*/, docs.length];
                 }
             });

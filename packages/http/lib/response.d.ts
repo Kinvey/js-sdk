@@ -1,5 +1,5 @@
 import { KinveyError } from '@kinveysdk/errors';
-import { HttpHeaders } from './headers';
+import { HttpHeaders, KinveyHttpHeaders } from './headers';
 export declare enum HttpStatusCode {
     Ok = 200,
     Created = 201,
@@ -35,5 +35,7 @@ export declare class HttpResponse {
     toPlainObject(): HttpResponseObject;
 }
 export declare class KinveyHttpResponse extends HttpResponse {
+    headers: KinveyHttpHeaders;
+    constructor(config?: HttpResponseConfig);
     readonly error: KinveyError | null;
 }

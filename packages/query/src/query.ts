@@ -51,6 +51,15 @@ export class Query<T extends Doc> {
     }
   }
 
+  get key(): string {
+    if ((isNumber(this.skip) && this.skip > 0) || (isNumber(this.limit) && this.limit < Number.MAX_SAFE_INTEGER)) {
+      return null;
+    }
+
+    const toPlainObject = this.toPlainObject();
+    return toPlainObject && !isEmpty(toPlainObject) ? JSON.stringify(toPlainObject) : '';
+  }
+
   isSupportedOffline(): boolean {
     return Object.keys(this.filter).reduce((supported, key): boolean => {
       if (supported) {

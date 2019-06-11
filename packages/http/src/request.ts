@@ -34,7 +34,7 @@ export interface HttpRequestObject extends HttpRequestConfig {
 }
 
 export class HttpRequest {
-  public headers: HttpHeaders;
+  public headers: HttpHeaders = new HttpHeaders();
   public method: HttpRequestMethod = HttpRequestMethod.GET;
   public url: string;
   public body?: any;
@@ -92,16 +92,18 @@ function stopRefreshProcess(): void {
 }
 
 export class KinveyHttpRequest extends HttpRequest {
-  public headers: KinveyHttpHeaders;
-  public auth: () => Promise<string>;
+  public headers: KinveyHttpHeaders = new KinveyHttpHeaders();
+  public auth: () => Promise<string> = async (): Promise<string> => null;
 
   constructor(config: KinveyHttpRequestConfig) {
     super(config);
-    this.headers = new KinveyHttpHeaders(this.headers);
-    this.auth = config.auth;
-    this.skipBusinessLogic(config.skipBL);
-    this.trace(config.trace);
-    this.customRequestPropertes(config.properties);
+    if (config) {
+      this.headers = new KinveyHttpHeaders(config.headers);
+      this.auth = config.auth;
+      this.skipBusinessLogic(config.skipBL);
+      this.trace(config.trace);
+      this.customRequestPropertes(config.properties);
+    }
   }
 
   skipBusinessLogic(value: boolean): KinveyHttpRequest {

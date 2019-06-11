@@ -3,7 +3,7 @@ import {
   KinveyError,
   InvalidCredentialsError
 } from '@kinveysdk/errors';
-import { HttpHeaders } from './headers';
+import { HttpHeaders, KinveyHttpHeaders } from './headers';
 import { parse } from './parse';
 
 
@@ -34,7 +34,7 @@ export interface HttpResponseObject extends HttpResponseConfig {
 
 export class HttpResponse {
   public statusCode: HttpStatusCode;
-  public headers: HttpHeaders;
+  public headers: HttpHeaders = new HttpHeaders();
   public data?;
 
   constructor(config?: HttpResponseConfig) {
@@ -64,6 +64,15 @@ export class HttpResponse {
 }
 
 export class KinveyHttpResponse extends HttpResponse {
+  public headers: KinveyHttpHeaders = new KinveyHttpHeaders();
+
+  constructor(config?: HttpResponseConfig) {
+    super(config);
+    if (config) {
+      this.headers = new KinveyHttpHeaders(config.headers);
+    }
+  }
+
   get error(): KinveyError | null {
     if (!this.isSuccess()) {
       if (isPlainObject(this.data)) {
