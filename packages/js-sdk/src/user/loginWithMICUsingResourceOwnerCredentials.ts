@@ -10,6 +10,7 @@ import { getActiveUser } from './getActiveUser';
 
 export interface MICOptions extends GetTokenWithUsernamePasswordOptions {
   micId?: string;
+  version?: string | number;
 }
 
 export async function loginWithMICUsingResourceOwnerCredentials(username: string, password: string, options: MICOptions = {}) {
