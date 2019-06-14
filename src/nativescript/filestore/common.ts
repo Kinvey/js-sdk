@@ -1,8 +1,6 @@
 import { File } from 'tns-core-modules/file-system';
-import { KinveyResponse } from '../../core/request';
 import { KinveyError } from '../../core/errors';
 import { FileStore as CoreFileStore } from '../../core/files';
-import { KinveyWorker } from './worker';
 
 export interface FileMetadata {
   _id?: string;
@@ -18,12 +16,6 @@ export interface FileUploadRequestOptions {
   timeout: number;
   maxBackoff: number;
   headers: { [key: string]: string };
-}
-
-export interface KinveyResponseConfig {
-  statusCode: number;
-  data?: any;
-  headers?: any;
 }
 
 export class CommonFileStore extends CoreFileStore {
@@ -47,22 +39,7 @@ export class CommonFileStore extends CoreFileStore {
     if (!(file instanceof File)) {
       file = File.fromPath(file);
     }
-
     const content = file.readSync();
     return content.length;
-  }
-}
-
-export interface FileUploadWorkerOptions {
-  url: string;
-  metadata: FileMetadata;
-  options: FileUploadRequestOptions;
-  filePath: string;
-}
-
-export class FileUploadWorker extends KinveyWorker {
-  upload(options: FileUploadWorkerOptions) {
-    return this.postMessage(options)
-      .then((responseConfig: KinveyResponseConfig) => new KinveyResponse(responseConfig));
   }
 }
