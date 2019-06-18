@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "@kinveysdk/eslint-config"
+  ],
+  "rules": {
+    "no-underscore-dangle": "off",
+    "@typescript-eslint/camelcase": "off"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@kinveysdk/typescript-config",
+  "description": "Kinvey JavaScript SDK config for TypeScript.",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Thomas Conner",
+    "email": "thomas.conner@progress.com"
+  },
+  "keywords": [
+    "Kinvey",
+    "TypeScript"
+  ],
+  "main": "index.js"
+}
