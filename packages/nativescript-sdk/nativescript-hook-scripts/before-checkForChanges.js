@@ -5,12 +5,11 @@ const pkg = require('../package.json');
 
 module.exports = function (hookArgs) {
   return new Promise((resolve, reject) => {
-    const appDirectoryPath = hookArgs && hookArgs.checkForChangesOpts && hookArgs.checkForChangesOpts.projectData && hookArgs.checkForChangesOpts.projectData.appDirectoryPath;
-
+    const appDirectoryPath = ((hookArgs && hookArgs.checkForChangesOpts && hookArgs.checkForChangesOpts.projectData && hookArgs.checkForChangesOpts.projectData) || hookArgs.projectData).appDirectoryPath;
     if (!appDirectoryPath) {
       reject(new Error('Unable to get path to app directory'));
     } else {
-      const platform = (hookArgs && hookArgs.checkForChangesOpts && hookArgs.checkForChangesOpts.platform.toLowerCase()) || '';
+      const platform = (((hookArgs && hookArgs.checkForChangesOpts) || hookArgs.prepareData).platform || '').toLowerCase();
       const pathToPackageJson = path.join(appDirectoryPath, 'package.json');
       const packageJsonContent = JSON.parse(fs.readFileSync(pathToPackageJson));
       const kinveyData = packageJsonContent.pluginsData && packageJsonContent.pluginsData[pkg.name];
