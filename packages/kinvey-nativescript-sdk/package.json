@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.12.3",
+  "version": "3.12.7-next.2",
   "name": "kinvey-nativescript-sdk",
   "description": "Kinvey NativeScript SDK for developing NativeScript applications.",
   "author": "Kinvey, Inc.",
@@ -9,6 +9,7 @@
   "main": "kinvey-nativescript-sdk.js",
   "typings": "kinvey.d.ts",
   "dependencies": {
+    "nativescript-background-http": "^3.4.1",
     "nativescript-hook": "0.2.4",
     "nativescript-sqlite": "latest",
     "nativescript-urlhandler": "^1.2.2",
@@ -29,7 +30,6 @@
     "preuninstall": "node lib/preuninstall.js"
   },
   "files": [
-    "file-upload-worker-android.js",
     "kinvey-nativescript-sdk.android.js",
     "kinvey-nativescript-sdk.android.js.map",
     "kinvey-nativescript-sdk.ios.js",
