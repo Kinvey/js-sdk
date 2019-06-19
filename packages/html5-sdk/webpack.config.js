@@ -16,7 +16,7 @@ module.exports = {
   mode: 'production',
   entry: path.join(__dirname, pkg.main),
   output: {
-    filename: `${pkg.name}-${pkg.version}.js`,
+    filename: `${pkg.name}-${pkg.version}.min.js`,
     path: path.join(__dirname, 'dist'),
     libraryTarget: 'umd',
     library: 'Kinvey'
