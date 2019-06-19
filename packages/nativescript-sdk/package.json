@@ -37,7 +37,7 @@
     "nativescript-secure-storage": "2.4.0",
     "nativescript-sqlite": "2.3.3",
     "nativescript-urlhandler": "1.2.3",
-    "pubnub": "git+https://github.com/thomasconner/javascript.git#develop"
+    "pubnub": "https://github.com/thomasconner/javascript/tarball/3ffab71afb1c5a730a524dca392818eed6addabd"
   },
   "peerDependencies": {
     "@angular/core": "~7.2.0",
