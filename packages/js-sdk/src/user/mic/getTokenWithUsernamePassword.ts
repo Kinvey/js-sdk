@@ -1,10 +1,11 @@
 import { Base64 } from 'js-base64';
 import { formatKinveyAuthUrl, HttpRequestMethod, KinveyHttpRequest, KinveyHttpAuth, KinveyHttpHeaders } from '../../http';
 import { getAuthProtocol, getAuthHost, getAppSecret } from '../../kinvey';
-import { Identity } from './utils';
+import { Identity, getVersion } from './utils';
 
 export interface GetTokenWithUsernamePasswordOptions {
   timeout?: number;
+  version?: string | number;
 }
 
 // export interface Token {
@@ -25,7 +26,7 @@ export async function getTokenWithUsernamePassword(username: string, password: s
         return `Basic ${credentials}`;
       }
     }),
-    url: formatKinveyAuthUrl('/oauth/token'),
+    url: formatKinveyAuthUrl(`/${getVersion(options.version)}/oauth/token`),
     body: {
       grant_type: 'password',
       client_id: clientId,
