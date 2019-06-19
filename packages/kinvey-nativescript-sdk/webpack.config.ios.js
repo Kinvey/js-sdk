@@ -41,7 +41,8 @@ module.exports = (env = {}) => {
       'tns-core-modules/ui/layouts/stack-layout': 'ui/layouts/stack-layout',
       'tns-core-modules/ui/web-view': 'ui/web-view',
       'tns-core-modules/platform': 'platform',
-      'tns-core-modules/utils/utils': 'utils/utils'
+      'tns-core-modules/utils/utils': 'utils/utils',
+      'nativescript-background-http': 'nativescript-background-http'
     },
     resolve: {
       extensions: extensions

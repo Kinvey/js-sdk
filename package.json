@@ -14,6 +14,7 @@
     "local-storage-fallback": "~4.0.0",
     "lodash": "~4.17.4",
     "loglevel": "~1.5.1",
+    "nativescript-background-http": "^3.4.1",
     "nativescript-urlhandler": "^1.2.2",
     "promise-queue": "github:thomasconner/promise-queue",
     "pubnub": "github:thomasconner/javascript#develop",
