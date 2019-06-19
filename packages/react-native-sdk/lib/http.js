@@ -39,8 +39,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var axios_1 = __importDefault(require("axios"));
-var kinvey_js_sdk_1 = require("kinvey-js-sdk");
-var http = {
+var http_1 = require("kinvey-js-sdk/lib/http");
+var errors_1 = require("kinvey-js-sdk/lib/errors");
+exports.http = {
     send: function (request) {
         return __awaiter(this, void 0, void 0, function () {
             var url, method, headers, body, timeout, response, error_1;
@@ -68,10 +69,10 @@ var http = {
                             response = error_1.response;
                         }
                         else if (error_1.request) {
-                            throw new kinvey_js_sdk_1.NetworkError('The request was made but a response was not received.', 'Please check your network connection.');
+                            throw new errors_1.NetworkError('The request was made but a response was not received.', 'Please check your network connection.');
                         }
                         else {
-                            throw new kinvey_js_sdk_1.KinveyError(error_1.message);
+                            throw new errors_1.KinveyError(error_1.message);
                         }
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/, {
@@ -85,7 +86,7 @@ var http = {
     }
 };
 function register() {
-    kinvey_js_sdk_1.setHttpAdapter(http);
+    http_1.setHttpAdapter(exports.http);
 }
 exports.register = register;
 //# sourceMappingURL=http.js.map

@@ -51,7 +51,7 @@ export class Query<T extends Doc> {
     }
   }
 
-  get key(): string {
+  get _id(): string {
     if ((isNumber(this.skip) && this.skip > 0) || (isNumber(this.limit) && this.limit < Number.MAX_SAFE_INTEGER)) {
       return null;
     }

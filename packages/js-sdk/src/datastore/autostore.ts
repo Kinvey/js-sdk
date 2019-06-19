@@ -1,6 +1,12 @@
 import isArray from 'lodash/isArray';
+import times from 'lodash/times';
 import { Doc } from '../storage';
-import { NetworkError, KinveyError } from '../errors';
+import {
+  NetworkError,
+  KinveyError,
+  MissingConfigurationError,
+  ParameterValueOutOfRangeError
+} from '../errors';
 import { Query } from '../query';
 import { getApiVersion } from '../init';
 import { NetworkStore, MultiInsertResult } from './networkstore';
@@ -8,10 +14,11 @@ import { DataStoreNetwork, FindNetworkOptions, NetworkOptions } from './network'
 import { DataStoreCache, QueryCache, SyncDoc, isValidTag, QueryDoc } from './cache';
 import { Sync, SyncPushResult } from './sync';
 
+const PAGE_LIMIT = 10000;
+
 export interface PullOptions extends FindNetworkOptions {
   useDeltaSet?: boolean;
   useAutoPagination?: boolean;
-  autoPaginationPageSize?: number;
 }
 
 export class AutoStore<T extends Doc> extends NetworkStore<T> {
@@ -125,40 +132,101 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     return syncDocs.length;
   }
 
-  async pull(query?: Query<T>, options?: FindNetworkOptions): Promise<number> {
+  async pull(query?: Query<T>, options?: PullOptions): Promise<number> {
     const pullQuery = new Query({ filter: query.filter });
     const network = new DataStoreNetwork(this.collectionName);
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const queryCache = new QueryCache(this.collectionName, this.tag);
-    const sync = new Sync(this.collectionName, this.tag);
 
     // Push sync queue
-    const count = await this.pendingSyncCount();
-    if (count > 0) {
-      await sync.push();
+    const pendingSyncCount = await this.pendingSyncCount();
+    if (pendingSyncCount > 0) {
+      await this .push(options);
       return this.pull(query, options);
     }
 
     // Retrieve existing queryCacheDoc
-    const queryCacheDoc: QueryDoc = (await queryCache.findById(pullQuery.key)) || { collectionName: this.collectionName, query: pullQuery.key, lastRequest: null };
+    const queryDoc: QueryDoc = (await queryCache.findById(pullQuery._id)) || { _id: pullQuery._id, collectionName: this.collectionName, since: null };
+
+    // Delta Set
+    if (options.useDeltaSet) {
+      try {
+        // Delta Set request
+        const response = await network.findByDeltaSet(pullQuery, Object.assign({}, options, { since: queryDoc.since }));
+        const { changed, deleted } = response.data;
+
+        // Delete the docs that have been deleted
+        if (isArray(deleted) && deleted.length > 0) {
+          const removeQuery = new Query().contains('_id', deleted.map((doc): string => doc._id));
+          await cache.remove(removeQuery);
+        }
+
+        // Save the docs that changed
+        if (isArray(changed) && changed.length > 0) {
+          await cache.save(changed);
+        }
+
+        // Update the query cache
+        queryDoc.since = response.headers.requestStart;
+        await queryCache.save(queryDoc);
+
+        // Return the number of changed docs
+        return changed.length;
+      } catch (error) {
+        if (!(error instanceof MissingConfigurationError) && !(error instanceof ParameterValueOutOfRangeError)) {
+          throw error;
+        }
+      }
+    }
+
+    // Auto pagination
+    if (options.useAutoPagination) {
+      // Clear the cache
+      await cache.clear();
+
+      // Get the total count of docs
+      const response = await network.count(pullQuery, options);
+      const { count } = response.data;
+
+      // Create the pages
+      const pageQueries = times(Math.ceil(count / PAGE_LIMIT), (i): Query<Doc> => {
+        const pageQuery = new Query(pullQuery);
+        pageQuery.skip = i * PAGE_LIMIT;
+        pageQuery.limit = Math.min(count - (i * PAGE_LIMIT), PAGE_LIMIT);
+        return pageQuery;
+      });
+
+      // Process the pages
+      const pagePromises = pageQueries.map(async (pageQuery): Promise<number> => {
+        const pageResponse = await network.find(pageQuery, options);
+        const docs = pageResponse.data;
+        await cache.save(docs);
+        return docs.length;
+      });
+      const pageCounts = await Promise.all(pagePromises);
+      const totalPageCount = pageCounts.reduce((totalCount: number, pageCount: number): number => totalCount + pageCount, 0);
+
+      // Update the query cache
+      queryDoc.since = response.headers.requestStart;
+      await queryCache.save(queryDoc);
+
+      // Return the total page count
+      return totalPageCount;
+    }
 
     // Find the docs on the backend
     const response = await network.find(pullQuery, options);
     const docs = response.data;
 
     // Remove the docs matching the provided query
-    if (pullQuery) {
-      await cache.remove(pullQuery);
-    } else {
-      await cache.remove();
-    }
+    await cache.remove(pullQuery);
 
     // Update the cache
     await cache.save(docs);
 
     // Update the query cache
-    queryCacheDoc.lastRequest = response.headers.requestStart;
-    await queryCache.save(queryCacheDoc);
+    queryDoc.since = response.headers.requestStart;
+    await queryCache.save(queryDoc);
 
     // Return the number of docs
     return docs.length;

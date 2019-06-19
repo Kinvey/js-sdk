@@ -77,9 +77,9 @@ var KinveyHttpResponse = /** @class */ (function (_super) {
             if (!this.isSuccess()) {
                 if (isPlainObject_1.default(this.data)) {
                     var message = this.data.message || this.data.description;
-                    var name_1 = this.data.name || this.data.error;
+                    var name = this.data.name || this.data.error;
                     var debug = this.data.debug;
-                    if (name_1 === 'InvalidCredentials') {
+                    if (name === 'InvalidCredentials') {
                         return new errors_1.InvalidCredentialsError(message, debug);
                     }
                     return new errors_1.KinveyError(message, debug);

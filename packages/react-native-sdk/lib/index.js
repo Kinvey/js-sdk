@@ -5,6 +5,7 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./acl"));
 __export(require("./datastore"));
+__export(require("./device"));
 __export(require("./endpoint"));
 __export(require("./init"));
 __export(require("./kmd"));

@@ -2,13 +2,10 @@
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "sourceMap": true,
     "target": "es5",
-    "lib": [
-      "es2015",
-      "es2016",
-      "es2017"
-    ],
+    "lib": [],
     "outDir": "lib"
   },
   "exclude": [

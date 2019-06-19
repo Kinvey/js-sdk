@@ -8,7 +8,7 @@ import {
 } from '../http';
 import { Query } from '../query';
 import { Doc } from '../storage';
-import { KinveyError } from '../errors';
+import { KinveyError, ParameterValueOutOfRangeError } from '../errors';
 
 export interface NetworkOptions {
   trace?: boolean;
@@ -21,6 +21,10 @@ export interface FindNetworkOptions extends NetworkOptions {
   kinveyFileTLS?: boolean;
 }
 
+export interface DeltaSetNetworkOptions extends FindNetworkOptions {
+  since?: string;
+}
+
 export class DataStoreNetwork {
   public collectionName: string;
 
@@ -29,11 +33,28 @@ export class DataStoreNetwork {
   }
 
   find(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
-      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}`, queryObject),
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}`, requestQueryObject),
+      skipBL: options.skipBL,
+      trace: options.trace,
+      properties: options.properties
+    });
+    return request.execute();
+  }
+
+  findByDeltaSet(query?: Query<Doc>, options: DeltaSetNetworkOptions = {}): Promise<KinveyHttpResponse> {
+    if (!options.since) {
+      throw new ParameterValueOutOfRangeError('A value for since in the options must be provided.');
+    }
+
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { since: options.since, kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const request = new KinveyHttpRequest({
+      method: HttpRequestMethod.GET,
+      auth: kinveySessionAuth,
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/_deltaset`, requestQueryObject),
       skipBL: options.skipBL,
       trace: options.trace,
       properties: options.properties
@@ -42,11 +63,11 @@ export class DataStoreNetwork {
   }
 
   findById(id: string, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign({ kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign({ kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
-      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/${id}`, queryObject),
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/${id}`, requestQueryObject),
       skipBL: options.skipBL,
       trace: options.trace,
       properties: options.properties
@@ -55,11 +76,11 @@ export class DataStoreNetwork {
   }
 
   count(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
-      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/_count`, queryObject),
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/_count`, requestQueryObject),
       skipBL: options.skipBL,
       trace: options.trace,
       properties: options.properties
@@ -100,11 +121,11 @@ export class DataStoreNetwork {
   }
 
   remove(query?: Query<Doc>, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const queryObject = Object.assign(query ? query.toHttpQueryObject() : {});
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {});
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.DELETE,
       auth: kinveySessionAuth,
-      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}`, queryObject),
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}`, requestQueryObject),
       skipBL: options.skipBL,
       trace: options.trace,
       properties: options.properties

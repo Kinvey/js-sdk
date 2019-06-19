@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var errors_1 = require("../errors");
+var device_1 = require("../device");
 var adapter = {
     send: function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -54,7 +55,14 @@ function getHttpAdapter() {
 }
 exports.getHttpAdapter = getHttpAdapter;
 function send(request) {
-    return getHttpAdapter().send(request);
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            if (!device_1.isNetworkConnected()) {
+                throw new errors_1.NetworkError('The device is not connected to the network.');
+            }
+            return [2 /*return*/, getHttpAdapter().send(request)];
+        });
+    });
 }
 exports.send = send;
 //# sourceMappingURL=http.js.map

@@ -2,10 +2,12 @@ import axios from 'axios';
 import {
   setHttpAdapter,
   HttpRequestObject,
-  HttpResponseObject,
+  HttpResponseObject
+} from 'kinvey-js-sdk/lib/http';
+import {
   NetworkError,
   KinveyError
-} from 'kinvey-js-sdk';
+} from 'kinvey-js-sdk/lib/errors';
 
 export const http = {
   async send(request: HttpRequestObject): Promise<HttpResponseObject> {

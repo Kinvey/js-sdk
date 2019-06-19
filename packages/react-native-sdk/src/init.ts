@@ -1,11 +1,13 @@
-import { init as initSdk, KinveyAppConfig } from 'kinvey-js-sdk/lib/init';
+import { init as initSdk, KinveySDKConfig } from 'kinvey-js-sdk/lib/init';
 import { register as registerHttp } from './http';
+import { startMonitoringNetworkState } from './device';
 
 export {
-  KinveyAppConfig
+  KinveySDKConfig
 } from 'kinvey-js-sdk/lib/init';
 
-export function init(config: KinveyAppConfig): void{
+export function init(config: KinveySDKConfig): void {
   registerHttp();
+  startMonitoringNetworkState();
   initSdk(config);
 }

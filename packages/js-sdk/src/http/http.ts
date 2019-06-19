@@ -1,4 +1,5 @@
-import { KinveyError } from '../errors';
+import { KinveyError, NetworkError } from '../errors';
+import { isNetworkConnected } from '../device';
 
 interface HttpRequest {
   headers?: { [name: string]: string };
@@ -32,6 +33,10 @@ export function getHttpAdapter(): HttpAdapter {
   return adapter;
 }
 
-export function send(request: HttpRequest): Promise<HttpResponse> {
+export async function send(request: HttpRequest): Promise<HttpResponse> {
+  if (!isNetworkConnected()) {
+    throw new NetworkError('The device is not connected to the network.');
+  }
+
   return getHttpAdapter().send(request);
 }

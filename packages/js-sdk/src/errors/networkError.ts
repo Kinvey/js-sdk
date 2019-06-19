@@ -1,4 +1,4 @@
-import { KinveyError } from './kinvey';
+import { KinveyError } from './kinveyError';
 
 export class NetworkError extends KinveyError {
   constructor(message = 'There was an error with the network.', debug?: string) {

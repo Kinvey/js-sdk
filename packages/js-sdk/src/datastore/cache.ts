@@ -4,6 +4,7 @@ import { Storage, Doc } from '../storage';
 import { getAppKey } from '../init';
 import { KinveyError } from '../errors';
 import { Query } from '../query';
+import { KinveyHttpResponse } from '../http';
 
 const SYNC_CACHE_COLLECTION_NAME = 'Sync';
 const QUERY_CACHE_COLLECTION_NAME = 'Query';
@@ -78,8 +79,7 @@ export class SyncCache extends DataStoreCache<SyncDoc> {
 
 export interface QueryDoc extends Doc {
   collectionName: string;
-  query: string;
-  lastRequest?: string;
+  since?: string;
 }
 
 export class QueryCache extends DataStoreCache<QueryDoc> {
@@ -87,3 +87,4 @@ export class QueryCache extends DataStoreCache<QueryDoc> {
     super(`${QUERY_CACHE_COLLECTION_NAME}.${collectionName}`, tag);
   }
 }
+
