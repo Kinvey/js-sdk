@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.1](https://github.com/Kinvey/js-sdk/tree/v4.2.1) (2019-06-19)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.2.0...v4.2.1)<br/>
+
+#### Bugs
+- Add default version to all MIC API requests. [#415](https://github.com/Kinvey/js-sdk/pull/415)
+- Use tarball to install forked PubNub package. [#419](https://github.com/Kinvey/js-sdk/pull/419)
+
+#### Enhancements
+- Make `kinvey-nativescript-sdk` hooks compatible with NativeScript 6.0 release. [#418](https://github.com/Kinvey/js-sdk/pull/418)
+- Add definition files for autocomplete on IDEs and type information. [#416](https://github.com/Kinvey/js-sdk/pull/416)
+
 ## [4.2.0](https://github.com/Kinvey/js-sdk/tree/v4.2.0) (2019-06-07)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.1.0...v4.2.0)<br/>
 
