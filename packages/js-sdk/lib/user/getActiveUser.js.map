@@ -1,1 +1,0 @@
-{"version":3,"file":"getActiveUser.js","sourceRoot":"","sources":["../../src/user/getActiveUser.ts"],"names":[],"mappings":";;AAAA,sCAAwC;AACxC,+BAAwC;AAExC,SAAgB,aAAa;IAC3B,IAAM,OAAO,GAAG,oBAAU,EAAE,CAAC;IAC7B,IAAI,OAAO,EAAE;QACX,OAAO,IAAI,WAAI,CAAI,OAAY,CAAC,CAAC;KAClC;IACD,OAAO,IAAI,CAAC;AACd,CAAC;AAND,sCAMC"}

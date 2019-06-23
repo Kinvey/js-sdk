@@ -8,20 +8,11 @@ yarn-error.log*
 # Dependency directories
 node_modules
 
-# files added by running the browser with disabled security
-tests/integration/''
-
-# Typescript v1 declaration files
-typings
-
 # Optional npm cache directory
 .npm
 
 # Optional eslint cache
 .eslintcache
-
-# Output of 'npm pack'
-*.tgz
 
 # Yarn Integrity file
 .yarn-integrity
