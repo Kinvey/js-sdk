@@ -1,4 +1,5 @@
 import { init as coreInit } from 'kinvey-js-sdk';
+import * as HttpAdapter from './httpAdapter';
 
 export interface KinveyConfig {
   appKey: string;
@@ -11,7 +12,7 @@ export interface KinveyConfig {
 export function init(config: KinveyConfig) {
   const kinveyConfig = coreInit({
     kinveyConfig: config,
-    httpAdapter: null,
+    httpAdapter: HttpAdapter,
     sessionStore: null,
     popup: null,
     storageAdapter: null,
