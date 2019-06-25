@@ -33,7 +33,7 @@ export function getInstanceId() {
 }
 
 export function getBaasProtocol() {
-  return 'https';
+  return 'https:';
 }
 
 export function getBaasHost() {
@@ -47,7 +47,7 @@ export function getBaasHost() {
 }
 
 export function getAuthProtocol() {
-  return 'https';
+  return 'https:';
 }
 
 export function getAuthHost() {
