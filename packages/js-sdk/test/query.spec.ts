@@ -5,6 +5,34 @@ import { Query } from '../src/query';
 import { QueryError } from '../src/errors/query';
 
 describe('Query', function () {
+  describe('notEqualTo()', function () {
+    it('should throw an error if the field is not a string', function () {
+      try {
+        const query = new Query();
+        // @ts-ignore
+        query.notEqualTo();
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('The field argument must be a string.');
+      }
+    });
+
+    it('should add the $neq filter', function () {
+      const field = 'field';
+      const value = 'foo'
+      const query = new Query();
+      query.notEqualTo(field, value);
+      expect(query.filter[field]).to.deep.equal({ $ne: value });
+    });
+
+    it('should add the $neq filter if value is null', function () {
+      const field = 'field';
+      const query = new Query();
+      query.notEqualTo(field, null);
+      expect(query.filter[field]).to.deep.equal({ $ne: null });
+    });
+  });
+
   describe('notContainedIn()', function() {
     it('should throw an error that a value must be provided', function () {
       try {
