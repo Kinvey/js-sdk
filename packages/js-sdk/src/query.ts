@@ -521,6 +521,10 @@ export class Query {
    * @returns {Query} Query
    */
   ascending(field: string) {
+    if (!isString(field)) {
+      throw new QueryError('The provided field must be a string.');
+    }
+
     if (this._parent) {
       this._parent.ascending(field);
     } else {
@@ -542,6 +546,10 @@ export class Query {
    * @returns {Query} Query
    */
   descending(field: string) {
+    if (!isString(field)) {
+      throw new QueryError('The provided field must be a string.');
+    }
+
     if (this._parent) {
       this._parent.descending(field);
     } else {
