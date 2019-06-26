@@ -699,6 +699,10 @@ export class Query {
    * @returns {Query} Query
    */
   addFilter(field: string, ...args: any) {
+    if (!isString(field)) {
+      throw new QueryError('The field argument must be a string.');
+    }
+
     const { condition, values } = args.length === 2
       ? { condition: args[0], values: args[1] }
       : { condition: undefined, values: args[0] };

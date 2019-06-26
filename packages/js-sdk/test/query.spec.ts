@@ -5,6 +5,40 @@ import { Query } from '../src/query';
 import { QueryError } from '../src/errors/query';
 
 describe('Query', function () {
+  describe('exists()', function() {
+    it('should throw an error if the field is not a string', function () {
+      try {
+        const query = new Query();
+        // @ts-ignore
+        query.exists();
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('The field argument must be a string.')
+      }
+    });
+
+    it('should add the $exists filter to true by default', function () {
+      const field = 'field';
+      const query = new Query();
+      query.exists(field);
+      expect(query.filter[field]).to.deep.equal({ $exists: true });
+    });
+
+    it('should add the $exists filter to true', function () {
+      const field = 'field';
+      const query = new Query();
+      query.exists(field, true);
+      expect(query.filter[field]).to.deep.equal({ $exists: true });
+    });
+
+    it('should add the $exists filter to false', function () {
+      const field = 'field';
+      const query = new Query();
+      query.exists(field, false);
+      expect(query.filter[field]).to.deep.equal({ $exists: false });
+    });
+  });
+
   describe('ascending()', function() {
     it('should throw an error if the field is not a string', function() {
       try {
