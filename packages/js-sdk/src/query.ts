@@ -6,7 +6,6 @@ import isEmpty from 'lodash/isEmpty';
 import isArray from 'lodash/isArray';
 import sift from 'sift';
 import { QueryError } from './errors/query';
-import { KinveyError } from './errors/kinvey';
 
 const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
 const PROTECTED_FIELDS = ['_id', '_acl'];
@@ -744,7 +743,7 @@ export class Query {
         if (isPlainObject(queryObject)) {
           query = new Query(queryObject);
         } else {
-          throw new KinveyError('query argument must be of type: Kinvey.Query[] or Object[].');
+          throw new QueryError('query argument must be of type: Kinvey.Query[] or Object[].');
         }
       }
       return query.toPlainObject().filter;
