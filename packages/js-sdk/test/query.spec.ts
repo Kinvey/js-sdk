@@ -5,6 +5,46 @@ import { Query } from '../src/query';
 import { QueryError } from '../src/errors/query';
 
 describe('Query', function () {
+  describe('notContainedIn()', function() {
+    it('should throw an error that a value must be provided', function () {
+      try {
+        const query = new Query();
+        // @ts-ignore
+        query.notContainedIn();
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('You must supply a value.');
+      }
+    });
+
+    it('should throw an error if the field is not a string', function () {
+      try {
+        const query = new Query();
+        // @ts-ignore
+        query.notContainedIn(null, ['foo']);
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('The field argument must be a string.');
+      }
+    });
+
+    it('should add the $nin filter', function () {
+      const field = 'field';
+      const values = ['foo'];
+      const query = new Query();
+      query.notContainedIn(field, values);
+      expect(query.filter[field]).to.deep.equal({ $nin: values });
+    });
+
+    it('should add the $nin filter if values is not an array', function () {
+      const field = 'field';
+      const value = 'foo';
+      const query = new Query();
+      query.notContainedIn(field, value);
+      expect(query.filter[field]).to.deep.equal({ $nin: [value] });
+    });
+  });
+
   describe('exists()', function() {
     it('should throw an error if the field is not a string', function () {
       try {
@@ -13,7 +53,7 @@ describe('Query', function () {
         query.exists();
       } catch (error) {
         expect(error).to.be.instanceOf(QueryError);
-        expect(error.message).to.equal('The field argument must be a string.')
+        expect(error.message).to.equal('The field argument must be a string.');
       }
     });
 
@@ -47,7 +87,7 @@ describe('Query', function () {
         query.ascending();
       } catch (error) {
         expect(error).to.be.instanceOf(QueryError);
-        expect(error.message).to.equal('The provided field must be a string.')
+        expect(error.message).to.equal('The provided field must be a string.');
       }
     });
 
@@ -67,7 +107,7 @@ describe('Query', function () {
         query.descending();
       } catch (error) {
         expect(error).to.be.instanceOf(QueryError);
-        expect(error.message).to.equal('The provided field must be a string.')
+        expect(error.message).to.equal('The provided field must be a string.');
       }
     });
 
