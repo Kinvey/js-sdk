@@ -146,4 +146,40 @@ describe('Query', function () {
       expect(query.sort[field]).to.equal(-1);
     });
   });
+
+  describe('or()', function() {
+    it('should throw an error if the argument is null', function() {
+      try {
+        const query = new Query();
+        query.or(null);
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('query argument must be of type: Kinvey.Query[] or Object[].');
+      }
+    });
+  });
+
+  describe('nor()', function () {
+    it('should throw an error if the argument is null', function () {
+      try {
+        const query = new Query();
+        query.nor(null);
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('query argument must be of type: Kinvey.Query[] or Object[].');
+      }
+    });
+  });
+
+  describe('and()', function () {
+    it('should throw an error if the argument is null', function () {
+      try {
+        const query = new Query();
+        query.and(null);
+      } catch (error) {
+        expect(error).to.be.instanceOf(QueryError);
+        expect(error.message).to.equal('query argument must be of type: Kinvey.Query[] or Object[].');
+      }
+    });
+  });
 });
