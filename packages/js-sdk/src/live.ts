@@ -125,3 +125,9 @@ export function unsubscribe() {
 
   return true;
 }
+
+export function reconnect() {
+  if (pubnub) {
+    pubnub.reconnect();
+  }
+}
