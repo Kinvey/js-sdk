@@ -1,5 +1,6 @@
 /* eslint class-methods-use-this: "off" */
 
+import isArray from 'lodash/isArray';
 import PQueue from 'p-queue';
 import { KinveyError } from '../errors';
 import { KmdObject } from '../kmd';
@@ -49,7 +50,14 @@ export class Storage<T extends Doc> {
     return QUEUE.add((): Promise<T> => this.storageAdapter.findById(this.namespace, this.collectionName, id));
   }
 
-  save(docsToSave: T[]): Promise<T[]> {
+  save(docsToSave: T): Promise<T>
+  save(docsToSave: T[]): Promise<T[]>
+  async save(docsToSave: any): Promise<any>{
+    if (!isArray(docsToSave)) {
+      const savedDocs = await this.save([docsToSave]);
+      return savedDocs.shift();
+    }
+
     return QUEUE.add(async (): Promise<T[]> => {
       // Clone the docs
       let docs = docsToSave.slice(0, docsToSave.length);

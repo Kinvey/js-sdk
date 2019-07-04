@@ -9,3 +9,4 @@ export * from './acl';
 export * from './endpoint';
 export * from './init';
 export * from './kmd';
+export * from './ping';

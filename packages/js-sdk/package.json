@@ -23,6 +23,7 @@
   "dependencies": {
     "js-base64": "^2.5.1",
     "lodash": "^4.17.11",
+    "loglevel": "^1.6.3",
     "p-queue": "^6.0.2",
     "sift": "^8.4.0",
     "url": "^0.11.0",

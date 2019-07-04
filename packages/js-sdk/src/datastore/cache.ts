@@ -1,10 +1,8 @@
 import isString from 'lodash/isString';
-import isArray from 'lodash/isArray';
 import { Storage, Doc } from '../storage';
 import { getAppKey } from '../init';
 import { KinveyError } from '../errors';
 import { Query } from '../query';
-import { KinveyHttpResponse } from '../http';
 
 const SYNC_CACHE_COLLECTION_NAME = 'Sync';
 const QUERY_CACHE_COLLECTION_NAME = 'Query';
@@ -33,17 +31,6 @@ export class DataStoreCache<T extends Doc> extends Storage<T> {
       return query.process(docs);
     }
     return docs;
-  }
-
-  save(doc: T): Promise<T>
-  save(docs: T[]): Promise<T[]>
-  async save(docs: any): Promise<any> {
-    if (!isArray(docs)) {
-      const savedDocs = await this.save([docs]);
-      return savedDocs.shift();
-    }
-
-    return super.save(docs);
   }
 
   async remove(query?: Query<T>): Promise<number> {
