@@ -5,7 +5,6 @@ import * as SessionStore from './sessionStore';
 import * as Popup from './popup';
 import { getStorageAdapter, StorageProvider } from './storage';
 import { getDataFromPackageJson } from './utils';
-import * as live from './live';
 
 export interface KinveyConfig {
   appKey: string;
@@ -26,8 +25,7 @@ export function init(config?: KinveyConfig) {
     popup: Popup,
     storageAdapter: getStorageAdapter(mergedConfig.storage),
     pubnub: PubNub
-  })
-  live.startMonitoring();
+  });
   return Object.assign({}, kinveyConfig, { storage: mergedConfig.storage, _storage: mergedConfig.storage });
 }
 

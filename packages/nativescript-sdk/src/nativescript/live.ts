@@ -22,3 +22,8 @@ export function startMonitoring() {
     currentConnectionType = newConnectionType;
   });
 }
+
+export function stopMonitoring() {
+  application.off(application.resumeEvent);
+  connectivityModule.stopMonitoring();
+}
