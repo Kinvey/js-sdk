@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.2](https://github.com/Kinvey/js-sdk/tree/v4.2.2) (2019-07-05)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.2.1...v4.2.2)<br/>
+
+#### Bugs
+- Change auto protocol from `https` to `https:`. [#423](https://github.com/Kinvey/js-sdk/pull/423)
+- Resume live services after network connection is resolved on NativeScript. [#429](https://github.com/Kinvey/js-sdk/pull/429)
+- Verify arguments for `query.ascending()` and `query.descending()`. [#424](https://github.com/Kinvey/js-sdk/pull/424)
+- Verify arguments for `query.exists()`. [#425](https://github.com/Kinvey/js-sdk/pull/425)
+- Verify arguments for `query.notContainedId()`. [#426](https://github.com/Kinvey/js-sdk/pull/426)
+- Verify arguments for `query.notEqualTo()`. [#427](https://github.com/Kinvey/js-sdk/pull/427)
+- Verify arguments for `query.or()`, `query.and()`, and `query.nor()`. [#428](https://github.com/Kinvey/js-sdk/pull/428)
+
 ## [4.2.1](https://github.com/Kinvey/js-sdk/tree/v4.2.1) (2019-06-19)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.2.0...v4.2.1)<br/>
 
