@@ -43,10 +43,10 @@ export interface DeviceState {
   network: {
     connected: boolean;
     type?: NetworkType;
-  }
+  };
 }
 
-const state: DeviceState = { network: { connected: true }};
+const state: DeviceState = { network: { connected: true } };
 
 export function isNetworkConnected(): boolean {
   return state.network.connected;
@@ -63,4 +63,3 @@ export function getNetworkType(): NetworkType | undefined {
 export function setNetworkType(type: NetworkType): void {
   state.network.type = type;
 }
-

@@ -1,29 +1,14 @@
 import { expect } from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
-import { init } from '../../src/init';
 import { formatKinveyBaasUrl, KinveyBaasNamespace, kinveySessionAuth, KinveyHttpResponse } from '../../src/http';
 import { setSession, removeSession } from '../../src/session';
 import { Query } from '../../src/query';
 import { DataStoreNetwork } from '../../src/datastore';
-import { register as registerHttp } from '../http';
 
-const APP_KEY = 'appKey';
-const APP_SECRET = 'appSecret';
 const COLLECTION_NAME = 'collectionName';
 
-describe('DataStore Network', function () {
-  before(function () {
-    registerHttp();
-  });
-
-  before(function () {
-    init({
-      appKey: APP_KEY,
-      appSecret: APP_SECRET
-    });
-  });
-
+describe('DataStore Network', function() {
   beforeEach(function() {
     return setSession({
       _id: '1',
@@ -43,11 +28,11 @@ describe('DataStore Network', function () {
 
   describe('find()', function() {
     describe('without a query', function() {
-      it('should send the correct GET request', async function () {
+      it('should send the correct GET request', async function() {
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth()
+            Authorization: await kinveySessionAuth()
           }
         })
           .get(url.pathname)
@@ -59,12 +44,12 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with kinveyFileTTL', async function () {
+      it('should send the correct GET request with kinveyFileTTL', async function() {
         const kinveyFileTTL = 1;
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth()
+            Authorization: await kinveySessionAuth()
           }
         })
           .get(url.pathname)
@@ -76,12 +61,12 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with kinveyFileTLS', async function () {
+      it('should send the correct GET request with kinveyFileTLS', async function() {
         const kinveyFileTLS = true;
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth()
+            Authorization: await kinveySessionAuth()
           }
         })
           .get(url.pathname)
@@ -93,11 +78,11 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with trace', async function () {
+      it('should send the correct GET request with trace', async function() {
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth(),
+            Authorization: await kinveySessionAuth(),
             'X-Kinvey-Include-Headers-In-Response': 'X-Kinvey-Request-Id',
             'X-Kinvey-ResponseWrapper': 'true'
           }
@@ -110,11 +95,11 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with skipBL', async function () {
+      it('should send the correct GET request with skipBL', async function() {
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth(),
+            Authorization: await kinveySessionAuth(),
             'X-Kinvey-Skip-Business-Logic': 'true'
           }
         })
@@ -130,12 +115,14 @@ describe('DataStore Network', function () {
     });
 
     describe('with a query', function() {
-      it('should send the correct GET request', async function () {
+      it('should send the correct GET request', async function() {
         const query = new Query().equalTo('title', 'Kinvey');
-        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`, query.toHttpQueryObject()));
+        const url = new URL(
+          formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`, query.toHttpQueryObject())
+        );
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth()
+            Authorization: await kinveySessionAuth()
           }
         })
           .get(url.pathname)
@@ -147,13 +134,15 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with kinveyFileTTL', async function () {
+      it('should send the correct GET request with kinveyFileTTL', async function() {
         const kinveyFileTTL = 1;
         const query = new Query().equalTo('title', 'Kinvey');
-        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`, query.toHttpQueryObject()));
+        const url = new URL(
+          formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`, query.toHttpQueryObject())
+        );
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth()
+            Authorization: await kinveySessionAuth()
           }
         })
           .get(url.pathname)
@@ -165,13 +154,15 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with kinveyFileTLS', async function () {
+      it('should send the correct GET request with kinveyFileTLS', async function() {
         const kinveyFileTLS = true;
         const query = new Query().equalTo('title', 'Kinvey');
-        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`, query.toHttpQueryObject()));
+        const url = new URL(
+          formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`, query.toHttpQueryObject())
+        );
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth()
+            Authorization: await kinveySessionAuth()
           }
         })
           .get(url.pathname)
@@ -183,12 +174,12 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with trace', async function () {
+      it('should send the correct GET request with trace', async function() {
         const query = new Query().equalTo('title', 'Kinvey');
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth(),
+            Authorization: await kinveySessionAuth(),
             'X-Kinvey-Include-Headers-In-Response': 'X-Kinvey-Request-Id',
             'X-Kinvey-ResponseWrapper': 'true'
           }
@@ -202,12 +193,12 @@ describe('DataStore Network', function () {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send the correct GET request with skipBL', async function () {
+      it('should send the correct GET request with skipBL', async function() {
         const query = new Query().equalTo('title', 'Kinvey');
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${COLLECTION_NAME}`));
         const scope = nock(url.origin, {
           reqheaders: {
-            'Authorization': await kinveySessionAuth(),
+            Authorization: await kinveySessionAuth(),
             'X-Kinvey-Skip-Business-Logic': 'true'
           }
         })

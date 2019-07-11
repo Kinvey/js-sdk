@@ -1,6 +1,10 @@
 {
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
+
   // Eslint
-  "eslint.workingDirectories": [
-    "packages"
-  ]
+  "eslint.autoFixOnSave": true,
+  "eslint.workingDirectories": ["packages"]
 }

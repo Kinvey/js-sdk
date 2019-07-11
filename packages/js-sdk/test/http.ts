@@ -19,7 +19,10 @@ const http = {
       if (error.response) {
         axiosResponse = error.response;
       } else if (error.request) {
-        throw new NetworkError('The request was made but a response was not received.', 'Please check your network connection.');
+        throw new NetworkError(
+          'The request was made but a response was not received.',
+          'Please check your network connection.'
+        );
       } else {
         throw new KinveyError(error.message);
       }

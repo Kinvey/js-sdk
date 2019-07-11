@@ -1,11 +1,5 @@
 import { KinveyError } from '../errors';
-import {
-  KinveyHttpRequest,
-  HttpRequestMethod,
-  formatKinveyBaasUrl,
-  KinveyBaasNamespace,
-  kinveyAppAuth
-} from '../http';
+import { KinveyHttpRequest, HttpRequestMethod, formatKinveyBaasUrl, KinveyBaasNamespace, kinveyAppAuth } from '../http';
 import { setSession } from '../session';
 import { User, UserData, getActiveUser } from '../user';
 

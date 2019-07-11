@@ -9,18 +9,18 @@ function getSessionKey(): string {
 }
 
 interface MICSession {
-  client_id: string,
-  redirect_uri?: string,
-  access_token: string,
-  refresh_token?: string
+  client_id: string;
+  redirect_uri?: string;
+  access_token: string;
+  refresh_token?: string;
 }
 
 export interface Session {
-  _id: string,
-  _kmd: KmdObject,
+  _id: string;
+  _kmd: KmdObject;
   _socialIdentity?: {
-    kinveyAuth?: MICSession
-  }
+    kinveyAuth?: MICSession;
+  };
 }
 
 export function getSession(): Session | null {

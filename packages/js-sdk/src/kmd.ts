@@ -8,7 +8,7 @@ export interface KmdObject {
   authtoken?: string;
   emailVerification?: {
     status: string;
-  }
+  };
 }
 
 export class Kmd {

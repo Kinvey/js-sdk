@@ -4,20 +4,19 @@ import urlJoin from 'url-join';
 import { getInstanceId, getAppKey } from '../init';
 
 export function clean(value: { [key: string]: any }): { [key: string]: any } {
-  return Object.keys(value)
-    .reduce((cleanVal: { [key: string]: any }, key): { [key: string]: any } => {
-      let objVal = value[key];
+  return Object.keys(value).reduce((cleanVal: { [key: string]: any }, key): { [key: string]: any } => {
+    let objVal = value[key];
 
-      if (isPlainObject(objVal)) {
-        objVal = clean(objVal);
-      }
+    if (isPlainObject(objVal)) {
+      objVal = clean(objVal);
+    }
 
-      if (typeof objVal !== 'undefined' && objVal !== null) {
-        return Object.assign(cleanVal, { [key]: objVal });
-      }
+    if (typeof objVal !== 'undefined' && objVal !== null) {
+      return Object.assign(cleanVal, { [key]: objVal });
+    }
 
-      return cleanVal;
-    }, {});
+    return cleanVal;
+  }, {});
 }
 
 export function getKinveyBaasProtocol(): string {
@@ -56,7 +55,11 @@ export enum KinveyBaasNamespace {
   User = 'user'
 }
 
-export function formatKinveyBaasUrl(namespace: KinveyBaasNamespace, path?: string, query?: { [key: string]: any }): string {
+export function formatKinveyBaasUrl(
+  namespace: KinveyBaasNamespace,
+  path?: string,
+  query?: { [key: string]: any }
+): string {
   return format({
     protocol: getKinveyBaasProtocol(),
     host: getKinveyBaasHost(),

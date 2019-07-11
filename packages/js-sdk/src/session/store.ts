@@ -22,7 +22,6 @@ class DefaultSessionStore {
 
 let store: SessionStore = new DefaultSessionStore();
 
-
 export function getSessionStore(): SessionStore {
   return store;
 }

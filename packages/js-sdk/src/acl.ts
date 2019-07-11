@@ -10,7 +10,7 @@ export interface AclObject {
   groups?: {
     r?: string[];
     w?: string[];
-  }
+  };
 }
 
 export class Acl {

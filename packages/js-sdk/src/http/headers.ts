@@ -8,8 +8,8 @@ export class HttpHeaders {
   private headers: Map<string, string> = new Map();
   private normalizedNames: Map<string, string> = new Map();
 
-  constructor(headers?: HttpHeaders)
-  constructor(headers?: { [name: string]: string | string[] | (() => string | string[]) })
+  constructor(headers?: HttpHeaders);
+  constructor(headers?: { [name: string]: string | string[] | (() => string | string[]) });
   constructor(headers?: any) {
     if (headers) {
       if (headers instanceof HttpHeaders) {
@@ -46,9 +46,9 @@ export class HttpHeaders {
     return Array.from(this.normalizedNames.values());
   }
 
-  set(name: string, value: string): HttpHeaders
-  set(name: string, value: string[]): HttpHeaders
-  set(name: string, value: () => string | string[]): HttpHeaders
+  set(name: string, value: string): HttpHeaders;
+  set(name: string, value: string[]): HttpHeaders;
+  set(name: string, value: () => string | string[]): HttpHeaders;
   set(name: string, value: any): HttpHeaders {
     if (isFunction(value)) {
       return this.set(name, value());
@@ -69,14 +69,12 @@ export class HttpHeaders {
   }
 
   join(headers: HttpHeaders): HttpHeaders {
-    headers
-      .keys()
-      .forEach((name): void => {
-        const value = headers.get(name);
-        if (value) {
-          this.set(name, value);
-        }
-      });
+    headers.keys().forEach((name): void => {
+      const value = headers.get(name);
+      if (value) {
+        this.set(name, value);
+      }
+    });
     return this;
   }
 
@@ -85,19 +83,17 @@ export class HttpHeaders {
   }
 
   toPlainObject(): { [name: string]: string } {
-    return this
-      .keys()
-      .reduce((headers: { [name: string]: string }, header): { [name: string]: string } => {
-        const value = this.get(header);
-        if (value) {
-          return Object.assign(headers, { [header]: value });
-        }
-        return headers;
-      }, {});
+    return this.keys().reduce((headers: { [name: string]: string }, header): { [name: string]: string } => {
+      const value = this.get(header);
+      if (value) {
+        return Object.assign(headers, { [header]: value });
+      }
+      return headers;
+    }, {});
   }
 
-  static fromHeaders(headers?: { [name: string]: string | string[] | (() => string | string[]) }): HttpHeaders
-  static fromHeaders(headers?: HttpHeaders): HttpHeaders
+  static fromHeaders(headers?: { [name: string]: string | string[] | (() => string | string[]) }): HttpHeaders;
+  static fromHeaders(headers?: HttpHeaders): HttpHeaders;
   static fromHeaders(headers?: any): HttpHeaders {
     const httpHeaders = new HttpHeaders();
 
@@ -116,8 +112,8 @@ export class HttpHeaders {
 }
 
 export class KinveyHttpHeaders extends HttpHeaders {
-  constructor(headers?: KinveyHttpHeaders)
-  constructor(headers?: { [name: string]: string | string[] | (() => string | string[]) })
+  constructor(headers?: KinveyHttpHeaders);
+  constructor(headers?: { [name: string]: string | string[] | (() => string | string[]) });
   constructor(headers?: any) {
     super(headers);
 

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { HttpHeaders } from '../../src/http';
 
-describe('Headers', function () {
+describe('Headers', function() {
   it('should set a header using a function', function() {
     const headers = new HttpHeaders();
     const header = 'foo';

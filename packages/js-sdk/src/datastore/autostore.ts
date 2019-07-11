@@ -1,12 +1,7 @@
 import isArray from 'lodash/isArray';
 import times from 'lodash/times';
 import { Doc } from '../storage';
-import {
-  NetworkError,
-  KinveyError,
-  MissingConfigurationError,
-  ParameterValueOutOfRangeError
-} from '../errors';
+import { NetworkError, KinveyError, MissingConfigurationError, ParameterValueOutOfRangeError } from '../errors';
 import { Query } from '../query';
 import { getApiVersion } from '../init';
 import { NetworkStore, MultiInsertResult } from './networkstore';
@@ -63,8 +58,8 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     }
   }
 
-  create(doc: T, options?: NetworkOptions): Promise<T>
-  create(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>
+  create(doc: T, options?: NetworkOptions): Promise<T>;
+  create(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>;
   async create(docs: any, options?: NetworkOptions): Promise<any> {
     const apiVersion = getApiVersion();
 
@@ -90,11 +85,14 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     // Attempt to sync the docs with the backend
     const syncDocs = await sync.addCreateSyncOperation(cachedDocs);
     const results = await sync.push(syncDocs, options);
-    return results.reduce((multiInsertResult, result): MultiInsertResult<T> => {
-      multiInsertResult.entities.push(result.doc);
-      multiInsertResult.errors.push(result.error);
-      return multiInsertResult;
-    }, { entities: [], errors: [] });
+    return results.reduce(
+      (multiInsertResult, result): MultiInsertResult<T> => {
+        multiInsertResult.entities.push(result.doc);
+        multiInsertResult.errors.push(result.error);
+        return multiInsertResult;
+      },
+      { entities: [], errors: [] }
+    );
   }
 
   async update(doc: T, options?: NetworkOptions): Promise<T> {
@@ -122,6 +120,42 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     return result.doc as T;
   }
 
+  async remove(query?: Query<T>, options?: NetworkOptions): Promise<number> {
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const sync = new Sync(this.collectionName, this.tag);
+    const network = new DataStoreNetwork(this.collectionName);
+
+    // Remove the docs from the network
+    const response = await network.remove(query, options);
+    const count = 'count' in response.data ? response.data.count : 0;
+
+    // Remove the docs from the cache
+    const docs = await cache.find(query);
+    const syncDocs = await sync.addDeleteSyncOperation(docs);
+    await sync.push(syncDocs, options);
+
+    // Return the count
+    return count;
+  }
+
+  async removeById(id: string, options?: NetworkOptions): Promise<number> {
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const sync = new Sync(this.collectionName, this.tag);
+    const network = new DataStoreNetwork(this.collectionName);
+
+    // Remove the docs from the network
+    const response = await network.removeById(id, options);
+    const count = 'count' in response.data ? response.data.count : 0;
+
+    // Remove the doc from the cache
+    const doc = await cache.findById(id);
+    const syncDocs = await sync.addDeleteSyncOperation([doc]);
+    await sync.push(syncDocs, options);
+
+    // Return the count
+    return count;
+  }
+
   async pendingSyncDocs(): Promise<SyncDoc[]> {
     const sync = new Sync(this.collectionName, this.tag);
     return sync.find();
@@ -132,7 +166,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     return syncDocs.length;
   }
 
-  async pull(query?: Query<T>, options?: PullOptions): Promise<number> {
+  async pull(query: Query<T> = new Query<T>(), options: PullOptions = {}): Promise<number> {
     const pullQuery = new Query({ filter: query.filter });
     const network = new DataStoreNetwork(this.collectionName);
     const cache = new DataStoreCache(this.collectionName, this.tag);
@@ -141,12 +175,16 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     // Push sync queue
     const pendingSyncCount = await this.pendingSyncCount();
     if (pendingSyncCount > 0) {
-      await this .push(options);
+      await this.push(options);
       return this.pull(query, options);
     }
 
     // Retrieve existing queryCacheDoc
-    const queryDoc: QueryDoc = (await queryCache.findById(pullQuery._id)) || { _id: pullQuery._id, collectionName: this.collectionName, since: null };
+    const queryDoc: QueryDoc = (await queryCache.findById(pullQuery._id)) || {
+      _id: pullQuery._id,
+      collectionName: this.collectionName,
+      since: null
+    };
 
     // Delta Set
     if (options.useDeltaSet) {
@@ -189,22 +227,30 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
       const { count } = response.data;
 
       // Create the pages
-      const pageQueries = times(Math.ceil(count / PAGE_LIMIT), (i): Query<Doc> => {
-        const pageQuery = new Query(pullQuery);
-        pageQuery.skip = i * PAGE_LIMIT;
-        pageQuery.limit = Math.min(count - (i * PAGE_LIMIT), PAGE_LIMIT);
-        return pageQuery;
-      });
+      const pageQueries = times(
+        Math.ceil(count / PAGE_LIMIT),
+        (i): Query<Doc> => {
+          const pageQuery = new Query(pullQuery);
+          pageQuery.skip = i * PAGE_LIMIT;
+          pageQuery.limit = Math.min(count - i * PAGE_LIMIT, PAGE_LIMIT);
+          return pageQuery;
+        }
+      );
 
       // Process the pages
-      const pagePromises = pageQueries.map(async (pageQuery): Promise<number> => {
-        const pageResponse = await network.find(pageQuery, options);
-        const docs = pageResponse.data;
-        await cache.save(docs);
-        return docs.length;
-      });
+      const pagePromises = pageQueries.map(
+        async (pageQuery): Promise<number> => {
+          const pageResponse = await network.find(pageQuery, options);
+          const docs = pageResponse.data;
+          await cache.save(docs);
+          return docs.length;
+        }
+      );
       const pageCounts = await Promise.all(pagePromises);
-      const totalPageCount = pageCounts.reduce((totalCount: number, pageCount: number): number => totalCount + pageCount, 0);
+      const totalPageCount = pageCounts.reduce(
+        (totalCount: number, pageCount: number): number => totalCount + pageCount,
+        0
+      );
 
       // Update the query cache
       queryDoc.since = response.headers.requestStart;

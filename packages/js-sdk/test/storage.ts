@@ -1,6 +1,6 @@
 /* eslint class-methods-use-this: "off" */
 
-import { Storage, StorageAdapter, Doc } from './storage';
+import { StorageAdapter, setStorageAdapter } from '../src/storage';
 
 const store = new Map<string, Map<string, any>>();
 
@@ -57,8 +57,6 @@ export class Memory implements StorageAdapter {
   }
 }
 
-export class MemoryStorage<T extends Doc> extends Storage<T> {
-  get storageAdapter(): Memory {
-    return new Memory();
-  }
+export function register(): void {
+  setStorageAdapter(new Memory());
 }

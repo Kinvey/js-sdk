@@ -4,6 +4,8 @@ import { Doc } from '../storage';
 import { Kmd } from '../kmd';
 import { getApiVersion } from '../init';
 import { KinveyError } from '../errors';
+import { Query } from '../query';
+// import { Aggregation } from "../aggregation";
 import { DataStoreNetwork, FindNetworkOptions, NetworkOptions } from './network';
 
 export interface MultiInsertResult<T extends Doc> {
@@ -22,14 +24,31 @@ export class NetworkStore<T extends Doc> {
     this.collectionName = collectionName;
   }
 
-  async find(query?: any, options?: FindNetworkOptions): Promise<T[]> {
+  async find(query?: Query<T>, options?: FindNetworkOptions): Promise<T[]> {
     const network = new DataStoreNetwork(this.collectionName);
     const response = await network.find(query, options);
     return response.data;
   }
 
-  create(doc: T, options?: NetworkOptions): Promise<T>
-  create(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>
+  async count(query?: Query<T>, options?: NetworkOptions): Promise<number> {
+    const network = new DataStoreNetwork(this.collectionName);
+    const response = await network.count(query, options);
+    return 'count' in response.data ? response.data.count : 0;
+  }
+
+  // async group(aggregation: Aggregation, options?: NetworkOptions): Promise<any> {
+  //   const network = new DataStoreNetwork(this.collectionName);
+  //   const response = await network.count(query, options);
+  // }
+
+  async findById(id: string, options?: NetworkOptions): Promise<T> {
+    const network = new DataStoreNetwork(this.collectionName);
+    const response = await network.findById(id, options);
+    return response.data;
+  }
+
+  create(doc: T, options?: NetworkOptions): Promise<T>;
+  create(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>;
   async create(docs: any, options?: NetworkOptions): Promise<any> {
     const batchSize = 100;
     const apiVersion = getApiVersion();
@@ -41,7 +60,9 @@ export class NetworkStore<T extends Doc> {
     if (isArray(docs) && docs.length > batchSize) {
       let i = 0;
 
-      const batchCreate = async (result: MultiInsertResult<T> = { entities: [], errors: [] }): Promise<MultiInsertResult<T>> => {
+      const batchCreate = async (
+        result: MultiInsertResult<T> = { entities: [], errors: [] }
+      ): Promise<MultiInsertResult<T>> => {
         if (i >= docs.length) {
           return result;
         }
@@ -77,8 +98,8 @@ export class NetworkStore<T extends Doc> {
     return response.data;
   }
 
-  save(doc: T, options?: NetworkOptions): Promise<T>
-  save(docs: T[], options?: NetworkOptions): Promise<T[]>
+  save(doc: T, options?: NetworkOptions): Promise<T>;
+  save(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>;
   save(docs: any, options?: NetworkOptions): Promise<any> {
     if (!isArray(docs)) {
       const kmd = new Kmd(docs._kmd);
@@ -89,5 +110,17 @@ export class NetworkStore<T extends Doc> {
     }
 
     return this.create(docs, options);
+  }
+
+  async remove(query?: Query<T>, options?: NetworkOptions): Promise<number> {
+    const network = new DataStoreNetwork(this.collectionName);
+    const response = await network.remove(query, options);
+    return 'count' in response.data ? response.data.count : 0;
+  }
+
+  async removeById(id: string, options?: NetworkOptions): Promise<number> {
+    const network = new DataStoreNetwork(this.collectionName);
+    const response = await network.removeById(id, options);
+    return 'count' in response.data ? response.data.count : 0;
   }
 }

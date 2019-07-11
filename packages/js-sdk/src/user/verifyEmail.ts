@@ -1,12 +1,6 @@
 import isString from 'lodash/isString';
 import { KinveyError } from '../errors';
-import {
-  KinveyHttpRequest,
-  HttpRequestMethod,
-  formatKinveyBaasUrl,
-  KinveyBaasNamespace,
-  kinveyAppAuth
-} from '../http';
+import { KinveyHttpRequest, HttpRequestMethod, formatKinveyBaasUrl, KinveyBaasNamespace, kinveyAppAuth } from '../http';
 
 export interface VerifyEmailOptions {
   timeout?: number;

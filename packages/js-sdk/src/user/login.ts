@@ -1,13 +1,7 @@
 import isString from 'lodash/isString';
 import isEmpty from 'lodash/isEmpty';
 import { KinveyError } from '../errors';
-import {
-  KinveyHttpRequest,
-  HttpRequestMethod,
-  formatKinveyBaasUrl,
-  KinveyBaasNamespace,
-  kinveyAppAuth
-} from '../http';
+import { KinveyHttpRequest, HttpRequestMethod, formatKinveyBaasUrl, KinveyBaasNamespace, kinveyAppAuth } from '../http';
 import { setSession } from '../session';
 import { getActiveUser } from './getActiveUser';
 import { User, UserData } from './user';
@@ -19,8 +13,10 @@ export async function login<T extends UserData>(username: string, password: stri
     throw new KinveyError('An active user already exists. Please logout the active user before you login.');
   }
 
-  if (!isString(username) ||!isString(password)) {
-    throw new KinveyError('Username and/or password are not a string. Please provide both a username and password as a string to login.');
+  if (!isString(username) || !isString(password)) {
+    throw new KinveyError(
+      'Username and/or password are not a string. Please provide both a username and password as a string to login.'
+    );
   }
 
   if (isEmpty(username) || isEmpty(password)) {

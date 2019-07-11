@@ -15,14 +15,46 @@ export interface Doc {
   _kmd?: KmdObject;
 }
 
-export interface StorageAdapter<T extends Doc> {
+export interface StorageAdapter {
   count(namespace: string, collectionName: string): Promise<number>;
-  find(namespace: string, collectionName: string): Promise<T[]>;
-  findById(namespace: string, collectionName: string, id: string): Promise<T>;
-  save(namespace: string, collectionName: string, docs: T[]): Promise<T[]>;
+  find(namespace: string, collectionName: string): Promise<any[]>;
+  findById(namespace: string, collectionName: string, id: string): Promise<any>;
+  save(namespace: string, collectionName: string, docs: any[]): Promise<any[]>;
   removeById(namespace: string, collectionName: string, id: string): Promise<number>;
   clear(namespace: string, collectionName: string): Promise<number>;
   clearDatabase(namespace: string, exclude?: string[]): Promise<void>;
+}
+
+let adapter: StorageAdapter = {
+  count(namespace: string, collectionName: string): Promise<number> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  },
+  find(namespace: string, collectionName: string): Promise<any[]> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  },
+  findById(namespace: string, collectionName: string, id: string): Promise<any> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  },
+  save(namespace: string, collectionName: string, docs: any[]): Promise<any[]> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  },
+  removeById(namespace: string, collectionName: string, id: string): Promise<number> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  },
+  clear(namespace: string, collectionName: string): Promise<number> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  },
+  clearDatabase(namespace: string, exclude?: string[]): Promise<void> {
+    throw new KinveyError('You must override the default storage adapter with a platform specific storage adapter.');
+  }
+};
+
+export function setStorageAdapter(_adapter: StorageAdapter): void {
+  adapter = _adapter;
+}
+
+export function getStorageAdapter(): StorageAdapter {
+  return adapter;
 }
 
 export class Storage<T extends Doc> {
@@ -34,57 +66,57 @@ export class Storage<T extends Doc> {
     this.collectionName = collectionName;
   }
 
-  get storageAdapter(): StorageAdapter<T> {
-    throw new KinveyError('You must override the Storage class and provide a storage adapter.');
-  }
-
   count(): Promise<number> {
-    return QUEUE.add((): Promise<number> => this.storageAdapter.count(this.namespace, this.collectionName));
+    return QUEUE.add((): Promise<number> => getStorageAdapter().count(this.namespace, this.collectionName));
   }
 
   find(): Promise<T[]> {
-    return QUEUE.add((): Promise<T[]> => this.storageAdapter.find(this.namespace, this.collectionName));
+    return QUEUE.add((): Promise<T[]> => getStorageAdapter().find(this.namespace, this.collectionName));
   }
 
   findById(id: string): Promise<T> {
-    return QUEUE.add((): Promise<T> => this.storageAdapter.findById(this.namespace, this.collectionName, id));
+    return QUEUE.add((): Promise<T> => getStorageAdapter().findById(this.namespace, this.collectionName, id));
   }
 
-  save(docsToSave: T): Promise<T>
-  save(docsToSave: T[]): Promise<T[]>
-  async save(docsToSave: any): Promise<any>{
+  save(docsToSave: T): Promise<T>;
+  save(docsToSave: T[]): Promise<T[]>;
+  async save(docsToSave: any): Promise<any> {
     if (!isArray(docsToSave)) {
       const savedDocs = await this.save([docsToSave]);
       return savedDocs.shift();
     }
 
-    return QUEUE.add(async (): Promise<T[]> => {
-      // Clone the docs
-      let docs = docsToSave.slice(0, docsToSave.length);
+    return QUEUE.add(
+      async (): Promise<T[]> => {
+        // Clone the docs
+        let docs = docsToSave.slice(0, docsToSave.length);
 
-      // Add _id if it is missing
-      if (docs.length > 0) {
-        docs = docs.map((doc: T): T => {
-          if (!doc._id) {
-            return Object.assign({}, doc, {
-              _id: generateId(),
-              _kmd: Object.assign({}, doc._kmd, { local: true })
-            });
-          }
-          return doc;
-        });
+        // Add _id if it is missing
+        if (docs.length > 0) {
+          docs = docs.map(
+            (doc: T): T => {
+              if (!doc._id) {
+                return Object.assign({}, doc, {
+                  _id: generateId(),
+                  _kmd: Object.assign({}, doc._kmd, { local: true })
+                });
+              }
+              return doc;
+            }
+          );
+        }
+
+        await getStorageAdapter().save(this.namespace, this.collectionName, docs);
+        return docs;
       }
-
-      await this.storageAdapter.save(this.namespace, this.collectionName, docs);
-      return docs;
-    });
+    );
   }
 
   removeById(id: string): Promise<number> {
-    return QUEUE.add((): Promise<number> => this.storageAdapter.removeById(this.namespace, this.collectionName, id));
+    return QUEUE.add((): Promise<number> => getStorageAdapter().removeById(this.namespace, this.collectionName, id));
   }
 
   clear(): Promise<number> {
-    return QUEUE.add((): Promise<number> => this.storageAdapter.clear(this.namespace, this.collectionName));
+    return QUEUE.add((): Promise<number> => getStorageAdapter().clear(this.namespace, this.collectionName));
   }
 }

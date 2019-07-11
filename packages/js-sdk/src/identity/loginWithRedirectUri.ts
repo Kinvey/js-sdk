@@ -12,7 +12,10 @@ export interface MICOptions {
   timeout?: number;
 }
 
-export async function loginWithRedirectUri<T extends UserData>(redirectUri: string, options: MICOptions = {}): Promise<User<T>> {
+export async function loginWithRedirectUri<T extends UserData>(
+  redirectUri: string,
+  options: MICOptions = {}
+): Promise<User<T>> {
   const activeUser = getActiveUser();
   let clientId = getAppKey();
 
@@ -27,18 +30,19 @@ export async function loginWithRedirectUri<T extends UserData>(redirectUri: stri
   if (isString(options.micId)) {
     clientId = `${clientId}.${options.micId}`;
   }
+  return {} as any;
 
-  const code = await loginWithPopup(clientId, redirectUri, version);
-  const token = await getTokenWithCode(code, clientId, redirectUri, options);
-  const credentials = { _socialIdentity: { [token.identity]: token } };
+  // const code = await loginWithPopup(clientId, redirectUri, version);
+  // const token = await getTokenWithCode(code, clientId, redirectUri, options);
+  // const credentials = { _socialIdentity: { [token.identity]: token } };
 
-  try {
-    return await login(credentials);
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      return signup(credentials);
-    }
+  // try {
+  //   return await login(credentials);
+  // } catch (error) {
+  //   if (error instanceof NotFoundError) {
+  //     return signup(credentials);
+  //   }
 
-    throw error;
-  }
+  //   throw error;
+  // }
 }

@@ -1,11 +1,7 @@
 import isPlainObject from 'lodash/isPlainObject';
-import {
-  KinveyError,
-  InvalidCredentialsError
-} from '../errors';
+import { KinveyError, InvalidCredentialsError } from '../errors';
 import { HttpHeaders, KinveyHttpHeaders } from './headers';
 import { parse } from './parse';
-
 
 export enum HttpStatusCode {
   Ok = 200,
@@ -29,7 +25,7 @@ export interface HttpResponseConfig {
 }
 
 export interface HttpResponseObject extends HttpResponseConfig {
-  headers: { [name: string]: string }
+  headers: { [name: string]: string };
 }
 
 export class HttpResponse {
@@ -46,20 +42,25 @@ export class HttpResponse {
   }
 
   isSuccess(): boolean {
-    return (this.statusCode >= 200 && this.statusCode < 300)
-      || this.statusCode === HttpStatusCode.MovedPermanently
-      || this.statusCode === HttpStatusCode.Found
-      || this.statusCode === HttpStatusCode.NotModified
-      || this.statusCode === HttpStatusCode.TemporaryRedirect
-      || this.statusCode === HttpStatusCode.PermanentRedirect;
+    return (
+      (this.statusCode >= 200 && this.statusCode < 300) ||
+      this.statusCode === HttpStatusCode.MovedPermanently ||
+      this.statusCode === HttpStatusCode.Found ||
+      this.statusCode === HttpStatusCode.NotModified ||
+      this.statusCode === HttpStatusCode.TemporaryRedirect ||
+      this.statusCode === HttpStatusCode.PermanentRedirect
+    );
   }
 
   toPlainObject(): HttpResponseObject {
-    return Object.assign({}, {
-      statusCode: this.statusCode,
-      headers: this.headers.toPlainObject(),
-      data: this.data
-    });
+    return Object.assign(
+      {},
+      {
+        statusCode: this.statusCode,
+        headers: this.headers.toPlainObject(),
+        data: this.data
+      }
+    );
   }
 }
 

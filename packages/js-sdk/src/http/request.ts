@@ -18,7 +18,7 @@ export enum HttpRequestMethod {
   POST = 'POST',
   PUT = 'PUT',
   DELETE = 'DELETE'
-};
+}
 
 export interface HttpRequestConfig {
   headers?: { [name: string]: string | string[] | (() => string | string[]) };
@@ -55,13 +55,16 @@ export class HttpRequest {
   }
 
   toPlainObject(): HttpRequestObject {
-    return Object.assign({}, {
-      headers: this.headers.toPlainObject(),
-      method: this.method,
-      url: this.url,
-      body: this.body,
-      timeout: this.timeout
-    });
+    return Object.assign(
+      {},
+      {
+        headers: this.headers.toPlainObject(),
+        method: this.method,
+        url: this.url,
+        body: this.body,
+        timeout: this.timeout
+      }
+    );
   }
 
   async execute(): Promise<HttpResponse> {
@@ -133,7 +136,9 @@ export class KinveyHttpRequest extends HttpRequest {
       const customRequestPropertiesByteCount = byteCount(customRequestPropertiesVal);
 
       if (customRequestPropertiesByteCount >= 2000) {
-        throw new KinveyError(`The custom properties are ${customRequestPropertiesByteCount} bytes. They must be less then 2000 bytes.`);
+        throw new KinveyError(
+          `The custom properties are ${customRequestPropertiesByteCount} bytes. They must be less then 2000 bytes.`
+        );
       }
 
       this.headers.set('X-Kinvey-Custom-Request-Properties', customRequestPropertiesVal);

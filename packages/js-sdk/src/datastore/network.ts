@@ -14,7 +14,7 @@ export interface NetworkOptions {
   trace?: boolean;
   skipBL?: boolean;
   properties?: any;
-};
+}
 
 export interface FindNetworkOptions extends NetworkOptions {
   kinveyFileTTL?: number;
@@ -33,7 +33,10 @@ export class DataStoreNetwork {
   }
 
   find(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, {
+      kinveyfile_ttl: options.kinveyFileTTL,
+      kinveyfile_tls: options.kinveyFileTLS
+    });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
@@ -50,7 +53,11 @@ export class DataStoreNetwork {
       throw new ParameterValueOutOfRangeError('A value for since in the options must be provided.');
     }
 
-    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { since: options.since, kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, {
+      since: options.since,
+      kinveyfile_ttl: options.kinveyFileTTL,
+      kinveyfile_tls: options.kinveyFileTLS
+    });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
@@ -63,7 +70,10 @@ export class DataStoreNetwork {
   }
 
   findById(id: string, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const requestQueryObject = Object.assign({ kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign({
+      kinveyfile_ttl: options.kinveyFileTTL,
+      kinveyfile_tls: options.kinveyFileTLS
+    });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
@@ -76,7 +86,10 @@ export class DataStoreNetwork {
   }
 
   count(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
-    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, { kinveyfile_ttl: options.kinveyFileTTL, kinveyfile_tls: options.kinveyFileTLS });
+    const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, {
+      kinveyfile_ttl: options.kinveyFileTTL,
+      kinveyfile_tls: options.kinveyFileTLS
+    });
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
@@ -88,8 +101,8 @@ export class DataStoreNetwork {
     return request.execute();
   }
 
-  create(doc: Doc, options?: NetworkOptions): Promise<KinveyHttpResponse>
-  create(docs: Doc[], options?: NetworkOptions): Promise<KinveyHttpResponse>
+  create(doc: Doc, options?: NetworkOptions): Promise<KinveyHttpResponse>;
+  create(docs: Doc[], options?: NetworkOptions): Promise<KinveyHttpResponse>;
   create(docs: any, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.POST,

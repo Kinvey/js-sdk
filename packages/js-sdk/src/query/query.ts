@@ -16,7 +16,7 @@ const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
 const PROTECTED_FIELDS = ['_id', '_acl'];
 
 export interface QueryObject {
-  filter?: { [field: string]: { [condition: string]: any }};
+  filter?: { [field: string]: { [condition: string]: any } };
   fields?: string[];
   sort?: { [field: string]: number };
   limit?: number;
@@ -39,8 +39,8 @@ export class Query<T extends Doc> {
   public skip?: number;
   private parent?: Query<T>;
 
-  constructor(query?: Query<T>)
-  constructor(query?: QueryObject)
+  constructor(query?: Query<T>);
+  constructor(query?: QueryObject);
   constructor(query?: any) {
     if (query instanceof Query || isPlainObject(query)) {
       this.fields = query.fields;
@@ -173,7 +173,11 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$mod', [divisor, remainder]);
   }
 
-  matches(field: string, expression: any, options: { ignoreCase?: boolean, multiline?: boolean, extended?: boolean, dotMatchesAll?: boolean } = {}): Query<T> {
+  matches(
+    field: string,
+    expression: any,
+    options: { ignoreCase?: boolean; multiline?: boolean; extended?: boolean; dotMatchesAll?: boolean } = {}
+  ): Query<T> {
     const flags = [];
     let regExp = expression;
 
@@ -182,7 +186,9 @@ export class Query<T extends Doc> {
     }
 
     if (regExp.source.indexOf('^') !== 0) {
-      throw new KinveyError('regExp must have \'^\' at the beginning of the expression to make it an anchored expression.');
+      throw new KinveyError(
+        "regExp must have '^' at the beginning of the expression to make it an anchored expression."
+      );
     }
 
     if ((regExp.ignoreCase || options.ignoreCase) && options.ignoreCase !== false) {
@@ -223,22 +229,15 @@ export class Query<T extends Doc> {
   }
 
   withinBox(field: string, bottomLeftCoord: number[], upperRightCoord: number[]): Query<T> {
-    if (!Array.isArray(bottomLeftCoord)
-      || !isNumber(bottomLeftCoord[0])
-      || !isNumber(bottomLeftCoord[1])) {
+    if (!Array.isArray(bottomLeftCoord) || !isNumber(bottomLeftCoord[0]) || !isNumber(bottomLeftCoord[1])) {
       throw new KinveyError('bottomLeftCoord must be a [number, number]');
     }
 
-    if (!Array.isArray(upperRightCoord)
-      || !isNumber(upperRightCoord[0])
-      || !isNumber(upperRightCoord[1])) {
+    if (!Array.isArray(upperRightCoord) || !isNumber(upperRightCoord[0]) || !isNumber(upperRightCoord[1])) {
       throw new KinveyError('upperRightCoord must be a [number, number]');
     }
 
-    const coords = [
-      [bottomLeftCoord[0], bottomLeftCoord[1]],
-      [upperRightCoord[0], upperRightCoord[1]]
-    ];
+    const coords = [[bottomLeftCoord[0], bottomLeftCoord[1]], [upperRightCoord[0], upperRightCoord[1]]];
     return this.addFilter(field, '$within', { $box: coords });
   }
 
@@ -327,7 +326,9 @@ export class Query<T extends Doc> {
     // Join operators operate on the top-level of `_filter`. Since the `toJSON`
     // magic requires `_filter` to be passed by reference, we cannot simply re-
     // assign `_filter`. Instead, empty it without losing the reference.
-    const currentFilter = Object.keys(this.filter).reduce((filter, key): { [field: string]: { [condition: string]: any } } => {
+    const currentFilter = Object.keys(this.filter).reduce((filter, key): {
+      [field: string]: { [condition: string]: any };
+    } => {
       const newFilter = Object.assign(filter, { [key]: this.filter[key] });
       delete this.filter[key];
       return newFilter;
@@ -380,38 +381,43 @@ export class Query<T extends Doc> {
       if (!isEmpty(queryObject.sort)) {
         // eslint-disable-next-line arrow-body-style
         processedDocs.sort((a, b): T[] => {
-          return Object.keys(queryObject.sort)
-            .reduce((result: any, field): number => {
-              if (typeof result !== 'undefined' && result !== 0) {
-                return result;
+          return Object.keys(queryObject.sort).reduce((result: any, field): number => {
+            if (typeof result !== 'undefined' && result !== 0) {
+              return result;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(queryObject.sort, field)) {
+              const aField = nested(a, field);
+              const bField = nested(b, field);
+              const modifier = queryObject.sort[field]; // -1 (descending) or 1 (ascending)
+
+              if (
+                aField !== null &&
+                typeof aField !== 'undefined' &&
+                (bField === null || typeof bField === 'undefined')
+              ) {
+                return 1 * modifier;
               }
-
-              if (Object.prototype.hasOwnProperty.call(queryObject.sort, field)) {
-                const aField = nested(a, field);
-                const bField = nested(b, field);
-                const modifier = queryObject.sort[field]; // -1 (descending) or 1 (ascending)
-
-                if ((aField !== null && typeof aField !== 'undefined')
-                  && (bField === null || typeof bField === 'undefined')) {
-                  return 1 * modifier;
-                }
-                if ((bField !== null && typeof bField !== 'undefined')
-                  && (aField === null || typeof aField === 'undefined')) {
-                  return -1 * modifier;
-                }
-                if (typeof aField === 'undefined' && bField === null) {
-                  return 0;
-                }
-                if (aField === null && typeof bField === 'undefined') {
-                  return 0;
-                }
-                if (aField !== bField) {
-                  return (aField < bField ? -1 : 1) * modifier;
-                }
+              if (
+                bField !== null &&
+                typeof bField !== 'undefined' &&
+                (aField === null || typeof aField === 'undefined')
+              ) {
+                return -1 * modifier;
               }
+              if (typeof aField === 'undefined' && bField === null) {
+                return 0;
+              }
+              if (aField === null && typeof bField === 'undefined') {
+                return 0;
+              }
+              if (aField !== bField) {
+                return (aField < bField ? -1 : 1) * modifier;
+              }
+            }
 
-              return 0;
-            }, undefined);
+            return 0;
+          }, undefined);
         });
       }
 
@@ -481,7 +487,9 @@ export class Query<T extends Doc> {
     }
 
     Object.keys(httpQueryObject).forEach((key): any => {
-      httpQueryObject[key] = isString(httpQueryObject[key]) ? httpQueryObject[key] : JSON.stringify(httpQueryObject[key]);
+      httpQueryObject[key] = isString(httpQueryObject[key])
+        ? httpQueryObject[key]
+        : JSON.stringify(httpQueryObject[key]);
     });
 
     return httpQueryObject;

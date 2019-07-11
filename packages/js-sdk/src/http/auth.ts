@@ -12,7 +12,10 @@ export async function kinveySessionAuth(): Promise<string> {
   const session = getSession();
 
   if (!session) {
-    throw new KinveyError('There is no active session to authorize the request.', 'Please login and retry the request.');
+    throw new KinveyError(
+      'There is no active session to authorize the request.',
+      'Please login and retry the request.'
+    );
   }
 
   return `Kinvey ${session._kmd.authtoken}`;
