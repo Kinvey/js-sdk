@@ -1,5 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
+import isPlainObject from 'lodash/isPlainObject';
 import { ActiveUserError } from '../errors/activeUser';
+import { KinveyError } from '../errors/kinvey';
 import { setSession, formatKinveyBaasUrl, HttpRequestMethod, KinveyHttpRequest, KinveyBaasNamespace, KinveyHttpAuth } from '../http';
 import { getActiveUser } from './getActiveUser';
 import { User } from './user';
@@ -7,6 +9,10 @@ import { User } from './user';
 export async function signup(data: object | User, options: { timeout?: number, state?: boolean } = {}) {
   const activeUser = getActiveUser();
   const { state = true } = options;
+
+  if (!isPlainObject(data)) {
+    throw new KinveyError('The provided data must be an object.');
+  }
 
   if (state === true && activeUser) {
     throw new ActiveUserError('An active user already exists. Please logout the active user before you signup.');
