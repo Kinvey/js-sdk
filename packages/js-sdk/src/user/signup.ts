@@ -6,11 +6,11 @@ import { setSession, formatKinveyBaasUrl, HttpRequestMethod, KinveyHttpRequest, 
 import { getActiveUser } from './getActiveUser';
 import { User } from './user';
 
-export async function signup(data: object | User, options: { timeout?: number, state?: boolean } = {}) {
+export async function signup(data?: object | User, options: { timeout?: number, state?: boolean } = {}) {
   const activeUser = getActiveUser();
   const { state = true } = options;
 
-  if (!isPlainObject(data)) {
+  if (data && !isPlainObject(data)) {
     throw new KinveyError('The provided data must be an object.');
   }
 
