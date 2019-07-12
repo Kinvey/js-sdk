@@ -18,6 +18,7 @@ import { DataStoreCache, QueryCache, SyncCache } from '../datastore/cache';
 import { subscribe, unsubscribe, isSubscribed } from '../live';
 import { logger } from '../log';
 import { mergeSocialIdentity } from './utils';
+import { signup } from './signup';
 
 export interface UserData extends Entity {
   _socialIdentity?: object;
@@ -99,6 +100,10 @@ export class User {
       return metadata.isEmailConfirmed();
     }
     return false;
+  }
+
+  async signup(options: { timeout?: number, state?: boolean } = {}) {
+    return signup(this.data, options);
   }
 
   async me(options: { timeout?: number } = {}) {
