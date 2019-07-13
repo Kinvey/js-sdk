@@ -29,7 +29,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     this.tag = tag;
   }
 
-  async find(query?: Query<T>, options?: FindNetworkOptions): Promise<T[]> {
+  async find(query?: Query, options?: FindNetworkOptions): Promise<T[]> {
     const cache = new DataStoreCache<T>(this.collectionName);
 
     try {
@@ -47,7 +47,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     const cache = new DataStoreCache<T>(this.collectionName);
 
     try {
-      const query = new Query<T>().equalTo('_id', id);
+      const query = new Query().equalTo('_id', id);
       await this.pull(query, options);
       return cache.findById(id);
     } catch (error) {
@@ -120,7 +120,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     return result.doc as T;
   }
 
-  async remove(query?: Query<T>, options?: NetworkOptions): Promise<number> {
+  async remove(query?: Query, options?: NetworkOptions): Promise<number> {
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const sync = new Sync(this.collectionName, this.tag);
     const network = new DataStoreNetwork(this.collectionName);
@@ -166,7 +166,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
     return syncDocs.length;
   }
 
-  async pull(query: Query<T> = new Query<T>(), options: PullOptions = {}): Promise<number> {
+  async pull(query: Query = new Query(), options: PullOptions = {}): Promise<number> {
     const pullQuery = new Query({ filter: query.filter });
     const network = new DataStoreNetwork(this.collectionName);
     const cache = new DataStoreCache(this.collectionName, this.tag);
@@ -229,7 +229,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
       // Create the pages
       const pageQueries = times(
         Math.ceil(count / PAGE_LIMIT),
-        (i): Query<Doc> => {
+        (i): Query => {
           const pageQuery = new Query(pullQuery);
           pageQuery.skip = i * PAGE_LIMIT;
           pageQuery.limit = Math.min(count - i * PAGE_LIMIT, PAGE_LIMIT);

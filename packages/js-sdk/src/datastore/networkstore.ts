@@ -24,13 +24,13 @@ export class NetworkStore<T extends Doc> {
     this.collectionName = collectionName;
   }
 
-  async find(query?: Query<T>, options?: FindNetworkOptions): Promise<T[]> {
+  async find(query?: Query, options?: FindNetworkOptions): Promise<T[]> {
     const network = new DataStoreNetwork(this.collectionName);
     const response = await network.find(query, options);
     return response.data;
   }
 
-  async count(query?: Query<T>, options?: NetworkOptions): Promise<number> {
+  async count(query?: Query, options?: NetworkOptions): Promise<number> {
     const network = new DataStoreNetwork(this.collectionName);
     const response = await network.count(query, options);
     return 'count' in response.data ? response.data.count : 0;
@@ -112,7 +112,7 @@ export class NetworkStore<T extends Doc> {
     return this.create(docs, options);
   }
 
-  async remove(query?: Query<T>, options?: NetworkOptions): Promise<number> {
+  async remove(query?: Query, options?: NetworkOptions): Promise<number> {
     const network = new DataStoreNetwork(this.collectionName);
     const response = await network.remove(query, options);
     return 'count' in response.data ? response.data.count : 0;

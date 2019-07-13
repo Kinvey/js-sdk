@@ -50,7 +50,7 @@ export class Sync {
       }
 
       // Remove existing sync events that match the docs
-      await syncCache.remove(new Query<SyncDoc>().contains('doc._id', docsToSync.map((doc): string => doc._id)));
+      await syncCache.remove(new Query().contains('doc._id', docsToSync.map((doc): string => doc._id)));
 
       // Don't add delete operations for docs that were created offline
       if (operation === SyncOperation.Delete) {

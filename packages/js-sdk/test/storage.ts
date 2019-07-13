@@ -1,6 +1,6 @@
 /* eslint class-methods-use-this: "off" */
 
-import { StorageAdapter, setStorageAdapter } from '../src/storage';
+import { StorageAdapter, setStorageAdapter, Doc } from '../src/storage';
 
 const store = new Map<string, Map<string, any>>();
 
@@ -12,7 +12,7 @@ function setCollection(namespace: string, collectionName: string, collection: Ma
   store.set(`${namespace}.${collectionName}`, collection);
 }
 
-export class Memory implements StorageAdapter {
+export class Memory implements StorageAdapter<Doc> {
   async count(namespace: string, collectionName: string): Promise<number> {
     const docs = await this.find(namespace, collectionName);
     return docs.length;
@@ -23,12 +23,12 @@ export class Memory implements StorageAdapter {
     return Array.from(collection.values());
   }
 
-  async findById(namespace: string, collectionName: string, id: string): Promise<any> {
+  async findById(namespace: string, collectionName: string, id: string): Promise<Doc> {
     const docs = await this.find(namespace, collectionName);
     return docs.find((doc): boolean => doc._id === id);
   }
 
-  async save(namespace: string, collectionName: string, docs: any[]): Promise<any[]> {
+  async save(namespace: string, collectionName: string, docs: Doc[]): Promise<Doc[]> {
     const collection = getCollection(namespace, collectionName);
     docs.forEach((doc): void => {
       collection.set(doc._id, doc);
@@ -52,7 +52,7 @@ export class Memory implements StorageAdapter {
     return count;
   }
 
-  clearDatabase(namespace: string, exclude?: string[]): Promise<void> {
+  clearDatabase(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }

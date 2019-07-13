@@ -32,7 +32,7 @@ export class DataStoreNetwork {
     this.collectionName = collectionName;
   }
 
-  find(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
+  find(query?: Query, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
     const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, {
       kinveyfile_ttl: options.kinveyFileTTL,
       kinveyfile_tls: options.kinveyFileTLS
@@ -48,7 +48,7 @@ export class DataStoreNetwork {
     return request.execute();
   }
 
-  findByDeltaSet(query?: Query<Doc>, options: DeltaSetNetworkOptions = {}): Promise<KinveyHttpResponse> {
+  findByDeltaSet(query?: Query, options: DeltaSetNetworkOptions = {}): Promise<KinveyHttpResponse> {
     if (!options.since) {
       throw new ParameterValueOutOfRangeError('A value for since in the options must be provided.');
     }
@@ -85,7 +85,7 @@ export class DataStoreNetwork {
     return request.execute();
   }
 
-  count(query?: Query<Doc>, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
+  count(query?: Query, options: FindNetworkOptions = {}): Promise<KinveyHttpResponse> {
     const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {}, {
       kinveyfile_ttl: options.kinveyFileTTL,
       kinveyfile_tls: options.kinveyFileTLS
@@ -133,7 +133,7 @@ export class DataStoreNetwork {
     return request.execute();
   }
 
-  remove(query?: Query<Doc>, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
+  remove(query?: Query, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
     const requestQueryObject = Object.assign(query ? query.toHttpQueryObject() : {});
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.DELETE,

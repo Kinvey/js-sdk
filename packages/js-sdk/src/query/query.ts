@@ -31,15 +31,15 @@ export interface HttpQueryObject {
   skip?: string;
 }
 
-export class Query<T extends Doc> {
+export class Query {
   public filter: { [field: string]: { [condition: string]: any } } = {};
   public fields: string[] = [];
   public sort: { [field: string]: number } = {};
   public limit?: number;
   public skip?: number;
-  private parent?: Query<T>;
+  private parent?: Query;
 
-  constructor(query?: Query<T>);
+  constructor(query?: Query);
   constructor(query?: QueryObject);
   constructor(query?: any) {
     if (query instanceof Query || isPlainObject(query)) {
@@ -81,15 +81,15 @@ export class Query<T extends Doc> {
     }, true);
   }
 
-  equalTo(field: string, value: any): Query<T> {
+  equalTo(field: string, value: any): Query {
     return this.addFilter(field, '$eq', value);
   }
 
-  notEqualTo(field: string, value: any): Query<T> {
+  notEqualTo(field: string, value: any): Query {
     return this.addFilter(field, '$ne', value);
   }
 
-  contains(field: string, values: any): Query<T> {
+  contains(field: string, values: any): Query {
     if (!values) {
       throw new KinveyError('You must supply a value.');
     }
@@ -101,7 +101,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$in', values);
   }
 
-  notContainedIn(field: string, values: any): Query<T> {
+  notContainedIn(field: string, values: any): Query {
     if (!values) {
       throw new KinveyError('You must supply a value.');
     }
@@ -113,7 +113,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$nin', values);
   }
 
-  containsAll(field: string, values: any): Query<T> {
+  containsAll(field: string, values: any): Query {
     if (!values) {
       throw new KinveyError('You must supply a value.');
     }
@@ -125,7 +125,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$all', values);
   }
 
-  greaterThan(field: string, value: any): Query<T> {
+  greaterThan(field: string, value: any): Query {
     if (!isNumber(value) && !isString(value)) {
       throw new KinveyError('You must supply a number or string.');
     }
@@ -133,7 +133,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$gt', value);
   }
 
-  greaterThanOrEqualTo(field: string, value: any): Query<T> {
+  greaterThanOrEqualTo(field: string, value: any): Query {
     if (!isNumber(value) && !isString(value)) {
       throw new KinveyError('You must supply a number or string.');
     }
@@ -141,7 +141,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$gte', value);
   }
 
-  lessThan(field: string, value: any): Query<T> {
+  lessThan(field: string, value: any): Query {
     if (!isNumber(value) && !isString(value)) {
       throw new KinveyError('You must supply a number or string.');
     }
@@ -149,7 +149,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$lt', value);
   }
 
-  lessThanOrEqualTo(field: string, value: any): Query<T> {
+  lessThanOrEqualTo(field: string, value: any): Query {
     if (!isNumber(value) && !isString(value)) {
       throw new KinveyError('You must supply a number or string.');
     }
@@ -157,11 +157,11 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$lte', value);
   }
 
-  exists(field: string, flag = true): Query<T> {
+  exists(field: string, flag = true): Query {
     return this.addFilter(field, '$exists', flag === true);
   }
 
-  mod(field: string, divisor: number, remainder = 0): Query<T> {
+  mod(field: string, divisor: number, remainder = 0): Query {
     if (!isNumber(divisor)) {
       throw new KinveyError('divisor must be a number');
     }
@@ -177,7 +177,7 @@ export class Query<T extends Doc> {
     field: string,
     expression: any,
     options: { ignoreCase?: boolean; multiline?: boolean; extended?: boolean; dotMatchesAll?: boolean } = {}
-  ): Query<T> {
+  ): Query {
     const flags = [];
     let regExp = expression;
 
@@ -214,7 +214,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$regex', regExp.source);
   }
 
-  near(field: string, coord: number[], maxDistance: number): Query<T> {
+  near(field: string, coord: number[], maxDistance: number): Query {
     if (!Array.isArray(coord) || !isNumber(coord[0]) || !isNumber(coord[1])) {
       throw new KinveyError('coord must be a [number, number]');
     }
@@ -228,7 +228,7 @@ export class Query<T extends Doc> {
     return this;
   }
 
-  withinBox(field: string, bottomLeftCoord: number[], upperRightCoord: number[]): Query<T> {
+  withinBox(field: string, bottomLeftCoord: number[], upperRightCoord: number[]): Query {
     if (!Array.isArray(bottomLeftCoord) || !isNumber(bottomLeftCoord[0]) || !isNumber(bottomLeftCoord[1])) {
       throw new KinveyError('bottomLeftCoord must be a [number, number]');
     }
@@ -241,7 +241,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$within', { $box: coords });
   }
 
-  withinPolygon(field: string, coords: number[][]): Query<T> {
+  withinPolygon(field: string, coords: number[][]): Query {
     if (Array.isArray(coords) === false || coords.length === 0 || coords[0].length > 3) {
       throw new KinveyError('coords must be a [[number, number]]');
     }
@@ -257,7 +257,7 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$within', { $polygon: withinCoords });
   }
 
-  size(field: string, size: number): Query<T> {
+  size(field: string, size: number): Query {
     if (!isNumber(size)) {
       throw new KinveyError('size must be a number');
     }
@@ -265,18 +265,18 @@ export class Query<T extends Doc> {
     return this.addFilter(field, '$size', size);
   }
 
-  private addFilter(field: string, condition: string, value: any): Query<T> {
+  private addFilter(field: string, condition: string, value: any): Query {
     this.filter[field] = Object.assign({}, this.filter[field], { [condition]: value });
     return this;
   }
 
-  and(...args: any): Query<T> {
+  and(...args: any): Query {
     // AND has highest precedence. Therefore, even if this query is part of a
     // JOIN already, apply it on this query.
     return this.join('$and', args);
   }
 
-  nor(...args: any): Query<T> {
+  nor(...args: any): Query {
     // NOR is preceded by AND. Therefore, if this query is part of an AND-join,
     // apply the NOR onto the parent to make sure AND indeed precedes NOR.
     if (this.parent && Object.hasOwnProperty.call(this.parent.filter, '$and')) {
@@ -286,7 +286,7 @@ export class Query<T extends Doc> {
     return this.join('$nor', args);
   }
 
-  or(...args: any): Query<T> {
+  or(...args: any): Query {
     // OR has lowest precedence. Therefore, if this query is part of any join,
     // apply the OR onto the parent to make sure OR has indeed the lowest
     // precedence.
@@ -297,16 +297,16 @@ export class Query<T extends Doc> {
     return this.join('$or', args);
   }
 
-  private join(operator: string, queries: any): Query<T> {
+  private join(operator: string, queries: any): Query {
     // Cast, validate, and parse arguments. If `queries` are supplied, obtain
     // the `filter` for joining. The eventual return function will be the
     // current query.
-    let result = new Query<T>(this);
+    let result = new Query(this);
     let filters = queries.map((queryObject): [] => {
       let query = queryObject;
       if (!(queryObject instanceof Query)) {
         if (isPlainObject(queryObject)) {
-          query = new Query<T>(queryObject);
+          query = new Query(queryObject);
         } else {
           throw new KinveyError('query argument must be of type: Kinvey.Query[] or Object[].');
         }
@@ -318,9 +318,9 @@ export class Query<T extends Doc> {
     // This query is the right-hand side of the join expression, and will be
     // returned to allow for a fluent interface.
     if (filters.length === 0) {
-      result = new Query<T>();
+      result = new Query();
       filters = [result.toPlainObject().filter];
-      result.parent = new Query<T>(this);
+      result.parent = new Query(this);
     }
 
     // Join operators operate on the top-level of `_filter`. Since the `toJSON`
@@ -339,7 +339,7 @@ export class Query<T extends Doc> {
     return result;
   }
 
-  ascending(field: string): Query<T> {
+  ascending(field: string): Query {
     if (this.parent) {
       this.parent.ascending(field);
     } else {
@@ -348,7 +348,7 @@ export class Query<T extends Doc> {
     return this;
   }
 
-  descending(field: string): Query<T> {
+  descending(field: string): Query {
     if (this.parent) {
       this.parent.descending(field);
     } else {
@@ -357,7 +357,7 @@ export class Query<T extends Doc> {
     return this;
   }
 
-  process(docs: T[] = []): T[] {
+  process<T extends Doc>(docs: T[] = []): T[] {
     const queryObject = this.toPlainObject();
 
     if (!Array.isArray(docs)) {
@@ -432,7 +432,7 @@ export class Query<T extends Doc> {
       }
 
       if (isArray(queryObject.fields) && queryObject.fields.length > 0) {
-        processedDocs = processedDocs.map((doc): T[] => {
+        processedDocs = processedDocs.map((doc): Doc[] => {
           const modifiedDoc: any = doc;
           Object.keys(modifiedDoc).forEach((key): void => {
             if (queryObject.fields && queryObject.fields.indexOf(key) === -1 && PROTECTED_FIELDS.indexOf(key) === -1) {

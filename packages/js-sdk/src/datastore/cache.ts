@@ -25,15 +25,15 @@ export class DataStoreCache<T extends Doc> extends Storage<T> {
     }
   }
 
-  async find(query?: Query<T>): Promise<T[]> {
+  async find(query?: Query): Promise<T[]> {
     const docs = await super.find();
     if (query) {
-      return query.process(docs);
+      return query.process<T>(docs);
     }
     return docs;
   }
 
-  async remove(query?: Query<T>): Promise<number> {
+  async remove(query?: Query): Promise<number> {
     const docs = await this.find(query);
     const results = await Promise.all(
       docs.map(
