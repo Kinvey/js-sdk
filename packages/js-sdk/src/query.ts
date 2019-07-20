@@ -8,12 +8,28 @@ import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import sift from 'sift';
-import { KinveyError } from '../errors';
-import { Doc } from '../storage';
-import { nested } from './utils';
+import { KinveyError } from './errors';
+import { Doc } from './storage';
 
 const UNSUPPORTED_CONDITIONS = ['$nearSphere'];
 const PROTECTED_FIELDS = ['_id', '_acl'];
+
+function nested(obj: any, dotProperty: string, value?: any): any {
+  if (!dotProperty) {
+    return value || obj;
+  }
+
+  const parts = dotProperty.split('.');
+  let currentProperty = parts.shift();
+  let currentObj = obj;
+
+  while (currentProperty && typeof currentObj !== 'undefined') {
+    currentObj = currentObj[currentProperty];
+    currentProperty = parts.shift();
+  }
+
+  return typeof currentObj === 'undefined' ? value : currentObj;
+}
 
 export interface QueryObject {
   filter?: { [field: string]: { [condition: string]: any } };

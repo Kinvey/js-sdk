@@ -1,16 +1,18 @@
 import { init } from '../src/init';
 import { register as registerHttp } from './http';
 import { register as registerStorage } from './storage';
-import { appKey, appSecret } from './env';
+import { APP_KEY, APP_SECRET } from './env';
 
-// Register HTTP adapter
-registerHttp();
+before(function() {
+  // Register HTTP adapter
+  registerHttp();
 
-// Register storage adapter
-registerStorage();
+  // Register storage adapter
+  registerStorage();
 
-// Initialize the SDK
-init({
-  appKey,
-  appSecret
+  // Initialize the SDK
+  init({
+    appKey: APP_KEY,
+    appSecret: APP_SECRET
+  });
 });

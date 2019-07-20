@@ -1,2 +1,2 @@
-export const appKey = 'appKey';
-export const appSecret = 'appSecret';
+export const APP_KEY = 'appKey';
+export const APP_SECRET = 'appSecret';

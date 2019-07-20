@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Acl } from '../src/acl';
 
-describe('Acl', function () {
+describe('Acl', function() {
   describe('creator', function() {
     it('should return undefined', function() {
       const acl = new Acl();
@@ -28,41 +28,41 @@ describe('Acl', function () {
     });
   });
 
-  describe('writers', function () {
-    it('should return an empty array', function () {
+  describe('writers', function() {
+    it('should return an empty array', function() {
       const acl = new Acl();
       expect(acl.writers).to.deep.equal([]);
     });
 
-    it('should return the writers', function () {
+    it('should return the writers', function() {
       const writers = ['writer'];
       const acl = new Acl({ w: writers });
       expect(acl.writers).to.deep.equal(writers);
     });
   });
 
-  describe('readerGroups', function () {
-    it('should return an empty array', function () {
+  describe('readerGroups', function() {
+    it('should return an empty array', function() {
       const acl = new Acl();
       expect(acl.readerGroups).to.deep.equal([]);
     });
 
-    it('should return the readerGroups', function () {
+    it('should return the readerGroups', function() {
       const readers = ['reader'];
-      const acl = new Acl({ groups: { r: readers }});
+      const acl = new Acl({ groups: { r: readers } });
       expect(acl.readerGroups).to.deep.equal(readers);
     });
   });
 
-  describe('writerGroups', function () {
-    it('should return an empty array', function () {
+  describe('writerGroups', function() {
+    it('should return an empty array', function() {
       const acl = new Acl();
       expect(acl.writerGroups).to.deep.equal([]);
     });
 
-    it('should return the writerGroups', function () {
+    it('should return the writerGroups', function() {
       const writers = ['writer'];
-      const acl = new Acl({ groups: { w: writers }});
+      const acl = new Acl({ groups: { w: writers } });
       expect(acl.writerGroups).to.deep.equal(writers);
     });
   });
@@ -76,8 +76,8 @@ describe('Acl', function () {
     });
   });
 
-  describe('removeReader()', function () {
-    it('should remove a reader', function () {
+  describe('removeReader()', function() {
+    it('should remove a reader', function() {
       const reader = 'reader';
       const acl = new Acl({ r: [reader] });
       acl.removeReader(reader);
@@ -86,7 +86,7 @@ describe('Acl', function () {
   });
 
   describe('addWriter()', function() {
-    it('should add a writer', function () {
+    it('should add a writer', function() {
       const writer = 'writer';
       const acl = new Acl();
       acl.addWriter(writer);
@@ -102,7 +102,7 @@ describe('Acl', function () {
       expect(acl.writers).to.not.include(writer);
     });
 
-    it('should remove a writer', function () {
+    it('should remove a writer', function() {
       const writer = 'writer';
       const acl = new Acl({ w: [writer] });
       acl.removeWriter(writer);
@@ -119,17 +119,17 @@ describe('Acl', function () {
     });
   });
 
-  describe('removeReaderGroup()', function () {
-    it('should remove a reader', function () {
+  describe('removeReaderGroup()', function() {
+    it('should remove a reader', function() {
       const reader = 'reader';
-      const acl = new Acl({ groups: { r: [reader] }});
+      const acl = new Acl({ groups: { r: [reader] } });
       acl.removeReaderGroup(reader);
       expect(acl.readerGroups).to.not.include(reader);
     });
   });
 
-  describe('addWriterGroup()', function () {
-    it('should add a writer', function () {
+  describe('addWriterGroup()', function() {
+    it('should add a writer', function() {
       const writer = 'writer';
       const acl = new Acl();
       acl.addWriterGroup(writer);
@@ -137,8 +137,8 @@ describe('Acl', function () {
     });
   });
 
-  describe('removeWriterGroup()', function () {
-    it('should remove a writer', function () {
+  describe('removeWriterGroup()', function() {
+    it('should remove a writer', function() {
       const writer = 'writer';
       const acl = new Acl({ groups: { w: [writer] } });
       acl.removeWriterGroup(writer);

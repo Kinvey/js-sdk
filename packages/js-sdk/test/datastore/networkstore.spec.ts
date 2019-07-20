@@ -6,7 +6,7 @@ import { formatKinveyBaasUrl, KinveyBaasNamespace } from '../../src/http';
 import { setSession, removeSession } from '../../src/session';
 import { KinveyError } from '../../src/errors';
 import { NetworkStore } from '../../src/datastore';
-import { appKey, appSecret } from '../env';
+import { APP_KEY, APP_SECRET } from '../env';
 
 const COLLECTION_NAME = 'collectionName';
 const BATCH_SIZE = 100;
@@ -89,8 +89,8 @@ describe('NetworkStore', function() {
     describe('with API version 5', function() {
       beforeEach(function() {
         init({
-          appKey,
-          appSecret,
+          appKey: APP_KEY,
+          appSecret: APP_SECRET,
           apiVersion: 5
         });
       });

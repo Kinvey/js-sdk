@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { HttpHeaders } from '../../src/http';
+import { HttpHeaders } from './headers';
 
 describe('Headers', function() {
   it('should set a header using a function', function() {

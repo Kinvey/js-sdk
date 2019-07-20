@@ -9,6 +9,7 @@ import {
 import { Query } from '../query';
 import { Doc } from '../storage';
 import { KinveyError, ParameterValueOutOfRangeError } from '../errors';
+import { Aggregation } from '../aggregation';
 
 export interface NetworkOptions {
   trace?: boolean;
@@ -94,6 +95,19 @@ export class DataStoreNetwork {
       method: HttpRequestMethod.GET,
       auth: kinveySessionAuth,
       url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/_count`, requestQueryObject),
+      skipBL: options.skipBL,
+      trace: options.trace,
+      properties: options.properties
+    });
+    return request.execute();
+  }
+
+  group<T>(aggregation: Aggregation<T>, options: NetworkOptions = {}): Promise<KinveyHttpResponse> {
+    const request = new KinveyHttpRequest({
+      method: HttpRequestMethod.POST,
+      auth: kinveySessionAuth,
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/_group`),
+      body: aggregation.toPlainObject(),
       skipBL: options.skipBL,
       trace: options.trace,
       properties: options.properties

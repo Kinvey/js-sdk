@@ -15,10 +15,10 @@
   "scripts": {
     "prebuild": "del lib && npm run lint",
     "build": "tsc -p tsconfig.json",
-    "coverage": "nyc mocha",
-    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' --quiet --fix",
-    "test": "mocha",
-    "test:watch": "mocha --watch --watch-extensions ts"
+    "coverage": "nyc mocha --opts mocha.opts",
+    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts}' --quiet --fix",
+    "test": "mocha --opts mocha.opts",
+    "test:watch": "mocha --watch --watch-extensions ts --opts mocha.opts"
   },
   "dependencies": {
     "js-base64": "^2.5.1",

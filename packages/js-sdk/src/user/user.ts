@@ -9,11 +9,20 @@ import {
   kinveySessionAuth
 } from '../http';
 
+export interface PushToken {
+  token: string;
+  platform: string;
+  arn: string;
+  framework?: string;
+}
+
 export interface UserData extends Session {
   _acl?: AclObject;
   email?: string;
   username?: string;
-  password?: string;
+  _messaging?: {
+    pushTokens: PushToken[];
+  };
 }
 
 export class User<T extends UserData> {

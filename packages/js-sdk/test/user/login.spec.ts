@@ -2,7 +2,8 @@ import { expect } from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
 import { formatKinveyBaasUrl, KinveyBaasNamespace } from '../../src/http';
-import { login, getActiveUser } from '../../src/user';
+import { loginWithUsernameAndPassword } from '../../src/identity';
+import { getActiveUser } from '../../src/user';
 
 describe('Login', function() {
   it('should login with correct username and password', async function() {
@@ -12,7 +13,7 @@ describe('Login', function() {
     const scope = nock(url.origin)
       .post(url.pathname, { username, password })
       .reply(200, { _id: '1', _kmd: { authtoken: 'authtoken' } });
-    const user = await login(username, password);
+    const user = await loginWithUsernameAndPassword(username, password);
     const activeUser = getActiveUser();
     expect(user).to.deep.equal(activeUser);
     expect(scope.isDone()).to.equal(true);

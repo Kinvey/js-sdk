@@ -5,7 +5,7 @@ import { Kmd } from '../kmd';
 import { getApiVersion } from '../init';
 import { KinveyError } from '../errors';
 import { Query } from '../query';
-// import { Aggregation } from "../aggregation";
+import { Aggregation } from '../aggregation';
 import { DataStoreNetwork, FindNetworkOptions, NetworkOptions } from './network';
 
 export interface MultiInsertResult<T extends Doc> {
@@ -36,10 +36,11 @@ export class NetworkStore<T extends Doc> {
     return 'count' in response.data ? response.data.count : 0;
   }
 
-  // async group(aggregation: Aggregation, options?: NetworkOptions): Promise<any> {
-  //   const network = new DataStoreNetwork(this.collectionName);
-  //   const response = await network.count(query, options);
-  // }
+  async group<K>(aggregation: Aggregation<K>, options?: NetworkOptions): Promise<K> {
+    const network = new DataStoreNetwork(this.collectionName);
+    const response = await network.group<K>(aggregation, options);
+    return response.data;
+  }
 
   async findById(id: string, options?: NetworkOptions): Promise<T> {
     const network = new DataStoreNetwork(this.collectionName);

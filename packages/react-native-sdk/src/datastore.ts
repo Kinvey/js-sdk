@@ -1,4 +1,1 @@
-export {
-  AutoStore,
-  NetworkStore
-} from 'kinvey-js-sdk/lib/datastore';
+export { AutoStore, NetworkStore } from 'kinvey-js-sdk/lib/datastore';

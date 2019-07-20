@@ -1,9 +1,7 @@
 import { NgModule, ModuleWithProviders, APP_INITIALIZER, InjectionToken, Inject, Injectable } from '@angular/core';
-import { init as initSDK, KinveySDKConfig } from './init';
+import { init as initSDK, KinveySDKConfig } from '../init';
 
-export { KinveySDKConfig };
-
-export const KINVEY_SDK_CONFIG_TOKEN = new InjectionToken<KinveySDKConfig>('kinveySDKConfigToken');
+export const KINVEY_SDK_CONFIG_TOKEN = new InjectionToken<KinveySDKConfig>('KinveySDKConfigToken');
 
 @Injectable()
 export class InitService {
@@ -23,14 +21,16 @@ export function appInitializer(initService: InitService): () => void {
   return fn;
 }
 
+export { KinveySDKConfig };
+
 @NgModule()
 export class KinveyModule {
   static init(config: KinveySDKConfig): ModuleWithProviders {
     return {
       ngModule: KinveyModule,
       providers: [
-        { provide: KINVEY_SDK_CONFIG_TOKEN, useValue: config },
         InitService,
+        { provide: KINVEY_SDK_CONFIG_TOKEN, useValue: config },
         {
           provide: APP_INITIALIZER,
           useFactory: appInitializer,
