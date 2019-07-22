@@ -5,10 +5,10 @@ import { get, set, remove } from './store';
 const MIC_IDENTITY = 'kinveyAuth';
 
 function getSessionKey(): string {
-  return `${getAppKey()}.active_user`;
+  return `${getAppKey()}.activeUser`;
 }
 
-interface MICSession {
+export interface MICToken {
   client_id: string;
   redirect_uri?: string;
   access_token: string;
@@ -19,7 +19,7 @@ export interface Session {
   _id: string;
   _kmd: KmdObject;
   _socialIdentity?: {
-    kinveyAuth?: MICSession;
+    kinveyAuth?: MICToken;
   };
 }
 
@@ -42,7 +42,7 @@ export function removeSession(): boolean {
   return remove(key);
 }
 
-export function getMICSession(): MICSession | null {
+export function getMICToken(): MICToken | null {
   const session = getSession();
   if (session && session._socialIdentity && session._socialIdentity[MIC_IDENTITY]) {
     return session._socialIdentity[MIC_IDENTITY];
@@ -50,8 +50,8 @@ export function getMICSession(): MICSession | null {
   return null;
 }
 
-export function setMICSession(micSession: MICSession): void {
+export function setMICToken(micToken: MICToken): void {
   const session = getSession();
-  session._socialIdentity = Object.assign(session._socialIdentity, { [MIC_IDENTITY]: micSession });
+  session._socialIdentity = Object.assign(session._socialIdentity, { [MIC_IDENTITY]: micToken });
   setSession(session);
 }

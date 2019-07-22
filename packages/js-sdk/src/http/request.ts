@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import PQueue from 'p-queue';
 import { Base64 } from 'js-base64';
 import { InvalidCredentialsError, KinveyError } from '../errors';
-import { getMICSession, setMICSession, getSession, setSession } from '../session';
+import { getMICToken, setMICToken, getSession, setSession } from '../session';
 import { getAppSecret } from '../init';
 import { HttpHeaders, KinveyHttpHeaders } from './headers';
 import { HttpResponse, KinveyHttpResponse } from './response';
@@ -167,9 +167,9 @@ export class KinveyHttpRequest extends HttpRequest {
           return REQUEST_QUEUE.add((): Promise<KinveyHttpResponse> => this.execute());
         }
 
-        const micSession = getMICSession();
+        const micToken = getMICToken();
 
-        if (micSession && micSession.refresh_token) {
+        if (micToken && micToken.client_id && micToken.redirect_uri && micToken.refresh_token) {
           // Start refresh process
           startRefreshProcess();
 
@@ -178,22 +178,22 @@ export class KinveyHttpRequest extends HttpRequest {
             const refreshRequest = new KinveyHttpRequest({
               method: HttpRequestMethod.POST,
               auth: async (): Promise<string> => {
-                const credentials = Base64.encode(`${micSession.client_id}:${getAppSecret()}`);
+                const credentials = Base64.encode(`${micToken.client_id}:${getAppSecret()}`);
                 return `Basic ${credentials}`;
               },
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
               },
-              url: formatKinveyAuthUrl('/oauth/token'),
+              url: formatKinveyAuthUrl(3, '/oauth/token'),
               body: {
                 grant_type: 'refresh_token',
-                client_id: micSession.client_id,
-                redirect_uri: micSession.redirect_uri,
-                refresh_token: micSession.refresh_token
+                client_id: micToken.client_id,
+                redirect_uri: micToken.redirect_uri,
+                refresh_token: micToken.refresh_token
               }
             });
             const refreshResponse = await refreshRequest.execute(false);
-            const newMicSession = refreshResponse.data;
+            const newMicToken = refreshResponse.data;
 
             // Login
             const session = getSession();
@@ -204,7 +204,7 @@ export class KinveyHttpRequest extends HttpRequest {
               body: {
                 _socialIdentity: {
                   kinveyAuth: {
-                    access_token: newMicSession.access_token,
+                    access_token: newMicToken.access_token,
                     id: session._id
                   }
                 }
@@ -215,7 +215,7 @@ export class KinveyHttpRequest extends HttpRequest {
 
             // Set the new session
             setSession(newSession);
-            setMICSession(Object.assign(micSession, newMicSession));
+            setMICToken(Object.assign(micToken, newMicToken));
           } catch (refreshError) {
             // TODO: log error
             throw error;

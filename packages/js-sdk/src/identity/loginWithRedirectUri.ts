@@ -1,18 +1,18 @@
-import { Base64 } from 'js-base64';
 import { parse } from 'url';
 import isString from 'lodash/isString';
-import { KinveyError, NotFoundError } from '../errors';
-import { getAppKey, getAppSecret } from '../init';
+import { KinveyError } from '../errors';
 import { User, UserData, getActiveUser } from '../user';
-import { formatKinveyAuthUrl, KinveyHttpRequest, HttpRequestMethod } from '../http';
+import { formatKinveyAuthUrl } from '../http';
 import { open as openPopup } from './popup';
 import { login } from './login';
-import { signup } from './signup';
+import { exchangeCodeForToken, MICOptions, getClientId } from './mic';
+import { setMICToken } from '../session';
 
-function loginWithPopup(redirectUri: string, clientId: string, version: number = 3): Promise<string> {
+function loginWithPopup(redirectUri: string, options: MICOptions = {}): Promise<string> {
   return new Promise(
     async (resolve, reject): Promise<void> => {
-      const url = formatKinveyAuthUrl(`/v${version}/oauth/auth`, {
+      const clientId = getClientId(options.micId);
+      const url = formatKinveyAuthUrl(options.version, '/oauth/auth', {
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: 'code',
@@ -37,7 +37,7 @@ function loginWithPopup(redirectUri: string, clientId: string, version: number =
               } else if (error) {
                 reject(new KinveyError(error as string, error_description as string));
               } else {
-                reject(new KinveyError('No code or error was provided.'));
+                reject(new KinveyError('No code or error was provided in the redirect url used for the MIC popup.'));
               }
             }
           } catch (error) {
@@ -49,50 +49,11 @@ function loginWithPopup(redirectUri: string, clientId: string, version: number =
       popup.onClosed((): void => {
         if (!redirected) {
           popup.removeAllListeners();
-          reject(new KinveyError('Unable to login with popup.'));
+          reject(new KinveyError('Unable to login with MIC using a popup.'));
         }
       });
     }
   );
-}
-
-interface Token {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
-async function exchangeCodeForToken(
-  code: string,
-  clientId: string,
-  redirectUri: string,
-  version: number = 3
-): Promise<Token> {
-  const request = new KinveyHttpRequest({
-    method: HttpRequestMethod.POST,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: (): string => {
-        const credentials = Base64.encode(`${clientId}:${getAppSecret()}`);
-        return `Basic ${credentials}`;
-      }
-    },
-    url: formatKinveyAuthUrl(`/c${version}/oauth/token`),
-    body: {
-      grant_type: 'authorization_code',
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      code
-    }
-  });
-  const response = await request.execute();
-  return response.data;
-}
-
-export interface MICOptions {
-  micId?: string;
-  version?: number;
 }
 
 export async function loginWithRedirectUri<T extends UserData>(
@@ -100,7 +61,6 @@ export async function loginWithRedirectUri<T extends UserData>(
   options: MICOptions = {}
 ): Promise<User<T>> {
   const activeUser = getActiveUser();
-  let clientId = getAppKey();
 
   if (activeUser) {
     throw new KinveyError('An active user already exists. Please logout the active user before you login.');
@@ -110,22 +70,14 @@ export async function loginWithRedirectUri<T extends UserData>(
     throw new KinveyError('A redirectUri is required and must be a string.');
   }
 
-  if (isString(options.micId)) {
-    clientId = `${clientId}.${options.micId}`;
-  }
-
-  const code = await loginWithPopup(redirectUri, clientId, options.version);
-  const token = await exchangeCodeForToken(code, clientId, redirectUri, options.version);
+  const code = await loginWithPopup(redirectUri, options);
+  const token = await exchangeCodeForToken(code, redirectUri, options);
   const credentials = { _socialIdentity: { kinveyAuth: { access_token: token.access_token } } };
+  const user = login<T>(credentials, { signup: true });
 
-  try {
-    return await login(credentials);
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      await signup(credentials);
-      return login(credentials);
-    }
+  // Update the MIC token for the active session
+  setMICToken(Object.assign({ client_id: getClientId(options.micId), redirect_uri: redirectUri }, token));
 
-    throw error;
-  }
+  // Return the user
+  return user;
 }

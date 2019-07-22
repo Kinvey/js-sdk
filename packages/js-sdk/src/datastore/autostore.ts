@@ -179,7 +179,7 @@ export class AutoStore<T extends Doc> extends NetworkStore<T> {
       return this.pull(query, options);
     }
 
-    // Retrieve existing queryCacheDoc
+    // Retrieve existing queryDoc
     const queryDoc: QueryDoc = (await queryCache.findById(pullQuery._id)) || {
       _id: pullQuery._id,
       collectionName: this.collectionName,

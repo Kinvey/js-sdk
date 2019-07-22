@@ -68,11 +68,11 @@ export function formatKinveyBaasUrl(
   });
 }
 
-export function formatKinveyAuthUrl(path?: string, query?: { [key: string]: any }): string {
+export function formatKinveyAuthUrl(version: number = 3, path?: string, query?: { [key: string]: any }): string {
   return format({
     protocol: getKinveyAuthProtocol(),
     host: getKinveyAuthHost(),
-    pathname: path,
+    pathname: urlJoin(`v${version}`, path),
     query: query ? clean(query) : undefined
   });
 }
