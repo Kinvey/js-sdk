@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.3](https://github.com/Kinvey/js-sdk/tree/v4.2.3) (2019-07-22)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.2.2...v4.2.3)<br/>
+
+- Add validation for User `signup()`. [#430](https://github.com/Kinvey/js-sdk/pull/431)
+- Add `signup()` as an instance function for the `User` class. [#431](https://github.com/Kinvey/js-sdk/pull/431)
+
 ## [4.2.2](https://github.com/Kinvey/js-sdk/tree/v4.2.2) (2019-07-05)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.2.1...v4.2.2)<br/>
 
