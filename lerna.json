@@ -1,6 +1,5 @@
 {
   "packages": [
-    "configs/*",
     "packages/*"
   ],
   "version": "independent"
