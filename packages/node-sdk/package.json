@@ -1,0 +1,11 @@
+{
+  "name": "kinvey-node-sdk",
+  "description": "Kinvey JavaScript SDK for NodeJS applications.",
+  "version": "5.0.0-next.0",
+  "license": "Apache-2.0",
+  "keywords": [
+    "Kinvey",
+    "JavaScript",
+    "NodeJS"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "extends": ["@kinveysdk/eslint-config"],
+  "rules": {
+    "no-underscore-dangle": "off",
+    "@typescript-eslint/camelcase": "off"
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.ts"],
+      "rules": {
+        "spaced-comment": "off",
+        "func-names": "off",
+        "no-undef": "off",
+        "no-unused-expressions": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "import/no-extraneous-dependencies": "off"
+      },
+      "env": {
+        "mocha": true
+      }
+    }
+  ]
+}
