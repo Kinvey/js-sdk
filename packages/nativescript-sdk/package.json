@@ -31,7 +31,7 @@
   "dependencies": {
     "events": "3.0.0",
     "kinvey-js-sdk": "^4.2.3",
-    "lodash": "4.17.11",
+    "lodash": "4.17.15",
     "nativescript-background-http": "3.4.0",
     "nativescript-hook": "0.2.5",
     "nativescript-secure-storage": "2.4.0",

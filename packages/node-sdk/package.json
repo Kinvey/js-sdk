@@ -27,11 +27,11 @@
     "postbuild": "node scripts/postbuild.js"
   },
   "dependencies": {
-    "axios": "0.18.0",
+    "axios": "0.19.0",
     "events": "3.0.0",
     "kinvey-js-sdk": "^4.2.3",
-    "lodash": "4.17.11",
-    "pubnub": "4.23.0",
+    "lodash": "4.17.15",
+    "pubnub": "4.24.4",
     "tslib": "1.9.3"
   },
   "devDependencies": {
