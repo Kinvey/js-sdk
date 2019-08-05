@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "kinvey-js-sdk-eslint-config",
+  "name": "eslint-config-kinvey-js-sdk",
   "description": "Kinvey JavaScript SDK config for ESLint.",
   "version": "1.0.0",
   "license": "Apache-2.0",
