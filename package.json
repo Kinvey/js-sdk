@@ -2,18 +2,9 @@
   "private": true,
   "name": "kinvey",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
-    "prebundle": "npm run build",
-    "bundle": "lerna run bundle",
-    "pretest": "npm run build",
-    "test": "lerna run test",
-    "test:html5": "lerna run test --scope kinvey-html5-integration-tests --stream",
-    "test:nativescript:android": "lerna run test:android --scope kinvey-nativescript-integration-tests --stream",
-    "test:nativescript:ios": "lerna run test:ios --scope kinvey-nativescript-integration-tests --stream",
-    "test:node": "lerna run test --scope kinvey-node-integration-tests --stream"
+    "bootstrap": "lerna bootstrap"
   },
   "devDependencies": {
-    "lerna": "~3.13.2"
+    "lerna": "3.16.4"
   }
 }
