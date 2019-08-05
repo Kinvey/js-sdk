@@ -50,7 +50,6 @@
     "@types/events": "~3.0.0",
     "del-cli": "~1.1.0",
     "fs-extra": "~7.0.1",
-    "nativescript-plugin-firebase": "~8.2.0",
     "tns-core-modules": "~5.3.1",
     "tns-platform-declarations": "~5.3.1",
     "typescript": "~3.2.0"
