@@ -1,0 +1,12 @@
+container:
+  image: node:latest
+
+task:
+  name: Test JavaScript SDK
+  skip: "!changesInclude('packages/js-sdk/**/*.ts')"
+  node_modules_cache:
+    folder: node_modules
+    fingerprint_script: cat package-lock.json
+    populate_script: npm ci
+  bootstrap_script: ./node_modules/.bin/lerna bootstrap
+  test_script: ./node_modules/.bin/lerna run --scope kinvey-js-sdk --stream test
