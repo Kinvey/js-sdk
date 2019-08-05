@@ -1,16 +1,12 @@
 {
-  "extends": [
-    "kinvey-js-sdk-eslint-config"
-  ],
+  "extends": ["kinvey-js-sdk"],
   "rules": {
     "no-underscore-dangle": "off",
     "@typescript-eslint/camelcase": "off"
   },
   "overrides": [
     {
-      "files": [
-        "test/**/*.ts"
-      ],
+      "files": ["test/**/*.ts"],
       "rules": {
         "spaced-comment": "off",
         "func-names": "off",
