@@ -3,18 +3,6 @@
   "description": "Kinvey JavaScript SDK for JavaScript applications.",
   "version": "4.2.3",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/js-sdk",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Kinvey/js-sdk.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Kinvey/js-sdk/issues"
-  },
-  "author": {
-    "name": "Thomas Conner",
-    "email": "thomas.conner@progress.com"
-  },
   "keywords": [
     "Kinvey",
     "JavaScript"
@@ -60,6 +48,6 @@
     "typescript": "~3.4.4"
   },
   "files": [
-    "lib"
+    "lib/**/*"
   ]
 }
