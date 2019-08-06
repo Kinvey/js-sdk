@@ -2,18 +2,19 @@
   "private": true,
   "name": "kinvey",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
-    "prebundle": "npm run build",
-    "bundle": "lerna run bundle",
-    "pretest": "npm run build",
-    "test": "lerna run test",
-    "test:html5": "lerna run test --scope kinvey-html5-integration-tests --stream",
-    "test:nativescript:android": "lerna run test:android --scope kinvey-nativescript-integration-tests --stream",
-    "test:nativescript:ios": "lerna run test:ios --scope kinvey-nativescript-integration-tests --stream",
-    "test:node": "lerna run test --scope kinvey-node-integration-tests --stream"
+    "bootstrap": "lerna bootstrap"
   },
   "devDependencies": {
-    "lerna": "~3.13.2"
+    "@commitlint/cli": "8.1.0",
+    "@commitlint/config-conventional": "8.1.0",
+    "commitizen": "4.0.3",
+    "cz-conventional-changelog": "3.0.2",
+    "husky": "3.0.2",
+    "lerna": "3.16.4"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
