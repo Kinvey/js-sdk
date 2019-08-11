@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Kinvey/js-sdk.svg?branch=refactor%2FMLIBZ-2587_Improve_SDK)](https://travis-ci.org/Kinvey/js-sdk)
+[![Build Status](https://travis-ci.org/Kinvey/js-sdk.svg?branch=refactor%2FMLIBZ-2587_Improve_SDK)](https://travis-ci.org/Kinvey/js-sdk) [![Greenkeeper badge](https://badges.greenkeeper.io/Kinvey/js-sdk.svg)](https://greenkeeper.io/)
 
 # Overview
 

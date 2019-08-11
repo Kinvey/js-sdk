@@ -32,15 +32,15 @@
     "kinvey-js-sdk": "^4.2.3",
     "lodash": "4.17.15",
     "pubnub": "4.24.4",
-    "tslib": "1.9.3"
+    "tslib": "1.10.0"
   },
   "devDependencies": {
     "@types/events": "~3.0.0",
-    "@types/lodash": "~4.14.123",
-    "@types/node": "~11.13.6",
-    "del-cli": "~1.1.0",
-    "fs-extra": "~7.0.1",
-    "typescript": "~3.4.4"
+    "@types/lodash": "4.14.136",
+    "@types/node": "~12.6.9",
+    "del-cli": "2.0.0",
+    "fs-extra": "~8.1.0",
+    "typescript": "~3.5.3"
   },
   "files": [
     "lib/**/*"
