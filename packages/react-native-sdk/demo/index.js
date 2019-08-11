@@ -9,8 +9,8 @@ import { name as appName } from './app.json';
 
 // Initialize the Kinvey React Native SDK
 init({
-  appKey: 'kid_rJQ3fa0il',
-  appSecret: 'c8368b49fe564ec8a6d172e2ec25e3be'
+  appKey: '<appKey>',
+  appSecret: '<appSecret>'
 });
 
 AppRegistry.registerComponent(appName, () => App);

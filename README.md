@@ -4,10 +4,8 @@
   </a>
 </p>
 
-<p align="left">
-  <a href="https://cirrus-ci.com/github/Kinvey/js-sdk"><img alt="Build Status" src="https://api.cirrus-ci.com/github/Kinvey/js-sdk.svg"></a>
-  <a href="https://conventionalcommits.org"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg"></a>
-</p>
+[![Build Status](https://api.cirrus-ci.com/github/Kinvey/js-sdk.svg)](https://cirrus-ci.com/github/Kinvey/js-sdk)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 # Overview
 
@@ -22,6 +20,8 @@ We currently support the following JavaScript platforms:
 - [React](packages/html5-sdk)
 - [React Native](packages/react-native-sdk)
 - [NativeScript](packages/nativescript-sdk)
+- [Vue](packages/html5-sdk)
+- [Web JavaScript](packages/html5-sdk)
 
 ## Contributing
 
@@ -46,6 +46,4 @@ The Kinvey JavaScript SDK repo is managed as a [monorepo](https://github.com/Kin
 
 ## License
 
-Copyright (c) Progress Software Corporation. All rights reserved.
-
-Licensed under the [Apache 2.0](LICENSE.txt) license.
+See [LICENSE](LICENSE.txt) for details.
