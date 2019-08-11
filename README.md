@@ -6,6 +6,7 @@
 
 [![Build Status](https://api.cirrus-ci.com/github/Kinvey/js-sdk.svg)](https://cirrus-ci.com/github/Kinvey/js-sdk)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Greenkeeper badge](https://badges.greenkeeper.io/Kinvey/js-sdk.svg)](https://greenkeeper.io/)
 
 # Overview
 
