@@ -12,7 +12,7 @@ npm i kinvey-react-native-sdk
 
 ## Demo App
 
-You can use the [demo app](./demo) as a starting template for your app. You will need to change the `appKey` and `appSecret` in [demo/inde.js](./demo/index.js) with your applications credentionals.
+You can use the [demo app](./demo) as a starting template for your app. You will need to change the `appKey` and `appSecret` in [demo/index.js](./demo/index.js) with your applications credentionals.
 
 ## Not yet implemented
 
