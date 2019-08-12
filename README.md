@@ -22,7 +22,7 @@ We currently support the following JavaScript platforms:
 - [React Native](packages/react-native-sdk)
 - [NativeScript](packages/nativescript-sdk)
 - [Vue](packages/html5-sdk)
-- [Web JavaScript](packages/html5-sdk)
+- [HTML5](packages/html5-sdk)
 
 ## Contributing
 
