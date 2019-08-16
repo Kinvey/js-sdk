@@ -37,10 +37,8 @@
   "devDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
     "@types/react-native": "^0.60.3",
-    "@types/react-native-sqlite-storage": "^3.3.1",
     "del-cli": "2.0.0",
     "fs-extra": "~8.1.0",
-    "react-native-sqlite-storage": "^3.3.11",
     "typescript": "~3.5.3"
   },
   "files": [
