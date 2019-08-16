@@ -32,7 +32,7 @@
   },
   "peerDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
-    "react-native": "^0.60.0"
+    "react-native": "^0.60.5"
   },
   "devDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
