@@ -31,9 +31,11 @@
     "kinvey-js-sdk": "^4.2.3"
   },
   "peerDependencies": {
+    "@react-native-community/async-storage": "^1.6.1",
     "react-native": "^0.60.5"
   },
   "devDependencies": {
+    "@react-native-community/async-storage": "^1.6.1",
     "@types/react-native": "^0.60.3",
     "del-cli": "2.0.0",
     "fs-extra": "~8.1.0",
