@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/events": "~3.0.0",
-    "@types/lodash": "4.14.136",
+    "@types/lodash": "4.14.137",
     "@types/node": "~12.7.2",
     "del-cli": "2.0.0",
     "fs-extra": "~8.1.0",

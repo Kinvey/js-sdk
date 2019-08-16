@@ -32,7 +32,7 @@
     "@types/events": "3.0.0",
     "@types/jest": "24.0.17",
     "@types/js-base64": "2.3.1",
-    "@types/lodash": "4.14.136",
+    "@types/lodash": "4.14.137",
     "@types/loglevel": "1.6.3",
     "@types/node": "~12.7.2",
     "@types/url-join": "4.0.0",
