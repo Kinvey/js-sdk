@@ -40,7 +40,6 @@
     "pubnub": "https://github.com/thomasconner/javascript/tarball/67b7944366453a87226389d483ac1ad861e0e129"
   },
   "peerDependencies": {
-    "@angular/core": "~7.2.0",
     "nativescript-plugin-firebase": "~8.2.0"
   },
   "devDependencies": {
