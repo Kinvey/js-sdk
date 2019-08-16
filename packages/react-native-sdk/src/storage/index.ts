@@ -1,17 +1,17 @@
 import { Errors } from "kinvey-js-sdk";
 import * as Memory from "./memory";
-import * as SQLite from "./sqlite";
+import * as AsyncStorage from "./asyncStorage";
 
 export enum StorageProvider {
-  Memory = "Memory",
-  SQLite = "SQLite"
+  AsyncStorage = "AsyncStorage",
+  Memory = "Memory"
 }
 
-export function getStorageAdapter(storageProvider = StorageProvider.SQLite) {
+export function getStorageAdapter(storageProvider = StorageProvider.AsyncStorage) {
   if (storageProvider === StorageProvider.Memory) {
     return Memory;
-  } else if (storageProvider === StorageProvider.SQLite) {
-    return SQLite;
+  } else if (storageProvider === StorageProvider.AsyncStorage) {
+    return AsyncStorage;
   }
 
   throw new Errors.KinveyError("You must override the default cache store.");
