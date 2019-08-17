@@ -1,0 +1,25 @@
+{
+  "extends": ["kinvey-js-sdk"],
+  "overrides": [
+    {
+      "files": ["jest/**/*.js", "jest/**/*.ts", "**/*.spec.js", "**/*.spec.ts"],
+      "rules": {
+        "spaced-comment": "off",
+        "func-names": "off",
+        "no-undef": "off",
+        "no-unused-expressions": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "import/no-extraneous-dependencies": "off",
+        "jest/no-disabled-tests": "warn",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "jest/prefer-to-have-length": "warn",
+        "jest/valid-expect": "error"
+      },
+      "env": {
+        "jest": true
+      },
+      "plugins": ["jest"]
+    }
+  ]
+}
