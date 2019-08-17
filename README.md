@@ -1,52 +1,50 @@
-[![Build Status](https://travis-ci.org/Kinvey/js-sdk.svg?branch=refactor%2FMLIBZ-2587_Improve_SDK)](https://travis-ci.org/Kinvey/js-sdk) [![Greenkeeper badge](https://badges.greenkeeper.io/Kinvey/js-sdk.svg)](https://greenkeeper.io/)
-
-# Overview
-
-[Kinvey](http://www.kinvey.com) (pronounced Kin-vey, like convey) makes it ridiculously easy for developers to setup, use and operate a cloud backend for their mobile apps. They don't have to worry about connecting to various cloud services, setting up servers for their backend, or maintaining and scaling them.
-
-The JS SDK is used as a way to share common code for platform specific SDK shims. Here is a list of the platforms we currently support.
-
-* [Angular](packages/angular-sdk)
-* [HTML5](packages/html5-sdk)
-* [NativeScript](packages/nativescript-sdk)
-* [NativeScript Angular](packages/nativescript-angular-sdk)
-* [NodeJS](packages/node-sdk)
-
-## Thanks
-Thanks to [BrowserStack](http://browserstack.com) for providing us with a free account.
 <p align="left">
-  <a href="http://browserstack.com" style="display: inline-block;">
-    <img src="logo-browserstack.png">
+  <a href="https://www.progress.com/kinvey" style="display: inline-block;">
+    <img src="logo-progresskinvey.png">
   </a>
 </p>
 
-## License
-See [LICENSE](LICENSE) for details.
+[![Build Status](https://api.cirrus-ci.com/github/Kinvey/js-sdk.svg)](https://cirrus-ci.com/github/Kinvey/js-sdk)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Greenkeeper badge](https://badges.greenkeeper.io/Kinvey/js-sdk.svg)](https://greenkeeper.io/)
+
+# Overview
+
+[Kinvey](https://www.progress.com/kinvey) is a high-productivity serverless application development platform that provides developers tools to build robust, multi-channel applications utilizing a cloud backend and front-end SDKs. As a platform, Kinvey provides many solutions to common development needs, such as a data store, data integration, single sign-on, and file storage. With Kinvey, developers can focus on building what provides value for their app - the user experience (UX) and business logic of the application. This approach increases developer productivity and aims to enable higher quality apps by leveraging Kinvey's pre-built components.
+
+## Platforms Supported
+
+We currently support the following JavaScript platforms:
+
+- [Angular](packages/angular-sdk)
+- [NodeJS](packages/node-sdk)
+- [React](packages/html5-sdk)
+- [React Native](packages/react-native-sdk)
+- [NativeScript](packages/nativescript-sdk)
+- [Vue](packages/html5-sdk)
+- [HTML5](packages/html5-sdk)
 
 ## Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on reporting bugs and making contributions.
 
-# Development
+If you are interested in fixing issues and contributing directly to the code base, please see the document [How to Contribute](), which covers the following:
 
-Fork the repo on GitHub and clone your fork to your local machine. You can then submit PRs to the main repo from your fork for changes that you make.
+- [How to build and run from source]()
+- [The development workflow, including debugging and running tests]()
+- [Coding guidelines]()
+- [Submitting pull requests]()
 
-## Setup
+## Feedback
 
-Run `npm install` from the command line at the root of the project.
+- Ask a question using [Kinvey support](https://support.kinvey.com/support/home).
+- Ask a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/kinvey)
+- [Request a new feature](CONTRIBUTING.md)
+- Up vote [popular feature requests](https://github.com/Kinvey/js-code/issues?q=is%3Aopen+is%3Aissue+label%3Afeature-request+sort%3Areactions-%2B1-desc)
+- [File an issue](https://github.com/Kinvey/js-sdk/issues)
 
-## Build
+## How is the repo structured?
 
-Run `npm run build` from the command line at the root of the project.
+The Kinvey JavaScript SDK repo is managed as a [monorepo](https://github.com/Kinvey/js-sdk/wiki/Monorepo) that is composed of many [npm packages](packages/README.md).
 
-## Test
+## License
 
-The project is setup with unit and integration tests.
-
-### Integration Tests
-
-Run `npm run test` from the command line at the root of the project to run the same tests against each of the SDKs. You can also run the tests against each individual SDK like this:
-
-- HTML5 SDK - `npm run test:html5`
-- NativeScript SDK on iOS - `npm run test:nativescript:ios`
-- NativeScript SDK on Android - `npm run test:nativescript:android`
-- NodeJS SDK - `npm run test:node`
+See [LICENSE](LICENSE.txt) for details.

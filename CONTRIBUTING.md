@@ -1,31 +1,66 @@
-# Contributing
+# Contributing to Kinvey JavaScript SDK
+
+Welcome, and thank you for your interest in contributing to the Kinvey JavaScript SDK!
+
+There are many ways in which you can contribute, beyond writing code. The goal of this document is to provide a high-level overview of how you can get involved.
+
+## Asking Questions
+
+Have a question? Rather than opening an issue, please ask away on [Stack Overflow](https://stackoverflow.com/questions/tagged/kinvey) using the tag `kinvey`.
+
+The active community will be eager to assist you. Your well-worded question will serve as a resource to others searching for help.
 
 ## Reporting Issues
 
-We recommend the following guidelines for reporting bugs -
+Have you identified a reproducible problem in the Kinvey JavaScript SDK? Have a feature request? We want to hear about it! Here's how you can make reporting your issue as effective as possible.
 
-- For faster response, we recommend using [Kinvey support](https://support.kinvey.com/support/home).
-- For bugs and enhancements specific to the library that are not time critical, please [file a GitHub issue](https://github.com/Kinvey/js-sdk/issues).
+### Look For an Existing Issue
 
-### Filing a bug
+Before you create a new issue, please do a search in [open issues](https://github.com/Kinvey/js-sdk/issues) to see if the issue or feature request has already been filed.
 
-When filing a bug, please provide as much of the following information as possible -
+Be sure to scan through the [most popular](https://github.com/Kinvey/js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Afeature-request+sort%3Areactions-%2B1-desc) feature requests.
 
-- Steps to reproduce
-- Expected result
-- Actual result
-- Sample code that demonstrates the issue
-- Version of Kinvey / Device and toolset information
-- Kinvey app ID (**never post your app secrets publicly**)
+If you find your issue already exists, make relevant comments and add your [reaction](https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comments). Use a reaction in place of a "+1" comment:
 
+- 👍 - upvote
+- 👎 - downvote
 
-## Contributing Code
+If you cannot find an existing issue that describes your bug or feature, create a new issue using the guidelines below.
 
-When contributing to the repository, please follow these guidelines -
+### Writing Good Bug Reports and Feature Requests
 
-- All contributions must be in the form of a pull request, with the `master` branch as the base.
-- Pull requests must pass the unit tests in the codebase. Whenever possible, new code should also add unit tests.
-- Each commit should include a commit message describing the change; and each pull request should include a high level summary of the bug or enhancement being addressed by the pull request.
-- The core team (Kinvey engineering) is currently responsible for reviewing, merging and releasing new code.
+File a single issue per problem and feature request. Do not enumerate multiple bugs or feature requests in the same issue.
 
-We require that all contributors sign a [CLA](https://goo.gl/forms/spZb2rXhC6I6zOxw1) prior to making a contribution. Please fill out the CLA so we can accept your contributions. If you have questions, you can email mobile@kinvey.com.
+Do not add your issue as a comment to an existing issue unless it's for the identical input. Many issues look similar, but have different causes.
+
+The more information you can provide, the more likely someone will be successful at reproducing the issue and finding a fix.
+
+Please include the following with each issue:
+
+- Version of JavaScript SDK
+
+- JavaScript platform and version you are using to develop your application. An example would be Angular 8.0.0.
+
+- Reproducible steps (1... 2... 3...) that cause the issue
+
+- What you expected to see, versus what you actually saw
+
+- Images, animations, or a link to a video showing the issue occurring
+
+- A code snippet that demonstrates the issue or a link to a code repository the developers can easily pull down to recreate the issue locally
+
+  - **Note:** Because the developers need to copy and paste the code snippet, including a code snippet as a media file (i.e. .gif) is not sufficient.
+
+### Final Checklist
+
+Please remember to do the following:
+
+- [ ] Search the issues to ensure your report is a new issue
+
+- [ ] Simplify your code around the issue to better isolate the problem
+
+Don't feel bad if the developers can't reproduce the issue right away. They will simply ask for more information!
+
+## Contributing Fixes
+
+If you are interested in writing code to fix issues, please see [How to Contribute](https://github.com/Kinvey/js-sdk/wiki/How-to-Contribute) in the wiki
