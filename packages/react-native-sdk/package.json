@@ -24,7 +24,9 @@
   "scripts": {
     "prebuild": "del lib",
     "build": "tsc -p tsconfig.json",
-    "postbuild": "node scripts/postbuild.js"
+    "postbuild": "node scripts/postbuild.js",
+    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts}' --quiet --fix",
+    "test": "jest"
   },
   "dependencies": {
     "axios": "0.19.0",
@@ -36,9 +38,27 @@
   },
   "devDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
+    "@types/jest": "^24.0.17",
     "@types/react-native": "^0.60.3",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
     "del-cli": "2.0.0",
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-kinvey-js-sdk": "1.0.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^22.15.1",
+    "eslint-plugin-prettier": "^3.1.0",
     "fs-extra": "~8.1.0",
+    "jest": "24.8.0",
+    "mock-async-storage": "^2.2.0",
+    "prettier": "^1.18.2",
+    "react": "^16.9.0",
+    "react-native": "^0.60.5",
+    "react-native-testing-library": "~1.11.1",
+    "react-test-renderer": "^16.9.0",
+    "ts-jest": "^24.0.2",
     "typescript": "~3.5.3"
   },
   "files": [
