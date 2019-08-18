@@ -35,14 +35,11 @@ export async function send(request: any) {
       timeout
     });
   } catch (error) {
-    if (error.code === 'ESOCKETTIMEDOUT'
-      || error.code === 'ETIMEDOUT'
-      || error.code === 'ECONNABORTED') {
+    if (error.code === 'ESOCKETTIMEDOUT' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
       throw new TimeoutError('The network request timed out.');
     }
 
-    if (error.code === 'ENOENT'
-      || !error.response) {
+    if (error.code === 'ENOENT' || !error.response) {
       throw new NetworkError();
     }
 

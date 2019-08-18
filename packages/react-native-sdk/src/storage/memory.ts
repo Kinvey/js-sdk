@@ -25,7 +25,7 @@ export async function findById(dbName: string, tableName: string, id: string) {
 
 export async function save(dbName: string, tableName: string, docs: any = []) {
   const table = getTable(dbName, tableName);
-  docs.forEach((doc: { _id: string; }) => {
+  docs.forEach((doc: { _id: string }) => {
     table.set(doc._id, doc);
   });
   setTable(dbName, tableName, table);

@@ -20,8 +20,8 @@ export function init(config: KinveyConfig) {
     popup: null,
     storageAdapter: getStorageAdapter(config.storage),
     pubnub: null
-  })
-  return Object.assign({}, kinveyConfig, { storage: config.storage, _storage: config.storage });
+  });
+  return { ...kinveyConfig, storage: config.storage, _storage: config.storage };
 }
 
 export function initialize(config: KinveyConfig) {
