@@ -6,14 +6,27 @@
   "license": "Apache-2.0",
   "main": "index.js",
   "peerDependencies": {
-    "@typescript-eslint/eslint-plugin": "2.0.0",
-    "@typescript-eslint/parser": "2.0.0",
-    "eslint-config-airbnb-base": "13.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-kinvey-platform": "kinvey/eslint-kinvey-platform#0.1.6",
-    "eslint-config-prettier": "6.0.0",
-    "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-prettier": "3.1.0",
-    "eslint": "6.1.0",
-    "prettier": "1.18.2"
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint": "^6.1.0",
+    "prettier": "^1.18.2",
+    "typescript": "^3.5.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-kinvey-platform": "kinvey/eslint-kinvey-platform#0.1.6",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint": "^6.1.0",
+    "prettier": "^1.18.2",
+    "typescript": "^3.5.3"
   }
 }
