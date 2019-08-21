@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
+import { AppURL, handleOpenURL } from 'nativescript-urlhandler';
 import { Color } from 'tns-core-modules/color';
-import { handleOpenURL, AppURL } from 'nativescript-urlhandler';
-import { ios } from "tns-core-modules/utils/utils";
 
 const LOADED_EVENT = 'loaded';
 const CLOSED_EVENT = 'closed';
@@ -81,7 +80,7 @@ export class Popup extends EventEmitter {
     });
 
     // Show the view controller
-    const app = ios.getter(UIApplication, UIApplication.sharedApplication);
+    const app = UIApplication.sharedApplication;
     this._viewController = app.keyWindow.rootViewController;
 
     // Get the topmost view controller
