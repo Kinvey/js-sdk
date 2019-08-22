@@ -1,7 +1,7 @@
 module.exports = {
-  testRegex: "./tests/.*.spec.[jt]s$",
+  collectCoverage: true,
+  roots: ['<rootDir>/src'],
   transform: {
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.tsx?$': 'ts-jest',
   },
-  verbose: true
 };
