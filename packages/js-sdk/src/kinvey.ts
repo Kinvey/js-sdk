@@ -1,7 +1,9 @@
-import isNumber = require('lodash/isNumber');
-import { getConfig, ConfigKey } from './config';
+import isNumber from 'lodash/isNumber';
+import isString from 'lodash/isString';
+import isEmpty from 'lodash/isEmpty';
+import { KinveyError } from './errors';
 
-export interface KinveyConfig {
+export interface KinveySDKConfig {
   appKey: string;
   appSecret: string;
   masterSecret?: string;
@@ -12,71 +14,99 @@ export interface KinveyConfig {
   apiVersion?: number;
 }
 
-export function getAppKey() {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
+const config: KinveySDKConfig = {
+  appKey: '',
+  appSecret: '',
+  defaultTimeout: 60000, // 1 minute
+  apiVersion: 4,
+};
+
+export function getAppKey(): string {
+  if (isEmpty(config.appKey)) {
+    throw new KinveyError('An appKey has not been set. Please initialize the SDK.');
+  }
   return config.appKey;
 }
 
-export function getAppSecret() {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
+export function setAppKey(appKey: string): void {
+  if (!isString(appKey)) {
+    throw new KinveyError('The appKey must be a string.');
+  }
+  config.appKey = appKey;
+}
+
+export function getAppSecret(): string {
+  if (isEmpty(config.appSecret)) {
+    throw new KinveyError('An appSecret has not been set. Please initialize the SDK.');
+  }
   return config.appSecret;
 }
 
-export function getMasterSecret() {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
+export function setAppSecret(appSecret: string): void {
+  if (!isString(appSecret)) {
+    throw new KinveyError('The appSecret must be a string.');
+  }
+  config.appSecret = appSecret;
+}
+
+export function getMasterSecret(): string {
+  if (isEmpty(config.masterSecret)) {
+    throw new KinveyError('An masterSecret has not been set.');
+  }
   return config.masterSecret;
 }
 
-export function getInstanceId() {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
+export function setMasterSecret(masterSecret: string): void {
+  if (!isString(masterSecret)) {
+    throw new KinveyError('The masterSecret must be a string.');
+  }
+  config.masterSecret = masterSecret;
+}
+
+export function getInstanceId(): string | undefined {
   return config.instanceId;
 }
 
-export function getBaasProtocol() {
-  return 'https:';
-}
-
-export function getBaasHost() {
-  const instanceId = getInstanceId();
-
-  if (instanceId) {
-    return `${instanceId}-baas.kinvey.com`;
+export function setInstanceId(instanceId: string): void {
+  if (!isString(instanceId)) {
+    throw new KinveyError('The instanceId must be a string.');
   }
-
-  return 'baas.kinvey.com';
+  config.instanceId = instanceId;
 }
 
-export function getAuthProtocol() {
-  return 'https:';
+export function removeInstanceId(): void {
+  config.instanceId = undefined;
 }
 
-export function getAuthHost() {
-  const instanceId = getInstanceId();
+export function getDefaultTimeout(): number {
+  return config.defaultTimeout;
+}
 
-  if (instanceId) {
-    return `${instanceId}-auth.kinvey.com`;
+export function setDefaultTimeout(timeout: number): void {
+  if (!isNumber(timeout)) {
+    throw new KinveyError('The default timeout must be a number and should be expressed in ms.');
   }
-
-  return 'auth.kinvey.com';
+  config.defaultTimeout = timeout;
 }
 
-export function getDefaultTimeout() {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
-  if (isNumber(config.defaultTimeout)) {
-    return config.defaultTimeout;
-  }
-  return 60000; // 1 minute
-}
-
-export function getEncryptionKey() {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
+export function getEncryptionKey(): string | undefined {
   return config.encryptionKey;
 }
 
-export function getApiVersion(): number {
-  const config = getConfig<KinveyConfig>(ConfigKey.KinveyConfig);
-  if (isNumber(config.apiVersion) && config.apiVersion >= 3) {
-    return config.apiVersion;
+export function setEncryptionKey(encryptionKey: string): void {
+  if (!isString(encryptionKey)) {
+    throw new KinveyError('The encryptionKey must be a string.');
   }
-  return 4;
+  config.encryptionKey = encryptionKey;
+}
+
+export function getApiVersion(): number {
+  return config.apiVersion;
+}
+
+export function setApiVersion(version: number): void {
+  if (!isNumber(version)) {
+    throw new KinveyError('The api version must be a number.');
+  }
+  config.apiVersion = version;
 }
