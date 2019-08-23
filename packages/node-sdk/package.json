@@ -31,7 +31,7 @@
     "events": "3.0.0",
     "kinvey-js-sdk": "^4.2.3",
     "lodash": "4.17.15",
-    "pubnub": "4.25.0",
+    "pubnub": "4.25.1",
     "tslib": "1.10.0"
   },
   "devDependencies": {
