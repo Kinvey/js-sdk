@@ -1,58 +1,35 @@
-import isFunction from 'lodash/isFunction';
-import { resolve } from 'path';
+jest.mock('react-native-push-notification');
+jest.mock('kinvey-js-sdk/lib/http');
 
-const DEVICE_TOKEN = { os: 'MacOs', token: 'token' };
-const PUSH_NOTIFICATION = {
-  foregroup: false,
-  userInteraction: false,
-  message: 'Hello World!',
-  data: { title: 'Test Push Notification' },
-  badge: 0,
-  alert: { title: 'Test Push Notification' },
-  sound: 'alert.wav',
-  finish: jest.fn()
-};
-const PushNotificationMock = {
-  configure: jest.fn((options = {}) => {
-    const { onRegister, onNotification } = options;
-
-    if (isFunction(onRegister)) {
-      onRegister(DEVICE_TOKEN);
-    }
-
-    if (isFunction(onNotification)) {
-      onNotification(PUSH_NOTIFICATION);
-    }
-  }),
-  unregister: jest.fn()
-};
-jest.mock('react-native-push-notification', () => PushNotificationMock);
-
-const KinveyHttpMock = {
-  formatKinveyBaasUrl: jest.fn((namespace, path) => resolve('https://baas.kinvey.com/', namespace, path)),
-  KinveyHttpRequest: jest.fn().mockImplementation(() => {
-    return {
-      execute: jest.fn(() => Promise.resolve())
-    };
-  }),
-  HttpRequestMethod: {
-    POST: 'post'
-  },
-  KinveyHttpAuth: {
-    Session: 'session'
-  },
-  KinveyBaasNamespace: {
-    Push: 'push'
-  }
-};
-jest.mock('kinvey-js-sdk/lib/http', () => KinveyHttpMock);
-
+import PushNotification from 'react-native-push-notification';
+import { KinveyHttpRequest } from 'kinvey-js-sdk/lib/http';
 import { register, unregister } from '../push';
 
 describe('register()', () => {
+  test('should configure react native push notification module', async () => {
+    const options = {
+      senderID: 'senderId',
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true
+      },
+      popInitialNotification: true,
+      onRegister: () => {},
+      onNotification: () => {}
+    };
+    await register(options);
+    // @ts-ignore
+    const argsReceived = PushNotification.configure.mock.calls[0][0];
+    expect(argsReceived.senderID).toEqual(options.senderID);
+    expect(argsReceived.permissions).toEqual(options.permissions);
+    expect(argsReceived.popInitialNotification).toEqual(options.popInitialNotification);
+    expect(argsReceived.onNotification).toEqual(options.onNotification);
+  });
+
   test('should register the device with Kinvey', async () => {
     await register();
-    expect(KinveyHttpMock.KinveyHttpRequest).toBeCalledWith({
+    expect(KinveyHttpRequest).toBeCalledWith({
       method: 'post',
       auth: 'session',
       url: '/register-device',
@@ -67,26 +44,29 @@ describe('register()', () => {
 
   test('should return device token', async () => {
     const token = await register();
-    expect(token).toEqual(DEVICE_TOKEN.token);
+    // @ts-ignore
+    expect(token).toEqual(PushNotification.DEVICE_TOKEN.token);
   });
 
   test('should call onRegister callback', async () => {
     const onRegister = jest.fn();
     await register({ onRegister });
-    expect(onRegister).toBeCalledWith(DEVICE_TOKEN);
+    // @ts-ignore
+    expect(onRegister).toBeCalledWith(PushNotification.DEVICE_TOKEN);
   });
 
   test('should call onNotification callback', async () => {
     const onNotification = jest.fn();
     await register({ onNotification });
-    expect(onNotification).toBeCalledWith(PUSH_NOTIFICATION);
+    // @ts-ignore
+    expect(onNotification).toBeCalledWith(PushNotification.PUSH_NOTIFICATION);
   });
 });
 
 describe('unregister()', () => {
   test('should unregister the device with Kinvey', async () => {
     await unregister();
-    expect(KinveyHttpMock.KinveyHttpRequest).toBeCalledWith({
+    expect(KinveyHttpRequest).toBeCalledWith({
       method: 'post',
       auth: 'session',
       url: '/unregister-device',
@@ -101,6 +81,6 @@ describe('unregister()', () => {
 
   test('should unregister react native push notification module', async () => {
     await unregister();
-    expect(PushNotificationMock.unregister).toBeCalled();
+    expect(PushNotification.unregister).toBeCalled();
   });
 });

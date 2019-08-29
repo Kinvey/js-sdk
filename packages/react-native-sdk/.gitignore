@@ -36,3 +36,6 @@ lib
 # Code Coverage
 .nyc_output
 coverage
+
+# Jest
+__mocks__
