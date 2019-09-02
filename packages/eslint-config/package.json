@@ -7,7 +7,7 @@
   "main": "index.js",
   "peerDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^2.0.0",
+    "@typescript-eslint/parser": "^2.1.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-kinvey-platform": "kinvey/eslint-kinvey-platform#0.1.6",
     "eslint-config-prettier": "^6.1.0",
