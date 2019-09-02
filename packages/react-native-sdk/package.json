@@ -41,7 +41,7 @@
     "@types/jest": "^24.0.18",
     "@types/react-native": "^0.60.3",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^2.0.0",
+    "@typescript-eslint/parser": "^2.1.0",
     "del-cli": "2.0.0",
     "eslint": "^6.2.1",
     "eslint-config-airbnb-base": "^14.0.0",
