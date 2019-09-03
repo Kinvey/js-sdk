@@ -2,11 +2,9 @@
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "outDir": "lib",
     "sourceMap": true,
-    "target": "es5",
-    "lib": [],
-    "outDir": "lib"
+    "target": "es5"
   },
-  "exclude": ["node_modules", "test", "tests"]
+  "exclude": ["node_modules", "src/**/*.test.ts"]
 }
