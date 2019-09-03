@@ -2,5 +2,11 @@
   "packages": [
     "packages/*"
   ],
-  "version": "independent"
+  "version": "independent",
+  "command": {
+    "version": {
+      "conventionalCommits": true,
+      "createRelease": true
+    }
+  }
 }
