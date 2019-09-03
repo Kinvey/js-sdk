@@ -1,7 +1,7 @@
 {
   "name": "kinvey-nativescript-sdk",
   "description": "Kinvey JavaScript SDK for NativeScript applications.",
-  "version": "4.2.3",
+  "version": "4.2.4",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/nativescript-sdk",
   "repository": {
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "events": "3.0.0",
-    "kinvey-js-sdk": "^4.2.3",
+    "kinvey-js-sdk": "^4.2.4",
     "lodash": "4.17.15",
     "nativescript-background-http": "4.0.0",
     "nativescript-hook": "0.2.5",
@@ -61,7 +61,8 @@
     "push.js"
   ],
   "nativescript": {
-    "hooks": [{
+    "hooks": [
+      {
         "type": "before-checkForChanges",
         "script": "nativescript-hook-scripts/before-checkForChanges.js",
         "inject": true
