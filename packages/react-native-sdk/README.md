@@ -18,7 +18,5 @@ You can use the [demo app](./demo) as a starting template for your app. You will
 
 ## Not yet implemented
 
-- Offline capabilities
-  - User credential storage
-- Push notifications
+- User credential storage
 - Live Service capabilities
