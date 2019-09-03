@@ -30,16 +30,20 @@
   },
   "dependencies": {
     "axios": "0.19.0",
-    "kinvey-js-sdk": "^4.2.3"
+    "kinvey-js-sdk": "^4.2.3",
+    "lodash": "^4.17.15"
   },
   "peerDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
-    "react-native": "^0.60.5"
+    "react-native": "^0.60.5",
+    "react-native-push-notification": "^3.1.9"
   },
   "devDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
     "@types/jest": "^24.0.18",
+    "@types/lodash": "^4.14.138",
     "@types/react-native": "^0.60.3",
+    "@types/react-native-push-notification": "^3.0.6",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
     "del-cli": "2.0.0",
@@ -56,6 +60,7 @@
     "prettier": "^1.18.2",
     "react": "^16.9.0",
     "react-native": "^0.60.5",
+    "react-native-push-notification": "^3.1.9",
     "react-native-testing-library": "~1.11.1",
     "react-test-renderer": "^16.9.0",
     "ts-jest": "^24.0.2",

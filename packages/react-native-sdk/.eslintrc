@@ -5,13 +5,22 @@
   },
   "overrides": [
     {
-      "files": ["jest/**/*.js", "jest/**/*.ts", "**/*.spec.js", "**/*.spec.ts"],
+      "files": [
+        "jest/**/*.js",
+        "jest/**/*.ts",
+        "**/*.spec.js",
+        "**/*.spec.ts",
+        "__mocks__/**/*.js",
+        "__mocks__/**/*.ts"
+      ],
       "rules": {
         "spaced-comment": "off",
         "func-names": "off",
         "no-undef": "off",
         "no-unused-expressions": "off",
+        "@typescript-eslint/ban-ts-ignore": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
+        "import/first": "off",
         "import/no-extraneous-dependencies": "off",
         "jest/no-disabled-tests": "warn",
         "jest/no-focused-tests": "error",
