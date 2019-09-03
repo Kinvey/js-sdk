@@ -1,7 +1,7 @@
 {
   "name": "kinvey-react-native-sdk",
   "description": "Kinvey JavaScript SDK for React Native applications.",
-  "version": "4.2.4",
+  "version": "4.3.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/react-native-sdk",
   "repository": {
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "axios": "0.19.0",
-    "kinvey-js-sdk": "^4.2.4",
+    "kinvey-js-sdk": "^4.2.5",
     "lodash": "^4.17.15"
   },
   "peerDependencies": {
@@ -49,7 +49,7 @@
     "del-cli": "2.0.0",
     "eslint": "^6.2.1",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-kinvey-js-sdk": "^1.0.1",
+    "eslint-config-kinvey-js-sdk": "^1.0.2",
     "eslint-config-prettier": "^6.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^22.15.1",
