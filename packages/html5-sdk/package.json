@@ -39,7 +39,7 @@
     "@types/events": "^3.0.0",
     "@types/lodash": "4.14.137",
     "clean-webpack-plugin": "~3.0.0",
-    "del-cli": "2.0.0",
+    "del-cli": "3.0.0",
     "typescript": "~3.5.3",
     "webpack": "~4.39.1",
     "webpack-cli": "^3.3.0"
