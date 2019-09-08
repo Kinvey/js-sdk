@@ -47,7 +47,7 @@
     "@angular/compiler-cli": "~8.2.0",
     "@angular/core": "~8.2.0",
     "@types/events": "~3.0.0",
-    "del-cli": "2.0.0",
+    "del-cli": "3.0.0",
     "fs-extra": "~8.1.0",
     "tns-core-modules": "~6.0.5",
     "tns-platform-declarations": "~6.0.5",
