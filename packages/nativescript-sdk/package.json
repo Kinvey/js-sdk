@@ -1,7 +1,7 @@
 {
   "name": "kinvey-nativescript-sdk",
   "description": "Kinvey JavaScript SDK for NativeScript applications.",
-  "version": "4.2.5",
+  "version": "4.2.5-next.1",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/nativescript-sdk",
   "repository": {
@@ -49,6 +49,7 @@
     "@types/events": "~3.0.0",
     "del-cli": "2.0.0",
     "fs-extra": "~8.1.0",
+    "nativescript-plugin-firebase": "~8.2.0",
     "tns-core-modules": "~6.0.5",
     "tns-platform-declarations": "~6.0.5",
     "typescript": "~3.5.3"
@@ -61,8 +62,7 @@
     "push.js"
   ],
   "nativescript": {
-    "hooks": [
-      {
+    "hooks": [{
         "type": "before-checkForChanges",
         "script": "nativescript-hook-scripts/before-checkForChanges.js",
         "inject": true
