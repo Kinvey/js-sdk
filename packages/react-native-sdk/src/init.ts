@@ -1,4 +1,5 @@
 import { init as coreInit } from 'kinvey-js-sdk';
+import PubNub from 'pubnub';
 import * as HttpAdapter from './httpAdapter';
 import * as SessionStore from './sessionStore';
 import { getStorageAdapter, StorageProvider } from './storage';
@@ -19,7 +20,7 @@ export function init(config: KinveyConfig) {
     sessionStore: SessionStore,
     popup: null,
     storageAdapter: getStorageAdapter(config.storage),
-    pubnub: null
+    pubnub: PubNub
   });
   return { ...kinveyConfig, storage: config.storage, _storage: config.storage };
 }
