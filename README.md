@@ -16,13 +16,13 @@
 
 We currently support the following JavaScript platforms:
 
-- [Angular](packages/angular-sdk)
-- [NodeJS](packages/node-sdk)
-- [React](packages/html5-sdk)
-- [React Native](packages/react-native-sdk)
-- [NativeScript](packages/nativescript-sdk)
-- [Vue](packages/html5-sdk)
-- [HTML5](packages/html5-sdk)
+- [Angular](sdks/angular-sdk)
+- [NodeJS](sdks/node-sdk)
+- [React](sdks/html5-sdk)
+- [React Native](sdks/react-native-sdk)
+- [NativeScript](sdks/nativescript-sdk)
+- [Vue](sdks/html5-sdk)
+- [HTML5](sdks/html5-sdk)
 
 ## Contributing
 

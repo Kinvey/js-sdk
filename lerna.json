@@ -1,13 +1,18 @@
 {
   "packages": [
-    "packages/*"
+    "packages/*",
+    "sdks/*"
   ],
-  "version": "independent",
   "command": {
     "version": {
       "conventionalCommits": true,
-      "createRelease": true,
       "message": "chore(release): publish"
     }
-  }
+  },
+  "ignoreChanges": [
+    "**/__fixtures__/**",
+    "**/__tests__/**",
+    "**/*.md"
+  ],
+  "version": "5.0.0"
 }

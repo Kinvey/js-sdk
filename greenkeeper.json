@@ -1,15 +1,8 @@
 {
   "groups": {
-    "default": {
+    "packages": {
       "packages": [
-        "package.json",
-        "packages/angular-sdk/package.json",
-        "packages/eslint-config/package.json",
-        "packages/html5-sdk/package.json",
-        "packages/js-sdk/package.json",
-        "packages/nativescript-sdk/package.json",
-        "packages/node-sdk/package.json",
-        "packages/react-native-sdk/package.json"
+        "packages/aggregation/package.json"
       ]
     }
   }

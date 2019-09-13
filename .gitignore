@@ -24,5 +24,9 @@ Desktop.ini
 # Mac
 .DS_Store
 
-# VS Code
-.vscode
+# Output of 'npm pack'
+*.tgz
+
+# Code Coverage
+.nyc_output
+coverage
