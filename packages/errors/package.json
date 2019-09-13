@@ -1,0 +1,15 @@
+{
+  "name": "@progresskinvey/js-sdk-errors",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib",
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "del-cli": "2.0.0",
+    "typescript": "3.6.2"
+  }
+}

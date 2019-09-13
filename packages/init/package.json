@@ -1,0 +1,19 @@
+{
+  "name": "@progresskinvey/js-sdk-init",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@progresskinvey/js-sdk-log": "1.0.0",
+    "lodash": "4.17.15"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.14.138",
+    "del-cli": "2.0.0",
+    "typescript": "3.6.2"
+  }
+}

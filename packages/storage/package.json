@@ -1,0 +1,19 @@
+{
+  "name": "@progresskinvey/js-sdk-storage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@progresskinvey/js-sdk-acl": "1.0.0",
+    "@progresskinvey/js-sdk-kmd": "1.0.0",
+    "p-queue": "6.1.1"
+  },
+  "devDependencies": {
+    "del-cli": "2.0.0",
+    "typescript": "3.6.2"
+  }
+}

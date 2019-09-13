@@ -1,0 +1,22 @@
+{
+  "name": "@progresskinvey/js-sdk-http",
+  "version": "1.0.0",
+  "description": "Networking",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@progresskinvey/js-sdk-init": "1.0.0",
+    "js-base64": "2.5.1",
+    "lodash": "4.17.15",
+    "url-join": "4.0.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.14.138",
+    "@types/url-join": "4.0.0",
+    "del-cli": "2.0.0",
+    "typescript": "3.6.2"
+  }
+}
