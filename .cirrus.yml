@@ -10,6 +10,7 @@ task:
     populate_script: npm ci
   bootstrap_script: ./node_modules/.bin/lerna bootstrap
   test_script: ./node_modules/.bin/lerna run --scope kinvey-js-sdk --stream test
+
 task:
   name: Test React Native SDK
   skip: "!changesInclude('packages/react-native-sdk/**/*.ts')"
