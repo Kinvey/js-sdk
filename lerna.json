@@ -14,6 +14,7 @@
     "**/__fixtures__/**",
     "**/__tests__/**",
     "**/*.md",
+    "**/package.json",
     "**/package-lock.json",
     "**/tsconfig.json",
     "**/tslint.json",
