@@ -31,7 +31,8 @@
   "dependencies": {
     "axios": "0.19.0",
     "kinvey-js-sdk": "^4.2.5",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "pubnub": "4.25.2"
   },
   "peerDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
