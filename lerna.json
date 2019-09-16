@@ -9,5 +9,11 @@
       "createRelease": true,
       "message": "chore(release): publish"
     }
-  }
+  },
+  "ignoreChanges": [
+    "**/__fixtures__/**",
+    "**/__tests__/**",
+    "**/*.md",
+    "**/package-lock.json"
+  ]
 }
