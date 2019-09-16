@@ -1,7 +1,7 @@
 {
   "name": "kinvey-react-native-sdk",
   "description": "Kinvey JavaScript SDK for React Native applications.",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/react-native-sdk",
   "repository": {
