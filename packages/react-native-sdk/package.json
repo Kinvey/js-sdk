@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "@react-native-community/async-storage": "^1.6.1",
-    "react-native": "^0.60.5",
+    "react-native": "^0.61.0",
     "react-native-push-notification": "^3.1.9"
   },
   "devDependencies": {
