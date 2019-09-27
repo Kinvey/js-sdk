@@ -1,4 +1,4 @@
-export default class KinveyError extends Error {
+export class KinveyError extends Error {
   public debug: string;
 
   constructor(message = 'An error occurred.', debug = '') {

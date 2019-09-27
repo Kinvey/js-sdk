@@ -1,0 +1,17 @@
+{
+  "name": "@progresskinvey/js-sdk-user",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "del lib",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@progresskinvey/js-sdk-http": "1.0.0"
+  },
+  "devDependencies": {
+    "del-cli": "2.0.0",
+    "typescript": "3.6.2"
+  }
+}

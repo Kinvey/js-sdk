@@ -6,8 +6,7 @@ import { Query } from '@progresskinvey/js-sdk-query';
 import { Aggregation } from '@progresskinvey/js-sdk-aggregation';
 
 const SYNC_CACHE_TAG = 'kinvey_sync';
-
-// const QUERY_CACHE_TAG = '_QueryCache';
+const QUERY_CACHE_TAG = '_QueryCache';
 
 export function isValidTag(tag: string): boolean {
   const regexp = /^[a-z0-9-]+$/i;
@@ -35,6 +34,11 @@ export class DataStoreCache<T extends Entity> extends Storage<T> {
     }
 
     return entities;
+  }
+
+  async count(query?: Query): Promise<number> {
+    const entities = await this.find(query);
+    return entities.length;
   }
 
   async group<K>(aggregation: Aggregation<K>): Promise<K> {
@@ -93,14 +97,14 @@ export class SyncCache extends DataStoreCache<SyncEntity> {
   }
 }
 
-// export interface QueryEntity extends Entity {
-//   collectionName: string;
-//   query: string;
-//   lastRequest: string | null;
-// }
+export interface QueryEntity extends Entity {
+  collectionName: string;
+  query: string;
+  lastRequest: string | null;
+}
 
-// export class QueryCache extends DataStoreCache<QueryEntity> {
-//   constructor(tag?: string) {
-//     super(QUERY_CACHE_TAG, tag);
-//   }
-// }
+export class QueryCache extends DataStoreCache<QueryEntity> {
+  constructor(tag?: string) {
+    super(QUERY_CACHE_TAG, tag);
+  }
+}

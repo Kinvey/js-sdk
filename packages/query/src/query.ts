@@ -62,13 +62,13 @@ export class Query {
     this.skip = config.skip;
   }
 
-  get key(): string | null {
-    if ((this._skip && this._skip > 0) || (this._limit && this._limit < Number.MAX_SAFE_INTEGER)) {
+  get _id(): string {
+    if ((isNumber(this.skip) && this.skip > 0) || (isNumber(this.limit) && this.limit < Number.MAX_SAFE_INTEGER)) {
       return null;
     }
 
-    const queryObject = this.toQueryObject();
-    return queryObject && !isEmpty(queryObject) ? JSON.stringify(queryObject) : '';
+    const toPlainObject = this.toPlainObject();
+    return toPlainObject && !isEmpty(toPlainObject) ? JSON.stringify(toPlainObject) : '';
   }
 
   get fields() {

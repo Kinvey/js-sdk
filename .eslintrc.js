@@ -67,6 +67,7 @@ module.exports = {
         'no-unused-expressions': 'off',
 
         // Import
+        'import/first': 'off',
         'import/no-extraneous-dependencies': 'off',
 
         // TypeScript

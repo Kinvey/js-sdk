@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { HttpRequestObject, HttpResponseObject } from '@progresskinvey/js-sdk-http';
+import { TimeoutError, NetworkError } from '@progresskinvey/js-sdk-errors';
 import { name, version } from '../package.json';
 
 function deviceInfo() {
@@ -34,11 +35,11 @@ export async function send(request: HttpRequestObject): Promise<HttpResponseObje
     });
   } catch (error) {
     if (error.code === 'ESOCKETTIMEDOUT' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
-      throw new Error('The network request timed out.');
+      throw new TimeoutError('The network request timed out.');
     }
 
     if (error.code === 'ENOENT' || !error.response) {
-      throw new Error();
+      throw new NetworkError(error.message);
     }
 
     response = error.response;

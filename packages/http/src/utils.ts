@@ -1,7 +1,6 @@
 import { format } from 'url';
 import urlJoin from 'url-join';
 import isPlainObject from 'lodash/isPlainObject';
-import isString from 'lodash/isString';
 import { getInstanceId, getAppKey } from '@progresskinvey/js-sdk-init';
 
 export function byteCount(str: string): number {
@@ -60,7 +59,7 @@ function clean(value: { [key: string]: any }): { [key: string]: any } {
   }, {});
 }
 
-export enum KinveyBaasNamespace {
+export enum KinveyNamespace {
   AppData = 'appdata',
   Blob = 'blob',
   Push = 'push',
@@ -68,11 +67,7 @@ export enum KinveyBaasNamespace {
   User = 'user',
 }
 
-export function formatKinveyBaasUrl(
-  namespace: KinveyBaasNamespace,
-  path?: string,
-  query?: { [key: string]: any }
-): string {
+export function formatKinveyBaasUrl(namespace: KinveyNamespace, path?: string, query?: { [key: string]: any }): string {
   const instanceId = getInstanceId();
   let host = 'baas.kinvey.com';
 

@@ -1,19 +1,16 @@
 import isArray from 'lodash/isArray';
 import isString from 'lodash/isString';
-import { getApiVersion } from '@progresskinvey/js-sdk-init';
+import partition from 'lodash/partition';
 import { Aggregation } from '@progresskinvey/js-sdk-aggregation';
-import { Kmd } from '@progresskinvey/js-sdk-kmd';
 import { Query } from '@progresskinvey/js-sdk-query';
 import { Entity } from '@progresskinvey/js-sdk-storage';
-import { DataStoreNetwork, FindNetworkOptions, NetworkOptions } from './network';
+import { DataStoreNetwork, FindNetworkOptions, NetworkOptions, MultiSaveResult, MultiSaveResponse } from './network';
+import { DataStore } from './datastore';
+import { SyncPushResult } from './sync';
 
-export interface MultiInsertResult<T extends Entity> {
-  entities: T[];
-  errors: Error[];
-}
-
-export class NetworkStore<T extends Entity> {
-  public collectionName: string;
+export class NetworkStore<T extends Entity> implements DataStore<T> {
+  private collectionName: string;
+  private network: DataStoreNetwork<T>;
 
   constructor(collectionName: string) {
     if (!isString(collectionName)) {
@@ -21,6 +18,7 @@ export class NetworkStore<T extends Entity> {
     }
 
     this.collectionName = collectionName;
+    this.network = new DataStoreNetwork<T>(collectionName);
   }
 
   get collection(): string {
@@ -44,104 +42,85 @@ export class NetworkStore<T extends Entity> {
   // }
 
   async find(query?: Query, options?: FindNetworkOptions): Promise<T[]> {
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.find(query, options);
+    const response = await this.network.find(query, options);
     return response.data;
   }
 
   async count(query?: Query, options?: NetworkOptions): Promise<number> {
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.count(query, options);
+    const response = await this.network.count(query, options);
     return 'count' in response.data ? response.data.count : 0;
   }
 
   async group<K>(aggregation: Aggregation<K>, options?: NetworkOptions): Promise<K> {
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.group<K>(aggregation, options);
+    const response = await this.network.group(aggregation, options);
     return response.data;
   }
 
   async findById(id: string, options?: NetworkOptions): Promise<T> {
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.findById(id, options);
+    const response = await this.network.findById(id, options);
     return response.data;
   }
 
-  create(doc: T, options?: NetworkOptions): Promise<T>;
-  create(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>;
-  async create(docs: any, options?: NetworkOptions): Promise<any> {
-    const batchSize = 100;
-    const apiVersion = getApiVersion();
+  async create(entities: T | T[], options?: NetworkOptions): Promise<T | MultiSaveResult<T>> {
+    const response = await this.network.create(entities, options);
+    return response.data;
+  }
 
-    if (apiVersion !== 5 && isArray(docs)) {
-      throw new Error('Unable to create an array of docs. Please create docs one by one.');
-    }
+  async update(entities: T | T[], options?: NetworkOptions): Promise<T | MultiSaveResult<T>> {
+    const response = await this.network.update(entities, options);
+    return response.data;
+  }
 
-    if (isArray(docs) && docs.length > batchSize) {
-      let i = 0;
-
-      const batchCreate = async (
-        result: MultiInsertResult<T> = { entities: [], errors: [] }
-      ): Promise<MultiInsertResult<T>> => {
-        if (i >= docs.length) {
-          return result;
+  async save(entities: T | T[], options?: NetworkOptions): Promise<T | MultiSaveResult<T>> {
+    if (isArray(entities)) {
+      const newItems = [];
+      const [entitiesToCreate, entitiesToUpdate] = partition(entities, (entity) => {
+        if (entity._id) {
+          newItems.push(false);
+          return false;
         }
+        newItems.push(true);
+        return true;
+      });
+      const createResult = await this.create(entitiesToCreate, options);
+      const updateResult = await this.update(entitiesToUpdate, options);
 
-        const batch = docs.slice(i, i + batchSize);
-        i += batch.length;
-        const batchResult = await this.create(batch as T[], options);
-        return batchCreate({
-          entities: result.entities.concat(batchResult.entities),
-          errors: result.errors.concat(batchResult.errors),
-        });
-      };
-
-      return batchCreate();
+      newItems.reduce(
+        ({ entities, errors }, isNew, index) => {
+          if (isNew) {
+            const entity = (createResult as MultiSaveResult<T>).entities.shift();
+            if (!entity) {
+            }
+          } else {
+            const entity = (updateResult as MultiSaveResult<T>).entities.shift();
+          }
+        },
+        { entities: [], errors: [] }
+      );
     }
 
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.create(docs, options);
-    return response.data;
-  }
-
-  async update(doc: T, options?: NetworkOptions): Promise<T> {
-    if (isArray(doc)) {
-      throw new Error('Unable to update an array of docs. Please update docs one by one.');
+    if ((entities as T)._id) {
+      return this.update(entities, options);
     }
-
-    if (!doc._id) {
-      throw new Error('The doc does not contain an _id. An _id is required to update the doc.');
-    }
-
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.update(doc, options);
-    return response.data;
-  }
-
-  save(doc: T, options?: NetworkOptions): Promise<T>;
-  save(docs: T[], options?: NetworkOptions): Promise<MultiInsertResult<T>>;
-  save(docs: any, options?: NetworkOptions): Promise<any> {
-    if (!isArray(docs)) {
-      const kmd = new Kmd(docs._kmd);
-
-      if (docs._id && !kmd.isLocal()) {
-        return this.update(docs, options);
-      }
-    }
-
-    return this.create(docs, options);
+    return this.create(entities, options);
   }
 
   async remove(query?: Query, options?: NetworkOptions): Promise<number> {
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.remove(query, options);
+    const response = await this.network.remove(query, options);
     return 'count' in response.data ? response.data.count : 0;
   }
 
   async removeById(id: string, options?: NetworkOptions): Promise<number> {
-    const network = new DataStoreNetwork(this.collectionName);
-    const response = await network.removeById(id, options);
+    const response = await this.network.removeById(id, options);
     return 'count' in response.data ? response.data.count : 0;
+  }
+
+  async push(): Promise<SyncPushResult<T>[]> {
+    throw new Error('push() is not supported on a NetworkStore.');
+  }
+
+  async pull(): Promise<number> {
+    throw new Error('pull() is not supported on a NetworkStore.');
   }
 
   // async subscribe(receiver: LiveServiceReceiver, options: any = {}) {

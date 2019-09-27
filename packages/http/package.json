@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@progresskinvey/js-sdk-errors": "1.0.0",
     "@progresskinvey/js-sdk-init": "1.0.0",
     "js-base64": "2.5.1",
     "lodash": "4.17.15",

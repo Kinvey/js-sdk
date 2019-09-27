@@ -1,5 +1,4 @@
 import PQueue from 'p-queue';
-import { Query } from '@progresskinvey/js-sdk-query';
 import { Entity } from '@progresskinvey/js-sdk-storage';
 import { Kmd } from '@progresskinvey/js-sdk-kmd';
 import { DataStoreNetwork, NetworkOptions } from './network';
@@ -10,7 +9,7 @@ const queues = new Map<string, PQueue>();
 function getQueue(key: string): PQueue {
   let queue = queues.get(key);
 
-  if (queue) {
+  if (!queue) {
     queue = new PQueue({ concurrency: 1 });
     queues.set(key, queue);
   }
@@ -18,17 +17,17 @@ function getQueue(key: string): PQueue {
   return queue;
 }
 
-export interface SyncPushResult {
+export interface SyncPushResult<T extends Entity> {
   _id?: string;
-  entity?: Entity;
+  entity?: T;
   operation: SyncOperation;
   error?: Error;
 }
 
-export class Sync {
+export class Sync<T extends Entity> {
   public collectionName: string;
-  private network: DataStoreNetwork;
-  private cache: DataStoreCache<Entity>;
+  private network: DataStoreNetwork<T>;
+  private cache: DataStoreCache<T>;
   private syncCache: SyncCache;
 
   constructor(collectionName: string, tag?: string) {
@@ -42,19 +41,23 @@ export class Sync {
     return this.syncCache.find();
   }
 
-  addCreateSyncOperation(entities: Entity[]): Promise<SyncEntity[]> {
-    return this.addSyncOperation(SyncOperation.Create, entities);
+  count(): Promise<number> {
+    return this.syncCache.count();
   }
 
-  addUpdateSyncOperation(entities: Entity[]): Promise<SyncEntity[]> {
-    return this.addSyncOperation(SyncOperation.Update, entities);
+  addCreateOperation(entities: Entity[]): Promise<SyncEntity[]> {
+    return this.addOperation(SyncOperation.Create, entities);
   }
 
-  addDeleteSyncOperation(entities: Entity[]): Promise<SyncEntity[]> {
-    return this.addSyncOperation(SyncOperation.Delete, entities);
+  addUpdateOperation(entities: Entity[]): Promise<SyncEntity[]> {
+    return this.addOperation(SyncOperation.Update, entities);
   }
 
-  async addSyncOperation(operation: SyncOperation, entities: Entity[]): Promise<SyncEntity[]> {
+  addDeleteOperation(entities: Entity[]): Promise<SyncEntity[]> {
+    return this.addOperation(SyncOperation.Delete, entities);
+  }
+
+  private async addOperation(operation: SyncOperation, entities: Entity[]): Promise<SyncEntity[]> {
     let entitiesToSync = [...entities];
 
     if (entitiesToSync.length > 0) {
@@ -67,13 +70,14 @@ export class Sync {
       }
 
       // Remove existing sync operations that match the entities
-      const query = new Query().contains('entityId', entitiesToSync.map((entity) => entity._id));
-      await this.remove(query);
+      // const query = new Query().contains('entityId', entitiesToSync.map((entity) => entity._id));
+      // await this.remove(query);
 
       // Don't add delete operations for entities that were created offline
       if (operation === SyncOperation.Delete) {
         entitiesToSync = entitiesToSync.filter((entity) => {
-          if (entity._kmd && entity._kmd.local === true) {
+          const kmd = new Kmd(entity);
+          if (kmd.isLocal()) {
             return false;
           }
 
@@ -99,7 +103,7 @@ export class Sync {
     return [];
   }
 
-  push(syncEntities: SyncEntity[], options?: NetworkOptions): Promise<SyncPushResult[]> {
+  push(syncEntities: SyncEntity[], options?: NetworkOptions): Promise<SyncPushResult<T>[]> {
     const queue = getQueue(this.collectionName);
     return queue.add(async () => {
       const batchSize = 100;
@@ -107,7 +111,7 @@ export class Sync {
       if (syncEntities.length > 0) {
         let i = 0;
 
-        const batchPush = async (pushResults: SyncPushResult[] = []): Promise<SyncPushResult[]> => {
+        const batchPush = async (pushResults: SyncPushResult<T>[] = []): Promise<SyncPushResult<T>[]> => {
           if (i >= syncEntities.length) {
             return pushResults;
           }
@@ -125,9 +129,9 @@ export class Sync {
                   try {
                     await this.network.removeById(entityId, options);
                   } catch (error) {
-                    if (!(error instanceof NotFoundError)) {
-                      throw error;
-                    }
+                    // if (!(error instanceof NotFoundError)) {
+                    //   throw error;
+                    // }
                   }
 
                   // Remove the sync doc

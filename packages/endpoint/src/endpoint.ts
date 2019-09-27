@@ -2,7 +2,7 @@ import isString from 'lodash/isString';
 import {
   formatKinveyBaasUrl,
   KinveyHttpRequest,
-  KinveyBaasNamespace,
+  KinveyNamespace,
   kinveySessionOrMasterAuth,
 } from '@progresskinvey/js-sdk-http';
 
@@ -18,7 +18,7 @@ export async function endpoint<T>(path: string, args?: any, options: EndpointOpt
   const request = new KinveyHttpRequest({
     method: 'POST',
     auth: kinveySessionOrMasterAuth,
-    url: formatKinveyBaasUrl(KinveyBaasNamespace.Rpc, `/custom/${path}`),
+    url: formatKinveyBaasUrl(KinveyNamespace.Rpc, `/custom/${path}`),
     body: args,
     timeout: options.timeout,
   });

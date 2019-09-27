@@ -2,7 +2,7 @@ import {
   KinveyHttpRequest,
   kinveySessionOrMasterAuth,
   formatKinveyBaasUrl,
-  KinveyBaasNamespace,
+  KinveyNamespace,
 } from '@progresskinvey/js-sdk-http';
 import { endpoint } from '../endpoint';
 
@@ -13,7 +13,7 @@ jest.mock('@progresskinvey/js-sdk-http', () => {
     KinveyHttpRequest: jest.fn().mockImplementation(() => {
       return { execute: jest.fn(async () => ({})) };
     }),
-    KinveyBaasNamespace: {},
+    KinveyNamespace: { Rpc: 'RPC' },
   };
 });
 
@@ -29,11 +29,11 @@ it('should throw an error if an endpoint is not a string', async () => {
 it('should send a KinveyHttpRequest to the endpoint with no arguments', async () => {
   const path = 'test';
   await endpoint(path);
-  expect(formatKinveyBaasUrl).toHaveBeenCalledWith(KinveyBaasNamespace.Rpc, `/custom/${path}`);
+  expect(formatKinveyBaasUrl).toHaveBeenCalledWith(KinveyNamespace.Rpc, `/custom/${path}`);
   expect(KinveyHttpRequest).toHaveBeenCalledWith({
     method: 'POST',
     auth: kinveySessionOrMasterAuth,
-    url: formatKinveyBaasUrl(KinveyBaasNamespace.Rpc, `/custom/${path}`),
+    url: formatKinveyBaasUrl(KinveyNamespace.Rpc, `/custom/${path}`),
     body: undefined,
     timeout: undefined,
   });

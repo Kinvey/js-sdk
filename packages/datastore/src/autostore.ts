@@ -1,83 +1,60 @@
-import { Query } from '@progresskinvey/js-sdk-query';
-import { Aggregation } from '@progresskinvey/js-sdk-aggregation';
-import { DataStoreCache } from './cache';
-import { DataStoreNetwork } from './network';
-import { DataStore } from './datastore';
+// import { Query } from '@progresskinvey/js-sdk-query';
+// import { NetworkError } from '@progresskinvey/js-sdk-errors';
+// import { Aggregation } from '@progresskinvey/js-sdk-aggregation';
+// import { CacheStore } from './cachestore';
+// import { FindNetworkOptions, NetworkOptions } from './network';
 
-export class AutoStore<T> extends DataStore<T> {
-  constructor(collectionName: string, options: any = { tag: undefined, useDeltaSet: false, useAutoPagination: false }) {
-    super(collectionName);
-  }
+// export class AutoStore<T> extends CacheStore<T> {
+//   async find(query?: Query, options?: FindNetworkOptions): Promise<T[]> {
+//     try {
+//       await this.pull(query, options);
+//       return this.cache.find(query);
+//     } catch (error) {
+//       if (error instanceof NetworkError) {
+//         return this.cache.find(query);
+//       }
 
-  async find(query?: Query, options: any = {}) {
-    const cache = new DataStoreCache(this.collectionName, this.tag);
+//       throw error;
+//     }
+//   }
 
-    if (query && !(query instanceof Query)) {
-      throw new KinveyError('query is not an instance of the Query class.');
-    }
+//   async count(query?: Query, options?: NetworkOptions): Promise<number> {
+//     try {
+//       const response = await this.network.count(query, options);
+//       return 'count' in response.data ? response.data.count : 0;
+//     } catch (error) {
+//       if (error instanceof NetworkError) {
+//         return this.cache.count(query);
+//       }
 
-    try {
-      await this.pull(query, options);
-      return cache.find(query);
-    } catch (error) {
-      if (error instanceof NetworkError) {
-        return cache.find(query);
-      }
+//       throw error;
+//     }
+//   }
 
-      throw error;
-    }
-  }
+//   async group<K>(aggregation: Aggregation<K>, options?: NetworkOptions): Promise<K> {
+//     try {
+//       const response = await this.network.group(aggregation, options);
+//       return response.data;
+//     } catch (error) {
+//       if (error instanceof NetworkError) {
+//         return this.cache.group(aggregation);
+//       }
 
-  async count(query?: Query, options: any = {}) {
-    if (query && !(query instanceof Query)) {
-      throw new KinveyError('query is not an instance of the Query class.');
-    }
+//       throw error;
+//     }
+//   }
 
-    try {
-      const network = new NetworkStore(this.collectionName);
-      const count = await network.count(query, options).toPromise();
-      return count;
-    } catch (error) {
-      if (error instanceof NetworkError) {
-        const cache = new DataStoreCache(this.collectionName, this.tag);
-        return cache.count(query);
-      }
+//   async findById(id: string, options?: FindNetworkOptions): Promise<T> {
+//     try {
+//       const query = new Query().equalTo('_id', id);
+//       await this.pull(query, options);
+//       return this.cache.findById(id);
+//     } catch (error) {
+//       if (error instanceof NetworkError) {
+//         return this.cache.findById(id);
+//       }
 
-      throw error;
-    }
-  }
-
-  async group(aggregation: Aggregation, options: any = {}) {
-    if (!(aggregation instanceof Query)) {
-      throw new KinveyError('aggregation is not an instance of the Aggregation class.');
-    }
-
-    try {
-      const network = new NetworkStore(this.collectionName);
-      const result = await network.group(aggregation, options).toPromise();
-      return result;
-    } catch (error) {
-      if (error instanceof NetworkError) {
-        const cache = new DataStoreCache(this.collectionName, this.tag);
-        return cache.group(aggregation);
-      }
-
-      throw error;
-    }
-  }
-
-  async findById(id: string, options: any = {}) {
-    const cache = new DataStoreCache(this.collectionName, this.tag);
-
-    try {
-      const doc = await this.pullById(id, options);
-      return doc;
-    } catch (error) {
-      if (error instanceof NetworkError) {
-        return cache.findById(id);
-      }
-
-      throw error;
-    }
-  }
-}
+//       throw error;
+//     }
+//   }
+// }

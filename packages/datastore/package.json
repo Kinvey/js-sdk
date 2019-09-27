@@ -9,16 +9,21 @@
   },
   "dependencies": {
     "@progresskinvey/js-sdk-aggregation": "1.0.0",
+    "@progresskinvey/js-sdk-errors": "1.0.0",
     "@progresskinvey/js-sdk-http": "1.0.0",
     "@progresskinvey/js-sdk-init": "1.0.0",
     "@progresskinvey/js-sdk-kmd": "1.0.0",
+    "@progresskinvey/js-sdk-log": "1.0.0",
     "@progresskinvey/js-sdk-query": "1.0.0",
     "@progresskinvey/js-sdk-storage": "1.0.0",
     "lodash": "4.17.15",
-    "p-queue": "6.1.1"
+    "p-queue": "6.1.1",
+    "rxjs": "6.5.3",
+    "url-join": "4.0.1"
   },
   "devDependencies": {
     "@types/lodash": "4.14.138",
+    "@types/url-join": "4.0.0",
     "del-cli": "2.0.0",
     "typescript": "3.6.2"
   }

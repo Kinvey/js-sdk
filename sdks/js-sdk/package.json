@@ -8,13 +8,19 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@progresskinvey/js-sdk-datastore": "1.0.0",
     "@progresskinvey/js-sdk-endpoint": "1.0.0",
+    "@progresskinvey/js-sdk-errors": "1.0.0",
     "@progresskinvey/js-sdk-init": "1.0.0",
     "@progresskinvey/js-sdk-http": "1.0.0",
+    "@progresskinvey/js-sdk-query": "1.0.0",
+    "@progresskinvey/js-sdk-storage": "1.0.0",
+    "@progresskinvey/js-sdk-user": "1.0.0",
     "axios": "0.19.0"
   },
   "devDependencies": {
     "del-cli": "2.0.0",
+    "nock": "11.3.5",
     "typescript": "3.6.2"
   }
 }
