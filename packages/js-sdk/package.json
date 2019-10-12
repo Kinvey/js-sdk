@@ -21,7 +21,7 @@
     "lodash": "4.17.15",
     "loglevel": "1.6.3",
     "loglevel-plugin-prefix": "0.8.4",
-    "p-queue": "~6.1.0",
+    "p-queue": "~6.2.0",
     "rxjs": "~6.5.2",
     "sift": "~7.0.1",
     "tslib": "1.10.0",
