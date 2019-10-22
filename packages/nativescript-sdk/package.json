@@ -1,7 +1,7 @@
 {
   "name": "kinvey-nativescript-sdk",
   "description": "Kinvey JavaScript SDK for NativeScript applications.",
-  "version": "4.2.5-next.1",
+  "version": "4.2.5",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/nativescript-sdk",
   "repository": {
