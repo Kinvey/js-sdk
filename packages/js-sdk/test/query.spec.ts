@@ -1,5 +1,3 @@
-/// <reference types="mocha" />
-
 import { expect } from 'chai';
 import { Query } from '../src/query';
 import { QueryError } from '../src/errors/query';

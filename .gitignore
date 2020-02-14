@@ -26,3 +26,6 @@ Desktop.ini
 
 # VS Code
 .vscode
+
+# WebStorm
+.idea

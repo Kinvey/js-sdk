@@ -1,5 +1,3 @@
-/// <reference types="mocha" />
-
 import { expect } from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
@@ -16,7 +14,7 @@ const APP_SECRET = 'appSecret';
 const COLLECTION_NAME = 'testCollection'
 
 describe('Autostore', function() {
-  before(function() {
+  beforeAll(function() {
     return init({
       kinveyConfig: {
         appKey: APP_KEY,
@@ -30,7 +28,7 @@ describe('Autostore', function() {
     })
   });
 
-  before(function() {
+  beforeAll(function() {
     return setSession({
       _id: '1',
       _kmd: {
@@ -39,7 +37,7 @@ describe('Autostore', function() {
     });
   });
 
-  after(function() {
+  afterAll(function() {
     return removeSession();
   });
 
