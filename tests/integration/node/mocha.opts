@@ -1,2 +1,2 @@
---timeout 999999
+--timeout 60000
 --colors

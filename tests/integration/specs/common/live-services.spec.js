@@ -16,7 +16,7 @@ const checkLocalStorageForSubscriptionKey = () => {
     }
   }
   return hasSubscriptionKey;
-}
+};
 
 describe('Live-services', () => {
   networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
@@ -33,42 +33,27 @@ describe('Live-services', () => {
       appKey: process.env.APP_KEY,
       appSecret: process.env.APP_SECRET,
       masterSecret: process.env.MASTER_SECRET
-    }
+    };
     appCredentials = Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
   });
 
-  before((done) => {
-    utilities.cleanUpAppData(collectionName, createdUserIds)
+  before(() => {
+    return utilities.cleanUpAppData(collectionName, createdUserIds)
       .then(() => Kinvey.User.signup())
-      .then((user) => {
-        createdUserIds.push(user.data._id);
-        done();
-      })
-      .catch(done);
+      .then((user) => createdUserIds.push(user.data._id));
   });
 
-  before((done) => {
-    networkStore.save(entity1)
-      .then(() => {
-        networkStore.save(entity2)
-          .then(() => {
-            done();
-          })
-      }).catch(done);
-  })
+  before(() => {
+    return networkStore.save(entity1)
+      .then(() => networkStore.save(entity2));
+  });
 
-  afterEach((done) => {
+  afterEach(() => {
     const activeUser = Kinvey.User.getActiveUser();
     if (activeUser) {
-      activeUser.unregisterFromLiveService()
-        .then(() => {
-          //expect(checkLocalStorageForSubscriptionKey()).to.equal(false);
-          done();
-        })
-        .catch(done);
+      return activeUser.unregisterFromLiveService();
     }
   });
-
 
   it('should register user for live services', (done) => {
     const activeUser = Kinvey.User.getActiveUser();

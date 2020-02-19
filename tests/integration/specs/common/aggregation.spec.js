@@ -6,14 +6,14 @@ import { collectionName } from '../config';
 import * as constants from '../constants'
 
 const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Sync];
-var createdUserIds = []
+var createdUserIds = [];
 
 before(() => {
   const initProperties = {
     appKey: process.env.APP_KEY,
     appSecret: process.env.APP_SECRET,
     masterSecret: process.env.MASTER_SECRET
-  }
+  };
   return Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
 });
 
@@ -45,7 +45,7 @@ describe('Aggregation', () => {
   const pickAggregationResult = (initialArray, value, field = constants.TextFieldName) => {
     let result = initialArray.filter((initialValue) => initialValue[field] === value);
     return result;
-  }
+  };
 
   describe('Aggregation with cachestore', () => {
     const cacheStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
