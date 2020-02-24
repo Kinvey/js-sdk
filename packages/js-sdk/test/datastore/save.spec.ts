@@ -1,5 +1,3 @@
-/// <reference types="mocha" />
-
 import { expect } from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
@@ -14,11 +12,25 @@ import * as sessionStore from '../sessionStore';
 
 const APP_KEY = 'appKey';
 const APP_SECRET = 'appSecret';
-const COLLECTION_NAME = 'testCollection'
+const COLLECTION_NAME = 'testCollection';
 const BATCH_SIZE = 100;
 
-describe('save()', function () {
-  before(function () {
+describe('save()', function() {
+  beforeAll(function() {
+    return init({
+      kinveyConfig: {
+        appKey: APP_KEY,
+        appSecret: APP_SECRET
+      },
+      httpAdapter,
+      sessionStore: sessionStore,
+      popup: null,
+      storageAdapter: memoryStorageAdapter,
+      pubnub: null
+    });
+  });
+
+  beforeAll(function() {
     return setSession({
       _id: '1',
       _kmd: {
@@ -27,7 +39,7 @@ describe('save()', function () {
     });
   });
 
-  after(function () {
+  afterAll(function () {
     return removeSession();
   });
 
@@ -41,7 +53,7 @@ describe('save()', function () {
   });
 
   describe('with API Version 4', function () {
-    before(function () {
+    beforeAll(function () {
       return init({
         kinveyConfig: {
           appKey: APP_KEY,
@@ -96,7 +108,7 @@ describe('save()', function () {
   });
 
   describe('with API Version 5', function() {
-    before(function () {
+    beforeAll(function () {
       return init({
         kinveyConfig: {
           appKey: APP_KEY,

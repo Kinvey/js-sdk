@@ -12,7 +12,7 @@ before(() => {
     appKey: process.env.APP_KEY,
     appSecret: process.env.APP_SECRET,
     masterSecret: process.env.MASTER_SECRET
-  }
+  };
   return Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
 });
 
@@ -117,7 +117,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           .catch(done);
       });
 
-      it('should return corrsect number of items for multiple collections', (done) => {
+      it('should return correct number of items for multiple collections', (done) => {
         const secondDeltaCollection = Kinvey.DataStore.collection(secondDeltaCollectionName, currentDataStoreType, { useDeltaSet: true });
         const secondDeltaCollectionNetwork = Kinvey.DataStore.collection(secondDeltaCollectionName, Kinvey.DataStoreType.Network);
         const secondDeltaCollectionSync = Kinvey.DataStore.collection(secondDeltaCollectionName, Kinvey.DataStoreType.Sync);

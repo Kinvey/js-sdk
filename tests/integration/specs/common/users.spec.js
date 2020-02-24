@@ -234,8 +234,7 @@ describe('User tests', () => {
 
     it('should signup with a user and set the user as the active user', (done) => {
       const username = utilities.randomString();
-      const newUser = new Kinvey.User({ username: username, password: utilities.randomString() });
-      Kinvey.User.signup(newUser)
+      Kinvey.User.signup({ username: username, password: utilities.randomString() })
         .then((user) => {
           createdUserIds.push(user.data._id);
           assertUserData(user, username, true);
@@ -346,7 +345,7 @@ describe('User tests', () => {
     });
 
     it('should update the active user', (done) => {
-      const newEmail = utilities.randomString();
+      const newEmail = `${utilities.randomString()}@example.com`;
       const newPassword = utilities.randomString();
       Kinvey.User.update({
         email: newEmail,
@@ -641,12 +640,10 @@ describe('User tests', () => {
 
   describe('restore', () => {
     before(() => {
-      Kinvey.User.signup()
+      return Kinvey.User.logout()
+        .then(() => Kinvey.User.signup())
         .then((user) => {
           createdUserIds.push(user.data._id);
-        })
-        .catch((err) => {
-          done(err);
         });
     });
 
@@ -664,12 +661,10 @@ describe('User tests', () => {
 
   describe('signUpWithIdentity', () => {
     before(() => {
-      Kinvey.User.signup()
+      return Kinvey.User.logout()
+        .then(() => Kinvey.User.signup())
         .then((user) => {
           createdUserIds.push(user.data._id);
-        })
-        .catch((err) => {
-          done(err);
         });
     });
 

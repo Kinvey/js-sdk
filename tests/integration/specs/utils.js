@@ -219,20 +219,9 @@ export function cleanAndPopulateCollection(collectionName, entities) {
 }
 
 export function cleanUpAppData(collectionName, createdUserIds = []) {
-  let currentUserId;
-  return Kinvey.User.logout()
-    .then(() => {
-      return Kinvey.User.signup();
-    })
-    .then((user) => {
-      currentUserId = user.data._id;
-      return cleanUpCollectionData(collectionName);
-    })
+  return cleanUpCollectionData(collectionName)
     .then(() => {
       return deleteUsers(createdUserIds);
-    })
-    .then(() => {
-      return deleteUsers([currentUserId]);
     })
     .then(() => {
       createdUserIds.length = 0;

@@ -1,5 +1,3 @@
-/// <reference types="mocha" />
-
 import { expect } from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
@@ -16,7 +14,7 @@ const APP_KEY = 'appKey';
 const APP_SECRET = 'appSecret';
 
 describe('Mobile Identity Connect', function () {
-  before(function () {
+  beforeAll(function () {
     return init({
       kinveyConfig: {
         appKey: APP_KEY,
