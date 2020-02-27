@@ -215,7 +215,7 @@ describe('NetworkStore', function() {
           await store.save(docs);
         } catch (error) {
           expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to save an array of entities. To insert multiple entities, please use "create" function.');
+          expect(error.message).to.eql('Unable to save an array of entities. Use "create" method to insert multiple entities.');
         }
       });
     });
