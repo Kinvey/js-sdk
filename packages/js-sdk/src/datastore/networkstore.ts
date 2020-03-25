@@ -199,7 +199,7 @@ export class NetworkStore {
     const apiVersion = getApiVersion();
 
     if (apiVersion < 5 && isArray(docs)) {
-      throw new KinveyError('Unable to create an array of entities. Please create entities one by one.');
+      throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
     }
 
     if (isArray(docs) && docs.length > batchSize) {

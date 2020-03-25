@@ -12,6 +12,7 @@ import { LiveServiceReceiver } from '../live';
 import { DataStoreCache, QueryCache } from './cache';
 import { queryToSyncQuery, Sync } from './sync';
 import { NetworkStore } from './networkstore';
+import { getApiVersion } from '../kinvey';
 
 const PAGE_LIMIT = 10000;
 
@@ -145,9 +146,9 @@ export class CacheStore {
     return stream;
   }
 
-  async create(doc: any, options: any = {}) {
+  async createOne(doc: any, options: any = {}) {
     if (isArray(doc)) {
-      throw new KinveyError('Unable to create an array of entities. Please create entities one by one.');
+      throw new KinveyError('Unable to create an array of entities. Use "create" method to insert multiple entities.');
     }
 
     const autoSync = options.autoSync === true || this.autoSync;
@@ -169,6 +170,36 @@ export class CacheStore {
     }
 
     return cachedDoc;
+  }
+
+  async create(docs: any, options: any = {}) {
+    if (!isArray(docs)) {
+      return this.createOne(docs, options);
+    }
+
+    const apiVersion = getApiVersion();
+    if (apiVersion < 5) {
+      throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
+    }
+
+    const createManyResult = {
+      entities: new Array(docs.length).fill(null),
+      errors: []
+    };
+
+    const createPromises = docs.map((doc, index) => {
+      return this.createOne(doc, options)
+        .then((entity) => {
+          createManyResult.entities[index] = entity;
+        })
+        .catch((error) => {
+          error.index = index;
+          createManyResult.errors.push(error);
+        });
+    });
+
+    await Promise.all(createPromises);
+    return createManyResult;
   }
 
   async update(doc: any, options: any = {}) {
@@ -202,6 +233,11 @@ export class CacheStore {
   }
 
   save(doc: any, options?: any) {
+    const apiVersion = getApiVersion();
+    if (apiVersion >= 5 && isArray(doc)) {
+      throw new KinveyError('Unable to save an array of entities. Use "create" method to insert multiple entities.');
+    }
+
     if (doc._id) {
       return this.update(doc, options);
     }

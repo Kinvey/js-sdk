@@ -77,7 +77,7 @@ describe('NetworkStore', function() {
           await store.create(docs);
         } catch (error) {
           expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one.');
+          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
         }
       });
 
@@ -89,7 +89,7 @@ describe('NetworkStore', function() {
           await store.save(docs);
         } catch (error) {
           expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one.');
+          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
         }
       });
     });
