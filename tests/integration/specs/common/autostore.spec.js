@@ -4,6 +4,9 @@ import { init, DataStore, DataStoreType, User, Query, Errors } from '__SDK__';
 import { collectionName, deltaCollectionName } from '../config';
 import { randomString, createSampleCollectionData, cleanUpAppData } from '../utils';
 
+const multiSaveErrorMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.';
+const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
+
 describe('AutoStore', function() {
   before(function() {
     // Initialize the SDK
@@ -873,10 +876,30 @@ describe('AutoStore', function() {
   // describe('PendingSyncEntities');
   // describe('ClearSync');
   // describe('Clear');
-  // describe('Save');
+  describe('Save', function() {
+    it('should throw an error when trying to save an array of items', async function() {
+      const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto);
+      try {
+        await autoTypeCollection.save([{}, {}]);
+        throw new Error('This test should fail');
+      } catch (error) {
+        expect(error).to.be.instanceOf(Errors.KinveyError);
+        expect(error.message).to.eql(multiInsertErrorMessage);
+      }
+    });
+  });
 
   describe('Create', function() {
-    it('should throw an error when trying to create an array of items');
+    it('should throw an error when trying to create an array of items', async function() {
+      const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto);
+      try {
+        await autoTypeCollection.create([{}, {}]);
+        throw new Error('This test should fail');
+      } catch (error) {
+        expect(error).to.be.instanceOf(Errors.KinveyError);
+        expect(error.message).to.eql(multiInsertErrorMessage);
+      }
+    });
 
     it('should create an item even if _id was not provided', async function() {
       const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto);
@@ -1148,4 +1171,44 @@ describe('AutoStore', function() {
   });
 
   // describe('RemoveById');
+
+  describe('with API version 5', function() {
+    before(function() {
+      // Initialize the SDK
+      return init({
+        appKey: process.env.APP_KEY,
+        appSecret: process.env.APP_SECRET,
+        masterSecret: process.env.MASTER_SECRET,
+        apiVersion: 5
+      });
+    });
+
+    describe('Save', function() {
+      it('should throw an error when trying to save an array of items', async function() {
+        const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto);
+        try {
+          await autoTypeCollection.save([{}, {}]);
+          throw new Error('This test should fail');
+        } catch (error) {
+          expect(error).to.be.instanceOf(Errors.KinveyError);
+          expect(error.message).to.eql(multiSaveErrorMessage);
+        }
+      });
+    });
+
+    describe('Create', function() {
+      it('should create an array of items with and without _id', async function() {
+        const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto);
+        const networkTypeCollection = DataStore.collection(collectionName, DataStoreType.Network);
+
+        // Create a doc
+        const id = randomString();
+        const result = await autoTypeCollection.create([{ _id: id }, {}]);
+
+        // Find with Network
+        expect(await networkTypeCollection.findById(id).toPromise()).to.deep.equal(result.entities[0]);
+        expect(await networkTypeCollection.findById(result.entities[1]._id).toPromise()).to.deep.equal(result.entities[1]);
+      });
+    });
+  });
 });
