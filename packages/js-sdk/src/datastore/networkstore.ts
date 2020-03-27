@@ -276,7 +276,7 @@ export class NetworkStore {
     return response.data;
   }
 
-  save(doc: any, options?: any) {
+  async save(doc: any, options?: any) {
     const apiVersion = getApiVersion();
     if (apiVersion >= 5 && isArray(doc)) {
       throw new KinveyError('Unable to save an array of entities. Use "create" method to insert multiple entities.');
