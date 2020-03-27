@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import chai from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
 import { formatKinveyBaasUrl, KinveyBaasNamespace, KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, KinveyHttpHeaders } from '../../src/http';
@@ -10,10 +10,15 @@ import * as httpAdapter from '../http';
 import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
 
+chai.use(require('chai-as-promised'));
+const expect = chai.expect;
+
 const APP_KEY = 'appKey';
 const APP_SECRET = 'appSecret';
 const COLLECTION_NAME = 'testCollection';
 const BATCH_SIZE = 100;
+
+const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
 
 describe('NetworkStore', function() {
   beforeAll(function() {
@@ -69,28 +74,18 @@ describe('NetworkStore', function() {
     });
 
     describe('with an array of docs', function() {
-      it('create should throw an error', async function() {
+      it('create should throw an error', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
 
-        try {
-          await store.create(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
-        }
+        expect(store.create(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
 
-      it('save should throw an error', async function() {
+      it('save should throw an error', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
 
-        try {
-          await store.save(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
-        }
+        expect(store.save(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
     });
 
@@ -207,16 +202,12 @@ describe('NetworkStore', function() {
         expect(scope3.isDone()).to.eql(true);
       });
 
-      it('save should throw an error', async function() {
+      it('save should throw an error', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
 
-        try {
-          await store.save(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.eql('Unable to save an array of entities. Use "create" method to insert multiple entities.');
-        }
+        const errMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.'
+        expect(store.save(docs)).to.be.rejectedWith(KinveyError, errMessage);
       });
     });
 

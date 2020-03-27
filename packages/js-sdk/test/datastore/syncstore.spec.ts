@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import chai from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
 import { formatKinveyBaasUrl, KinveyBaasNamespace, KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, KinveyHttpHeaders } from '../../src/http';
@@ -10,9 +10,14 @@ import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
 import { KinveyError } from '../../src/errors';
 
+chai.use(require('chai-as-promised'));
+const expect = chai.expect;
+
 const APP_KEY = 'appKey';
 const APP_SECRET = 'appSecret';
-const COLLECTION_NAME = 'testCollection'
+const COLLECTION_NAME = 'testCollection';
+
+const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
 
 describe('Syncstore', function() {
   beforeAll(function() {
@@ -68,24 +73,14 @@ describe('Syncstore', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Sync);
 
-        try {
-          await store.create(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
-        }
+        expect(store.create(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
 
       it('save should throw an error', async function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Sync);
 
-        try {
-          await store.save(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
-        }
+        expect(store.save(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
     });
 
@@ -172,12 +167,8 @@ describe('Syncstore', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Sync);
 
-        try {
-          await store.save(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.eql('Unable to save an array of entities. Use "create" method to insert multiple entities.');
-        }
+        const errMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.'
+        expect(store.save(docs)).to.be.rejectedWith(KinveyError, errMessage);
       });
     });
 
