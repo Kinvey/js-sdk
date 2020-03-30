@@ -146,7 +146,7 @@ export class CacheStore {
     return stream;
   }
 
-  async createOne(doc: any, options: any = {}) {
+  private async _createOne(doc: any, options: any = {}) {
     if (isArray(doc)) {
       throw new KinveyError('Unable to create an array of entities. Use "create" method to insert multiple entities.');
     }
@@ -172,7 +172,7 @@ export class CacheStore {
     return cachedDoc;
   }
 
-  async createMany(docs: any, options: any = {}) {
+  private async _createMany(docs: any, options: any = {}) {
     const apiVersion = getApiVersion();
     if (apiVersion < 5) {
       throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
@@ -184,7 +184,7 @@ export class CacheStore {
     };
 
     const createPromises = docs.map((doc, index) => {
-      return this.createOne(doc, options)
+      return this._createOne(doc, options)
         .then((entity) => {
           createManyResult.entities[index] = entity;
         })
@@ -200,10 +200,10 @@ export class CacheStore {
 
   async create(docs: any, options: any = {}) {
     if (!isArray(docs)) {
-      return this.createOne(docs, options);
+      return this._createOne(docs, options);
     }
 
-    return this.createMany(docs, options);
+    return this._createMany(docs, options);
   }
 
   async update(doc: any, options: any = {}) {
