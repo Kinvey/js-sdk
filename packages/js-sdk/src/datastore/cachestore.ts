@@ -172,11 +172,7 @@ export class CacheStore {
     return cachedDoc;
   }
 
-  async create(docs: any, options: any = {}) {
-    if (!isArray(docs)) {
-      return this.createOne(docs, options);
-    }
-
+  async createMany(docs: any, options: any = {}) {
     const apiVersion = getApiVersion();
     if (apiVersion < 5) {
       throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
@@ -200,6 +196,14 @@ export class CacheStore {
 
     await Promise.all(createPromises);
     return createManyResult;
+  }
+
+  async create(docs: any, options: any = {}) {
+    if (!isArray(docs)) {
+      return this.createOne(docs, options);
+    }
+
+    return this.createMany(docs, options);
   }
 
   async update(doc: any, options: any = {}) {
