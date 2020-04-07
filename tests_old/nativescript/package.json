@@ -18,7 +18,7 @@
         "events": "~3.0.0",
         "js-base64": "~2.5.0",
         "kinvey-nativescript-sdk": "file:../../packages/kinvey-nativescript-sdk",
-        "lodash": "~4.17.11",
+        "lodash": "~4.17.13",
         "loglevel": "~1.6.1",
         "loglevel-plugin-prefix": "~0.8.4",
         "lokijs": "~1.5.6",
