@@ -196,8 +196,6 @@ export class CacheStore {
 
     syncDocs.map((syncDoc, index) => {
       if (syncDoc.error) {
-        const error = syncDoc.error;
-        error.index = index;
         createManyResult.errors.push(syncDoc.error);
       } else {
         createManyResult.entities[index] = syncDoc.entity;

@@ -52,6 +52,10 @@ describe('Syncstore', function() {
     return syncStore.clear();
   });
 
+  afterEach(function() {
+    nock.cleanAll();
+  });
+
   describe('with API Version 4', function() {
     beforeAll(function () {
       return init({
@@ -153,6 +157,7 @@ describe('Syncstore', function() {
           .post(url.pathname)
           .reply(201, docs[0]);
         const result = await store.create(docs);
+        expect(scope.isDone()).to.equal(false);
         expect(result).to.have.keys(['entities', 'errors']);
         expect(result.entities).to.be.an('Array').of.length(3);
         expect(result.errors).to.be.an('Array').of.length(0);
@@ -160,6 +165,39 @@ describe('Syncstore', function() {
         result.entities.forEach((entity) => {
           expect(entity).to.have.property('_id').that.is.not.empty;
           expect(entity).to.have.deep.property('_kmd', { local: true });
+        });
+      });
+
+      it('push should batch objects for create and send them first', async function () {
+        const docForUpdate = { _id: '123', data: 123 };
+        const docsForInsert = [];
+        for (let i = 0; i < 3; i++) {
+          docsForInsert.push({ data: i });
+        }
+
+        const store = collection(COLLECTION_NAME, DataStoreType.Sync);
+        await store.save(docForUpdate);
+        await store.create(docsForInsert);
+
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        const scope = nock(url.origin)
+          .post(url.pathname)
+          .reply(207, { entities: docsForInsert, errors: [] })
+          .put(url.pathname + '/123')
+          .reply(200, docForUpdate);
+
+        const result = await store.push();
+
+        expect(scope.isDone()).to.equal(true);
+        expect(result).to.be.an('Array').of.length(4);
+        expect(result[0]).to.have.deep.property('entity', docsForInsert[0]);
+        expect(result[1]).to.have.deep.property('entity', docsForInsert[1]);
+        expect(result[2]).to.have.deep.property('entity', docsForInsert[2]);
+        expect(result[3]).to.have.deep.property('entity', docForUpdate);
+
+        result.forEach((entity) => {
+          expect(entity).to.have.property('_id').that.is.not.empty;
+          expect(entity).to.not.have.property('_kmd');
         });
       });
 

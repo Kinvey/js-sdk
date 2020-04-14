@@ -3,6 +3,7 @@ import { SyncError } from '../errors/sync';
 import { NotFoundError } from '../errors/notFound';
 import { NetworkStore } from './networkstore';
 import { DataStoreCache, SyncCache, SyncEvent } from './cache';
+import { getApiVersion } from '../kinvey';
 
 const pushInProgress = new Map<string, boolean>();
 
@@ -122,130 +123,249 @@ export class Sync {
   }
 
   async push(providedQuery?: Query, options?: any) {
-    const network = new NetworkStore(this.collectionName);
-    const cache = new DataStoreCache(this.collectionName, this.tag);
-    const syncCache = new SyncCache(this.tag);
-
     if (this.isPushInProgress()) {
       throw new SyncError('Data is already being pushed to the backend. Please wait for it to complete before pushing new data to the backend.');
     }
 
-    const batchSize = 100;
-    const query = new Query(providedQuery).equalTo('collection', this.collectionName);
-    const syncDocs = await syncCache.find(query);
+    const apiVersion = getApiVersion();
+    const network = new NetworkStore(this.collectionName);
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const syncCache = new SyncCache(this.tag);
+    const collectionQuery = new Query(providedQuery).equalTo('collection', this.collectionName);
+    const totalPushResults = [];
 
-    if (syncDocs.length > 0) {
-      let i = 0;
+    const batchCreateEntities = async (): Promise<any> => {
+      // Batch insert entities for create
+      const queryForInsert = new Query(collectionQuery).equalTo('state.operation', SyncEvent.Create);
+      const syncDocsForInsert = await syncCache.find(queryForInsert);
 
-      const batchPush = async (pushResults: any = []): Promise<any> => {
+      if (syncDocsForInsert.length > 0) {
+        const localIdsToRemove = [];
+        const entitiesForInsert = await Promise.all(
+          syncDocsForInsert.map(async (doc) => {
+            const entity = await cache.findById(doc.entityId);
+            if (entity._kmd && entity._kmd.local === true) {
+              localIdsToRemove.push(doc.entityId);
+              delete entity._id;
+              delete entity._kmd.local;
+            }
+            return entity;
+          })
+        );
+
+        const multiInsertResult = await network.create(entitiesForInsert, options);
+
+        // Process successful inserts
+        if (multiInsertResult.entities != null) {
+          await Promise.all(
+            multiInsertResult.entities.map(async (insertedEntity, index) => {
+              if (insertedEntity != null) {
+                await syncCache.removeById(insertedEntity._id!); // Remove the sync doc
+                await cache.save(insertedEntity); // Save the doc to cache
+                // Add the inserted entity to the end result
+                totalPushResults.push({
+                  _id: syncDocsForInsert[index].entityId,
+                  operation: SyncEvent.Create,
+                  entity: insertedEntity
+                });
+              }
+            })
+          );
+        }
+
+        // Process insert errors
+        if (multiInsertResult.errors != null) {
+          await Promise.all(
+            multiInsertResult.errors.map(async (insertError) => {
+              // Add the error to the end result and keep the order relative to other inserts
+              totalPushResults.splice(insertError.index, 0, {
+                _id: syncDocsForInsert[insertError.index].entityId,
+                operation: SyncEvent.Create,
+                entity: entitiesForInsert[insertError.index],
+                error: insertError
+              });
+            })
+          );
+        }
+
+        // Remove the original docs that were created locally
+        await Promise.all(localIdsToRemove.map((id) => cache.removeById(id)));
+      }
+    };
+
+    const createEntity = async (syncDocId, entityId): Promise<any> => {
+      let doc: any = await cache.findById(entityId);
+      let local = false;
+
+      try {
+        // Save the doc to the backend
+        if (doc._kmd && doc._kmd.local === true) {
+          local = true;
+          // tslint:disable-next-line:no-delete
+          delete doc._id;
+          // tslint:disable-next-line:no-delete
+          delete doc._kmd.local;
+        }
+
+        doc = await network.create(doc, options);
+
+        // Remove the sync doc
+        await syncCache.removeById(syncDocId!);
+
+        // Save the doc to cache
+        await cache.save(doc);
+
+        // Remove the original doc that was created
+        if (local) {
+          await cache.removeById(entityId);
+        }
+
+        // Return a result
+        return {
+          _id: entityId,
+          operation: SyncEvent.Create,
+          entity: doc
+        };
+      } catch (error) {
+        // Return a result with the error
+        return {
+          _id: entityId,
+          operation: SyncEvent.Create,
+          entity: doc,
+          error
+        };
+      }
+    };
+
+    const updateEntity = async (syncDocId, entityId): Promise<any> => {
+      let doc: any = await cache.findById(entityId);
+
+      try {
+        // Save the doc to the backend
+        doc = await network.update(doc, options);
+
+        // Remove the sync doc
+        await syncCache.removeById(syncDocId!);
+
+        // Save the doc to cache
+        await cache.save(doc);
+
+        // Return a result
+        return {
+          _id: entityId,
+          operation: SyncEvent.Update,
+          entity: doc
+        };
+      } catch (error) {
+        // Return a result with the error
+        return {
+          _id: entityId,
+          operation: SyncEvent.Update,
+          entity: doc,
+          error
+        };
+      }
+    };
+
+    const deleteEntity = async (syncDocId, entityId): Promise<any> => {
+      try {
+        try {
+          // Remove the doc from the backend
+          await network.removeById(entityId, options);
+        } catch (error) {
+          // Rethrow the error if it is not a NotFoundError
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
+
+        // Remove the sync doc
+        await syncCache.removeById(syncDocId!);
+
+        // Return a result
+        return {
+          _id: entityId,
+          operation: SyncEvent.Delete
+        };
+      } catch (error) {
+        // Return a result with the error
+        return {
+          _id: entityId,
+          operation: SyncEvent.Delete,
+          error
+        };
+      }
+    };
+
+    const pushEntity = async (syncDoc): Promise<any> => {
+      const { _id, entityId, state = { operation: undefined } } = syncDoc;
+      switch (state.operation) {
+        case SyncEvent.Create: {
+          if (apiVersion >= 5) {
+            return null; // Inserts must have already been batched
+          }
+          return createEntity(_id, entityId);
+        }
+        case SyncEvent.Update: {
+          return updateEntity(_id, entityId);
+        }
+        case SyncEvent.Delete: {
+          return deleteEntity(_id, entityId);
+        }
+        default: {
+          return {
+            _id,
+            operation: state.operation,
+            error: new Error('Unable to push item in sync table because the event was not recognized.')
+          };
+        }
+      }
+    };
+
+    // First try inserting new entities at once
+    if (apiVersion >= 5) {
+      try {
         markPushStart(this.collectionName);
+        await batchCreateEntities();
+      } finally {
+        markPushEnd(this.collectionName);
+      }
+    }
 
+    // Push other entities one by one in batches of 100 parallel requests
+    const syncDocs = await syncCache.find(collectionQuery);
+    if (syncDocs.length > 0) {
+      const batchSize = 100;
+      let i = 0;
+      const batchPush = async (): Promise<any> => {
         if (i >= syncDocs.length) {
-          markPushEnd(this.collectionName);
-          return pushResults;
+          return;
         }
 
         const batch = syncDocs.slice(i, i + batchSize);
         i += batchSize;
 
-        const results = await Promise.all(batch.map(async (syncDoc) => {
-          const { _id, entityId, state = { operation: undefined } } = syncDoc;
-          const event = state.operation;
-
-          if (event === SyncEvent.Delete) {
-            try {
-              try {
-                // Remove the doc from the backend
-                await network.removeById(entityId, options);
-              } catch (error) {
-                // Rethrow the error if it is not a NotFoundError
-                if (!(error instanceof NotFoundError)) {
-                  throw error;
-                }
+        try {
+          markPushStart(this.collectionName);
+          await Promise.all(batch.map((syncDoc) => pushEntity(syncDoc)
+            .then((pushResult) => {
+              if (pushResult != null) {
+                totalPushResults.push(pushResult);
               }
-
-              // Remove the sync doc
-              await syncCache.removeById(_id!);
-
-              // Return a result
-              return {
-                _id: entityId,
-                operation: event
-              };
-            } catch (error) {
-              // Return a result with the error
-              return {
-                _id: entityId,
-                operation: event,
-                error
-              };
-            }
-          } else if (event === SyncEvent.Create || event === SyncEvent.Update) {
-            let doc: any = await cache.findById(entityId);
-            let local = false;
-
-            try {
-              // Save the doc to the backend
-              if (event === SyncEvent.Create) {
-                if (doc._kmd && doc._kmd.local === true) {
-                  local = true;
-                  // tslint:disable-next-line:no-delete
-                  delete doc._id;
-                  // tslint:disable-next-line:no-delete
-                  delete doc._kmd.local;
-                }
-
-                doc = await network.create(doc, options);
-              } else {
-                doc = await network.update(doc, options);
-              }
-
-              // Remove the sync doc
-              await syncCache.removeById(_id!);
-
-              // Save the doc to cache
-              await cache.save(doc);
-
-              // Remove the original doc that was created
-              if (local) {
-                await cache.removeById(entityId);
-              }
-
-              // Return a result
-              return {
-                _id: entityId,
-                operation: event,
-                entity: doc
-              };
-            } catch (error) {
-              // Return a result with the error
-              return {
-                _id: entityId,
-                operation: event,
-                entity: doc,
-                error
-              };
-            }
-          }
-
-          // Return a default result
-          return {
-            _id,
-            operation: event,
-            error: new Error('Unable to push item in sync table because the event was not recognized.')
-          };
-        }));
-
-        markPushEnd(this.collectionName);
+            })
+          ));
+        } finally {
+          markPushEnd(this.collectionName);
+        }
 
         // Push remaining docs
-        return batchPush(pushResults.concat(results));
+        return batchPush();
       };
 
-      return batchPush();
+      await batchPush();
     }
 
-    return [];
+    return totalPushResults;
   }
 
   async remove(providedQuery?: Query) {
