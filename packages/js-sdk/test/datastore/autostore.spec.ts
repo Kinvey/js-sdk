@@ -206,6 +206,11 @@ describe('Autostore', function() {
         const result = await store.create(docs);
         expect(scope.isDone()).to.eql(true);
         expect(result).to.deep.eql(expectedResult);
+
+        // Verify sync queue, only the errored entity should be there
+        const pendingSyncEntities = await store.pendingSyncEntities();
+        expect(pendingSyncEntities.length).to.eql(1);
+        expect(pendingSyncEntities[0].entity.data).to.eql(1);
       });
 
       it('save should throw an error', async function() {

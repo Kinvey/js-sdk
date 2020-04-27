@@ -142,10 +142,10 @@ export class Sync {
       if (syncDocsForInsert.length > 0) {
         const localIdsToRemove = [];
         const entitiesForInsert = await Promise.all(
-          syncDocsForInsert.map(async (doc) => {
+          syncDocsForInsert.map(async (doc, index) => {
             const entity = await cache.findById(doc.entityId);
             if (entity._kmd && entity._kmd.local === true) {
-              localIdsToRemove.push(doc.entityId);
+              localIdsToRemove[index] = doc.entityId;
               delete entity._id;
               delete entity._kmd.local;
             }
@@ -160,8 +160,11 @@ export class Sync {
           await Promise.all(
             multiInsertResult.entities.map(async (insertedEntity, index) => {
               if (insertedEntity != null) {
-                await syncCache.removeById(insertedEntity._id!); // Remove the sync doc
-                await cache.save(insertedEntity); // Save the doc to cache
+                // Successful insert, clean up metadata
+                const syncDoc = syncDocsForInsert[index];
+                await syncCache.removeById(syncDoc._id!);        // Remove the sync doc
+                await cache.save(insertedEntity);                // Save the doc to cache
+                await cache.removeById(localIdsToRemove[index]); // Remove the original doc that was created
                 // Add the inserted entity to the end result
                 totalPushResults.push({
                   _id: syncDocsForInsert[index].entityId,
@@ -187,9 +190,6 @@ export class Sync {
             })
           );
         }
-
-        // Remove the original docs that were created locally
-        await Promise.all(localIdsToRemove.map((id) => cache.removeById(id)));
       }
     };
 
