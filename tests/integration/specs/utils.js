@@ -22,6 +22,7 @@ export function setOfflineProvider(initObject, provider) {
 export function assertEntityMetadata(entities) {
   ensureArray(entities).forEach((entity) => {
     expect(entity._kmd.lmt).to.exist;
+    expect(entity._kmd.llt).to.exist;
     expect(entity._kmd.ect).to.exist;
     expect(entity._acl.creator).to.exist;
   });

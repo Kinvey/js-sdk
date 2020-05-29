@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const glob = require('glob-promise');
 const babel = require('@babel/core');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const SPECS_DIR = path.join(__dirname, '../../specs');
 const TEST_DIR = path.join(__dirname, '../test');

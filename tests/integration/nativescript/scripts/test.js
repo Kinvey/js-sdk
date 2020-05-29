@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const chalk = require('chalk');
 const ora = require('ora');
 const isArray = require('lodash/isArray');

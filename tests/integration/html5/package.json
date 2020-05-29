@@ -4,12 +4,12 @@
   "description": "Integration tests for kinvey-html5-sdk.",
   "version": "0.0.16",
   "scripts": {
-    "pretest": "node scripts/test.js",
+    "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build": "cd ../../../packages/html5-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
+    "pretest": "npm run symlink-js-sdk && npm run build && node scripts/test.js",
     "test": "karma start karma.conf.js"
   },
-  "dependencies": {
-    "kinvey-html5-sdk": "^4.2.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "~7.4.3",
     "@babel/plugin-transform-runtime": "~7.4.3",
@@ -28,7 +28,9 @@
     "karma-mocha-reporter": "~2.2.5",
     "karma-webpack": "~3.0.5",
     "mocha": "~6.0.2",
+    "rimraf": "~3.0.2",
     "sinon": "~7.3.1",
+    "symlink-dir": "~4.0.3",
     "webpack": "~4.29.6"
   }
 }

@@ -24,8 +24,8 @@ Desktop.ini
 # Mac
 .DS_Store
 
-# VS Code
-.vscode
-
 # WebStorm
 .idea
+
+!tests/integration/node_modules
+tests/integration/.env

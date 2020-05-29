@@ -4,12 +4,14 @@
   "description": "Integration tests for kinvey-nativescript-sdk.",
   "version": "0.0.16",
   "scripts": {
-    "test:android": "node scripts/test.js && cd TestApp && tns test android",
-    "test:ios": "node scripts/test.js && cd TestApp && tns test ios"
+    "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build": "cd ../../../packages/nativescript-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
+    "pretest": "npm run symlink-js-sdk && npm run build && node scripts/test.js && cd TestApp",
+    "test": "npm run test:android && npm run test:ios",
+    "test:android": "tns test android",
+    "test:ios": "tns test ios"
   },
-  "dependencies": {
-    "kinvey-nativescript-sdk": "^4.2.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "~7.4.3",
     "@babel/plugin-transform-runtime": "~7.4.3",
@@ -26,7 +28,9 @@
     "fs-extra": "~7.0.1",
     "glob": "~7.1.3",
     "ora": "~3.4.0",
+    "rimraf": "~3.0.2",
     "sinon": "~7.3.1",
+    "symlink-dir": "~4.0.3",
     "webpack": "~4.30.0",
     "webpack-node-externals": "~1.7.2"
   }

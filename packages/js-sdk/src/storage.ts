@@ -38,6 +38,7 @@ export interface Entity {
     authtoken?: string;
     ect?: string;
     lmt?: string;
+    llt?: string;
     emailVerification?: {
       status: string;
     }
