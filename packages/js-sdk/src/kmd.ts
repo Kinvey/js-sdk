@@ -86,7 +86,7 @@ export class Kmd {
    * @returns {Date?} _kmd.llt
    */
   get llt() {
-    return this.updatedAt;
+    return this.loggedAt;
   }
 
   /**
@@ -95,7 +95,7 @@ export class Kmd {
    * @returns {Date?} _kmd.llt
    */
   get lastLoginTime() {
-    return this.updatedAt;
+    return this.loggedAt;
   }
 
   /**
