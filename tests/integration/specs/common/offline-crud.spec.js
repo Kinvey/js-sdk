@@ -14,6 +14,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
     let syncStore;
     let cacheStore;
     let storeToTest;
+    let storeCount;
     const dataStoreType = currentDataStoreType;
     const entity1 = utilities.getEntity(utilities.randomString());
     const createdUserIds = [];
@@ -46,6 +47,8 @@ dataStoreTypes.forEach((currentDataStoreType) => {
     beforeEach((done) => {
       utilities.cleanUpCollectionData(collectionName)
         .then(() => cacheStore.save(entity1))
+        .then(() => cacheStore.count().toPromise())
+        .then((count) => { storeCount = count; })
         .then(() => done())
         .catch(done);
     });
@@ -67,9 +70,9 @@ dataStoreTypes.forEach((currentDataStoreType) => {
             .then(() => done(new Error(shouldNotBeCalledErrorMessage)))
             .catch((error) => {
               expect(error.name).to.equal(notFoundErrorName);
-              syncStore.count().toPromise()
+              return syncStore.count().toPromise()
                 .then((count) => {
-                  expect(count).to.equal(1);
+                  expect(count).to.equal(storeCount);
                   done();
                 });
             })
@@ -198,7 +201,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
             return networkStore.count().toPromise();
           })
           .then((count) => {
-            expect(count).to.equal(2);
+            expect(count).to.equal(storeCount + 1);
             done();
           })
           .catch(done);
@@ -249,7 +252,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
             return networkStore.count().toPromise();
           })
           .then((count) => {
-            expect(count).to.equal(2);
+            expect(count).to.equal(storeCount + 1);
             done();
           })
           .catch(done);
