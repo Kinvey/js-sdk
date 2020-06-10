@@ -1,6 +1,6 @@
 import { format } from 'url';
 import { ConfigKey, setConfig } from './config';
-import { SessionStore, HttpAdapter, getAppVersion } from './http';
+import { SessionStore, HttpAdapter, getAppVersion, setAppVersion } from './http';
 import {
   getAppKey,
   getAppSecret,
@@ -29,15 +29,13 @@ export interface Config {
 
 export function init(config: Config) {
   // Check that an appKey was provided
-  if (config.kinveyConfig.appKey === null && config.kinveyConfig.appKey === undefined) {
+  if (config.kinveyConfig.appKey === null || config.kinveyConfig.appKey === undefined) {
     throw new KinveyError('No app key was provided to initialize the Kinvey JavaScript SDK.');
   }
 
   // Check that an appSecret or masterSecret was provided
-  if (config.kinveyConfig.appSecret === null
-    && config.kinveyConfig.appSecret === undefined
-    && config.kinveyConfig.masterSecret === null
-    && config.kinveyConfig.masterSecret === undefined) {
+  if ((config.kinveyConfig.appSecret === null || config.kinveyConfig.appSecret === undefined)
+    && (config.kinveyConfig.masterSecret === null || config.kinveyConfig.masterSecret === undefined)) {
     throw new KinveyError('No app secret was provided to initialize the Kinvey JavaScript SDK.');
   }
 
@@ -47,6 +45,10 @@ export function init(config: Config) {
   setConfig(ConfigKey.Popup, config.popup);
   setConfig(ConfigKey.StorageAdapter, config.storageAdapter);
   setConfig(ConfigKey.PubNub, config.pubnub);
+
+  if (config.kinveyConfig.appVersion !== null && config.kinveyConfig.appVersion !== undefined) {
+    setAppVersion(config.kinveyConfig.appVersion);
+  }
 
   return {
     apiHost: getBaasHost(),

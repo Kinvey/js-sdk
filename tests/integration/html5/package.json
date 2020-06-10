@@ -5,9 +5,11 @@
   "version": "0.0.16",
   "scripts": {
     "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build-js-sdk": "cd ../../../packages/js-sdk && npm run build",
     "build": "cd ../../../packages/html5-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
-    "pretest": "npm run symlink-js-sdk && npm run build && node scripts/test.js",
-    "test": "karma start karma.conf.js"
+    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node scripts/test.js",
+    "test": "karma start karma.conf.js --browsers=ChromeHeadless_without_security",
+    "test-debug": "npm run pretest && karma start karma.conf.js --browsers=Chrome_without_security --single-run=false"
   },
   "dependencies": {},
   "devDependencies": {

@@ -46,12 +46,16 @@ module.exports = function (config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome_without_security'],
+    browsers: ['ChromeHeadless_without_security', 'Chrome_without_security'],
 
     // you can define custom flags
     customLaunchers: {
-      Chrome_without_security: {
+      ChromeHeadless_without_security: {
         base: 'ChromeHeadless',
+        flags: ['--disable-web-security', '--disable-site-isolation-trials']
+      },
+      Chrome_without_security: {
+        base: 'Chrome',
         flags: ['--disable-web-security', '--disable-site-isolation-trials']
       }
     },
@@ -59,6 +63,8 @@ module.exports = function (config) {
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true,
+
+    browserNoActivityTimeout: 100000,
 
     // Concurrency level
     // how many browser should be started simultaneous

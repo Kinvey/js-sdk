@@ -25,5 +25,8 @@ module.exports = {
     'kinvey-nativescript-sdk',
     'tns-core-modules/file-system'
   ],
-  target: 'node'
+  target: 'node',
+	optimization: {
+		minimize: false
+	},
 }

@@ -9,6 +9,7 @@
     "test-unit:react-native": "lerna run build --scope kinvey-react-native-sdk --stream && lerna run test --scope kinvey-react-native-sdk --stream",
     "test-integration": "npm run test-integration:html5 && npm run test-integration:nativescript && npm run test-integration:node",
     "test-integration:html5": "cd tests/integration/html5 && npm i --no-audit && npm test",
+    "test-integration:html5-debug": "cd tests/integration/html5 && npm i --no-audit && npm run test-debug",
     "test-integration:nativescript": "cd tests/integration/nativescript && npm i --no-audit && npm test",
     "test-integration:node": "cd tests/integration/node && npm i --no-audit && npm test"
   },

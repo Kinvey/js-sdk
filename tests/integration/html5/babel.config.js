@@ -3,6 +3,9 @@ module.exports = function (api) {
 
   const presets = [
     ['@babel/env', {
+      "targets": {
+        "chrome": "84",
+      },
       corejs: '3',
       useBuiltIns: 'usage'
     }]

@@ -5,8 +5,9 @@
   "version": "0.0.16",
   "scripts": {
     "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build-js-sdk": "cd ../../../packages/js-sdk && npm run build",
     "build": "cd ../../../packages/nativescript-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
-    "pretest": "npm run symlink-js-sdk && npm run build && node scripts/test.js && cd TestApp",
+    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node scripts/test.js && cd TestApp",
     "test": "npm run test:android && npm run test:ios",
     "test:android": "tns test android",
     "test:ios": "tns test ios"

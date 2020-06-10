@@ -37,7 +37,7 @@ const setupOfflineProvider = (offlineProvider) => {
 const checkIndexedDB = async () => {
   const collection = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
   const insertedItem = await collection.save(testItem);
-  const dbPromise = idb.openDb(process.env.APP_KEY, 3);
+  const dbPromise = idb.openDB(process.env.APP_KEY, 4);
   return dbPromise.then(db => {
     const tx = db.transaction(collectionName)
     const store = tx.objectStore(collectionName);
@@ -83,7 +83,7 @@ describe('Init tests', () => {
         const init = Kinvey.init({
           appSecret: process.env.APP_SECRET
         });
-      }).to.throw('An appKey is required and must be a string.');
+      }).to.throw('No app key was provided to initialize the Kinvey JavaScript SDK.');
       done();
     });
 
@@ -92,7 +92,7 @@ describe('Init tests', () => {
         const init = Kinvey.init({
           appKey: process.env.APP_KEY
         });
-      }).to.throw('An appSecret is required and must be a string.');
+      }).to.throw('No app secret was provided to initialize the Kinvey JavaScript SDK.');
       done();
     });
 
@@ -124,7 +124,9 @@ describe('Init tests', () => {
         masterSecret: process.env.MASTER_SECRET,
         instanceId: instanceId,
         appVersion: '2',
-        encryptionKey: encryptionKey
+        encryptionKey: encryptionKey,
+        defaultTimeout: 20000,
+        storage: Kinvey.StorageProvider.Memory
       });
       expect(init.masterSecret).to.equal(process.env.MASTER_SECRET);
       expect(init.apiProtocol).to.equal(defaultApiProtocol);
@@ -138,23 +140,9 @@ describe('Init tests', () => {
       expect(init.micHostname).to.equal(`${defaultMicProtocol}//${instanceId}-${defaultMicHost}`);
       expect(init.appVersion).to.equal('2');
       expect(init.encryptionKey).to.equal(encryptionKey);
+      expect(init.defaultTimeout).to.equal(20000);
+      expect(init.storage).to.equal(Kinvey.StorageProvider.Memory);
       done();
-    });
-  });
-
-  describe('initialize', () => {
-    it('should return deprecation error', (done) => {
-      Kinvey.initialize({
-        appKey: process.env.APP_KEY,
-        appSecret: process.env.APP_SECRET,
-      })
-        .then(() => {
-          Promise.reject(new Error('An error for deprecated function should be returned.'))
-        })
-        .catch((err) => {
-          expect(err.message).to.equal('initialize() has been deprecated. Please use init().');
-          done();
-        });
     });
   });
 
