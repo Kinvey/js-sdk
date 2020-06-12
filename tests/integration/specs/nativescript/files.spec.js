@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import _ from 'lodash';
 import { knownFolders, path, File } from 'tns-core-modules/file-system';
+import * as httpModule from 'tns-core-modules/http';
 import * as Kinvey from '__SDK__';
 import * as utilities from '../utils';
 
@@ -11,7 +12,7 @@ describe('Files', function() {
       appSecret: process.env.APP_SECRET,
       masterSecret: process.env.MASTER_SECRET
     });
-    return utilities.cleanUpCollection(config, '_blob');
+    return utilities.cleanUpCollection(config, '_blob', httpModule.request.bind(httpModule));
   });
 
   before(function() {
@@ -48,7 +49,7 @@ describe('Files', function() {
     it('should upload with mimeType application/octet-stream by default', async function() {
       const filePath = path.join(knownFolders.currentApp().path, '/sample-test-files/test1.txt');
       const kinveyFile = await Kinvey.Files.upload(filePath);
-      expect(file.mimeType).to.equal('application/octet-stream');
+      expect(kinveyFile.mimeType).to.equal('application/octet-stream');
       return Kinvey.Files.removeById(kinveyFile._id);
     });
 
@@ -56,7 +57,7 @@ describe('Files', function() {
       const mimeType = 'text/plain';
       const filePath = path.join(knownFolders.currentApp().path, '/sample-test-files/test1.txt');
       const kinveyFile = await Kinvey.Files.upload(filePath, { mimeType });
-      expect(file.mimeType).to.equal(mimeType);
+      expect(kinveyFile.mimeType).to.equal(mimeType);
       return Kinvey.Files.removeById(kinveyFile._id);
     });
 
@@ -64,7 +65,7 @@ describe('Files', function() {
       const metadata = { testProperty: 'test' };
       const filePath = path.join(knownFolders.currentApp().path, '/sample-test-files/test1.txt');
       const kinveyFile = await Kinvey.Files.upload(filePath, metadata);
-      expect(file.testProperty).to.equal(metadata.testProperty);
+      expect(kinveyFile.testProperty).to.equal(metadata.testProperty);
       return Kinvey.Files.removeById(kinveyFile._id);
     });
 
@@ -73,7 +74,7 @@ describe('Files', function() {
     it('should upload a publicly-readable file with public set to true', async function() {
       const filePath = path.join(knownFolders.currentApp().path, '/sample-test-files/test1.txt');
       const kinveyFile = await Kinvey.Files.upload(filePath, { public: true });
-      expect(file._public).to.equal(true);
+      expect(kinveyFile._public).to.equal(true);
       return Kinvey.Files.removeById(kinveyFile._id);
     });
 
