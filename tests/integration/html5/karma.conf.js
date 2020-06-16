@@ -51,8 +51,22 @@ module.exports = function (config) {
     // you can define custom flags
     customLaunchers: {
       ChromeHeadless_without_security: {
-        base: 'ChromeHeadless',
-        flags: ['--disable-web-security', '--disable-site-isolation-trials']
+        base: 'Chrome',
+        flags: [
+          '--headless',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-software-rasterizer',
+          '--remote-debugging-port=9222',
+          '--mute-audio',
+          '--remote-debugging-address=0.0.0.0',
+          '--no-sandbox',
+          '--user-data-dir=/tmp',
+          '--incognito',
+          '--window-size=1440,900',
+          '--disable-web-security',
+          '--disable-site-isolation-trials'
+        ]
       },
       Chrome_without_security: {
         base: 'Chrome',

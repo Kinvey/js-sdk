@@ -17,7 +17,7 @@ const fbUserName = 'Test User Facebook';
 const fbCookieName = 'c_user';
 const fbCookieValue = '1172498488';
 
-const collectionName = process.env.COLLECTION_NAME;
+const collectionName = process.env.COLLECTION_NAME || 'TestData';
 const networkstore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
 
 

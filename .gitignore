@@ -27,5 +27,5 @@ Desktop.ini
 # WebStorm
 .idea
 
-!tests/integration/node_modules
+!tests/node_modules
 tests/integration/.env

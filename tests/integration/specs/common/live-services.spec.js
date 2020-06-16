@@ -4,7 +4,7 @@ import * as Kinvey from '__SDK__';
 import * as utilities from '../utils';
 
 const createdUserIds = [];
-const collectionName = process.env.COLLECTION_NAME;
+const collectionName = process.env.COLLECTION_NAME || 'TestData';
 var networkStore;
 var appCredentials;
 
