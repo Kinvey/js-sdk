@@ -1,3 +1,4 @@
+const os = require('os');
 const axios = require('axios');
 const async = require('async');
 const argv = require('yargs').argv;
@@ -5,8 +6,10 @@ const { callbackify } = require('util');
 const { login } = require('./shared');
 
 let target = argv.target;
-if (process.env.CI) {
-  target += '-ci'
+if (process.env.CIRRUS_BRANCH) {
+  target += `-${process.env.CIRRUS_BRANCH}`;
+} else {
+  target += `-${os.hostname()}`;
 }
 
 function getApps() {

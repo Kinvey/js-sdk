@@ -7,12 +7,13 @@
     "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
     "build-js-sdk": "cd ../../../packages/js-sdk && npm run build",
     "build": "cd ../../../packages/nativescript-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
-    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node scripts/test.js --clean",
+    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node ../setup.js --target=nativescript && node scripts/test.js --clean",
     "test": "npm run test:android && npm run test:ios",
-    "test:android": "cd TestApp && tns test android",
+    "test:android": "cd TestApp && tns test android || (npm run posttest && exit 1)",
     "test:android-without-build": "node scripts/test.js && npm run test:android",
-    "test:ios": "cd TestApp && tns test ios",
-    "test:ios-without-build": "node scripts/test.js && npm run test:ios"
+    "test:ios": "cd TestApp && tns test ios || (npm run posttest && exit 1)",
+    "test:ios-without-build": "node scripts/test.js && npm run test:ios",
+    "posttest": "node ../clean.js --target=nativescript"
   },
   "dependencies": {
     "nativescript": "6.7.4"
