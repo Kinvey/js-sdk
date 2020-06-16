@@ -6,6 +6,11 @@ const argv = require('yargs').argv;
 const { callbackify } = require('util');
 const { login } = require('./shared');
 
+let target = argv.target;
+if (process.env.CI) {
+  target += '-ci'
+}
+
 const dotenvPath = path.join(__dirname, '.env');
 
 function updateDotEnv() {
@@ -32,7 +37,7 @@ function createApp() {
     method: 'POST',
     url: '/apps',
     data: {
-      name: `JSSDK-${argv.target}-${new Date().getTime()}`,
+      name: `JSSDK-${target}-${new Date().getTime()}`,
       organizationId: process.env.TEST_ORG_ID,
       realtime: { enabled: true }
     }
@@ -91,7 +96,7 @@ function createDeltaCollection(name) {
 
 function createAuth(name, refresh, wrongConfig=false) {
   const data = {
-    name: `JSSDK-${argv.target}-${name}-${new Date().getTime()}`,
+    name: `JSSDK-${target}-${name}-${new Date().getTime()}`,
     redirectUri: ['http://localhost:9876/callback'],
     grantTtl: 10,
     tokenTtl: 3600,

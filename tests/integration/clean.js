@@ -4,12 +4,17 @@ const argv = require('yargs').argv;
 const { callbackify } = require('util');
 const { login } = require('./shared');
 
+let target = argv.target;
+if (process.env.CI) {
+  target += '-ci'
+}
+
 function getApps() {
   return axios({
     method: 'GET',
     url: '/apps',
   }).then(({ data }) => {
-    return data.filter(app => app.name.startsWith(`JSSDK-${argv.target}`) && app.organizationId === process.env.TEST_ORG_ID);
+    return data.filter(app => app.name.startsWith(`JSSDK-${target}`) && app.organizationId === process.env.TEST_ORG_ID);
   }).catch((err) => {
     console.error(err.response.data);
   });
@@ -31,7 +36,7 @@ function getAuthServices() {
     method: 'GET',
     url: '/auth-services',
   }).then(({ data }) => {
-    return data.filter(app => app.name.startsWith(`JSSDK-${argv.target}`) && app.identityStoreId === process.env.TEST_IDSTORE_ID);
+    return data.filter(app => app.name.startsWith(`JSSDK-${target}`) && app.identityStoreId === process.env.TEST_IDSTORE_ID);
   }).catch((err) => {
     console.error(err.response.data);
   });
