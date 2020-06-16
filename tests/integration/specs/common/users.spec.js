@@ -9,6 +9,7 @@ const assertUserData = (user, expectedUsername, shouldReturnPassword) => {
   expect(user.data._id).to.exist;
   expect(user.metadata.authtoken).to.exist;
   expect(user.metadata.lmt).to.exist;
+  expect(user.metadata.llt).to.exist;
   expect(user.metadata.ect).to.exist;
   expect(user._acl.creator).to.exist;
   if (expectedUsername) {

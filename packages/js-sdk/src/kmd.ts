@@ -81,6 +81,37 @@ export class Kmd {
   }
 
   /**
+   * Get last login time.
+   *
+   * @returns {Date?} _kmd.llt
+   */
+  get llt() {
+    return this.loggedAt;
+  }
+
+  /**
+   * Get last login time.
+   *
+   * @returns {Date?} _kmd.llt
+   */
+  get lastLoginTime() {
+    return this.loggedAt;
+  }
+
+  /**
+   * Get last login time.
+   *
+   * @returns {Date?} _kmd.llt
+   */
+  get loggedAt() {
+    if (this.entity._kmd && this.entity._kmd.llt) {
+      return new Date(this.entity._kmd.llt);
+    }
+
+    return undefined;
+  }
+
+  /**
    * Get the email verification details.
    *
    * @returns {Object} _kmd.emailVerification

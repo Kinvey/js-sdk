@@ -259,7 +259,7 @@ describe('User', () => {
 
   describe('metadata', () => {
     it('should return the metadata', () => {
-      const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+      const data = { _kmd: { lmt: new Date().toISOString(), llt: new Date().toISOString(), ect: new Date().toISOString() } };
       const user = new User(data);
       expect(user.metadata).toEqual(new Kmd(data));
     });
@@ -268,7 +268,7 @@ describe('User', () => {
       expect(() => {
         const user = new User();
         const metadata = user.metadata;
-        const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+        const data = { _kmd: { lmt: new Date().toISOString(), llt: new Date().toISOString(), ect: new Date().toISOString() } };
         user.metadata = new Kmd(data);
       }).toThrow(TypeError, /which has only a getter/);
     });
@@ -276,7 +276,7 @@ describe('User', () => {
 
   describe('_kmd', () => {
     it('should return the metadata', () => {
-      const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+      const data = { _kmd: { lmt: new Date().toISOString(), llt: new Date().toISOString(), ect: new Date().toISOString() } };
       const user = new User(data);
       expect(user._kmd).toEqual(new Kmd(data));
     });
@@ -285,7 +285,7 @@ describe('User', () => {
       expect(() => {
         const user = new User();
         const kmd = user._kmd;
-        const data = { _kmd: { lmt: new Date().toISOString(), ect: new Date().toISOString() } };
+        const data = { _kmd: { lmt: new Date().toISOString(), llt: new Date().toISOString(), ect: new Date().toISOString() } };
         user._kmd = new Kmd(data);
       }).toThrow(TypeError, /which has only a getter/);
     });
@@ -483,6 +483,7 @@ describe('User', () => {
         _id: randomString(),
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString(),
           authtoken: randomString()
         },
@@ -526,6 +527,7 @@ describe('User', () => {
         _id: randomString(),
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString(),
           authtoken: randomString()
         },
@@ -568,6 +570,7 @@ describe('User', () => {
         _id: randomString(),
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString(),
           authtoken: randomString()
         },
@@ -630,6 +633,7 @@ describe('User', () => {
         },
         _kmd: {
           lmt: '2016-08-17T15:32:01.741Z',
+          llt: '2016-08-17T15:32:01.741Z',
           ect: '2016-08-17T15:32:01.741Z'
         }
       };
@@ -644,6 +648,7 @@ describe('User', () => {
         },
         _kmd: {
           lmt: '2016-08-17T15:32:01.744Z',
+          llt: '2016-08-17T15:32:01.744Z',
           ect: '2016-08-17T15:32:01.744Z'
         }
       };
@@ -1138,6 +1143,7 @@ describe('User', () => {
         },
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString()
         }
       }, {
@@ -1148,6 +1154,7 @@ describe('User', () => {
         },
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString()
         }
       }];
@@ -1173,6 +1180,7 @@ describe('User', () => {
         },
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString()
         }
       }, {
@@ -1183,6 +1191,7 @@ describe('User', () => {
         },
         _kmd: {
           lmt: new Date().toISOString(),
+          llt: new Date().toISOString(),
           ect: new Date().toISOString()
         }
       }];

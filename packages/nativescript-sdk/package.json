@@ -62,7 +62,8 @@
     "push.js"
   ],
   "nativescript": {
-    "hooks": [{
+    "hooks": [
+      {
         "type": "before-checkForChanges",
         "script": "nativescript-hook-scripts/before-checkForChanges.js",
         "inject": true

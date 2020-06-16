@@ -4,12 +4,15 @@
   "description": "Integration tests for kinvey-html5-sdk.",
   "version": "0.0.16",
   "scripts": {
-    "pretest": "node scripts/test.js",
-    "test": "karma start karma.conf.js"
+    "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build-js-sdk": "cd ../../../packages/js-sdk && npm run build",
+    "build": "cd ../../../packages/html5-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
+    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node ../setup.js --target=html5 && node scripts/test.js",
+    "test": "karma start karma.conf.js --browsers=ChromeHeadless_without_security",
+    "test-debug": "npm run pretest && karma start karma.conf.js --browsers=Chrome_without_security --single-run=false; npm run posttest",
+    "posttest": "node ../clean.js --target=html5"
   },
-  "dependencies": {
-    "kinvey-html5-sdk": "^4.2.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "~7.4.3",
     "@babel/plugin-transform-runtime": "~7.4.3",
@@ -20,6 +23,7 @@
     "chai": "~4.2.0",
     "core-js": "^3.0.1",
     "dotenv": "~7.0.0",
+    "fs-extra": "~8.1.0",
     "glob-promise": "~3.4.0",
     "idb": "~4.0.4",
     "karma": "~4.0.1",
@@ -28,7 +32,9 @@
     "karma-mocha-reporter": "~2.2.5",
     "karma-webpack": "~3.0.5",
     "mocha": "~6.0.2",
+    "rimraf": "~3.0.2",
     "sinon": "~7.3.1",
+    "symlink-dir": "~4.0.3",
     "webpack": "~4.29.6"
   }
 }
