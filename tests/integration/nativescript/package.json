@@ -5,13 +5,18 @@
   "version": "0.0.16",
   "scripts": {
     "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build-js-sdk": "cd ../../../packages/js-sdk && npm run build",
     "build": "cd ../../../packages/nativescript-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
-    "pretest": "npm run symlink-js-sdk && npm run build && node scripts/test.js && cd TestApp",
+    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node scripts/test.js --clean",
     "test": "npm run test:android && npm run test:ios",
-    "test:android": "tns test android",
-    "test:ios": "tns test ios"
+    "test:android": "cd TestApp && tns test android",
+    "test:android-without-build": "node scripts/test.js && npm run test:android",
+    "test:ios": "cd TestApp && tns test ios",
+    "test:ios-without-build": "node scripts/test.js && npm run test:ios"
   },
-  "dependencies": {},
+  "dependencies": {
+    "nativescript": "6.7.4"
+  },
   "devDependencies": {
     "@babel/core": "~7.4.3",
     "@babel/plugin-transform-runtime": "~7.4.3",
@@ -32,6 +37,7 @@
     "sinon": "~7.3.1",
     "symlink-dir": "~4.0.3",
     "webpack": "~4.30.0",
-    "webpack-node-externals": "~1.7.2"
+    "webpack-node-externals": "~1.7.2",
+    "yargs": "^15.3.1"
   }
 }

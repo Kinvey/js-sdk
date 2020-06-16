@@ -21,55 +21,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "unit:react-native",
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-          "run", "test-unit:react-native", "--"
-      ],
-      "skipFiles": [
-        "<node_internals>/**/*.js"
-      ],
-      "autoAttachChildProcesses": true
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "integration:html5",
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run", "test-integration:html5", "--", "--"
-      ],
-      "skipFiles": [
-        "<node_internals>/**/*.js"
-      ],
-      "autoAttachChildProcesses": true,
-      "timeout": 20000
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "integration:nativescript",
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run", "test-integration:nativescript", "--", "--"
-      ],
-      "skipFiles": [
-        "<node_internals>/**/*.js"
-      ],
-      "autoAttachChildProcesses": true,
-      "timeout": 20000
-    },
-    {
-      "type": "node",
-      "request": "launch",
       "name": "integration:node",
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "run", "test-integration:node", "--", "--"
+        "run", "test-integration:node-debug", "--", "--"
       ],
       "skipFiles": [
         "<node_internals>/**/*.js"

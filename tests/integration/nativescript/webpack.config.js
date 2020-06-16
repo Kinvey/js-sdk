@@ -23,7 +23,11 @@ module.exports = {
   },
   externals: [
     'kinvey-nativescript-sdk',
-    'tns-core-modules/file-system'
+    'tns-core-modules/file-system',
+    'tns-core-modules/http'
   ],
-  target: 'node'
+  target: 'node',
+	optimization: {
+		minimize: false
+	},
 }

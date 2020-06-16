@@ -204,7 +204,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           .then((result) => validatePullOperation(result, [entity1, entity2]))
           .then(() => deltaNetworkStore.save(entity3))
           .then(() => deltaStoreToTest.pull(query, { autoPagination: true }))
-          .then((result) => validateNewPullOperation(result, [entity1, entity2, entity3], []))
+          .then((result) => validateNewPullOperation(result, [entity3], []))
           .then(() => done())
           .catch(done);
       });
@@ -351,14 +351,13 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           .then((result) => validatePullOperation(result, [entity4, entity5, entity6]))
           .then(() => deltaNetworkStore.removeById(entity4._id))
           .then(() => deltaStoreToTest.pull(query))
-          .then((result) => validatePullOperation(result, [entity6]))
+          .then((result) => validatePullOperation(result, []))
           .then(() => deltaStoreToTest.pull(query))
-          .then((result) => validatePullOperation(result, [entity6]))
+          .then((result) => validateNewPullOperation(result, [], [entity4]))
           .then(() => deltaStoreToTest.pull(queryWithoutModifiers))
           .then((result) => validateNewPullOperation(result, [], [entity4]))
           .then(() => done())
           .catch(done);
-
       });
 
       it('limit and skip query should not delete data', (done) => {
@@ -370,7 +369,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           .then(() => deltaStoreToTest.pull())
           .then((result) => validatePullOperation(result, [entity1, entity2, entity3]))
           .then(() => deltaStoreToTest.pull(query))
-          .then((result) => validatePullOperation(result, [entity2, entity3]))
+          .then((result) => validatePullOperation(result, []))
           .then(() => deltaStoreToTest.pull())
           .then((result) => validateNewPullOperation(result, [], []))
           .then(() => {
@@ -519,11 +518,10 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           .then((result) => validatePullOperation(result.pull, [entity1, entity2]))
           .then(() => deltaNetworkStore.save(entity3))
           .then(() => deltaStoreToTest.sync(query, { autoPagination: true }))
-          .then((result) => validateNewPullOperation(result.pull, [entity1, entity2, entity3], []))
+          .then((result) => validateNewPullOperation(result.pull, [entity3], []))
           .then(() => done())
           .catch(done);
       });
-
 
       it('should return correct number of items with tagged dataStore', (done) => {
         const onNextSpy = sinon.spy();
@@ -667,14 +665,13 @@ dataStoreTypes.forEach((currentDataStoreType) => {
           .then((result) => validatePullOperation(result.pull, [entity4, entity5, entity6]))
           .then(() => deltaNetworkStore.removeById(entity4._id))
           .then(() => deltaStoreToTest.sync(query))
-          .then((result) => validatePullOperation(result.pull, [entity6]))
+          .then((result) => validatePullOperation(result.pull, []))
           .then(() => deltaStoreToTest.sync(query))
-          .then((result) => validatePullOperation(result.pull, [entity6]))
+          .then((result) => validateNewPullOperation(result.pull, [], [entity4]))
           .then(() => deltaStoreToTest.sync(queryWithoutModifiers))
           .then((result) => validateNewPullOperation(result.pull, [], [entity4]))
           .then(() => done())
           .catch(done);
-
       });
     });
 

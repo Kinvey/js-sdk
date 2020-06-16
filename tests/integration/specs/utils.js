@@ -22,7 +22,6 @@ export function setOfflineProvider(initObject, provider) {
 export function assertEntityMetadata(entities) {
   ensureArray(entities).forEach((entity) => {
     expect(entity._kmd.lmt).to.exist;
-    expect(entity._kmd.llt).to.exist;
     expect(entity._kmd.ect).to.exist;
     expect(entity._acl.creator).to.exist;
   });
@@ -321,20 +320,26 @@ export function getExpectedFileMetadata(metadata) {
 }
 
 
-export async function cleanUpCollection(config, collectionName) {
+export async function cleanUpCollection(config, collectionName, requestLib) {
   let response;
 
+  if (!requestLib) {
+    requestLib = axios;
+  }
+
   try {
-    response = await axios({
+    const token = toBase64(`${config.appKey}:${config.masterSecret}`);
+    response = await requestLib({
       headers: {
-        Authorization: `Basic ${Buffer.from(`${config.appKey}:${config.masterSecret}`).toString('base64')}`,
+        Authorization: `Basic ${token}`,
         'Content-Type': 'application/json',
         'X-Kinvey-Delete-Entire-Collection': true,
         'X-Kinvey-Retain-collection-Metadata': true
       },
       method: 'POST',
       url: `https://baas.kinvey.com/rpc/${config.appKey}/remove-collection`,
-      data: { collectionName }
+      data: { collectionName },
+      content: JSON.stringify({ collectionName })
     });
   } catch (error) {
     if (error.response) {
@@ -344,9 +349,31 @@ export async function cleanUpCollection(config, collectionName) {
     throw error;
   }
 
+  if (!response.status) {
+    response.status = response.statusCode;
+  }
+
   if (response.status !== 200 && response.status !== 404) {
-    throw new Error(`${collectionName} collection cleanup failed!`);
+    throw new Error(`${collectionName} collection cleanup failed! - ${JSON.stringify(response)}`);
   }
 
   return null;
+}
+
+function toBase64(textString) {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(textString).toString('base64')
+  } else if (typeof NSString !== 'undefined') {
+    const text = NSString.stringWithString(textString);
+    const data = text.dataUsingEncoding(NSUTF8StringEncoding);
+    const base64String = data.base64EncodedStringWithOptions(0);
+    return base64String;
+  } else if (typeof java !== 'undefined') {
+    const text = new java.lang.String(textString);
+    const data = text.getBytes("UTF-8");
+    const base64String = android.util.Base64.encodeToString(data,android.util.Base64.DEFAULT);
+    return base64String;
+  } else {
+    throw new Error("Missing base64 conversion.");
+  }
 }

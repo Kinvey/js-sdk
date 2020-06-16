@@ -11,6 +11,7 @@ const webpack = require('webpack');
 const babel = require('@babel/core');
 const pkg = require('../package.json');
 const webpackConfig = require('../webpack.config');
+const argv = require('yargs').argv
 
 const appName = 'TestApp';
 const rootPath = path.join(__dirname, '..');
@@ -48,18 +49,25 @@ function build(file) {
   return singular ? results[0] : results;
 }
 
-const spinner = ora('Removing an exisiting NativeScript Test App...').start();
 
-// Remove the existing app
-del.sync([appPath]);
+const spinner = ora('').start();
 
-// Create a NativeScript app
-spinner.text = 'Creating a NativeScript app...';
-runCommand('tns', ['create', appName], rootPath);
+if (argv.clean) {
+  // Remove the existing app
+  spinner.text = 'Removing an exisiting NativeScript Test App...';
+  del.sync([appPath]);
 
-// Setup the app for testing
-spinner.text = 'Setting up the NativeScript app for testing...';
-runCommand('tns', ['test', 'init', '--framework', 'mocha'], appPath);
+  // Create a NativeScript app
+  spinner.text = 'Creating a NativeScript app...';
+  runCommand('tns', ['create', appName], rootPath);
+
+  // Setup the app for testing
+  spinner.text = 'Setting up the NativeScript app for testing...';
+  runCommand('tns', ['test', 'init', '--framework', 'mocha'], appPath);
+}
+
+// Copy app.gradle
+fs.copyFileSync(path.join(rootPath, 'scripts', 'app.gradle'), path.join(appPath, 'app', 'App_Resources', 'Android', 'app.gradle'));
 
 // Copy karma.conf.js
 fs.copyFileSync(path.join(rootPath, 'karma.conf.js'), path.join(appPath, 'karma.conf.js'));
