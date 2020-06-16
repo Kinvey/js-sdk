@@ -556,6 +556,7 @@ describe('User tests', () => {
           })
           .then((user) => {
             expect(user.metadata.emailVerification).to.exist;
+            expect(user.metadata.llt).to.exist;
             done();
           })
           .catch(done);
