@@ -139,57 +139,66 @@ export class Sync {
       const queryForInsert = new Query(collectionQuery).equalTo('state.operation', SyncEvent.Create);
       const syncDocsForInsert = await syncCache.find(queryForInsert);
 
-      if (syncDocsForInsert.length > 0) {
-        const localIdsToRemove = [];
-        const entitiesForInsert = await Promise.all(
-          syncDocsForInsert.map(async (doc, index) => {
-            const entity = await cache.findById(doc.entityId);
-            if (entity._kmd && entity._kmd.local === true) {
-              localIdsToRemove[index] = doc.entityId;
-              delete entity._id;
-              delete entity._kmd.local;
-            }
-            return entity;
-          })
-        );
+      if (!syncDocsForInsert.length) {
+        return;
+      }
 
-        const multiInsertResult = await network.create(entitiesForInsert, options);
+      const localIdsToRemove = [];
+      const entitiesForInsert = await Promise.all(
+        syncDocsForInsert.map(async (doc, index) => {
+          const entity = await cache.findById(doc.entityId);
+          if (entity._kmd && entity._kmd.local === true) {
+            localIdsToRemove[index] = doc.entityId;
+            delete entity._id;
+            delete entity._kmd.local;
+          }
+          return entity;
+        })
+      );
 
-        // Process successful inserts
-        if (multiInsertResult.entities != null) {
-          await Promise.all(
-            multiInsertResult.entities.map(async (insertedEntity, index) => {
-              if (insertedEntity != null) {
-                // Successful insert, clean up metadata
-                const syncDoc = syncDocsForInsert[index];
-                await syncCache.removeById(syncDoc._id!);        // Remove the sync doc
-                await cache.save(insertedEntity);                // Save the doc to cache
-                await cache.removeById(localIdsToRemove[index]); // Remove the original doc that was created
-                // Add the inserted entity to the end result
-                totalPushResults.push({
-                  _id: syncDocsForInsert[index].entityId,
-                  operation: SyncEvent.Create,
-                  entity: insertedEntity
-                });
-              }
-            })
-          );
-        }
+      const multiInsertResult = await network.create(entitiesForInsert, options);
 
-        // Process insert errors
-        if (multiInsertResult.errors != null) {
-          await Promise.all(
-            multiInsertResult.errors.map(async (insertError) => {
-              // Add the error to the end result and keep the order relative to other inserts
-              totalPushResults.splice(insertError.index, 0, {
-                _id: syncDocsForInsert[insertError.index].entityId,
-                operation: SyncEvent.Create,
-                entity: entitiesForInsert[insertError.index],
-                error: insertError
-              });
-            })
-          );
-        }
+      // Process successful inserts
+      if (multiInsertResult.entities != null) {
+        const insertedEntities = [];
+        const idsToRemoveFromSyncCache = [];
+        const idsToRemoveFromCache = [];
+
+        multiInsertResult.entities.forEach((insertedEntity, index) => {
+          if (insertedEntity == null) {
+            return;
+          }
+
+          insertedEntities.push(insertedEntity);
+          idsToRemoveFromSyncCache.push(syncDocsForInsert[index]._id);
+          idsToRemoveFromCache.push(localIdsToRemove[index]);
+
+          // Add the inserted entity to the end result
+          totalPushResults.push({
+            _id: syncDocsForInsert[index].entityId,
+            operation: SyncEvent.Create,
+            entity: insertedEntity
+          });
+        });
+
+        await Promise.all([
+          syncCache.removeManyById(idsToRemoveFromSyncCache),  // Remove the sync docs
+          cache.save(insertedEntities),                        // Save the docs to cache
+          cache.removeManyById(idsToRemoveFromCache)           // Remove the original docs that were created
+        ]);
+      }
+
+      // Process insert errors
+      if (multiInsertResult.errors != null) {
+        multiInsertResult.errors.forEach((insertError) => {
+          // Add the error to the end result and keep the order relative to other inserts
+          totalPushResults.splice(insertError.index, 0, {
+            _id: syncDocsForInsert[insertError.index].entityId,
+            operation: SyncEvent.Create,
+            entity: entitiesForInsert[insertError.index],
+            error: insertError
+          });
+        })
       }
     };
 

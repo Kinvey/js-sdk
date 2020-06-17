@@ -31,13 +31,13 @@ describe('AutoStore', function() {
   //   return null;
   // });
 
-  afterEach(function() {
+  afterEach('cleanUpAppData', function() {
     // Clean up sample data
     const activeUser = User.getActiveUser();
     return cleanUpAppData(collectionName, [activeUser._id]);
   });
 
-  afterEach(function () {
+  afterEach('cleanUpAppData - delta', function () {
     // Clean up sample data
     return cleanUpAppData(deltaCollectionName);
   });
@@ -1209,6 +1209,18 @@ describe('AutoStore', function() {
         expect(await networkTypeCollection.findById(id).toPromise()).to.deep.equal(result.entities[0]);
         expect(await networkTypeCollection.findById(result.entities[1]._id).toPromise()).to.deep.equal(result.entities[1]);
       });
+
+      it('should create 1000 items in less than 10 seconds', async () => {
+        const batchCollectionName = 'BatchTest'
+        const batchCount = 1000;
+
+        const autoTypeCollection = DataStore.collection(batchCollectionName, DataStoreType.Auto);
+        const networkTypeCollection = DataStore.collection(batchCollectionName, DataStoreType.Network);
+
+        await autoTypeCollection.create([...Array(batchCount).keys()].map((key) => ({ name: key })));
+
+        expect(await networkTypeCollection.count().toPromise()).to.equal(batchCount);
+      }).timeout(10000);
     });
   });
 });

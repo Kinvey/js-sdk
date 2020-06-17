@@ -273,6 +273,24 @@ export function removeById(dbName: string, objectStoreName: string, id: string) 
   });
 }
 
+export function removeManyById(dbName: string, objectStoreName: string, ids: string[]) {
+  const db = new IndexedDB(dbName);
+  return new Promise<any>((resolve, reject) => {
+    db.open(objectStoreName, true, (txn: any) => {
+      const store = txn.objectStore(objectStoreName);
+
+      let deletedCount = 0;
+      ids.forEach(id => {
+        const request = store.delete(id);
+        request.onsuccess = () => { deletedCount += 1; };
+      });
+
+      txn.oncomplete = () => resolve(deletedCount);
+      txn.onerror = (err: any) => reject(err);
+    }, reject);
+  });
+}
+
 export function clear(dbName: string, objectStoreName: string): Promise<any> {
   const db = new IndexedDB(dbName);
   return new Promise((resolve, reject) => {

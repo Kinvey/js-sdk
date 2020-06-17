@@ -92,6 +92,11 @@ export async function removeById(dbName: string, tableName: string, id: string) 
   return responses.shift();
 }
 
+export async function removeManyById(dbName: string, tableName: string, ids: string[]) {
+  const responses = await execute(dbName, tableName, [['DELETE FROM #{table} WHERE key = ?', ids]], true);
+  return responses.shift();
+}
+
 export async function clear(dbName: string, tableName: string) {
   await execute(dbName, tableName, [['DROP TABLE IF EXISTS #{table}']], true);
   return true;
