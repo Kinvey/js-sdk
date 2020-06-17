@@ -184,8 +184,9 @@ export class Sync {
         await Promise.all([
           syncCache.removeManyById(idsToRemoveFromSyncCache),  // Remove the sync docs
           cache.save(insertedEntities),                        // Save the docs to cache
-          cache.removeManyById(idsToRemoveFromCache)           // Remove the original docs that were created
         ]);
+
+        await cache.removeManyById(idsToRemoveFromCache)       // Remove the original docs that were created
       }
 
       // Process insert errors
