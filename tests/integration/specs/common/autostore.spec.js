@@ -1221,6 +1221,17 @@ describe('AutoStore', function() {
 
         expect(await networkTypeCollection.count().toPromise()).to.equal(batchCount);
       }).timeout(10000);
+
+      it('should read correctly created items', async () => {
+        const syncCollectionName = 'AutoSyncTest'
+        const itemsCount = 10;
+
+        const autoTypeCollection = DataStore.collection(syncCollectionName, DataStoreType.Auto);
+        await autoTypeCollection.create([...Array(itemsCount).keys()].map((key) => ({ name: key })));
+        const items = await autoTypeCollection.find();
+
+        expect(items.length).to.equal(itemsCount);
+      });
     });
   });
 });

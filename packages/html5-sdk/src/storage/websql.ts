@@ -113,7 +113,7 @@ export async function removeById(dbName: string, tableName: string, id: string) 
 }
 
 export async function removeManyById(dbName: string, tableName: string, ids: string[]) {
-  const response = await execute(dbName, tableName, [['DELETE FROM #{table} WHERE key = ?', ids]], true);
+  const response = await execute(dbName, tableName, [[`DELETE FROM #{table} WHERE key IN (${ids.map(() => '?').join(', ')})`, ids]], true);
   return response.rowCount;
 }
 
