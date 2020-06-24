@@ -1224,7 +1224,7 @@ describe('AutoStore', function() {
 
       it('should read correctly created items', async () => {
         const syncCollectionName = 'AutoSyncTest'
-        const itemsCount = 10;
+        const itemsCount = 1000;
 
         const autoTypeCollection = DataStore.collection(syncCollectionName, DataStoreType.Auto);
         await autoTypeCollection.create([...Array(itemsCount).keys()].map((key) => ({ name: key })));
