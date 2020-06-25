@@ -1210,7 +1210,7 @@ describe('AutoStore', function() {
         expect(await networkTypeCollection.findById(result.entities[1]._id).toPromise()).to.deep.equal(result.entities[1]);
       });
 
-      it('should create 1000 items in less than 10 seconds', async () => {
+      it('should create 1000 items in less than 15 seconds', async () => {
         const batchCollectionName = 'BatchTest'
         const batchCount = 1000;
 
@@ -1220,7 +1220,7 @@ describe('AutoStore', function() {
         await autoTypeCollection.create([...Array(batchCount).keys()].map((key) => ({ name: key })));
 
         expect(await networkTypeCollection.count().toPromise()).to.equal(batchCount);
-      }).timeout(10000);
+      }).timeout(15000);
 
       it('should read correctly created items', async () => {
         const syncCollectionName = 'AutoSyncTest'
