@@ -1,4 +1,5 @@
 import isString from 'lodash/isString';
+import sum from 'lodash/sum';
 import { Errors } from 'kinvey-js-sdk';
 
 const MASTER_TABLE_NAME = 'sqlite_master';
@@ -110,6 +111,17 @@ export async function save(dbName: string, tableName: string, docs: any = []) {
 export async function removeById(dbName: string, tableName: string, id: string) {
   const response = await execute(dbName, tableName, [['DELETE FROM #{table} WHERE key = ?', [id]]], true);
   return response.rowCount;
+}
+
+export async function removeManyById(dbName: string, tableName: string, ids: string[]) {
+  const responses = [];
+  while (ids.length) {
+    const currentIds = ids.splice(0, 100);
+    const deleteQuery = `DELETE FROM #{table} WHERE key IN (${currentIds.map(() => '?').join(', ')})`;
+    responses.push(await execute(dbName, tableName, [[deleteQuery, currentIds]], true));
+  }
+
+  return sum(responses.map(r => r.rowCount));
 }
 
 export async function clear(dbName: string, tableName: string) {

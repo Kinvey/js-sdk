@@ -186,33 +186,31 @@ describe('Autostore', function() {
     });
 
     describe('with an array of docs', function () {
-      it('create should send separate insert requests', async function () {
+      it('create should send a batch insert request', async function () {
         const docs = [];
         for (let i = 0; i < 3; i++) {
           docs.push({ data: i });
         }
 
+        const expectedResult = {
+          entities: [docs[0], null, docs[2]],
+          errors: [{ index: 1, message: 'test' }]
+        };
+
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
-        const scope1 = nock(url.origin)
+        const scope = nock(url.origin)
           .post(url.pathname)
-          .reply(201, docs[0]);
-        const scope2 = nock(url.origin)
-          .post(url.pathname)
-          .reply(400, { message: 'test' });
-        const scope3 = nock(url.origin)
-          .post(url.pathname)
-          .reply(201, docs[2]);
+          .reply(207, expectedResult);
 
         const result = await store.create(docs);
-        expect(scope1.isDone()).to.eql(true);
-        expect(scope2.isDone()).to.eql(true);
-        expect(scope3.isDone()).to.eql(true);
-        expect(result).to.have.keys(['entities', 'errors']);
-        expect(result.entities).to.deep.eql([docs[0], null, docs[2]]);
-        expect(result.errors).to.be.an('Array').of.length(1);
-        expect(result.errors[0].message).to.eql('test');
-        expect(result.errors[0].index).to.eql(1);
+        expect(scope.isDone()).to.eql(true);
+        expect(result).to.deep.eql(expectedResult);
+
+        // Verify sync queue, only the errored entity should be there
+        const pendingSyncEntities = await store.pendingSyncEntities();
+        expect(pendingSyncEntities.length).to.eql(1);
+        expect(pendingSyncEntities[0].entity.data).to.eql(1);
       });
 
       it('save should throw an error', async function() {
@@ -225,24 +223,24 @@ describe('Autostore', function() {
     });
 
     describe('with a single doc', function () {
-      it('create should send a POST request', async function () {
+      it('create should send a multi-insert POST request', async function () {
         const doc = {};
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
         const scope = nock(url.origin)
           .post(url.pathname)
-          .reply(201, doc);
+          .reply(207, { entities: [doc], errors: [] });
         expect(await store.create(doc)).to.deep.equal(doc);
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('save should send a POST request', async function () {
+      it('save should send a multi-insert POST request', async function () {
         const doc = {};
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
         const scope = nock(url.origin)
           .post(url.pathname)
-          .reply(201, doc);
+          .reply(207, { entities: [doc], errors: [] });
         expect(await store.save(doc)).to.deep.equal(doc);
         expect(scope.isDone()).to.equal(true);
       });

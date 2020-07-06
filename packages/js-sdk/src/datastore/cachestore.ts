@@ -183,18 +183,25 @@ export class CacheStore {
       errors: []
     };
 
-    const createPromises = docs.map((doc, index) => {
-      return this._createOne(doc, options)
-        .then((entity) => {
-          createManyResult.entities[index] = entity;
-        })
-        .catch((error) => {
-          error.index = index;
-          createManyResult.errors.push(error);
-        });
+    const autoSync = options.autoSync === true || this.autoSync;
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const sync = new Sync(this.collectionName, this.tag);
+    const cachedDocs = await cache.save(docs);
+    let syncDocs = await sync.addCreateSyncEvent(cachedDocs);
+
+    if (autoSync) {
+      const query = new Query().contains('_id', syncDocs.map((doc) => doc._id));
+      syncDocs = await sync.push(query, options);
+    }
+
+    syncDocs.map((syncDoc, index) => {
+      if (syncDoc.error) {
+        createManyResult.errors.push(syncDoc.error);
+      } else {
+        createManyResult.entities[index] = syncDoc.entity;
+      }
     });
 
-    await Promise.all(createPromises);
     return createManyResult;
   }
 
