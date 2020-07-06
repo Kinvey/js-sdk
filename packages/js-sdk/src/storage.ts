@@ -1,4 +1,5 @@
 import isArray from 'lodash/isArray';
+import sum from 'lodash/sum';
 import PQueue from 'p-queue';
 import { ConfigKey, getConfig } from './config';
 import { Query } from './query';
@@ -51,6 +52,7 @@ export interface StorageAdapter {
   findById(dbName: string, collectionName: string, id: string): Promise<Entity>;
   save(dbName: string, collectionName: string, docs: Entity[]): Promise<Entity[]>;
   removeById(dbName: string, collectionName: string, id: string): Promise<number>;
+  removeManyById?(dbName: string, collectionName: string, ids: string[]): Promise<number>;
   clear(dbName: string, collectionName: string): Promise<any>;
   clearDatabase(dbName: string, exclude?: string[]): Promise<any>;
 }
@@ -159,6 +161,15 @@ export class Storage<T extends Entity> {
 
   removeById(id: string): Promise<number> {
     return queue.add(() => this.storageAdapter.removeById(this.dbName, this.collectionName, id));
+  }
+
+  removeManyById(ids: string[]): Promise<number> {
+    if (this.storageAdapter.removeManyById) {
+      return queue.add(() => this.storageAdapter.removeManyById(this.dbName, this.collectionName, ids));
+    }
+
+    return Promise.all(ids.map(id => this.removeById(id)))
+      .then(results => sum(results));
   }
 
   clear() {

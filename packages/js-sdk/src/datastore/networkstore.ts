@@ -198,22 +198,28 @@ export class NetworkStore {
     const batchSize = 100;
     const apiVersion = getApiVersion();
 
-    if (apiVersion !== 5 && isArray(docs)) {
-      throw new KinveyError('Unable to create an array of entities. Please create entities one by one.');
+    if (apiVersion < 5 && isArray(docs)) {
+      throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
     }
 
     if (isArray(docs) && docs.length > batchSize) {
       let i = 0;
 
-      const batchCreate = async (createResults: any = []): Promise<any> => {
+      const batchCreate = async (previousResult: any = { entities: [], errors: [] }): Promise<any> => {
         if (i >= docs.length) {
-          return createResults;
+          return previousResult;
         }
 
         const batch = docs.slice(i, i + batchSize);
-        i += batchSize;
         const result = await this.create(batch, options);
-        return batchCreate(createResults.concat(result));
+        result.errors.forEach((e) => (e.index += i));
+        const combinedResult = {
+          entities: previousResult.entities.concat(result.entities),
+          errors: previousResult.errors.concat(result.errors)
+        };
+
+        i += batchSize;
+        return batchCreate(combinedResult);
       };
 
       return batchCreate();
@@ -270,16 +276,20 @@ export class NetworkStore {
     return response.data;
   }
 
-  save(docs: any, options?: any) {
-    if (!isArray(docs)) {
-      const kmd = new Kmd(cloneDeep(docs));
+  async save(doc: any, options?: any) {
+    const apiVersion = getApiVersion();
+    if (apiVersion >= 5 && isArray(doc)) {
+      throw new KinveyError('Unable to save an array of entities. Use "create" method to insert multiple entities.');
+    }
 
-      if (docs._id && !kmd.isLocal()) {
-        return this.update(docs, options);
+    if (doc._id) {
+      const kmd = new Kmd(cloneDeep(doc));
+      if (!kmd.isLocal()) {
+        return this.update(doc, options);
       }
     }
 
-    return this.create(docs, options);
+    return this.create(doc, options);
   }
 
   async remove(query: Query, options: any = {}) {

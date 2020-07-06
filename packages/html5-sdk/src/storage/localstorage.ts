@@ -53,6 +53,13 @@ export async function removeById(dbName: string, tableName: string, id: string) 
   return 0;
 }
 
+export async function removeManyById(dbName: string, tableName: string, ids: string[]) {
+  const table = getTable(dbName, tableName);
+  const deleted = ids.map(id => table.delete(id));
+  setTable(dbName, tableName, table);
+  return deleted.filter(i => i).length;
+}
+
 export async function clear(dbName: string, tableName: string) {
   window.localStorage.removeItem(`${dbName}.${tableName}`);
   return true;

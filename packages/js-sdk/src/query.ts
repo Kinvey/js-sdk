@@ -4,6 +4,7 @@ import isPlainObject from 'lodash/isPlainObject';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import isArray from 'lodash/isArray';
+import cloneDeep from 'lodash/cloneDeep';
 import sift from 'sift';
 import { QueryError } from './errors/query';
 
@@ -50,7 +51,7 @@ export class Query {
       sort: {},
       limit: Number.MAX_SAFE_INTEGER,
       skip: 0
-    }, query);
+    }, cloneDeep(query));
 
     this.fields = config.fields;
     this.filter = config.filter;

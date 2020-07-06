@@ -12,6 +12,7 @@ import { LiveServiceReceiver } from '../live';
 import { DataStoreCache, QueryCache } from './cache';
 import { queryToSyncQuery, Sync } from './sync';
 import { NetworkStore } from './networkstore';
+import { getApiVersion } from '../kinvey';
 
 const PAGE_LIMIT = 10000;
 
@@ -145,9 +146,9 @@ export class CacheStore {
     return stream;
   }
 
-  async create(doc: any, options: any = {}) {
+  private async _createOne(doc: any, options: any = {}) {
     if (isArray(doc)) {
-      throw new KinveyError('Unable to create an array of entities. Please create entities one by one.');
+      throw new KinveyError('Unable to create an array of entities. Use "create" method to insert multiple entities.');
     }
 
     const autoSync = options.autoSync === true || this.autoSync;
@@ -169,6 +170,47 @@ export class CacheStore {
     }
 
     return cachedDoc;
+  }
+
+  private async _createMany(docs: any, options: any = {}) {
+    const apiVersion = getApiVersion();
+    if (apiVersion < 5) {
+      throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
+    }
+
+    const createManyResult = {
+      entities: new Array(docs.length).fill(null),
+      errors: []
+    };
+
+    const autoSync = options.autoSync === true || this.autoSync;
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const sync = new Sync(this.collectionName, this.tag);
+    const cachedDocs = await cache.save(docs);
+    let syncDocs = await sync.addCreateSyncEvent(cachedDocs);
+
+    if (autoSync) {
+      const query = new Query().contains('_id', syncDocs.map((doc) => doc._id));
+      syncDocs = await sync.push(query, options);
+    }
+
+    syncDocs.map((syncDoc, index) => {
+      if (syncDoc.error) {
+        createManyResult.errors.push(syncDoc.error);
+      } else {
+        createManyResult.entities[index] = syncDoc.entity;
+      }
+    });
+
+    return createManyResult;
+  }
+
+  async create(docs: any, options: any = {}) {
+    if (!isArray(docs)) {
+      return this._createOne(docs, options);
+    }
+
+    return this._createMany(docs, options);
   }
 
   async update(doc: any, options: any = {}) {
@@ -201,7 +243,12 @@ export class CacheStore {
     return cachedDoc;
   }
 
-  save(doc: any, options?: any) {
+  async save(doc: any, options?: any) {
+    const apiVersion = getApiVersion();
+    if (apiVersion >= 5 && isArray(doc)) {
+      throw new KinveyError('Unable to save an array of entities. Use "create" method to insert multiple entities.');
+    }
+
     if (doc._id) {
       return this.update(doc, options);
     }

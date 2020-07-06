@@ -1,3 +1,4 @@
+const os = require('os');
 const axios = require('axios');
 const async = require('async');
 const argv = require('yargs').argv;
@@ -5,8 +6,10 @@ const { callbackify } = require('util');
 const { login } = require('./shared');
 
 let target = argv.target;
-if (process.env.CI) {
-  target += '-ci'
+if (process.env.CIRRUS_BRANCH) {
+  target += `-${process.env.CIRRUS_BRANCH}`;
+} else {
+  target += `-${os.hostname()}`;
 }
 
 function getApps() {
@@ -36,7 +39,7 @@ function getAuthServices() {
     method: 'GET',
     url: '/auth-services',
   }).then(({ data }) => {
-    return data.filter(app => app.name.startsWith(`JSSDK-${target}`) && app.identityStoreId === process.env.TEST_IDSTORE_ID);
+    return data.filter(i => i.name.startsWith(`JSSDK-${target}`));
   }).catch((err) => {
     console.error(err.response.data);
   });
@@ -53,10 +56,34 @@ function cleanAuthServices(items) {
   }));
 }
 
+function getIdentityStores() {
+  return axios({
+    method: 'GET',
+    url: '/identity-stores',
+  }).then(({ data }) => {
+    return data.filter(i => i.name.startsWith(`JSSDK-${target}`));
+  }).catch((err) => {
+    console.error(err.response.data);
+  });
+}
+
+function cleanIdentityStores(items) {
+  return Promise.all(items.map(item => {
+    return axios({
+      method: 'DELETE',
+      url: `/identity-stores/${item.id}`,
+    }).catch((err) => {
+      console.error(err.response.data);
+    });
+  }));
+}
+
 async.waterfall([
   callbackify(login),
   callbackify(getApps),
   callbackify(cleanTestApps),
   callbackify(getAuthServices),
-  callbackify(cleanAuthServices)
+  callbackify(cleanAuthServices),
+  callbackify(getIdentityStores),
+  callbackify(cleanIdentityStores)
 ]);

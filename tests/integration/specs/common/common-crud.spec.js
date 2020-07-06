@@ -980,7 +980,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
         it('should throw an error when trying to save an array of entities', (done) => {
           storeToTest.save([entity1, entity2])
             .catch((error) => {
-              expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one.');
+              expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
               done();
             })
             .catch(done);
@@ -1048,7 +1048,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
         it('should throw an error when trying to create an array of entities', (done) => {
           storeToTest.create([entity1, entity2])
             .catch((error) => {
-              expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one.');
+              expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
               done();
             })
             .catch(done);

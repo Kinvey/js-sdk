@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const axios = require('axios');
 const async = require('async');
 const argv = require('yargs').argv;
@@ -7,8 +8,10 @@ const { callbackify } = require('util');
 const { login } = require('./shared');
 
 let target = argv.target;
-if (process.env.CI) {
-  target += '-ci'
+if (process.env.CIRRUS_BRANCH) {
+  target += `-${process.env.CIRRUS_BRANCH}`;
+} else {
+  target += `-${os.hostname()}`;
 }
 
 const dotenvPath = path.join(__dirname, '.env');
@@ -20,7 +23,7 @@ function updateDotEnv() {
     env = fs.readFileSync(dotenvPath, { encoding: 'utf-8' });
   }
 
-  envLines = env.split('\n').slice(0, 9);
+  envLines = env.split('\n').slice(0, 8);
   envLines.push(`APP_KEY=${process.env.APP_KEY}`);
   envLines.push(`APP_SECRET=${process.env.APP_SECRET}`);
   envLines.push(`MASTER_SECRET=${process.env.MASTER_SECRET}`);
@@ -94,7 +97,27 @@ function createDeltaCollection(name) {
   });
 }
 
-function createAuth(name, refresh, wrongConfig=false) {
+function createIdStore(name) {
+  return axios({
+    method: 'POST',
+    url: `/identity-stores`,
+    data: {
+      name: `JSSDK-${target}-${name} Store`,
+      access: {
+        writers: {
+          organizations: [process.env.TEST_ORG_ID]
+        }
+      },
+    }
+  }).then(({ data }) => {
+    return data.id;
+  }).catch((err) => {
+    console.error(err.response.data);
+    throw new Error('...');
+  });
+}
+
+function createAuth(identityStoreId, name, refresh, wrongConfig=false) {
   const data = {
     name: `JSSDK-${target}-${name}-${new Date().getTime()}`,
     redirectUri: ['http://localhost:9876/callback'],
@@ -113,7 +136,7 @@ function createAuth(name, refresh, wrongConfig=false) {
         clientSecret: process.env.FACEBOOK_APP_SECRET,
       }
     },
-    identityStoreId: process.env.TEST_IDSTORE_ID
+    identityStoreId
   };
 
   if (wrongConfig) {
@@ -130,7 +153,7 @@ function createAuth(name, refresh, wrongConfig=false) {
   });
 }
 
-function setDefaultAuth() {
+function setDefaultAuth(identityStoreId) {
   return axios({
     method: 'PUT',
     url: `/environments/${process.env.APP_KEY}`,
@@ -143,7 +166,7 @@ function setDefaultAuth() {
         required: false,
         auto: false
       },
-      identityStoreId: process.env.TEST_IDSTORE_ID,
+      identityStoreId,
       masterSecret: process.env.MASTER_SECRET,
     }
   }).catch((err) => {
@@ -152,22 +175,21 @@ function setDefaultAuth() {
   });
 }
 
-async.series([
+async.waterfall([
   callbackify(login),
   callbackify(createApp),
   callbackify(createTestEndpoint),
   callbackify(createTestEndpointReturnsArgs),
   callbackify(() => createDeltaCollection('BooksDelta')),
   callbackify(() => createDeltaCollection('NewsDelta')),
-  callbackify(() => createAuth('FBAuth', true)
-    .then(({ data }) => { process.env.AUTH_SERVICE_ID = data.id; })),
-  callbackify(() => createAuth('FBAuthNoRefresh', false)
+  callbackify(() => createIdStore()),
+  callbackify((identityStoreId) => createAuth(identityStoreId, 'FBAuth', true)
+    .then(({ data }) => { process.env.AUTH_SERVICE_ID = data.id; })
+    .then(() => setDefaultAuth(identityStoreId))),
+  callbackify(() => createIdStore()),
+  callbackify((identityStoreId) => createAuth(identityStoreId, 'FBAuthNoRefresh', false)
     .then(({ data }) => { process.env.NO_REFRESH_AUTH_SERVICE_ID = data.id; })),
-  callbackify(() => createAuth('FBAuthWrongConfig', true, true)
+  callbackify(() => createIdStore()),
+  callbackify((identityStoreId) => createAuth(identityStoreId, 'FBAuthWrongConfig', true, true)
     .then(({ data }) => { process.env.WRONG_AUTH_SERVICE_ID = data.id; })),
-  callbackify(setDefaultAuth),
-  (callback) => {
-    updateDotEnv();
-    callback();
-  }
-]);
+], () => updateDotEnv());

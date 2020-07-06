@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import chai from 'chai';
 import nock from 'nock';
 import { URL } from 'url';
 import { formatKinveyBaasUrl, KinveyBaasNamespace, KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, KinveyHttpHeaders } from '../../src/http';
@@ -10,12 +10,17 @@ import * as httpAdapter from '../http';
 import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
 
+chai.use(require('chai-as-promised'));
+const expect = chai.expect;
+
 const APP_KEY = 'appKey';
 const APP_SECRET = 'appSecret';
 const COLLECTION_NAME = 'testCollection';
 const BATCH_SIZE = 100;
 
-describe('save()', function() {
+const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
+
+describe('NetworkStore', function() {
   beforeAll(function() {
     return init({
       kinveyConfig: {
@@ -39,7 +44,7 @@ describe('save()', function() {
     });
   });
 
-  afterAll(function () {
+  afterAll(function() {
     return removeSession();
   });
 
@@ -47,7 +52,7 @@ describe('save()', function() {
     return nock.cleanAll();
   });
 
-  afterEach(function () {
+  afterEach(function() {
     const syncStore = collection(COLLECTION_NAME, DataStoreType.Sync);
     return syncStore.clear();
   });
@@ -69,21 +74,34 @@ describe('save()', function() {
     });
 
     describe('with an array of docs', function() {
-      it('should throw an error', async function () {
+      it('create should throw an error', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
 
-        try {
-          await store.save(docs);
-        } catch (error) {
-          expect(error).to.be.instanceOf(KinveyError);
-          expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one.');
-        }
+        expect(store.create(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
+      });
+
+      it('save should throw an error', function() {
+        const docs = [{}, {}];
+        const store = collection(COLLECTION_NAME, DataStoreType.Network);
+
+        expect(store.save(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
     });
 
     describe('with a single doc', function() {
-      it('should send a POST request', async function() {
+      it('create should send a POST request', async function() {
+        const doc = {};
+        const store = collection(COLLECTION_NAME, DataStoreType.Network);
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        const scope = nock(url.origin)
+          .post(url.pathname)
+          .reply(201, doc);
+        expect(await store.create(doc)).to.deep.equal(doc);
+        expect(scope.isDone()).to.equal(true);
+      });
+
+      it('save should send a POST request', async function() {
         const doc = {};
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
@@ -94,7 +112,7 @@ describe('save()', function() {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send a PUT request', async function () {
+      it('save should send a PUT request', async function () {
         const doc = { _id: '1' };
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `${store.pathname}/${doc._id}`));
@@ -124,40 +142,88 @@ describe('save()', function() {
     });
 
     describe('with an array of docs', function () {
-      it('should send a multi insert request', async function () {
-        const docs = [{}, {}];
+      it('create should send a multi insert request', async function () {
+        const docs = [];
+        for (let i = 0; i < 50; i++) {
+          docs.push({ data: i });
+        }
+        const response = { entities: docs, errors: [] };
+        response.entities[5] = null;
+        response.entities[42] = null;
+        response.errors.push({ index: 5 });
+        response.errors.push({ index: 42 });
+
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
         const scope = nock(url.origin)
           .post(url.pathname)
-          .reply(207, docs);
-        expect(await store.save(docs)).to.deep.equal(docs);
+          .reply(207, response);
+        expect(await store.create(docs)).to.deep.equal(response);
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send 2 multi insert requests if the length of the array is 150', async function () {
+      it('create should send 3 multi insert requests if the length of the array is 250', async function () {
         const docs = [];
-
-        for(let i = 0; i < 150; i++) {
-          docs.push({});
+        for (let i = 0; i < 250; i++) {
+          docs.push({ data: i });
         }
+
+        const firstBatchResponse = { entities: docs.slice(0, BATCH_SIZE), errors: [] };
+        firstBatchResponse.entities[5] = null;
+        firstBatchResponse.errors.push({ index: 5 });
+
+        const secondBatchResponse = { entities: docs.slice(BATCH_SIZE, BATCH_SIZE * 2), errors: [] };
+        secondBatchResponse.entities[42] = null;
+        secondBatchResponse.errors.push({ index: 42 });
+
+        const thirdBatchResponse = { entities: docs.slice(BATCH_SIZE * 2, docs.length), errors: [] };
+        thirdBatchResponse.entities[12] = null;
+        thirdBatchResponse.errors.push({ index: 12 });
+
+        const expectedResult = { entities: docs, errors: [{ index: 5 }, { index: 142 }, { index: 212 }]};
+        expectedResult.entities[5] = null;
+        expectedResult.entities[142] = null;
+        expectedResult.entities[212] = null;
 
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
         const scope1 = nock(url.origin)
           .post(url.pathname)
-          .reply(207, docs.slice(0, BATCH_SIZE));
+          .reply(207, firstBatchResponse);
         const scope2 = nock(url.origin)
           .post(url.pathname)
-          .reply(207, docs.slice(BATCH_SIZE, docs.length));
-        expect(await store.save(docs)).to.deep.equal(docs);
-        expect(scope1.isDone()).to.equal(true);
-        expect(scope2.isDone()).to.equal(true);
+          .reply(207, secondBatchResponse);
+        const scope3 = nock(url.origin)
+          .post(url.pathname)
+          .reply(207, thirdBatchResponse);
+        expect(await store.create(docs)).to.deep.eql(expectedResult);
+        expect(scope1.isDone()).to.eql(true);
+        expect(scope2.isDone()).to.eql(true);
+        expect(scope3.isDone()).to.eql(true);
+      });
+
+      it('save should throw an error', function() {
+        const docs = [{}, {}];
+        const store = collection(COLLECTION_NAME, DataStoreType.Network);
+
+        const errMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.'
+        expect(store.save(docs)).to.be.rejectedWith(KinveyError, errMessage);
       });
     });
 
     describe('with a single doc', function () {
-      it('should send a POST request', async function () {
+      it('create should send a POST request', async function () {
+        const doc = {};
+        const store = collection(COLLECTION_NAME, DataStoreType.Network);
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        const scope = nock(url.origin)
+          .post(url.pathname)
+          .reply(201, doc);
+        expect(await store.create(doc)).to.deep.equal(doc);
+        expect(scope.isDone()).to.equal(true);
+      });
+
+      it('save should send a POST request', async function () {
         const doc = {};
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
@@ -168,7 +234,7 @@ describe('save()', function() {
         expect(scope.isDone()).to.equal(true);
       });
 
-      it('should send a PUT request', async function () {
+      it('save should send a PUT request', async function () {
         const doc = { _id: '1' };
         const store = collection(COLLECTION_NAME, DataStoreType.Network);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `${store.pathname}/${doc._id}`));
