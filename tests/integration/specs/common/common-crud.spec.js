@@ -10,6 +10,8 @@ const dataStoreTypes = [Kinvey.DataStoreType.Network, Kinvey.DataStoreType.Cache
 const invalidQueryMessage = 'Invalid query. It must be an instance of the Query class.';
 const notFoundErrorName = 'NotFoundError';
 const { collectionName } = externalConfig;
+const multiSaveErrorMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.';
+const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
 
 dataStoreTypes.forEach((currentDataStoreType) => {
   describe(`CRUD Entity - ${currentDataStoreType}`, () => {
@@ -980,7 +982,7 @@ dataStoreTypes.forEach((currentDataStoreType) => {
         it('should throw an error when trying to save an array of entities', (done) => {
           storeToTest.save([entity1, entity2])
             .catch((error) => {
-              expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
+              expect(error.message).to.equal(multiSaveErrorMessage);
               done();
             })
             .catch(done);
@@ -1045,15 +1047,6 @@ dataStoreTypes.forEach((currentDataStoreType) => {
       });
 
       describe('create()', () => {
-        it('should throw an error when trying to create an array of entities', (done) => {
-          storeToTest.create([entity1, entity2])
-            .catch((error) => {
-              expect(error.message).to.equal('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
-              done();
-            })
-            .catch(done);
-        });
-
         it('should create a new entity without _id', (done) => {
           const newEntity = {
             [textFieldName]: utilities.randomString()
@@ -1275,5 +1268,38 @@ dataStoreTypes.forEach((currentDataStoreType) => {
         });
       });
     });
+
+  describe('with API version 4', function() {
+    before(function() {
+      return Kinvey.init({
+        appKey: process.env.APP_KEY,
+        appSecret: process.env.APP_SECRET,
+        masterSecret: process.env.MASTER_SECRET,
+        apiVersion: 4
+      });
+    });
+
+    describe('Save', function() {
+      it('should throw an error when trying to save an array of entities', (done) => {
+        storeToTest.save([entity1, entity2])
+          .catch((error) => {
+            expect(error.message).to.equal(multiInsertErrorMessage);
+            done();
+          })
+          .catch(done);
+      });
+    });
+
+    describe('Create', function() {
+      it('should throw an error when trying to create an array of entities', (done) => {
+        storeToTest.create([entity1, entity2])
+          .catch((error) => {
+            expect(error.message).to.equal(multiInsertErrorMessage);
+            done();
+          })
+          .catch(done);
+      });
+    });
+  });
   });
 });
