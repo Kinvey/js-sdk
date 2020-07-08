@@ -156,7 +156,20 @@ export class Sync {
         })
       );
 
-      const multiInsertResult = await network.create(entitiesForInsert, options);
+      let multiInsertResult;
+      try {
+        multiInsertResult = await network.create(entitiesForInsert, options);
+      } catch (error) {
+        // In case of a general error with the batch insert, simulate per-entity errors
+        return syncDocsForInsert.forEach((doc, index) => {
+          totalPushResults.push({
+            _id: doc.entityId,
+            operation: SyncEvent.Create,
+            entity: entitiesForInsert[index],
+            error
+          });
+        });
+      }
 
       // Process successful inserts
       if (multiInsertResult.entities != null) {
@@ -199,7 +212,7 @@ export class Sync {
             entity: entitiesForInsert[insertError.index],
             error: insertError
           });
-        })
+        });
       }
     };
 

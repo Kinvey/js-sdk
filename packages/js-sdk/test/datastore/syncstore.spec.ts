@@ -8,7 +8,7 @@ import { setSession, removeSession } from '../../src/http/session';
 import * as httpAdapter from '../http';
 import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
-import { KinveyError } from '../../src/errors';
+import { KinveyError, InsufficientCredentialsError } from '../../src/errors';
 
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
@@ -194,6 +194,44 @@ describe('Syncstore', function() {
         expect(result[1]).to.have.deep.property('entity', docsForInsert[1]);
         expect(result[2]).to.have.deep.property('entity', docsForInsert[2]);
         expect(result[3]).to.have.deep.property('entity', docForUpdate);
+
+        result.forEach((entity) => {
+          expect(entity).to.have.property('_id').that.is.not.empty;
+          expect(entity).to.not.have.property('_kmd');
+        });
+      });
+
+      it('push should not reject if batch insert fails with a generic error', async function () {
+        const docForUpdate = { _id: '123', data: 123 };
+        const docsForInsert = [];
+        for (let i = 0; i < 3; i++) {
+          docsForInsert.push({ data: i });
+        }
+
+        const store = collection(COLLECTION_NAME, DataStoreType.Sync);
+        await store.save(docForUpdate);
+        await store.create(docsForInsert);
+
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        const scope = nock(url.origin)
+          .post(url.pathname)
+          .reply(401, {})
+          .put(url.pathname + '/123')
+          .reply(200, docForUpdate);
+
+        const result = await store.push();
+
+        expect(scope.isDone()).to.equal(true);
+        expect(result).to.be.an('Array').of.length(4);
+        expect(result[0].entity).to.have.property('data', docsForInsert[0].data);
+        expect(result[1].entity).to.have.property('data', docsForInsert[1].data);
+        expect(result[2].entity).to.have.property('data', docsForInsert[2].data);
+        expect(result[3]).to.have.deep.property('entity', docForUpdate);
+
+        expect(result[0].error.constructor.name).to.eql(InsufficientCredentialsError.name);
+        expect(result[1].error.constructor.name).to.eql(InsufficientCredentialsError.name);
+        expect(result[2].error.constructor.name).to.eql(InsufficientCredentialsError.name);
+        expect(result[3]).to.not.have.property('error');
 
         result.forEach((entity) => {
           expect(entity).to.have.property('_id').that.is.not.empty;
