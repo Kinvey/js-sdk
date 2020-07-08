@@ -132,17 +132,12 @@ export class Sync {
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const syncCache = new SyncCache(this.tag);
     const collectionQuery = new Query(providedQuery).equalTo('collection', this.collectionName);
+    const queryForInsert = new Query(collectionQuery).equalTo('state.operation', SyncEvent.Create);
+    const syncDocsForInsert = await syncCache.find(queryForInsert);
+    const batchCreateEnabled = apiVersion >= 5 && syncDocsForInsert.length > 1;
     const totalPushResults = [];
 
     const batchCreateEntities = async (): Promise<any> => {
-      // Batch insert entities for create
-      const queryForInsert = new Query(collectionQuery).equalTo('state.operation', SyncEvent.Create);
-      const syncDocsForInsert = await syncCache.find(queryForInsert);
-
-      if (!syncDocsForInsert.length) {
-        return;
-      }
-
       const localIdsToRemove = [];
       const entitiesForInsert = await Promise.all(
         syncDocsForInsert.map(async (doc, index) => {
@@ -311,7 +306,7 @@ export class Sync {
       const { _id, entityId, state = { operation: undefined } } = syncDoc;
       switch (state.operation) {
         case SyncEvent.Create: {
-          if (apiVersion >= 5) {
+          if (batchCreateEnabled) {
             return null; // Inserts must have already been batched
           }
           return createEntity(_id, entityId);
@@ -333,7 +328,7 @@ export class Sync {
     };
 
     // First try inserting new entities at once
-    if (apiVersion >= 5) {
+    if (batchCreateEnabled) {
       try {
         markPushStart(this.collectionName);
         await batchCreateEntities();
