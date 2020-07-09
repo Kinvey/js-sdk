@@ -78,5 +78,5 @@ export function getApiVersion(): number {
   if (isNumber(config.apiVersion) && config.apiVersion >= 3) {
     return config.apiVersion;
   }
-  return 4;
+  return 5;
 }

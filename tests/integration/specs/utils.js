@@ -29,8 +29,10 @@ export function assertEntityMetadata(entities) {
 
 export function deleteEntityMetadata(entities) {
   ensureArray(entities).forEach((entity) => {
-    delete entity._kmd;
-    delete entity._acl;
+    if (entity) {
+      delete entity._kmd;
+      delete entity._acl;
+    }
   });
   return entities;
 }

@@ -223,24 +223,13 @@ describe('Autostore', function() {
     });
 
     describe('with a single doc', function () {
-      it('create should send a multi-insert POST request', async function () {
+      it('save should send a POST request', async function() {
         const doc = {};
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
         const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
         const scope = nock(url.origin)
           .post(url.pathname)
-          .reply(207, { entities: [doc], errors: [] });
-        expect(await store.create(doc)).to.deep.equal(doc);
-        expect(scope.isDone()).to.equal(true);
-      });
-
-      it('save should send a multi-insert POST request', async function () {
-        const doc = {};
-        const store = collection(COLLECTION_NAME, DataStoreType.Auto);
-        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
-        const scope = nock(url.origin)
-          .post(url.pathname)
-          .reply(207, { entities: [doc], errors: [] });
+          .reply(201, doc);
         expect(await store.save(doc)).to.deep.equal(doc);
         expect(scope.isDone()).to.equal(true);
       });
@@ -256,5 +245,18 @@ describe('Autostore', function() {
         expect(scope.isDone()).to.equal(true);
       });
     });
+
+    describe('with multiple doc', function () {
+      it('create should send a multi-insert POST request', async function () {
+        const docs = [{}, {}];
+        const store = collection(COLLECTION_NAME, DataStoreType.Auto);
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        const scope = nock(url.origin)
+          .post(url.pathname)
+          .reply(207, { entities: docs, errors: [] });
+        expect(await store.create(docs)).to.deep.equal({ entities: docs, errors: [] });
+        expect(scope.isDone()).to.equal(true);
+      });
+    })
   });
 });
