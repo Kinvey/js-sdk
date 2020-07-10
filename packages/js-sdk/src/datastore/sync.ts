@@ -155,15 +155,19 @@ export class Sync {
       try {
         multiInsertResult = await network.create(entitiesForInsert, options);
       } catch (error) {
-        // In case of a general error with the batch insert, simulate per-entity errors
-        return syncDocsForInsert.forEach((doc, index) => {
-          totalPushResults.push({
-            _id: doc.entityId,
-            operation: SyncEvent.Create,
-            entity: entitiesForInsert[index],
-            error
+        // In case of a general batch insert error, do not break the push operation and aggregate all errors in the result
+        if (options.catchGeneralErrors === true) {
+          return syncDocsForInsert.forEach((doc, index) => {
+            totalPushResults.push({
+              _id: doc.entityId,
+              operation: SyncEvent.Create,
+              entity: entitiesForInsert[index],
+              error
+            });
           });
-        });
+        }
+
+        throw error;
       }
 
       // Process successful inserts

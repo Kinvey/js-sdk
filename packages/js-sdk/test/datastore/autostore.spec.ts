@@ -9,7 +9,7 @@ import { setSession, removeSession } from '../../src/http/session';
 import * as httpAdapter from '../http';
 import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
-import { KinveyError } from '../../src/errors';
+import { KinveyError, InsufficientCredentialsError } from '../../src/errors';
 
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
@@ -122,14 +122,14 @@ describe('Autostore', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
 
-        expect(store.create(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
+        return expect(store.create(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
 
       it('save should throw an error', async function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
 
-        expect(store.save(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
+        return expect(store.save(docs)).to.be.rejectedWith(KinveyError, multiInsertErrorMessage);
       });
     });
 
@@ -213,12 +213,37 @@ describe('Autostore', function() {
         expect(pendingSyncEntities[0].entity.data).to.eql(1);
       });
 
+      it('create with single entity should reject if insert fails with a generic error', async function () {
+        const store = collection(COLLECTION_NAME, DataStoreType.Auto);
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        nock(url.origin)
+          .post(url.pathname)
+          .reply(401, {});
+
+        return expect(store.create({ data: 123 })).to.be.rejectedWith(InsufficientCredentialsError);
+      });
+
+      it('create with multiple entities should reject if insert fails with a generic error', async function () {
+        const docs = [];
+        for (let i = 0; i < 3; i++) {
+          docs.push({ data: i });
+        }
+
+        const store = collection(COLLECTION_NAME, DataStoreType.Auto);
+        const url = new URL(formatKinveyBaasUrl(KinveyBaasNamespace.AppData, store.pathname));
+        nock(url.origin)
+          .post(url.pathname)
+          .reply(401, {});
+
+        return expect(store.create(docs)).to.be.rejectedWith(InsufficientCredentialsError);
+      });
+
       it('save should throw an error', async function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
 
-        const errMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.'
-        expect(store.save(docs)).to.be.rejectedWith(KinveyError, errMessage);
+        const errMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.';
+        return expect(store.save(docs)).to.be.rejectedWith(KinveyError, errMessage);
       });
     });
 
