@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@4.4.0...kinvey-react-native-sdk@5.0.0) (2020-07-10)
+
+**Note:** Version bump only for package kinvey-react-native-sdk
+
+
+
+
+
 # [4.4.0](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@4.3.0...kinvey-react-native-sdk@4.4.0) (2019-09-16)
 
 
