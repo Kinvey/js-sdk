@@ -344,8 +344,10 @@ export class CacheStore {
     return { count };
   }
 
-  push(query?: Query, options?: any) {
+  push(query?: Query, options: any = {}) {
     const sync = new Sync(this.collectionName, this.tag);
+    // eslint-disable-next-line no-param-reassign
+    options.catchGenericErrors = true;
     return sync.push(undefined, options);
   }
 
