@@ -156,7 +156,7 @@ export class Sync {
         multiInsertResult = await network.create(entitiesForInsert, options);
       } catch (error) {
         // In case of a general batch insert error, do not break the push operation and aggregate all errors in the result
-        if (options.catchGenericErrors === true) {
+        if (options.catchGeneralErrors === true) {
           return syncDocsForInsert.forEach((doc, index) => {
             totalPushResults.push({
               _id: doc.entityId,

@@ -347,7 +347,7 @@ export class CacheStore {
   push(query?: Query, options: any = {}) {
     const sync = new Sync(this.collectionName, this.tag);
     // eslint-disable-next-line no-param-reassign
-    options.catchGenericErrors = true;
+    options.catchGeneralErrors = true;
     return sync.push(undefined, options);
   }
 
