@@ -146,6 +146,14 @@ export class CacheStore {
     return stream;
   }
 
+  private async _checkForDuplicateId(docs, cache) {
+    return Promise.all(docs.map(async (doc) => {
+      if (doc._id && await cache.findById(doc._id) != null) {
+        throw new KinveyError(`An entity with _id '${doc._id}' already exists.`);
+      }
+    }));
+  }
+
   private async _createOne(doc: any, options: any = {}) {
     if (isArray(doc)) {
       throw new KinveyError('Unable to create an array of entities. Use "create" method to insert multiple entities.');
@@ -153,8 +161,9 @@ export class CacheStore {
 
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
-    const sync = new Sync(this.collectionName, this.tag);
+    await this._checkForDuplicateId([doc], cache);
     const cachedDoc = await cache.save(doc);
+    const sync = new Sync(this.collectionName, this.tag);
     const syncDoc = await sync.addCreateSyncEvent(cachedDoc);
 
     if (autoSync) {
@@ -189,6 +198,7 @@ export class CacheStore {
 
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
+    await this._checkForDuplicateId(docs, cache);
     const sync = new Sync(this.collectionName, this.tag);
     const cachedDocs = await cache.save(docs);
     let syncDocs = await sync.addCreateSyncEvent(cachedDocs);

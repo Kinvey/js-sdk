@@ -240,8 +240,7 @@ describe('Autostore', function() {
 
       it('create should throw an error for empty array', async function() {
         const store = collection(COLLECTION_NAME, DataStoreType.Auto);
-
-        expect(store.create([])).to.be.rejectedWith(KinveyError, 'Unable to create an array of entities. The array must not be empty.');
+        await expect(store.create([])).to.be.rejectedWith(KinveyError, 'Unable to create an array of entities. The array must not be empty.');
       });
 
       it('save should throw an error', async function() {
