@@ -178,6 +178,10 @@ export class CacheStore {
       throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
     }
 
+    if (docs.length === 0) {
+      throw new KinveyError('Unable to create an array of entities. The array must not be empty.');
+    }
+
     const createManyResult = {
       entities: new Array(docs.length).fill(null),
       errors: []
