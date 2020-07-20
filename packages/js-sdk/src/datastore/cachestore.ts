@@ -147,6 +147,21 @@ export class CacheStore {
   }
 
   private async _checkForDuplicateId(docs, cache) {
+    // Check if the array itself has duplicate ids
+    if (docs.length > 1) {
+      const ids = new Set();
+      docs.forEach((doc) => {
+        if (doc._id) {
+          if (ids.has(doc._id)) {
+            throw new KinveyError(`The array contains more than one entity with _id '${doc._id}'.`);
+          }
+
+          ids.add(doc._id);
+        }
+      });
+    }
+
+    // Check if the id of any doc already exists in the cache
     return Promise.all(docs.map(async (doc) => {
       if (doc._id && await cache.findById(doc._id) != null) {
         throw new KinveyError(`An entity with _id '${doc._id}' already exists.`);
