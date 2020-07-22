@@ -239,6 +239,40 @@ describe('Syncstore', function() {
         });
       });
 
+      it('create should throw an error for empty array', async function() {
+        const store = collection(COLLECTION_NAME, DataStoreType.Sync);
+        await expect(store.create([])).to.be.rejectedWith(KinveyError, 'Unable to create an array of entities. The array must not be empty.');
+      });
+
+      it('create should return an error for local object with duplicate id', async function () {
+        const store = collection(COLLECTION_NAME, DataStoreType.Sync);
+        const doc = { _id: 1234, data: 1 };
+
+        const result = await store.create(doc);
+        expect(result).to.deep.eql(doc);
+
+        // Test single-item create
+        await expect(store.create(doc)).to.be.rejectedWith(KinveyError, "An entity with _id '1234' already exists.");
+
+        // Test multi-item create
+        await expect(store.create([{}, doc])).to.be.rejectedWith(KinveyError, "An entity with _id '1234' already exists.");
+
+        const pendingSyncEntities = await store.pendingSyncEntities();
+        expect(pendingSyncEntities.length).to.eql(1);
+        expect(pendingSyncEntities[0].entity).to.eql(doc);
+      });
+
+      it('create should return an error for two objects with the same id in the array', async function () {
+        const store = collection(COLLECTION_NAME, DataStoreType.Sync);
+        const doc1 = { _id: 11, data: 1 };
+        const doc2 = { _id: 11, data: 2 };
+
+        await expect(store.create([{}, doc1, {}, doc2])).to.be.rejectedWith(KinveyError, "The array contains more than one entity with _id '11'.");
+
+        const pendingSyncEntities = await store.pendingSyncEntities();
+        expect(pendingSyncEntities.length).to.eql(0);
+      });
+
       it('save should throw an error', async function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Sync);

@@ -202,6 +202,11 @@ describe('NetworkStore', function() {
         expect(scope3.isDone()).to.eql(true);
       });
 
+      it('create should throw an error for empty array', async function() {
+        const store = collection(COLLECTION_NAME, DataStoreType.Network);
+        await expect(store.create([])).to.be.rejectedWith(KinveyError, 'Unable to create an array of entities. The array must not be empty.');
+      });
+
       it('save should throw an error', function() {
         const docs = [{}, {}];
         const store = collection(COLLECTION_NAME, DataStoreType.Network);

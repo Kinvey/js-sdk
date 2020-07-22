@@ -146,6 +146,29 @@ export class CacheStore {
     return stream;
   }
 
+  private async _checkForDuplicateId(docs, cache) {
+    // Check if the array itself has duplicate ids
+    if (docs.length > 1) {
+      const ids = new Set();
+      docs.forEach((doc) => {
+        if (doc._id) {
+          if (ids.has(doc._id)) {
+            throw new KinveyError(`The array contains more than one entity with _id '${doc._id}'.`);
+          }
+
+          ids.add(doc._id);
+        }
+      });
+    }
+
+    // Check if the id of any doc already exists in the cache
+    return Promise.all(docs.map(async (doc) => {
+      if (doc._id && await cache.findById(doc._id) != null) {
+        throw new KinveyError(`An entity with _id '${doc._id}' already exists.`);
+      }
+    }));
+  }
+
   private async _createOne(doc: any, options: any = {}) {
     if (isArray(doc)) {
       throw new KinveyError('Unable to create an array of entities. Use "create" method to insert multiple entities.');
@@ -153,8 +176,9 @@ export class CacheStore {
 
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
-    const sync = new Sync(this.collectionName, this.tag);
+    await this._checkForDuplicateId([doc], cache);
     const cachedDoc = await cache.save(doc);
+    const sync = new Sync(this.collectionName, this.tag);
     const syncDoc = await sync.addCreateSyncEvent(cachedDoc);
 
     if (autoSync) {
@@ -178,6 +202,10 @@ export class CacheStore {
       throw new KinveyError('Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.');
     }
 
+    if (docs.length === 0) {
+      throw new KinveyError('Unable to create an array of entities. The array must not be empty.');
+    }
+
     const createManyResult = {
       entities: new Array(docs.length).fill(null),
       errors: []
@@ -185,6 +213,7 @@ export class CacheStore {
 
     const autoSync = options.autoSync === true || this.autoSync;
     const cache = new DataStoreCache(this.collectionName, this.tag);
+    await this._checkForDuplicateId(docs, cache);
     const sync = new Sync(this.collectionName, this.tag);
     const cachedDocs = await cache.save(docs);
     let syncDocs = await sync.addCreateSyncEvent(cachedDocs);
