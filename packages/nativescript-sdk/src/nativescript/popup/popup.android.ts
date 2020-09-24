@@ -1,11 +1,5 @@
 import { EventEmitter } from 'events';
-import { Color } from 'tns-core-modules/color';
-import { topmost } from 'tns-core-modules/ui/frame';
-import * as app from 'tns-core-modules/application';
-import { Page } from 'tns-core-modules/ui/page';
-import { GridLayout } from 'tns-core-modules/ui/layouts/grid-layout';
-import { StackLayout } from 'tns-core-modules/ui/layouts/stack-layout';
-import { WebView, LoadEventData } from 'tns-core-modules/ui/web-view';
+import { Application, Color, Frame, Page, GridLayout, StackLayout, WebView, LoadEventData} from '@nativescript/core';
 import { handleOpenURL, AppURL } from 'nativescript-urlhandler';
 
 const LOADED_EVENT = 'loaded';
@@ -102,7 +96,7 @@ class LegacyPopup extends EventEmitter {
       };
 
       const authPage = new OAuthPageProvider(url, webViewIntercept);
-      topmost().navigate(() => authPage.createWebViewPage());
+      Frame.topmost().navigate(() => authPage.createWebViewPage());
       this._open = true;
     }
 
@@ -131,7 +125,7 @@ export class Popup extends EventEmitter {
 
   async open(url = '/', options: PopupOptions = {}) {
     if (this._open !== true) {
-      const activity = app.android.startActivity || app.android.foregroundActivity;
+      const activity = Application.android.startActivity || Application.android.foregroundActivity;
       let shouldClose = false;
       let success = false;
 
@@ -213,7 +207,7 @@ export class Popup extends EventEmitter {
 
   async close() {
     if (this._open === true) {
-      topmost().goBack();
+      Frame.topmost().goBack();
       this._open = false;
     }
 

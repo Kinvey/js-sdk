@@ -1,13 +1,13 @@
-import * as app from 'tns-core-modules/application';
+import { Application, isAndroid, isIOS } from '@nativescript/core';
 import { loginWithRedirectUri as loginWithRedirectUriCommon } from 'kinvey-js-sdk/lib/user/loginWithRedirectUri';
 import { getDataFromPackageJson } from '../utils';
 
 declare const NSBundle: any;
 
 function getAppIdentifier(): string | null {
-  if (app.android) {
-    return app.android.packageName;
-  } else if (app.ios) {
+  if (isAndroid) {
+    return Application.android.packageName;
+  } else if (isIOS) {
     return NSBundle.mainBundle.bundleIdentifier;
   }
   return null;

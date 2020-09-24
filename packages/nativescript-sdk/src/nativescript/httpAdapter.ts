@@ -1,11 +1,10 @@
-import { request as tnsRequest } from 'tns-core-modules/http';
-import { device } from 'tns-core-modules/platform';
+import { Http, Device } from '@nativescript/core';
 import { name, version } from '../../package.json';
 
 function deviceInformation() {
-  const platform = device.os;
-  const version = device.osVersion;
-  const manufacturer = device.manufacturer;
+  const platform = Device.os;
+  const version = Device.osVersion;
+  const manufacturer = Device.manufacturer;
   const parts = [`js-${name}/${version}`];
 
   return parts.concat([platform, version, manufacturer]).map((part) => {
@@ -20,16 +19,16 @@ function deviceInformation() {
 function deviceInfo() {
   return {
     hv: 1,
-    md: device.model,
-    os: device.os,
-    ov: device.osVersion,
+    md: Device.model,
+    os: Device.os,
+    ov: Device.osVersion,
     sdk: {
       name,
       version
     },
-    pv: device.sdkVersion,
-    ty: device.deviceType,
-    id: device.uuid
+    pv: Device.sdkVersion,
+    ty: Device.deviceType,
+    id: Device.uuid
   };
 }
 
@@ -43,7 +42,7 @@ export async function send(request: any): Promise<any> {
     headers['X-Kinvey-Device-Info'] = JSON.stringify(deviceInfo());
   }
 
-  const response = await tnsRequest({
+  const response = await Http.request({
     headers,
     method,
     url,
