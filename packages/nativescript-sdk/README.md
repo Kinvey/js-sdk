@@ -5,7 +5,7 @@
 From the command prompt go to your app's root folder and execute:
 
 ```bash
-npm i kinvey-nativescript-sdk@next
+npm i kinvey-nativescript-sdk
 ```
 
 ## Usage
