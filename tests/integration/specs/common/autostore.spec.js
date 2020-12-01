@@ -8,6 +8,7 @@ const multiSaveErrorMessage = 'Unable to save an array of entities. Use "create"
 const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
 
 describe('AutoStore', function() {
+  this.retries(4);
   before(function() {
     // Initialize the SDK
     return init({
