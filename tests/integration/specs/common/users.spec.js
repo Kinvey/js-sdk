@@ -55,11 +55,11 @@ before(() => {
   appCredentials = Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
 });
 
-before(() => {
-  utilities.cleanUpCollection(appCredentials, 'user');
-});
-
 describe('User tests', () => {
+  before(() => {
+    utilities.cleanUpCollection(appCredentials, 'user');
+  });
+  
   const missingCredentialsError = 'Username and/or password missing';
   const createdUserIds = [];
 
