@@ -1,6 +1,6 @@
 import isFunction from 'lodash/isFunction';
-import * as bghttp from 'nativescript-background-http';
-import { File } from 'tns-core-modules/file-system';
+import * as bghttp from '@nativescript/background-http';
+import { File } from '@nativescript/core';
 import { transformMetadata, saveFileMetadata } from 'kinvey-js-sdk/lib/files/upload';
 import { KinveyError } from 'kinvey-js-sdk/lib/errors';
 

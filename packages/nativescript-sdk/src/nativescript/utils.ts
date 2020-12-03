@@ -1,4 +1,4 @@
-import { knownFolders } from 'tns-core-modules/file-system';
+import { knownFolders } from '@nativescript/core';
 
 export function getDataFromPackageJson() {
   try {

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { AppURL, handleOpenURL } from 'nativescript-urlhandler';
-import { Color } from 'tns-core-modules/color';
+import { Color } from '@nativescript/core';
 
 const LOADED_EVENT = 'loaded';
 const CLOSED_EVENT = 'closed';

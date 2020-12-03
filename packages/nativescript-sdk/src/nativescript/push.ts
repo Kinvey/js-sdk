@@ -1,5 +1,5 @@
-import { messaging, Message } from 'nativescript-plugin-firebase/messaging';
-import { device } from 'tns-core-modules/platform';
+import { firebase, messaging } from '@nativescript/firebase';
+import { Device } from '@nativescript/core';
 import { formatKinveyBaasUrl, KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, KinveyBaasNamespace } from 'kinvey-js-sdk/lib/http';
 
 export interface PushRegisterOptions {
@@ -8,7 +8,7 @@ export interface PushRegisterOptions {
   timeout?: number;
 }
 
-export async function register(callback: (message: Message) => void, options: PushRegisterOptions = {}) {
+export async function register(callback: (message: firebase.Message) => void, options: PushRegisterOptions = {}) {
   // Init Firebase messaging
   messaging.initFirebaseMessaging(Object.assign({
     showNotifications: true,
@@ -27,7 +27,7 @@ export async function register(callback: (message: Message) => void, options: Pu
     auth: KinveyHttpAuth.Session,
     url: formatKinveyBaasUrl(KinveyBaasNamespace.Push, '/register-device'),
     body: {
-      platform: device.os.toLowerCase(),
+      platform: Device.os.toLowerCase(),
       framework: 'nativescript',
       deviceId: token,
       service: 'firebase'
@@ -54,7 +54,7 @@ export async function unregister(options: PushUnregisterOptions = {}) {
     auth: KinveyHttpAuth.Session,
     url: formatKinveyBaasUrl(KinveyBaasNamespace.Push, '/unregister-device'),
     body: {
-      platform: device.os.toLowerCase(),
+      platform: Device.os.toLowerCase(),
       framework: 'nativescript',
       deviceId: token,
       service: 'firebase'

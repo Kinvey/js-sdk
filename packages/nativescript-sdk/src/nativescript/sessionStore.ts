@@ -1,4 +1,4 @@
-import { SecureStorage } from 'nativescript-secure-storage';
+import { SecureStorage } from '@nativescript/secure-storage';
 import * as live from './live';
 
 export function get(key: string) {
