@@ -76,7 +76,8 @@ dataStoreTypes.forEach((currentDataStoreType) => {
       deltaCacheStore = Kinvey.DataStore.collection(deltaCollectionName, Kinvey.DataStoreType.Cache, { useDeltaSet: true });
     });
 
-    describe('pull', () => {
+    describe('pull', function() {
+      this.retries(4);
       const entity1 = utilities.getEntity(utilities.randomString());
       const entity2 = utilities.getEntity(utilities.randomString());
       const entity3 = utilities.getEntity(utilities.randomString());

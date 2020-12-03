@@ -18,7 +18,8 @@ const checkLocalStorageForSubscriptionKey = () => {
   return hasSubscriptionKey;
 };
 
-describe('Live-services', () => {
+describe('Live-services', function() {
+  this.retries(4);
   networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
 
   var messageCreated;
@@ -27,6 +28,11 @@ describe('Live-services', () => {
   const entity1 = utilities.getEntity(utilities.randomString());
   const entity2 = utilities.getEntity(utilities.randomString());
   const entity3 = utilities.getEntity(utilities.randomString());
+
+  beforeEach((done) => {
+    setTimeout(() =>  done(), 1000);
+  });
+
 
   before(() => {
     const initProperties = {
