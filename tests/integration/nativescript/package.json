@@ -16,7 +16,7 @@
     "posttest": "node ../clean.js --target=nativescript"
   },
   "dependencies": {
-    "nativescript": "6.7.4"
+    "nativescript": "7.0.11"
   },
   "devDependencies": {
     "@babel/core": "~7.4.3",
