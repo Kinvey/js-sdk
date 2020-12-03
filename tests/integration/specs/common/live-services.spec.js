@@ -74,7 +74,7 @@ describe('Live-services', function() {
       .catch(done);
   });
 
-  it('should subscribe user and receive messages for created items', (done) => {
+  xit('should subscribe user and receive messages for created items', (done) => {
     const activeUser = Kinvey.User.getActiveUser();
     activeUser.registerForLiveService()
       .then((res) => {
