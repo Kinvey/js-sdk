@@ -22,6 +22,9 @@ module.exports = function(config) {
     exclude: [
     ],
 
+    browserDisconnectTolerance: 10,
+    browserDisconnectTimeout : 180000,
+    browserNoActivityTimeout : 180000,
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -74,7 +77,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Mocha config
     client: {

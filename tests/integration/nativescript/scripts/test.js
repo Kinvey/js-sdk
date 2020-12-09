@@ -1,7 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const chalk = require('chalk');
-const ora = require('ora');
 const isArray = require('lodash/isArray');
 const spawn = require('cross-spawn');
 const del = require('del');
@@ -49,25 +48,32 @@ function build(file) {
   return singular ? results[0] : results;
 }
 
-
-const spinner = ora('').start();
-
 if (argv.clean) {
   // Remove the existing app
-  spinner.text = 'Removing an exisiting NativeScript Test App...';
+  console.log('Removing an exisiting NativeScript Test App...');
   del.sync([appPath]);
 
   // Create a NativeScript app
-  spinner.text = 'Creating a NativeScript app...';
+  console.log('Creating a NativeScript app...');
   runCommand('tns', ['create', appName], rootPath);
 
   // Setup the app for testing
-  spinner.text = 'Setting up the NativeScript app for testing...';
+  console.log('Setting up the NativeScript app for testing...');
   runCommand('tns', ['test', 'init', '--framework', 'mocha'], appPath);
 }
 
+// Copy nativescript.config.ts
+fs.copyFileSync(path.join(rootPath, 'scripts', 'nativescript.config.ts'), path.join(appPath, 'nativescript.config.ts'));
+
 // Copy app.gradle
-fs.copyFileSync(path.join(rootPath, 'scripts', 'app.gradle'), path.join(appPath, 'app', 'App_Resources', 'Android', 'app.gradle'));
+fs.copyFileSync(path.join(rootPath, 'scripts', 'app.gradle'), path.join(appPath, 'App_Resources', 'Android', 'app.gradle'));
+
+// Copy AndroidManifest.xml
+fs.copyFileSync(path.join(rootPath, 'scripts', 'AndroidManifest.xml'), path.join(appPath, 'App_Resources', 'Android', 'src', 'main', 'AndroidManifest.xml'));
+
+// Copy socket.io.js
+fs.copyFileSync(path.join(rootPath, 'scripts', 'fix-socket-io.js'), path.join(appPath, 'hooks', 'after-prepare', 'fix-socket-io.js'));
+fs.copyFileSync(path.join(rootPath, 'scripts', 'socket.io.js'), path.join(appPath, 'hooks', 'socket.io.js'));
 
 // Copy karma.conf.js
 fs.copyFileSync(path.join(rootPath, 'karma.conf.js'), path.join(appPath, 'karma.conf.js'));
@@ -79,7 +85,7 @@ fs.copyFileSync(path.join(rootPath, 'mocha.opts'), path.join(appPath, 'mocha.opt
 del.sync([appTestsPath]);
 
 // Pack and copy the kinvey-js-sdk
-spinner.text = 'Packing and copying SDK to the NativeScript app...';
+console.log('Packing and copying SDK to the NativeScript app...');
 const jsSdkPath = path.join(__dirname, '../../../../packages/js-sdk');
 runCommand('npm', ['pack'], jsSdkPath);
 const jsSdkFile = glob
@@ -90,6 +96,9 @@ fs.copyFileSync(jsSdkFile, path.join(appPath, 'kinvey-js-sdk.tgz'));
 
 // Pack and copy the kinvey-nativescript-sdk
 const nativescriptSdkPath = path.join(__dirname, '../../../../packages/nativescript-sdk');
+// Remove the existing packages
+del.sync([path.join(nativescriptSdkPath, '*.tgz')], { force: true });
+
 runCommand('npm', ['pack'], nativescriptSdkPath);
 const nativescriptSdkFile = glob
   .sync(path.join(nativescriptSdkPath, '*.tgz'))
@@ -104,7 +113,7 @@ const newAppPackageJson = Object.assign({}, appPackageJson, { dependencies: newD
 fs.outputFileSync(path.join(appPath, 'package.json'), JSON.stringify(newAppPackageJson, null, 4));
 
 // Build shared tests and copy them to the app
-spinner.text = 'Bundling test files and copying them to the the NativeScript app...';
+console.log('Bundling test files and copying them to the the NativeScript app...');
 const testFiles = []
   .concat(glob.sync(path.join(sharedTestsPath, '*.js')))
   .concat(glob.sync(path.join(sharedTestsPath, 'common/**/*.js')))
@@ -128,12 +137,12 @@ webpack(webpackConfig, (err, stats) => {
       console.error(chalk.red(err.details));
     }
 
-    spinner.fail('Unable to test NativeScript.');
+    console.error('Unable to test NativeScript.');
     return;
   }
 
   // Remove the tmp directory
   del.sync([tmpPath]);
 
-  spinner.succeed(`Done! cd ${appName} and run tns test ios.`);
+  console.log(`Done! cd ${appName} and run tns test ios.`);
 });

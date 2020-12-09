@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import _ from 'lodash';
-import { knownFolders, path, File } from 'tns-core-modules/file-system';
-import * as httpModule from 'tns-core-modules/http';
+import { knownFolders, path, File, Http } from '@nativescript/core';
 import * as Kinvey from '__SDK__';
 import * as utilities from '../utils';
 
@@ -12,7 +11,7 @@ describe('Files', function() {
       appSecret: process.env.APP_SECRET,
       masterSecret: process.env.MASTER_SECRET
     });
-    return utilities.cleanUpCollection(config, '_blob', httpModule.request.bind(httpModule));
+    return utilities.cleanUpCollection(config, '_blob', Http.request.bind(Http));
   });
 
   before(function() {

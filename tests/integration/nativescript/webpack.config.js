@@ -23,8 +23,9 @@ module.exports = {
   },
   externals: [
     'kinvey-nativescript-sdk',
-    'tns-core-modules/file-system',
-    'tns-core-modules/http'
+    'kinvey-js-sdk',
+    '@nativescript/core',
+    'nativescript'
   ],
   target: 'node',
 	optimization: {
