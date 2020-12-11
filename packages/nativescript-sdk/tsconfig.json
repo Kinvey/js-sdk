@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "target": "es2017",
+		"module": "esnext",
     "moduleResolution": "node",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
@@ -13,15 +13,12 @@
     "noEmitOnError": true,
     "noImplicitAny": false,
     "importHelpers": false,
-    "lib": [
-      "dom",
-      "es6",
-      "es2015.iterable"
-    ],
+		"lib": ["es2017", "dom"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "skipLibCheck": true
   },
   "angularCompilerOptions": {
     "genDir": ".",

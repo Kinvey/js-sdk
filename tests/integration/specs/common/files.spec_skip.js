@@ -114,7 +114,7 @@ describe('Files', () => {
           // Check if the runtime is {N} and set fileToUpload to file path, as Files.upload() works by file path in {N}
           // Files.upload() itself is tested per shim in other suites
           try {
-            const fs = require('tns-core-modules/file-system');
+            const fs = require('@nativescript/core');
             const sampleTestFilesPath = fs.path.join(fs.knownFolders.currentApp().path, 'sample-test-files');
             fileToUpload1 = fs.path.join(sampleTestFilesPath, 'test1.txt');
             fileToUpload2 = fs.path.join(sampleTestFilesPath, 'test2.txt');

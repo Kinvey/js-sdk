@@ -1226,7 +1226,7 @@ describe('AutoStore', function() {
       });
 
       it('should create 1000 items in less than 15 seconds', async () => {
-        const batchCollectionName = 'BatchTest'
+        const batchCollectionName = randomString();
         const batchCount = 1000;
 
         const autoTypeCollection = DataStore.collection(batchCollectionName, DataStoreType.Auto);
@@ -1238,8 +1238,8 @@ describe('AutoStore', function() {
       }).timeout(15000);
 
       it('should read correctly created items', async () => {
-        const syncCollectionName = 'AutoSyncTest'
-        const itemsCount = 1000;
+        const syncCollectionName = randomString();
+        const itemsCount = 10;
 
         const autoTypeCollection = DataStore.collection(syncCollectionName, DataStoreType.Auto);
         await autoTypeCollection.create([...Array(itemsCount).keys()].map((key) => ({ name: key })));

@@ -1,7 +1,7 @@
 {
   "name": "kinvey-nativescript-sdk",
   "description": "Kinvey JavaScript SDK for NativeScript applications.",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/nativescript-sdk",
   "repository": {
@@ -29,30 +29,30 @@
     "preuninstall": "node nativescript-hook-scripts/preuninstall.js"
   },
   "dependencies": {
+    "@nativescript/background-http": "~5.0.0",
+    "@nativescript/secure-storage": "~3.0.0",
     "events": "3.0.0",
     "kinvey-js-sdk": "^5.0.1",
-    "lodash": "4.17.15",
-    "nativescript-background-http": "4.0.0",
+    "lodash": "4.17.20",
     "nativescript-hook": "0.2.5",
-    "nativescript-secure-storage": "~2.5.0",
-    "nativescript-sqlite": "~2.3.3",
+    "nativescript-sqlite": "~2.6.4",
     "nativescript-urlhandler": "~1.3.0",
     "pubnub": "https://github.com/kinvey/pubnub-javascript/tarball/67b7944366453a87226389d483ac1ad861e0e129"
   },
   "peerDependencies": {
-    "nativescript-plugin-firebase": "~8.2.0"
+    "@nativescript/firebase": "~11.0.0"
   },
   "devDependencies": {
-    "@angular/compiler": "~8.2.0",
-    "@angular/compiler-cli": "~8.2.0",
-    "@angular/core": "~8.2.0",
+    "@angular/compiler": "~10.1.0",
+    "@angular/compiler-cli": "~10.1.0",
+    "@angular/core": "~10.1.0",
+    "@nativescript/core": "~7.0.5",
+    "@nativescript/types": "~7.0.4",
     "@types/events": "~3.0.0",
     "del-cli": "2.0.0",
     "fs-extra": "~8.1.0",
-    "nativescript-plugin-firebase": "~8.2.0",
-    "tns-core-modules": "~6.0.5",
-    "tns-platform-declarations": "~6.0.5",
-    "typescript": "~3.5.3"
+    "@nativescript/firebase": "~11.0.0",
+    "typescript": "~3.9.7"
   },
   "files": [
     "angular",
