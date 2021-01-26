@@ -1,6 +1,7 @@
-import { firebase, messaging } from '@nativescript/firebase';
 import { Device } from '@nativescript/core';
-import { formatKinveyBaasUrl, KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, KinveyBaasNamespace } from 'kinvey-js-sdk/lib/http';
+import { firebase } from "@nativescript/firebase";
+import { messaging } from "@nativescript/firebase/messaging";
+import { formatKinveyBaasUrl, HttpRequestMethod, KinveyBaasNamespace, KinveyHttpAuth, KinveyHttpRequest } from 'kinvey-js-sdk/lib/http';
 
 export interface PushRegisterOptions {
   showNotifications?: boolean; // Whether you want the firebase plugin to automatically display the notifications or just notify the callback. Currently used on iOS only. Default value for the plugin is true.
