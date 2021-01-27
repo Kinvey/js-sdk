@@ -1,4 +1,5 @@
-import { firebase, messaging } from '@nativescript/firebase';
+import { firebase } from '@nativescript/firebase';
+import { messaging } from '@nativescript/firebase/messaging';
 import { Device } from '@nativescript/core';
 import { formatKinveyBaasUrl, KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, KinveyBaasNamespace } from 'kinvey-js-sdk/lib/http';
 
