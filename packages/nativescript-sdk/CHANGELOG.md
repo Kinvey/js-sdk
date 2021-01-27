@@ -8,7 +8,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-> Fix webpack failing to find firebase messaging ([#577](https://github.com/Kinvey/js-sdk/pull/577))
+* Fix webpack failing to find firebase messaging ([#577](https://github.com/Kinvey/js-sdk/pull/577))
 
 
 
