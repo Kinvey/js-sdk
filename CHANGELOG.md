@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.1](https://github.com/Kinvey/js-sdk/tree/kinvey-js-sdk@5.0.1) (2020-07-22)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.0...kinvey-js-sdk@5.0.1)<br/>
+
+- Multi Insert fixes [#569](https://github.com/Kinvey/js-sdk/pull/569)
+
+## [5.0.0](https://github.com/Kinvey/js-sdk/tree/kinvey-js-sdk@5.0.0) (2020-07-10)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@4.2.5...kinvey-js-sdk@5.0.0)<br/>
+
+- Introducing the Multi Insert functionality
+- Update the default KCS api version to 5 [#566](https://github.com/Kinvey/js-sdk/pull/566)
+- Add `lastLoginTime` to Kinvey metadata [#562](https://github.com/Kinvey/js-sdk/pull/562)
+
 ## [4.2.3](https://github.com/Kinvey/js-sdk/tree/v4.2.3) (2019-07-22)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/v4.2.2...v4.2.3)<br/>
 
