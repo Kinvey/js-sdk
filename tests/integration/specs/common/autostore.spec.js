@@ -108,11 +108,14 @@ describe('AutoStore', function() {
         expect(docs.length).to.equal(1);
         expect(docs).to.deep.equal([sampleDocs[1]]);
 
-        // Verify that the docs are stored in the cache that match the query
         const syncTypeCollection = DataStore.collection(collectionName, DataStoreType.Sync);
-        const cachedDocs = await syncTypeCollection.find(query).toPromise();
-        expect(cachedDocs.length).to.equal(1);
-        expect(cachedDocs).to.deep.equal([sampleDocs[1]]);
+        const docsMatchingQuery = await syncTypeCollection.find(query).toPromise();
+        expect(docsMatchingQuery.length).to.equal(0); // we only have 1 item locally and it represents page 2 on the server
+
+        // Verify that the docs are stored in the cache that match the query
+        const allOfflineDocs = await syncTypeCollection.find().toPromise();
+        expect(allOfflineDocs.length).to.equal(1);
+        expect(allOfflineDocs).to.deep.equal([sampleDocs[1]]);
       });
 
       it('should return correct data with delta set', async function () {
