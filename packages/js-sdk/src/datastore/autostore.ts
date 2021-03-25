@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 import { Query } from '../query';
 import { NetworkError } from '../errors/network';
 import { KinveyError } from '../errors/kinvey';
@@ -18,13 +19,22 @@ export class AutoStore extends CacheStore {
 
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const useDeltaSet = options.useDeltaSet === true || this.useDeltaSet;
+    query = query && new Query(query.toPlainObject());
 
     try {
       if (useDeltaSet) {
         await this.pull(query, options);
         return await cache.find(query);
       }
-      return await this._pullInternal(query, options);
+      const requiredFields = get(query, 'fields', []);
+      if (query) {
+        query.fields = [];
+      }
+      const serverResponse = await this._pullInternal(query, options) as any[];
+      if (!requiredFields.length) {
+        return serverResponse;
+      }
+      return new Query({ fields: requiredFields }).process(serverResponse);
     } catch (error) {
       if (error instanceof NetworkError) {
         return cache.find(query);

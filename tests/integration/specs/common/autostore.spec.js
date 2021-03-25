@@ -1,8 +1,9 @@
 import { expect } from 'chai';
-import isArray from 'lodash/isArray';
+import times from 'lodash/times';
+import omit from 'lodash/omit';
 import { init, DataStore, DataStoreType, User, Query, Errors } from '__SDK__';
 import { collectionName, deltaCollectionName } from '../config';
-import { randomString, createSampleCollectionData, cleanUpAppData } from '../utils';
+import { randomString, createSampleCollectionData, cleanUpAppData, createDocsOnServer } from '../utils';
 
 const multiSaveErrorMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.';
 const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
@@ -116,6 +117,27 @@ describe('AutoStore', function() {
         const allOfflineDocs = await syncTypeCollection.find().toPromise();
         expect(allOfflineDocs.length).to.equal(1);
         expect(allOfflineDocs).to.deep.equal([sampleDocs[1]]);
+      });
+
+      it('should return correct data with projection', async function () {
+        const sampleDocs = times(2, () => ({ field1: randomString(), field2: randomString() }));
+        const serverDocs = await createDocsOnServer(collectionName, sampleDocs);
+        const query = new Query().ascending('field1');
+        query.fields = ['field1'];
+
+        const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto);
+        const docs = await autoTypeCollection.find(query);
+        expect(docs.length).to.equal(sampleDocs.length);
+        serverDocs.forEach((serverDoc) => {
+          expect(docs).deep.contains(omit(serverDoc, 'field2', '_kmd'));
+        });
+
+        const syncTypeCollection = DataStore.collection(collectionName, DataStoreType.Sync);
+        const allOfflineDocs = await syncTypeCollection.find().toPromise();
+        expect(allOfflineDocs.length).to.equal(sampleDocs.length);
+        serverDocs.forEach((serverDoc) => {
+          expect(allOfflineDocs).deep.contains(serverDoc);
+        });
       });
 
       it('should return correct data with delta set', async function () {

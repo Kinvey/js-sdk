@@ -5,6 +5,7 @@ import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import isArray from 'lodash/isArray';
 import cloneDeep from 'lodash/cloneDeep';
+import pick from 'lodash/pick';
 import sift from 'sift';
 import { QueryError } from './errors/query';
 
@@ -839,15 +840,7 @@ export class Query {
       }
 
       if (isArray(queryPlainObject.fields) && queryPlainObject.fields.length > 0) {
-        processedDocs = processedDocs.map((doc) => {
-          const modifiedDoc: any = doc;
-          Object.keys(modifiedDoc).forEach((key) => {
-            if (queryPlainObject.fields && queryPlainObject.fields.indexOf(key) === -1 && PROTECTED_FIELDS.indexOf(key) === -1) {
-              delete modifiedDoc[key];
-            }
-          });
-          return modifiedDoc;
-        });
+        processedDocs = processedDocs.map(d => pick(d, ...PROTECTED_FIELDS, ...queryPlainObject.fields));
       }
 
       return processedDocs;
