@@ -380,17 +380,16 @@ export class CacheStore {
     return sync.push(undefined, options);
   }
 
-  async pull(query: Query = new Query(), options: any = {}) {
-    const pullQuery = new Query({ filter: query.filter });
+  async _pullInternal(query: Query = new Query(), pullOptions: any = {}, options: { paginationCountsOnly?: boolean } = {}) : Promise<any[]|number> {
     const network = new NetworkStore(this.collectionName);
     const cache = new DataStoreCache(this.collectionName, this.tag);
     const queryCache = new QueryCache(this.tag);
-    const useDeltaSet = options.useDeltaSet === true || this.useDeltaSet;
-    const useAutoPagination = options.useAutoPagination === true || options.autoPagination || this.useAutoPagination;
+    const useDeltaSet = pullOptions.useDeltaSet === true || this.useDeltaSet;
+    const useAutoPagination = pullOptions.useAutoPagination === true || pullOptions.autoPagination || this.useAutoPagination;
 
     // Retrieve existing queryCacheDoc
-    const queryCacheDocs = await queryCache.find(new Query().equalTo('query', pullQuery.key).equalTo('collectionName', this.collectionName));
-    const queryCacheDoc = queryCacheDocs.shift() || { collectionName: this.collectionName, query: pullQuery.key, lastRequest: null };
+    const queryCacheDocs = await queryCache.find(new Query().equalTo('query', query.key).equalTo('collectionName', this.collectionName));
+    const queryCacheDoc = queryCacheDocs.shift() || { collectionName: this.collectionName, query: query.key, lastRequest: null };
 
     // Push sync queue
     const count = await this.pendingSyncCount();
@@ -413,7 +412,7 @@ export class CacheStore {
     // Delta set
     if (useDeltaSet && queryCacheDoc.lastRequest) {
       try {
-        const queryObject = Object.assign({ since: queryCacheDoc.lastRequest }, pullQuery.toQueryObject());
+        const queryObject = Object.assign({ since: queryCacheDoc.lastRequest }, query.toQueryObject());
 
         // Delta Set request
         const url = formatKinveyBaasUrl(KinveyBaasNamespace.AppData, `/${this.collectionName}/_deltaset`, queryObject);
@@ -437,8 +436,7 @@ export class CacheStore {
         queryCacheDoc.lastRequest = headers.requestStart;
         await queryCache.save(queryCacheDoc);
 
-        // Return the number of changed docs
-        return changed.length;
+        return changed;
       } catch (error) {
         if (!(error instanceof MissingConfigurationError) && !(error instanceof ParameterValueOutOfRangeError)) {
           throw error;
@@ -452,44 +450,51 @@ export class CacheStore {
       await cache.clear();
 
       // Get the total count of docs
-      const response = await network.count(pullQuery, Object.assign({}, options, { rawResponse: true })).toPromise();
+      const response = await network.count(query, Object.assign({}, pullOptions, { rawResponse: true })).toPromise();
       const count = 'count' in response.data ? response.data.count : Number.MAX_SAFE_INTEGER;
 
       // Create the pages
-      const pageSize = options.autoPaginationPageSize || (options.autoPagination && options.autoPagination.pageSize) || PAGE_LIMIT;
+      const pageSize = pullOptions.autoPaginationPageSize || (pullOptions.autoPagination && pullOptions.autoPagination.pageSize) || PAGE_LIMIT;
       const pageCount = Math.ceil(count / pageSize);
       const pageQueries = times(pageCount, (i) => {
-        const pageQuery = new Query(pullQuery);
+        const pageQuery = new Query(query);
         pageQuery.skip = i * pageSize;
         pageQuery.limit = Math.min(count - (i * pageSize), pageSize);
         return pageQuery;
       });
 
       // Process the pages
-      const pagePromises = pageQueries.map((pageQuery) => {
-        return network.find(pageQuery, options).toPromise()
+      const returnCounts = options && options.paginationCountsOnly;
+      const pagePromises: Promise<any[]|number>[] = pageQueries.map((pageQuery) => {
+        return network.find(pageQuery, pullOptions).toPromise()
           .then((docs: {}) => cache.save(docs))
-          .then((docs: { length: any; }) => docs.length);
+          .then((docs: any[]) => {
+            if (returnCounts) {
+              return docs.length;
+            }
+            return docs;
+          });
       });
-      const pageCounts = await Promise.all(pagePromises);
-      const totalPageCount = pageCounts.reduce((totalCount: number, pageCount: number) => totalCount + pageCount, 0);
+      const paginationResults = await Promise.all(pagePromises);
 
       // Update the query cache
       const headers = new KinveyHttpHeaders(response.headers.toPlainObject());
       queryCacheDoc.lastRequest = headers.requestStart;
       await queryCache.save(queryCacheDoc);
 
-      // Return the total page count
-      return totalPageCount;
+      if (returnCounts) {
+        return paginationResults.reduce((result: number, current: number) => (result + current));
+      }
+      return paginationResults.reduce((result: any[], pageDocs: any[]) => result.concat(pageDocs));
     }
 
     // Find the docs on the backend
-    const response = await network.find(pullQuery, Object.assign({}, options, { rawResponse: true })).toPromise();
+    const response = await network.find(query, Object.assign({}, pullOptions, { rawResponse: true })).toPromise();
     const docs = response.data;
 
     // Remove the docs matching the provided query
-    if (pullQuery) {
-      await cache.remove(pullQuery);
+    if (query) {
+      await cache.remove(query);
     } else {
       await cache.clear();
     }
@@ -502,8 +507,12 @@ export class CacheStore {
     queryCacheDoc.lastRequest = headers.requestStart;
     await queryCache.save(queryCacheDoc);
 
-    // Return the number of docs
-    return docs.length;
+    return docs;
+  }
+
+  async pull(query: Query = new Query(), options: any = {}) {
+    const docs = await this._pullInternal(new Query({ filter: query.filter }), options, { paginationCountsOnly: true });
+    return Array.isArray(docs) ? docs.length : docs;
   }
 
   async pullById(id: string, options: any = {}) {

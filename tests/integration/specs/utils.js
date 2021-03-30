@@ -184,9 +184,19 @@ export function validateEntity(dataStoreType, collectionName, expectedEntity, se
     });
 }
 
+export function createDocsOnServer(collectionName, docs) {
+  const collection = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
+  return collection.create(docs)
+    .then(({ errors, entities }) => {
+      if (errors.length) {
+        return Promise.reject(errors);
+      }
+      return entities;
+    });
+}
+
 export function createSampleCollectionData(collectionName, count = 1, propertyName = '') {
   const docs = [];
-  const collection = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
 
   for (let i = 0; i < count; i++) {
     const doc = {};
@@ -196,8 +206,8 @@ export function createSampleCollectionData(collectionName, count = 1, propertyNa
     docs.push(doc);
   }
 
-  const promises = docs.map((doc) => collection.save(doc));
-  return Promise.all(promises);
+  return createDocsOnServer(collectionName, docs)
+    .catch(errors => Promise.reject(errors[0]));
 }
 
 export async function cleanUpCollectionData(collectionName) {

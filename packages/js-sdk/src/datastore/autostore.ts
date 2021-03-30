@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 import { Query } from '../query';
 import { NetworkError } from '../errors/network';
 import { KinveyError } from '../errors/kinvey';
@@ -12,15 +13,28 @@ export class AutoStore extends CacheStore {
   }
 
   async find(query?: Query, options: any = {}) {
-    const cache = new DataStoreCache(this.collectionName, this.tag);
-
     if (query && !(query instanceof Query)) {
       throw new KinveyError('query is not an instance of the Query class.')
     }
 
+    const cache = new DataStoreCache(this.collectionName, this.tag);
+    const useDeltaSet = options.useDeltaSet === true || this.useDeltaSet;
+    query = query && new Query(query.toPlainObject());
+
     try {
-      await this.pull(query, options);
-      return cache.find(query);
+      if (useDeltaSet) {
+        await this.pull(query, options);
+        return await cache.find(query);
+      }
+      const requiredFields = get(query, 'fields', []);
+      if (query) {
+        query.fields = [];
+      }
+      const serverResponse = await this._pullInternal(query, options) as any[];
+      if (!requiredFields.length) {
+        return serverResponse;
+      }
+      return new Query({ fields: requiredFields }).process(serverResponse);
     } catch (error) {
       if (error instanceof NetworkError) {
         return cache.find(query);
@@ -32,7 +46,7 @@ export class AutoStore extends CacheStore {
 
   async count(query?: Query, options: any = {}) {
     if (query && !(query instanceof Query)) {
-      throw new KinveyError('query is not an instance of the Query class.')
+      throw new KinveyError('query is not an instance of the Query class.');
     }
 
     try {
@@ -50,7 +64,7 @@ export class AutoStore extends CacheStore {
   }
 
   async group(aggregation: Aggregation, options: any = {}) {
-    if (!(aggregation instanceof Query)) {
+    if (!(aggregation instanceof Aggregation)) {
       throw new KinveyError('aggregation is not an instance of the Aggregation class.')
     }
 
