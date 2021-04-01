@@ -3,9 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.1...kinvey-js-sdk@5.1.0) (2021-04-01)
+
+
+### Bug Fixes
+
+* Auto DataStore disregards "skip" and "limit" and fetches up to 10000 items per call. [#581](https://github.com/Kinvey/js-sdk/pull/581)
+
+
+
+
+
 ## [5.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.0...kinvey-js-sdk@5.0.1) (2020-07-22)
 
-**Note:** Version bump only for package kinvey-js-sdk
+- Multi Insert validations [#569](https://github.com/Kinvey/js-sdk/pull/569)
 
 
 

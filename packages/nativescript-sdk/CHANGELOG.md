@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [6.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@6.0.1...kinvey-nativescript-sdk@6.1.0) (2021-04-01)
+
+
+### Bug Fixes
+
+* Auto DataStore disregards "skip" and "limit" and fetches up to 10000 items per call. [#581](https://github.com/Kinvey/js-sdk/pull/581)
+
+
+
+
+
 # [6.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@6.0.0...kinvey-nativescript-sdk@6.0.1) (2021-01-27)
 
 
@@ -16,12 +27,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@5.0.1...kinvey-nativescript-sdk@6.0.0) (2020-12-09)
 
-> Introducing support for NativeScript **7.0**, and dropping support for NativeScript **6.x** and older versions.
+* Introducing support for NativeScript **7.0**, and dropping support for NativeScript **6.x** and older versions.
+
+
+
 
 
 ## [5.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@5.0.0...kinvey-nativescript-sdk@5.0.1) (2020-07-22)
 
-**Note:** Version bump only for package kinvey-nativescript-sdk
+* Multi Insert validations [#569](https://github.com/Kinvey/js-sdk/pull/569)
 
 
 
