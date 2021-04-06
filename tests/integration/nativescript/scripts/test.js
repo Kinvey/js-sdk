@@ -87,6 +87,9 @@ del.sync([appTestsPath]);
 // Pack and copy the kinvey-js-sdk
 console.log('Packing and copying SDK to the NativeScript app...');
 const jsSdkPath = path.join(__dirname, '../../../../packages/js-sdk');
+// Remove the existing packages
+del.sync([path.join(jsSdkPath, '*.tgz')], { force: true });
+
 runCommand('npm', ['pack'], jsSdkPath);
 const jsSdkFile = glob
   .sync(path.join(jsSdkPath, '*.tgz'))
