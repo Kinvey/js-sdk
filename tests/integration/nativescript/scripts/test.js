@@ -71,9 +71,6 @@ fs.copyFileSync(path.join(rootPath, 'scripts', 'app.gradle'), path.join(appPath,
 // Copy AndroidManifest.xml
 fs.copyFileSync(path.join(rootPath, 'scripts', 'AndroidManifest.xml'), path.join(appPath, 'App_Resources', 'Android', 'src', 'main', 'AndroidManifest.xml'));
 
-// Copy socket.io.js
-fs.copyFileSync(path.join(rootPath, 'scripts', 'fix-socket-io.js'), path.join(appPath, 'hooks', 'after-prepare', 'fix-socket-io.js'));
-fs.copyFileSync(path.join(rootPath, 'scripts', 'socket.io.js'), path.join(appPath, 'hooks', 'socket.io.js'));
 
 // Copy karma.conf.js
 fs.copyFileSync(path.join(rootPath, 'karma.conf.js'), path.join(appPath, 'karma.conf.js'));
