@@ -71,6 +71,8 @@ fs.copyFileSync(path.join(rootPath, 'scripts', 'app.gradle'), path.join(appPath,
 // Copy AndroidManifest.xml
 fs.copyFileSync(path.join(rootPath, 'scripts', 'AndroidManifest.xml'), path.join(appPath, 'App_Resources', 'Android', 'src', 'main', 'AndroidManifest.xml'));
 
+// Copy fix-nativescript-build-xcconfig.js
+fs.copyFileSync(path.join(rootPath, 'scripts', 'fix-nativescript-build-xcconfig.js'), path.join(appPath, 'hooks', 'after-prepare', 'fix-nativescript-build-xcconfig.js'));
 
 // Copy karma.conf.js
 fs.copyFileSync(path.join(rootPath, 'karma.conf.js'), path.join(appPath, 'karma.conf.js'));
