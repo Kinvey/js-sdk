@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [6.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@6.0.1...kinvey-nativescript-sdk@6.1.0) (2021-04-01)
+# [6.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@6.0.1...kinvey-nativescript-sdk@6.1.0) (2021-04-08)
 
 
 ### Bug Fixes
@@ -53,7 +53,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-* optimize data push ([905b879](https://github.com/Kinvey/js-sdk/commit/905b879))
+* Introducing the Multi Insert functionality
+* Update the default KCS api version to 5 [#566](https://github.com/Kinvey/js-sdk/pull/566)
+* Add `lastLoginTime` to Kinvey metadata [#562](https://github.com/Kinvey/js-sdk/pull/562)
 
 
 
