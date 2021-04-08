@@ -71,9 +71,8 @@ fs.copyFileSync(path.join(rootPath, 'scripts', 'app.gradle'), path.join(appPath,
 // Copy AndroidManifest.xml
 fs.copyFileSync(path.join(rootPath, 'scripts', 'AndroidManifest.xml'), path.join(appPath, 'App_Resources', 'Android', 'src', 'main', 'AndroidManifest.xml'));
 
-// Copy socket.io.js
-fs.copyFileSync(path.join(rootPath, 'scripts', 'fix-socket-io.js'), path.join(appPath, 'hooks', 'after-prepare', 'fix-socket-io.js'));
-fs.copyFileSync(path.join(rootPath, 'scripts', 'socket.io.js'), path.join(appPath, 'hooks', 'socket.io.js'));
+// Copy fix-nativescript-build-xcconfig.js
+fs.copyFileSync(path.join(rootPath, 'scripts', 'fix-nativescript-build-xcconfig.js'), path.join(appPath, 'hooks', 'after-prepare', 'fix-nativescript-build-xcconfig.js'));
 
 // Copy karma.conf.js
 fs.copyFileSync(path.join(rootPath, 'karma.conf.js'), path.join(appPath, 'karma.conf.js'));
@@ -87,6 +86,9 @@ del.sync([appTestsPath]);
 // Pack and copy the kinvey-js-sdk
 console.log('Packing and copying SDK to the NativeScript app...');
 const jsSdkPath = path.join(__dirname, '../../../../packages/js-sdk');
+// Remove the existing packages
+del.sync([path.join(jsSdkPath, '*.tgz')], { force: true });
+
 runCommand('npm', ['pack'], jsSdkPath);
 const jsSdkFile = glob
   .sync(path.join(jsSdkPath, '*.tgz'))
