@@ -483,9 +483,9 @@ export class CacheStore {
       await queryCache.save(queryCacheDoc);
 
       if (returnCounts) {
-        return paginationResults.reduce((result: number, current: number) => (result + current));
+        return paginationResults.reduce((result: number, current: number) => (result + current), []);
       }
-      return paginationResults.reduce((result: any[], pageDocs: any[]) => result.concat(pageDocs));
+      return paginationResults.reduce((result: any[], pageDocs: any[]) => result.concat(pageDocs), []);
     }
 
     // Find the docs on the backend
