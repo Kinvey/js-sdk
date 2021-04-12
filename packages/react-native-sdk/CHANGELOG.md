@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-eact-native-sdk@5.1.0...kinvey-eact-native-sdk@5.1.1) (2021-04-12)
+
+**Note:** Version bump only for package kinvey-js-sdk
+
+
+
+
+
 ## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@5.0.1...kinvey-react-native-sdk@5.1.0) (2021-04-08)
 
 

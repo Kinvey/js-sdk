@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.1.1](https://github.com/Kinvey/js-sdk/tree/kinvey-js-sdk@5.1.1) (2021-04-12)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1)<br/>
+
+#### Bugs
+- The pull function returns an error with Auto store when called with autoPagination: true and there are no items. [#590](https://github.com/Kinvey/js-sdk/pull/590)
+
 ## [5.1.0](https://github.com/Kinvey/js-sdk/tree/kinvey-js-sdk@5.1.0) (2021-04-08)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.1...kinvey-js-sdk@5.1.0)<br/>
 

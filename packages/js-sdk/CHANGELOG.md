@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1) (2021-04-12)
+
+
+### Bug Fixes
+
+* The pull function returns an error with Auto store when called with autoPagination: true and there are no items. [#590](https://github.com/Kinvey/js-sdk/pull/590)
+
+
+
+
+
 ## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.1...kinvey-js-sdk@5.1.0) (2021-04-08)
 
 
