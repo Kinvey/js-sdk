@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.1.0...kinvey-angular-sdk@5.1.1) (2021-04-12)
+
+**Note:** Version bump only for package kinvey-js-sdk
+
+
+
+
+
 ## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.0.1...kinvey-angular-sdk@5.1.0) (2021-04-08)
 
 * Auto DataStore disregards "skip" and "limit" and fetches up to 10000 items per call. [#581](https://github.com/Kinvey/js-sdk/pull/581)
