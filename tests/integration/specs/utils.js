@@ -3,6 +3,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import * as Kinvey from '__SDK__';
 import * as Constants from './constants';
+import { authenticator as otpAuthenticator } from 'otplib';
 
 export function ensureArray(entities) {
   return [].concat(entities);
@@ -340,7 +341,7 @@ export async function cleanUpCollection(config, collectionName, requestLib) {
   }
 
   try {
-    const token = toBase64(`${config.appKey}:${config.masterSecret}`);
+    const token = getToken(config);
     response = await requestLib({
       headers: {
         Authorization: `Basic ${token}`,
@@ -370,6 +371,74 @@ export async function cleanUpCollection(config, collectionName, requestLib) {
   }
 
   return null;
+}
+
+export async function createVerifiedAuthenticator(userId, sdkConfig, requestLib) {
+  const reqOpts = {
+    headers: {
+      Authorization: `Basic ${getToken(sdkConfig)}`,
+      'Content-Type': 'application/json',
+      'X-Kinvey-API-Version': 6
+    },
+    method: 'POST',
+    url: `https://stg-us1-baas.kinvey.com/user/${sdkConfig.appKey}/${userId}/authenticators`, // TODO: kdev-1575 Remove hard-coded URL
+    data: { type: 'totp', name: 'js-sdk-test' }
+  };
+
+  const response = await makeRequest(reqOpts, true, requestLib);
+  const authenticator = response.data;
+  console.log(`--created authenticator: ${JSON.stringify(authenticator, null, 2)}`);
+  reqOpts.url = `https://stg-us1-baas.kinvey.com/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticator.id}/verify`;
+  reqOpts.data = { code: otpAuthenticator.generate(authenticator.config.secret) };
+  const verifyRes = await makeRequest(reqOpts, true, requestLib);
+  authenticator.recoveryCodes = verifyRes.data.recoveryCodes || [];
+  return authenticator;
+}
+
+export async function removeAuthenticator(userId, authenticatorId, sdkConfig, requestLib) {
+  const reqOpts = {
+    headers: {
+      Authorization: `Basic ${getToken(sdkConfig)}`,
+      'Content-Type': 'application/json',
+      'X-Kinvey-API-Version': 6
+    },
+    method: 'DELETE',
+    url: `https://stg-us1-baas.kinvey.com/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticatorId}` // TODO: kdev-1575 Remove hard-coded URL
+  };
+
+  return makeRequest(reqOpts, true, requestLib);
+}
+
+async function makeRequest(reqOpts, expectSuccess, requestLib) {
+  let response;
+
+  if (!requestLib) {
+    requestLib = axios;
+  }
+
+  try {
+    response = await requestLib(reqOpts);
+  } catch (error) {
+    if (error.response) {
+      response = error.response;
+    }
+
+    throw error;
+  }
+
+  if (!response.status) {
+    response.status = response.statusCode;
+  }
+
+  if (expectSuccess && (response.status < 200 || response.status > 299)) {
+    throw new Error(`Status code is not 2xx (${reqOpts.url}): ${JSON.stringify(response)}`);
+  }
+
+  return response;
+}
+
+function getToken(config) {
+  return toBase64(`${config.appKey}:${config.masterSecret}`);
 }
 
 function toBase64(textString) {

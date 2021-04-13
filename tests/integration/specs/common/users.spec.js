@@ -1,7 +1,11 @@
-import { expect } from 'chai';
+import chai from 'chai';
+import { authenticator as otpAuthenticator } from 'otplib';
 import * as Kinvey from '__SDK__';
 import * as config from '../config';
 import * as utilities from '../utils';
+
+const expect = chai.expect;
+chai.use(require('chai-as-promised'));
 
 var appCredentials;
 const collectionName = config.collectionName;
@@ -50,8 +54,14 @@ before(() => {
   const initProperties = {
     appKey: process.env.APP_KEY,
     appSecret: process.env.APP_SECRET,
-    masterSecret: process.env.MASTER_SECRET
+    masterSecret: process.env.MASTER_SECRET,
+    apiVersion: 6
+  };
+
+  if (process.env.INSTANCE_ID) {
+    initProperties.instanceId = process.env.INSTANCE_ID;
   }
+
   appCredentials = Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
 });
 
@@ -59,7 +69,7 @@ describe('User tests', () => {
   before(() => {
     utilities.cleanUpCollection(appCredentials, 'user');
   });
-  
+
   const missingCredentialsError = 'Username and/or password missing';
   const createdUserIds = [];
 
@@ -75,102 +85,202 @@ describe('User tests', () => {
       .catch(done);
   });
 
-  describe('login()', () => {
-    beforeEach((done) => {
+  describe('login', () => {
+    before((done) => {
       Kinvey.User.logout()
         .then(() => done());
     });
 
-    it('should throw an error if an active user already exists', (done) => {
-      Kinvey.User.signup()
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return Kinvey.User.login(utilities.randomString(), utilities.randomString());
-        })
-        .catch((error) => {
-          expect(error.message).to.contain('An active user already exists.');
-          done();
-        })
-        .catch(done);
+    afterEach((done) => {
+      Kinvey.User.logout()
+        .then(() => done());
     });
 
-    it('should throw an error if a username is not provided', (done) => {
-      Kinvey.User.login(null, utilities.randomString())
-        .catch((error) => {
-          expect(error.message).to.contain(missingCredentialsError);
-          done();
-        })
-        .catch(done);
+    describe('login()', () => {
+      it('should throw an error if an active user already exists', (done) => {
+        Kinvey.User.signup()
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            return Kinvey.User.login(utilities.randomString(), utilities.randomString());
+          })
+          .catch((error) => {
+            expect(error.message).to.contain('An active user already exists.');
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should throw an error if a username is not provided', (done) => {
+        Kinvey.User.login(null, utilities.randomString())
+          .catch((error) => {
+            expect(error.message).to.contain(missingCredentialsError);
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should throw an error if the username is an empty string', (done) => {
+        Kinvey.User.login(' ', utilities.randomString())
+          .catch((error) => {
+            expect(error.message).to.contain(missingCredentialsError);
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should throw an error if a password is not provided', (done) => {
+        Kinvey.User.login(utilities.randomString())
+          .catch((error) => {
+            expect(error.message).to.contain(missingCredentialsError);
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should throw an error if the password is an empty string', (done) => {
+        Kinvey.User.login(utilities.randomString(), ' ')
+          .catch((error) => {
+            expect(error.message).to.contain(missingCredentialsError);
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should throw an error if the username and/or password is invalid', (done) => {
+        Kinvey.User.login(utilities.randomString(), utilities.randomString())
+          .catch((error) => {
+            expect(error.message).to.contain('Invalid credentials.');
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should login a user', (done) => {
+        const username = utilities.randomString();
+        const password = utilities.randomString();
+        Kinvey.User.signup({ username: username, password: password })
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            return Kinvey.User.logout();
+          })
+          .then(() => Kinvey.User.login(username, password))
+          .then((user) => {
+            assertUserData(user, username);
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should login a user by providing credentials as an object', (done) => {
+        const username = utilities.randomString();
+        const password = utilities.randomString();
+        Kinvey.User.signup({ username: username, password: password })
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            return Kinvey.User.logout();
+          })
+          .then(() => Kinvey.User.login({ username: username, password: password }))
+          .then((user) => {
+            assertUserData(user, username);
+            done();
+          })
+          .catch(done);
+      });
     });
 
-    it('should throw an error if the username is an empty string', (done) => {
-      Kinvey.User.login(' ', utilities.randomString())
-        .catch((error) => {
-          expect(error.message).to.contain(missingCredentialsError);
-          done();
-        })
-        .catch(done);
-    });
+    describe('loginWithMFA()', () => {
+      let username;
+      let password;
+      let userAuthenticator;
+      let createdUser;
 
-    it('should throw an error if a password is not provided', (done) => {
-      Kinvey.User.login(utilities.randomString())
-        .catch((error) => {
-          expect(error.message).to.contain(missingCredentialsError);
-          done();
-        })
-        .catch(done);
-    });
+      before('setup user with MFA', async () => {
+        username = utilities.randomString();
+        password = utilities.randomString();
+        createdUser = await Kinvey.User.signup({ username: username, password: password });
+        createdUserIds.push(createdUser.data._id);
+        userAuthenticator = await utilities.createVerifiedAuthenticator(createdUser.data._id, appCredentials);
+        await Kinvey.User.logout();
+      });
 
-    it('should throw an error if the password is an empty string', (done) => {
-      Kinvey.User.login(utilities.randomString(), ' ')
-        .catch((error) => {
-          expect(error.message).to.contain(missingCredentialsError);
-          done();
-        })
-        .catch(done);
-    });
+      after('cleanup authenticator', async () => utilities.removeAuthenticator(createdUser.data._id, userAuthenticator.id, appCredentials));
 
-    it('should throw an error if the username and/or password is invalid', (done) => {
-      Kinvey.User.login(utilities.randomString(), utilities.randomString())
-        .catch((error) => {
-          expect(error.message).to.contain('Invalid credentials.');
-          done();
-        })
-        .catch(done);
-    });
+      it('should login a user with correct credentials and code', async () => {
+        const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
+        const mfaComplete = () => otpAuthenticator.generate(userAuthenticator.config.secret);
+        const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
+        assertUserData(user, username);
+      });
 
-    it('should login a user', (done) => {
-      const username = utilities.randomString();
-      const password = utilities.randomString();
-      Kinvey.User.signup({ username: username, password: password })
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return Kinvey.User.logout();
-        })
-        .then(() => Kinvey.User.login(username, password))
-        .then((user) => {
-          assertUserData(user, username);
-          done();
-        })
-        .catch(done);
-    });
+      it('should retry and login a user with correct credentials and a mix of incorrect and correct code', async () => {
+        const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
+        const mfaComplete = (authenticator, context) => {
+          expect(context).to.exist.and.to.be.an('object');
+          expect(context.retries, 'Context.retries').to.be.a('number');
+          if (context.retries === 0) {
+            return '111999'; // to fail the login once
+          }
 
-    it('should login a user by providing credentials as an object', (done) => {
-      const username = utilities.randomString();
-      const password = utilities.randomString();
-      Kinvey.User.signup({ username: username, password: password })
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return Kinvey.User.logout();
-        })
-        .then(() => Kinvey.User.login({ username: username, password: password }))
-        .then((user) => {
-          assertUserData(user, username);
-          done();
-        })
-        .catch(done);
+          expect(context.retries).to.equal(1);
+          return otpAuthenticator.generate(userAuthenticator.config.secret)
+        };
+        const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
+        assertUserData(user, username);
+      });
+
+      it('should throw an error when selectAuthenticator returns null', async () => {
+        const selectAuthenticator = () => null;
+        const mfaComplete = () => otpAuthenticator.generate(userAuthenticator.config.secret);
+        await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('MFA authenticator ID is missing.');
+      });
+
+      it('should throw an error when mfaComplete returns null', async () => {
+        const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
+        const mfaComplete = () => null;
+        await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('MFA code is missing.');
+      });
+
+      it('should throw an error when credentials are incorrect', async () => {
+        await expect(Kinvey.User.loginWithMFA(utilities.randomString(), utilities.randomString(), () => null, () => null))
+          .to.be.rejectedWith('Invalid credentials.');
+      });
+
+      it('should throw an error when username is an empty string', async () => {
+        await expect(Kinvey.User.loginWithMFA('', password, () => null, () => null))
+          .to.be.rejectedWith(missingCredentialsError);
+      });
+
+      it('should throw an error when password is an empty string', async () => {
+        await expect(Kinvey.User.loginWithMFA(username, '',  () => null, () => null))
+          .to.be.rejectedWith(missingCredentialsError);
+      });
+
+      it('should throw an error when selectAuthenticator is null', async () => {
+        await expect(Kinvey.User.loginWithMFA(username, password,  null, () => null))
+          .to.be.rejectedWith('Function to select authenticator is missing.');
+      });
+
+      it('should throw an error when mfaComplete is null', async () => {
+        await expect(Kinvey.User.loginWithMFA(username, password, () => null, null))
+          .to.be.rejectedWith('Function to complete MFA is missing.');
+      });
+
+      describe('when an active user already exists', () => {
+        before('setup active user', async () => {
+          const existingActiveUser = await Kinvey.User.signup();
+          createdUserIds.push(existingActiveUser.data._id);
+        });
+
+        it('should throw an error when an active user already exists', async () => {
+          await expect(Kinvey.User.loginWithMFA(username, password, () => null, () => null)).to.be.rejectedWith('An active user already exists.');
+        });
+      });
     });
   });
+
+
+
+
 
   describe('logout()', () => {
     let syncDataStore;

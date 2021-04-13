@@ -35,3 +35,20 @@ export function setSession(session: SessionObject): boolean {
 export function removeSession(): boolean {
   return getStore().remove(getKey());
 }
+
+function getMFAKey() {
+  return `${getAppKey()}.mfa_session_token`;
+}
+
+export function getMFASessionToken(): string | undefined {
+  const token = getStore().get(getMFAKey());
+  return token;
+}
+
+export function setMFASessionToken(token: string): boolean {
+  return getStore().set(getMFAKey(), token);
+}
+
+export function removeMFASessionToken(): boolean {
+  return getStore().remove(getMFAKey());
+}
