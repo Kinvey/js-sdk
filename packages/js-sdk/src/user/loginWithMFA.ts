@@ -59,12 +59,12 @@ async function completeMFALoginRetryable(
     const mfaResult = await executeCompleteRequest(code);
     return mfaResult;
   } catch (err) {
-    if (err.message === errMsgNoCode) {
+    if (err.message === errMsgNoCode || !(err instanceof KinveyError)) {
       throw err;
     }
 
-    // eslint-disable-next-line no-param-reassign
-    context.retries += 1;
+    context.retries += 1; // eslint-disable-line no-param-reassign
+    context.error = err; // eslint-disable-line no-param-reassign
     return completeMFALoginRetryable(mfaComplete, context);
   }
 }

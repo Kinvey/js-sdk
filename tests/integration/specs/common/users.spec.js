@@ -221,10 +221,14 @@ describe('User tests', () => {
             expect(context).to.exist.and.to.be.an('object');
             expect(context.retries, 'Context.retries').to.be.a('number');
             if (context.retries === 0) {
+              expect(context.error).to.not.exist;
               return '111999'; // to fail the login once
             }
 
             expect(context.retries).to.equal(1);
+            expect(context.error).to.exist;
+            expect(context.error.message).to.contain('Your request body contained invalid or incorrectly formatted data.');
+
             return otpAuthenticator.generate(userAuthenticator.config.secret)
           };
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
