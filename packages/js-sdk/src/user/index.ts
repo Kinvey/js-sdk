@@ -3,6 +3,7 @@ import { exists, ExistsOptions } from './exists';
 import { forgotUsername, ForgotUsernameOptions } from './forgotUsername';
 import { login, LoginOptions } from './login';
 import { loginWithMFA, MFAContext } from './loginWithMFA';
+import { loginWithRecoveryCode } from './loginWithRecoveryCode';
 import { loginWithRedirectUri, MICOptions } from './loginWithRedirectUri';
 import { loginWithMICUsingResourceOwnerCredentials } from './loginWithMICUsingResourceOwnerCredentials';
 import { loginWithMIC, AuthorizationGrant } from './loginWithMIC';
@@ -45,6 +46,10 @@ export class User extends KinveyUser {
     options: LoginOptions = {}
   ) {
     return loginWithMFA(username, password, selectAuthenticator, mfaComplete, options);
+  }
+
+  static loginWithRecoveryCode(username: string, password: string, recoveryCode: string, options: LoginOptions = {}) {
+    return loginWithRecoveryCode(username, password, recoveryCode, options);
   }
 
   static loginWithRedirectUri(redirectUri: string, options?: MICOptions) {
