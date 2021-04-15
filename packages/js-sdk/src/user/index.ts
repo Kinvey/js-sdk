@@ -2,7 +2,7 @@ import { Query } from '../query';
 import { exists, ExistsOptions } from './exists';
 import { forgotUsername, ForgotUsernameOptions } from './forgotUsername';
 import { login, LoginOptions } from './login';
-import { loginWithMFA, MFAContext } from './loginWithMFA';
+import {loginWithMFA, MFACompleteResult, MFAContext} from './loginWithMFA';
 import { loginWithRecoveryCode } from './loginWithRecoveryCode';
 import { loginWithRedirectUri, MICOptions } from './loginWithRedirectUri';
 import { loginWithMICUsingResourceOwnerCredentials } from './loginWithMICUsingResourceOwnerCredentials';
@@ -42,7 +42,7 @@ export class User extends KinveyUser {
     username: string,
     password: string,
     selectAuthenticator: (authenticators: object[], context: MFAContext) => Promise<string>,
-    mfaComplete: (authenticator: string, context: MFAContext) => Promise<string>,
+    mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
     options: LoginOptions = {}
   ) {
     return loginWithMFA(username, password, selectAuthenticator, mfaComplete, options);

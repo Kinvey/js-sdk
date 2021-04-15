@@ -36,13 +36,12 @@ export function removeSession(): boolean {
   return getStore().remove(getKey());
 }
 
-function getMFAKey() {
+function getMFAKey(): string {
   return `${getAppKey()}.mfa_session_token`;
 }
 
 export function getMFASessionToken(): string | undefined {
-  const token = getStore().get(getMFAKey());
-  return token;
+  return getStore().get(getMFAKey());
 }
 
 export function setMFASessionToken(token: string): boolean {
@@ -51,4 +50,24 @@ export function setMFASessionToken(token: string): boolean {
 
 export function removeMFASessionToken(): boolean {
   return getStore().remove(getMFAKey());
+}
+
+function getDeviceTokenKey(username: string): string {
+  return `${getAppKey()}.${username}`;
+}
+
+export function getDeviceToken(username: string): string | undefined {
+  return getStore().get(getDeviceTokenKey(username));
+}
+
+export function hasDeviceToken(username: string): boolean {
+  return getDeviceToken(username) != null;
+}
+
+export function setDeviceToken(username: string, deviceToken: string): boolean {
+  return getStore().set(getDeviceTokenKey(username), deviceToken);
+}
+
+export function removeDeviceToken(username: string): boolean {
+  return getStore().remove(getDeviceTokenKey(username));
 }

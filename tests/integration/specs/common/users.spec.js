@@ -85,7 +85,7 @@ describe('User tests', () => {
       .catch(done);
   });
 
-  describe('login', () => {
+  describe.only('login', () => {
     before((done) => {
       Kinvey.User.logout()
         .then(() => done());
@@ -189,18 +189,14 @@ describe('User tests', () => {
     });
 
     describe('login when MFA is enabled', () => {
+      let createdUser;
+      let userAuthenticator;
       let username;
       let password;
-      let userAuthenticator;
-      let createdUser;
 
       before('setup user with MFA', async () => {
-        username = utilities.randomString();
-        password = utilities.randomString();
-        createdUser = await Kinvey.User.signup({ username: username, password: password });
+        ({ createdUser, userAuthenticator, username, password } = await utilities.setupUserWithMFA(appCredentials, true));
         createdUserIds.push(createdUser.data._id);
-        userAuthenticator = await utilities.createVerifiedAuthenticator(createdUser.data._id, appCredentials);
-        await Kinvey.User.logout();
       });
 
       after('cleanup authenticator', async () => utilities.removeAuthenticator(createdUser.data._id, userAuthenticator.id, appCredentials));
@@ -208,7 +204,7 @@ describe('User tests', () => {
       describe('loginWithMFA()', () => {
         it('should login a user with correct credentials and code', async () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
-          const mfaComplete = () => otpAuthenticator.generate(userAuthenticator.config.secret);
+          const mfaComplete = () => { return { code: otpAuthenticator.generate(userAuthenticator.config.secret) }};
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
           assertUserData(user, username);
           const activeUser = Kinvey.User.getActiveUser();
@@ -222,14 +218,14 @@ describe('User tests', () => {
             expect(context.retries, 'Context.retries').to.be.a('number');
             if (context.retries === 0) {
               expect(context.error).to.not.exist;
-              return '111999'; // to fail the login once
+              return { code: '111999' }; // to fail the login once
             }
 
             expect(context.retries).to.equal(1);
             expect(context.error).to.exist;
             expect(context.error.message).to.contain('Your request body contained invalid or incorrectly formatted data.');
 
-            return otpAuthenticator.generate(userAuthenticator.config.secret)
+            return { code: otpAuthenticator.generate(userAuthenticator.config.secret) };
           };
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
           assertUserData(user, username);
@@ -237,13 +233,19 @@ describe('User tests', () => {
 
         it('should throw an error when selectAuthenticator returns null', async () => {
           const selectAuthenticator = () => null;
-          const mfaComplete = () => otpAuthenticator.generate(userAuthenticator.config.secret);
+          const mfaComplete = () => { return { code: otpAuthenticator.generate(userAuthenticator.config.secret) }};
           await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('MFA authenticator ID is missing.');
+        });
+
+        it('should throw an error when mfaComplete returns code as null', async () => {
+          const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
+          const mfaComplete = () => { return { code: null }};
+          await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('MFA code is missing.');
         });
 
         it('should throw an error when mfaComplete returns null', async () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
-          const mfaComplete = () => null;
+          const mfaComplete = () => { return { code: null }};
           await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('MFA code is missing.');
         });
 
@@ -280,6 +282,69 @@ describe('User tests', () => {
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithMFA(username, password, () => null, () => null)).to.be.rejectedWith('An active user already exists.');
+          });
+        });
+
+        describe('when a user trusts the device', () => {
+          let gullibleUserName;
+          let gullibleUserPassword;
+          let gullibleUserAuthenticator;
+          let gullibleUser;
+
+          before('setup new user with MFA', async () => {
+            ({ createdUser: gullibleUser, userAuthenticator: gullibleUserAuthenticator, username: gullibleUserName, password: gullibleUserPassword } =
+              await utilities.setupUserWithMFA(appCredentials, true));
+            createdUserIds.push(gullibleUser.data._id);
+          });
+
+          after('cleanup authenticator', async () => utilities.removeAuthenticator(gullibleUser.data._id, gullibleUserAuthenticator.id, appCredentials));
+
+          it('should not ask the same user for MFA code on second login', async () => {
+            const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === gullibleUserAuthenticator.id).id);
+            const mfaComplete = () => {
+              return {
+                code: otpAuthenticator.generate(gullibleUserAuthenticator.config.secret),
+                trustDevice: true
+              }
+            };
+            const user = await Kinvey.User.loginWithMFA(gullibleUserName, gullibleUserPassword, selectAuthenticator, mfaComplete);
+            assertUserData(user, gullibleUserName);
+            const activeUser = Kinvey.User.getActiveUser();
+            expect(user).to.deep.equal(activeUser);
+
+            await Kinvey.User.logout();
+
+            await expect(
+              Kinvey.User.loginWithMFA(gullibleUserName, gullibleUserPassword, selectAuthenticator, () => {throw new Error('MFA complete should not be called');})
+            ).to.not.be.rejected;
+          });
+
+          it('should ask another user for MFA', async () => {
+            // first, login a user who trusts the device and then, log them out
+            const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === gullibleUserAuthenticator.id).id);
+            const mfaComplete = (authenticator, context) => {
+              expect(context).to.exist;
+              return {
+                code: otpAuthenticator.generate(gullibleUserAuthenticator.config.secret),
+                trustDevice: true
+              }
+            };
+            const firstUser = await Kinvey.User.loginWithMFA(gullibleUserName, gullibleUserPassword, selectAuthenticator, mfaComplete);
+            assertUserData(firstUser, gullibleUserName);
+            await Kinvey.User.logout();
+
+            // login a completely different user from the first one and expect mfaComplete to be called
+            const selectAuthenticatorAnotherUser = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
+            let mfaCompleteIsCalled = false;
+            const mfaCompleteAnotherUser = () => {
+              mfaCompleteIsCalled = true;
+              return {
+                code: otpAuthenticator.generate(userAuthenticator.config.secret)
+              }
+            };
+            const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticatorAnotherUser, mfaCompleteAnotherUser);
+            assertUserData(user, username);
+            expect(mfaCompleteIsCalled).to.equal(true);
           });
         });
       });

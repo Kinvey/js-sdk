@@ -1,3 +1,5 @@
+import isObjectLike from 'lodash/isObjectLike';
+import isBoolean from 'lodash/isBoolean';
 import { KinveyError } from '../errors/kinvey';
 import {
   setSession,
@@ -8,6 +10,10 @@ import {
   KinveyHttpRequest,
   KinveyBaasNamespace,
   KinveyHttpAuth,
+  setDeviceToken,
+  getDeviceToken,
+  hasDeviceToken,
+  removeDeviceToken,
 } from '../http';
 import { User } from './user';
 import { LoginOptions, validateNoActiveUser, executeLoginRequest, validateCredentials } from './login';
@@ -33,12 +39,15 @@ async function executeChallengeRequest(authenticatorId: string): Promise<any> {
   return response.data;
 }
 
-async function executeCompleteRequest(code): Promise<object> {
+async function executeCompleteRequest(code, trustDevice = false): Promise<object> {
   const request = new KinveyHttpRequest({
     method: HttpRequestMethod.POST,
     auth: KinveyHttpAuth.MFASessionToken,
     url: formatKinveyBaasUrl(KinveyBaasNamespace.User, '/mfa/complete'),
-    body: { code },
+    body: {
+      code,
+      createDeviceToken: trustDevice,
+    },
   });
 
   const response = await request.execute();
@@ -47,19 +56,25 @@ async function executeCompleteRequest(code): Promise<object> {
 }
 
 async function completeMFALoginRetryable(
-  mfaComplete: (authenticator: string, context: MFAContext) => Promise<string>,
+  mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
   context: MFAContext
 ): Promise<any> {
   const errMsgNoCode = 'MFA code is missing.';
+  const errMsgTrustDevice = 'trustDevice should be boolean.';
   try {
-    const code = await mfaComplete(context.authenticator.id, context);
-    if (code == null) {
+    const mfaCompleteResult = await mfaComplete(context.authenticator.id, context);
+    if (!isObjectLike(mfaCompleteResult) || mfaCompleteResult.code == null) {
       throw new KinveyError(errMsgNoCode);
     }
-    const mfaResult = await executeCompleteRequest(code);
-    return mfaResult;
+
+    if (mfaCompleteResult.trustDevice != null && !isBoolean(mfaCompleteResult.trustDevice)) {
+      throw new KinveyError(errMsgTrustDevice);
+    }
+    const trustDevice = mfaCompleteResult.trustDevice || false;
+    const mfaData = await executeCompleteRequest(mfaCompleteResult.code, trustDevice);
+    return mfaData;
   } catch (err) {
-    if (err.message === errMsgNoCode || !(err instanceof KinveyError)) {
+    if (err.message === errMsgNoCode || err.message === errMsgTrustDevice || !(err instanceof KinveyError)) {
       throw err;
     }
 
@@ -69,11 +84,16 @@ async function completeMFALoginRetryable(
   }
 }
 
+export interface MFACompleteResult {
+  code: string;
+  trustDevice?: boolean;
+}
+
 async function _loginWithMFA(
   username: string,
   password: string,
   selectAuthenticator: (authenticators: object[], context: MFAContext) => Promise<string>,
-  mfaComplete: (authenticator: string, context: MFAContext) => Promise<string>,
+  mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
   options: LoginOptions = {}
 ): Promise<User> {
   validateNoActiveUser();
@@ -87,10 +107,20 @@ async function _loginWithMFA(
     throw new KinveyError('Function to complete MFA is missing.');
   }
 
+  const userHasDeviceToken = hasDeviceToken(credentials.username);
+  if (userHasDeviceToken) {
+    credentials.deviceToken = getDeviceToken(credentials.username);
+  }
+
   const loginResult = await executeLoginRequest(credentials, options.timeout);
   if (!loginResult.mfaRequired) {
     setSession(loginResult.user);
     return new User(loginResult.user);
+  }
+
+  if (userHasDeviceToken) {
+    // MFA is still required which means that the device token has expired
+    removeDeviceToken(credentials.username);
   }
 
   setMFASessionToken(loginResult.mfaSessionToken);
@@ -112,6 +142,9 @@ async function _loginWithMFA(
   await executeChallengeRequest(selectedAuthenticatorId);
 
   const mfaResult = await completeMFALoginRetryable(mfaComplete, context);
+  if (mfaResult.deviceToken) {
+    setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
+  }
   setSession(mfaResult.user);
   return new User(mfaResult.user);
 }
@@ -120,7 +153,7 @@ export async function loginWithMFA(
   username: string,
   password: string,
   selectAuthenticator: (authenticators: object[], context: MFAContext) => Promise<string>,
-  mfaComplete: (authenticator: string, context: MFAContext) => Promise<string>,
+  mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
   options: LoginOptions = {}
 ): Promise<User> {
   try {
