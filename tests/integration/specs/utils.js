@@ -391,6 +391,22 @@ export async function setupUserWithMFA(appCredentials, shouldLogoutUser = true) 
   };
 }
 
+function buildBaasUrl(path) {
+  const instanceId = process.env.INSTANCE_ID;
+  const isLocalhost = instanceId && instanceId.includes('localhost');
+  let protocol;
+  let domain;
+  if (isLocalhost) {
+    protocol = 'http';
+    domain = instanceId;
+  } else {
+    protocol = 'https';
+    domain = instanceId ? `${instanceId}-baas.kinvey.com` : 'baas.kinvey.com';
+  }
+
+  return `${protocol}://${domain}${path}`;
+}
+
 export async function createVerifiedAuthenticator(userId, sdkConfig, requestLib) {
   const reqOpts = {
     headers: {
@@ -399,14 +415,13 @@ export async function createVerifiedAuthenticator(userId, sdkConfig, requestLib)
       'X-Kinvey-API-Version': 6
     },
     method: 'POST',
-    url: `https://stg-us1-baas.kinvey.com/user/${sdkConfig.appKey}/${userId}/authenticators`, // TODO: kdev-1575 Remove hard-coded URL
+    url: buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators`),
     data: { type: 'totp', name: 'js-sdk-test' }
   };
 
   const response = await makeRequest(reqOpts, true, requestLib);
   const authenticator = response.data;
-  console.log(`--created authenticator: ${JSON.stringify(authenticator, null, 2)}`);
-  reqOpts.url = `https://stg-us1-baas.kinvey.com/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticator.id}/verify`;
+  reqOpts.url = buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticator.id}/verify`);
   reqOpts.data = { code: otpAuthenticator.generate(authenticator.config.secret) };
   const verifyRes = await makeRequest(reqOpts, true, requestLib);
   authenticator.recoveryCodes = verifyRes.data.recoveryCodes || [];
@@ -421,7 +436,7 @@ export async function removeAuthenticator(userId, authenticatorId, sdkConfig, re
       'X-Kinvey-API-Version': 6
     },
     method: 'DELETE',
-    url: `https://stg-us1-baas.kinvey.com/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticatorId}` // TODO: kdev-1575 Remove hard-coded URL
+    url: buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticatorId}`)
   };
 
   return makeRequest(reqOpts, true, requestLib);
