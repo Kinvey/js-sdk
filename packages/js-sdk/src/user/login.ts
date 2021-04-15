@@ -94,8 +94,12 @@ export async function login(username: string | { username?: string, password?: s
     throw new KinveyError('Username and/or password missing. Please provide both a username and password to login.');
   }
 
-  // TODO: kdev-1575 Handle the case where there's no user because MFA is required
-  const { user: session } = await executeLoginRequest(credentials, timeout);
+  const result = await executeLoginRequest(credentials, timeout);
+  if (result.mfaRequired) {
+    throw new KinveyError('MFA login is required.');
+  }
+
+  const session = result.user;
 
   // Merge _socialIdentity
   if (credentials._socialIdentity) {

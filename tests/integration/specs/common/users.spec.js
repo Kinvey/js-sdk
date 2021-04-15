@@ -201,6 +201,12 @@ describe('User tests', () => {
 
       after('cleanup authenticator', async () => utilities.removeAuthenticator(createdUser.data._id, userAuthenticator.id, appCredentials));
 
+      describe('login()', () => {
+        it('should throw an error', async () => {
+          await expect(Kinvey.User.login(username, password)).to.be.rejectedWith('MFA login is required.');
+        });
+      });
+
       describe('loginWithMFA()', () => {
         it('should login a user with correct credentials and code', async () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
