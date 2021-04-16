@@ -170,22 +170,6 @@ describe('User tests', () => {
           })
           .catch(done);
       });
-
-      it('should login a user by providing credentials as an object', (done) => {
-        const username = utilities.randomString();
-        const password = utilities.randomString();
-        Kinvey.User.signup({ username: username, password: password })
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            return Kinvey.User.logout();
-          })
-          .then(() => Kinvey.User.login({ username: username, password: password }))
-          .then((user) => {
-            assertUserData(user, username);
-            done();
-          })
-          .catch(done);
-      });
     });
 
     describe('login when MFA is enabled', () => {

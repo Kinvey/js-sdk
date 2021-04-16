@@ -34,7 +34,7 @@ export class User extends KinveyUser {
     return forgotUsername(email, options);
   }
 
-  static login(username: string | { username?: string, password?: string, _socialIdentity?: any }, password?: string, options?: LoginOptions) {
+  static login(username: string, password: string, options?: LoginOptions) {
     return login(username, password, options);
   }
 

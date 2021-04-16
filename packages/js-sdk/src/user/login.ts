@@ -20,7 +20,15 @@ export function validateNoActiveUser() {
   }
 }
 
-export async function executeLoginRequest(reqBody: object, timeout?: number): Promise<any> {
+export interface LoginRequestBody {
+  username?: string;
+  password?: string;
+  recoveryCode?: string,
+  deviceToken?: string;
+  _socialIdentity?: any;
+}
+
+export async function executeLoginRequest(reqBody: LoginRequestBody, timeout?: number): Promise<any> {
   const request = new KinveyHttpRequest({
     method: HttpRequestMethod.POST,
     auth: KinveyHttpAuth.App,
@@ -68,47 +76,16 @@ export function validateCredentials(username: string, password: string): any {
   return credentials;
 }
 
-export async function login(username: string | { username?: string, password?: string, _socialIdentity?: any }, password?: string, options: LoginOptions = {}) {
+export async function login(username: string, password: string, options: LoginOptions = {}) {
   validateNoActiveUser();
 
-  let credentials: any = { username, password };
-  let timeout = options.timeout;
-
-  if (isPlainObject(username)) {
-    credentials = username;
-
-    if (isPlainObject(password)) {
-      timeout = (password as LoginOptions).timeout;
-    }
-  }
-
-  if (credentials.username) {
-    credentials.username = String(credentials.username).trim();
-  }
-
-  if (credentials.password) {
-    credentials.password = String(credentials.password).trim();
-  }
-
-  if ((!credentials.username || credentials.username === '' || !credentials.password || credentials.password === '') && !credentials._socialIdentity) {
-    throw new KinveyError('Username and/or password missing. Please provide both a username and password to login.');
-  }
-
-  const result = await executeLoginRequest(credentials, timeout);
+  const credentials = validateCredentials(username, password);
+  const result = await executeLoginRequest(credentials, options.timeout);
   if (result.mfaRequired) {
     throw new KinveyError('MFA login is required.');
   }
 
-  const session = result.user;
-
-  // Merge _socialIdentity
-  if (credentials._socialIdentity) {
-    session._socialIdentity = mergeSocialIdentity(credentials._socialIdentity, session._socialIdentity);
-  }
-
-  // Store the active session
-  setSession(session);
-
-  // Return the user
-  return new User(session);
+  const { user } = result;
+  setSession(user);
+  return new User(user);
 }

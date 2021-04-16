@@ -21,15 +21,6 @@ describe('Auth', function() {
       expect(user.username).to.equal(username);
       await User.remove(user._id, { hard: true });
     });
-
-    it('should login by providing credentials as an object', async function() {
-      const username = randomString();
-      const password = randomString();
-      await User.signup({ username, password }, { state: false });
-      const user = await User.login({ username, password });
-      expect(user.username).to.equal(username);
-      await User.remove(user._id, { hard: true });
-    });
   });
 
   describe('logout()', function() {
