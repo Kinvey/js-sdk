@@ -21,6 +21,7 @@ import { User as KinveyUser } from './user';
 import { verifyEmail, VerifyEmailOptions } from './verifyEmail';
 import { registerForLiveService } from './registerForLiveService';
 import { unregisterFromLiveService } from './unregisterFromLiveService';
+import { invalidateTokens } from './invalidateTokens';
 
 
 export { AuthorizationGrant };
@@ -32,6 +33,10 @@ export class User extends KinveyUser {
 
   static forgotUsername(email: string, options?: ForgotUsernameOptions) {
     return forgotUsername(email, options);
+  }
+
+  static invalidateTokens() {
+    return invalidateTokens();
   }
 
   static login(username: string, password: string, options?: LoginOptions) {

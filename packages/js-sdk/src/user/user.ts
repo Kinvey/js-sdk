@@ -247,4 +247,29 @@ export class User {
 
     return this;
   }
+
+  async invalidateTokens() {
+    if (!this.isActive()) {
+      return this;
+    }
+
+    this.unregisterFromLiveService();
+
+    try {
+      const request = new KinveyHttpRequest({
+        method: HttpRequestMethod.DELETE,
+        auth: KinveyHttpAuth.Session,
+        url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${this._id}/tokens`),
+      });
+      await request.execute();
+    } catch (error) {
+      logger.error('Tokens invalidation failed.');
+      logger.error(error.message);
+    }
+
+    removeSession();
+    await QueryCache.clear();
+    await SyncCache.clear();
+    await DataStoreCache.clear();
+  }
 }

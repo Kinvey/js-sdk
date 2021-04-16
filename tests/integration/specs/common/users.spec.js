@@ -431,6 +431,32 @@ describe('User tests', () => {
     });
   });
 
+  describe('invalidateTokens()', () => {
+    let syncDataStore;
+    const username = utilities.randomString();
+    const password = utilities.randomString();
+
+    before('setup data store and user', async () => {
+      syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+      await safelySignUpUser(username, password, true, createdUserIds);
+      if (!Kinvey.User.getActiveUser()) {
+        throw new Error('No active user found.');
+      }
+      await syncDataStore.save({ field: 'value' });
+    });
+
+    it('should invalidate tokens, remove active user and clear data store', async () => {
+      await Kinvey.User.invalidateTokens();
+      expect(Kinvey.User.getActiveUser()).to.not.exist;
+      const dataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
+      const foundItems = await dataStore.find().toPromise();
+      expect(foundItems).to.deep.equal([]);
+
+      // should not throw when called a second time
+      await expect(Kinvey.User.invalidateTokens()).to.not.be.rejected;
+    });
+  });
+
   describe('signup', () => {
     beforeEach((done) => {
       Kinvey.User.logout()
