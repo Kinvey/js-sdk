@@ -555,7 +555,7 @@ describe('AutoStore', function() {
     });
 
     it('should use autopagination when turned on', async function() {
-      const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto, { useAutoPagination: { pageZie: 2 } });
+      const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto, { autoPagination: { pageSize: 2 } });
       const syncTypeCollection = DataStore.collection(collectionName, DataStoreType.Sync);
 
       // Create sample data
@@ -573,6 +573,16 @@ describe('AutoStore', function() {
         const sampleDoc = sampleDocs.find((sampleDoc) => sampleDoc._id === doc._id);
         expect(doc).to.deep.equal(sampleDoc);
       });
+    });
+
+    it('should return 0 when no items exist to be pulled', async function() {
+      const autoTypeCollection = DataStore.collection(collectionName, DataStoreType.Auto, { useAutoPagination: true });
+      const syncTypeCollection = DataStore.collection(collectionName, DataStoreType.Sync);
+
+      expect(await autoTypeCollection.pull(new Query(), { autoPagination: true })).to.equal(0);
+
+      const docs = await syncTypeCollection.find().toPromise();
+      expect(docs.length).to.equal(0);
     });
 
     it('should return error for invalid query');
@@ -1250,7 +1260,7 @@ describe('AutoStore', function() {
         expect(await networkTypeCollection.findById(result.entities[1]._id).toPromise()).to.deep.equal(result.entities[1]);
       });
 
-      it('should create 1000 items in less than 15 seconds', async () => {
+      xit('should create 1000 items in less than 15 seconds', async () => {
         const batchCollectionName = randomString();
         const batchCount = 1000;
 

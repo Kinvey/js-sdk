@@ -3,9 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.1.0...kinvey-angular-sdk@5.1.1) (2021-04-12)
+
+**Note:** Version bump only for package kinvey-js-sdk
+
+
+
+
+
+## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.0.1...kinvey-angular-sdk@5.1.0) (2021-04-08)
+
+* Auto DataStore disregards "skip" and "limit" and fetches up to 10000 items per call. [#581](https://github.com/Kinvey/js-sdk/pull/581)
+
+
+
+
+
 ## [5.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.0.0...kinvey-angular-sdk@5.0.1) (2020-07-22)
 
-**Note:** Version bump only for package kinvey-angular-sdk
+* Multi Insert validations [#569](https://github.com/Kinvey/js-sdk/pull/569)
 
 
 
@@ -13,7 +29,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [5.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@4.2.5...kinvey-angular-sdk@5.0.0) (2020-07-10)
 
-**Note:** Version bump only for package kinvey-angular-sdk
+### Features
+
+* Introducing the Multi Insert functionality
+* Update the default KCS api version to 5 [#566](https://github.com/Kinvey/js-sdk/pull/566)
+* Add `lastLoginTime` to Kinvey metadata [#562](https://github.com/Kinvey/js-sdk/pull/562)
 
 
 

@@ -3,9 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1) (2021-04-12)
+
+
+### Bug Fixes
+
+* The pull function returns an error with Auto store when called with autoPagination: true and there are no items. [#590](https://github.com/Kinvey/js-sdk/pull/590)
+
+
+
+
+
+## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.1...kinvey-js-sdk@5.1.0) (2021-04-08)
+
+
+### Bug Fixes
+
+* Auto DataStore disregards "skip" and "limit" and fetches up to 10000 items per call. [#581](https://github.com/Kinvey/js-sdk/pull/581)
+
+
+
+
+
 ## [5.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.0...kinvey-js-sdk@5.0.1) (2020-07-22)
 
-**Note:** Version bump only for package kinvey-js-sdk
+- Multi Insert validations [#569](https://github.com/Kinvey/js-sdk/pull/569)
 
 
 
@@ -21,10 +43,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-* add lastLoginTime to kinvey metadata ([0124725](https://github.com/Kinvey/js-sdk/commit/0124725))
-* optimize data push ([905b879](https://github.com/Kinvey/js-sdk/commit/905b879))
-* remove local cache only after network results save ([3968b7a](https://github.com/Kinvey/js-sdk/commit/3968b7a))
-* switch default API version to 5 ([ba2cb6e](https://github.com/Kinvey/js-sdk/commit/ba2cb6e))
+* Introducing the Multi Insert functionality
+* Update the default KCS api version to 5 [#566](https://github.com/Kinvey/js-sdk/pull/566)
+* Add `lastLoginTime` to Kinvey metadata [#562](https://github.com/Kinvey/js-sdk/pull/562)
 
 
 
