@@ -336,6 +336,23 @@ describe('User tests', () => {
     });
   });
 
+  describe('me()', () => {
+    let initialActiveUser;
+
+    before(async () => {
+      await safelySignUpUser(utilities.randomString(), null, true, createdUserIds);
+      initialActiveUser = await Kinvey.User.getActiveUser();
+      delete initialActiveUser.data.password;
+    });
+
+    it('should not change authtoken', async () => {
+      const meUser = await Kinvey.User.me();
+      const actualActiveUser = Kinvey.User.getActiveUser();
+      expect(actualActiveUser).to.deep.equal(initialActiveUser);
+      expect(meUser).to.deep.equal(actualActiveUser);
+    });
+  });
+
   describe('update()', () => {
     const username = utilities.randomString();
 
