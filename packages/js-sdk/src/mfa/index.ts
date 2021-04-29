@@ -12,25 +12,25 @@ async function callOnActiveUser(funcName, ...args): Promise<any> {
 }
 
 const Authenticators = {
-  create: async function create(
+  create: function create(
     newAuthenticator: NewMFAAuthenticator,
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>
   ): Promise<CreateMFAAuthenticatorResult> {
     return callOnActiveUser('createAuthenticator', newAuthenticator, verify);
   },
-  list: async function list(): Promise<MFAAuthenticator[]> {
+  list: function list(): Promise<MFAAuthenticator[]> {
     return callOnActiveUser('listAuthenticators');
   },
-  remove: async function remove(id: string) {
+  remove: function remove(id: string): Promise<any> {
     return callOnActiveUser('removeAuthenticator', id);
   },
 };
 
-async function listRecoveryCodes(): Promise<string[]> {
+function listRecoveryCodes(): Promise<string[]> {
   return callOnActiveUser('listRecoveryCodes');
 }
 
-async function regenerateRecoveryCodes(): Promise<string[]> {
+function regenerateRecoveryCodes(): Promise<string[]> {
   return callOnActiveUser('regenerateRecoveryCodes');
 }
 
@@ -38,7 +38,7 @@ async function isEnabled(): Promise<boolean> {
   return (await Authenticators.list()).length > 0;
 }
 
-async function disable() {
+async function disable(): Promise<any> {
   const authenticators = await Authenticators.list();
   const activeUser = getActiveUser();
   return Promise.all(authenticators.map((a) => activeUser.removeAuthenticator(a.id)));
