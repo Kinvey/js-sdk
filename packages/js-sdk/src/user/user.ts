@@ -248,14 +248,12 @@ export class User {
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>,
     context: VerifyContext
   ): Promise<any> {
-    const errMsgNoCode = 'MFA code is missing.';
+    const code = await verify(context.authenticator, context);
+    if (code == null) {
+      throw new KinveyError('MFA code is missing.');
+    }
 
     try {
-      const code = await verify(context.authenticator, context);
-      if (code == null) {
-        throw new KinveyError(errMsgNoCode);
-      }
-
       const request = new KinveyHttpRequest({
         method: HttpRequestMethod.POST,
         auth: KinveyHttpAuth.SessionOrMaster,
@@ -268,10 +266,6 @@ export class User {
       const { data } = await request.execute();
       return data;
     } catch (err) {
-      if (err.message === errMsgNoCode || !(err instanceof KinveyError)) {
-        throw err;
-      }
-
       context.retries += 1; // eslint-disable-line no-param-reassign
       context.error = err; // eslint-disable-line no-param-reassign
       return this._verifyAuthenticatorRetryable(verify, context);
