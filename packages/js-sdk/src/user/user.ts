@@ -215,40 +215,7 @@ export class User {
     return true;
   }
 
-  async logout(options: { timeout?: number } = {}) {
-    if (this.isActive()) {
-      // TODO: unregister push
-
-      // Unregister from Live Service
-      this.unregisterFromLiveService();
-
-      try {
-        // Logout
-        const request = new KinveyHttpRequest({
-          method: HttpRequestMethod.POST,
-          auth: KinveyHttpAuth.Session,
-          url: formatKinveyBaasUrl(KinveyBaasNamespace.User, '/_logout'),
-          timeout: options.timeout
-        });
-        await request.execute();
-      } catch (error) {
-        logger.error('Logout request failed.');
-        logger.error(error.message);
-      }
-
-      // Remove the session
-      removeSession();
-
-      // Clear cache's
-      await QueryCache.clear();
-      await SyncCache.clear();
-      await DataStoreCache.clear();
-    }
-
-    return this;
-  }
-
-  async invalidateTokens() {
+  async _cleanup(kinveyRequest, operationName) {
     if (!this.isActive()) {
       return this;
     }
@@ -256,14 +223,9 @@ export class User {
     this.unregisterFromLiveService();
 
     try {
-      const request = new KinveyHttpRequest({
-        method: HttpRequestMethod.DELETE,
-        auth: KinveyHttpAuth.Session,
-        url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${this._id}/tokens`),
-      });
-      await request.execute();
+      await kinveyRequest.execute();
     } catch (error) {
-      logger.error('Tokens invalidation failed.');
+      logger.error(`${operationName} failed.`);
       logger.error(error.message);
     }
 
@@ -271,5 +233,26 @@ export class User {
     await QueryCache.clear();
     await SyncCache.clear();
     await DataStoreCache.clear();
+    return this;
+  }
+
+  async logout(options: { timeout?: number } = {}) {
+    const request = new KinveyHttpRequest({
+      method: HttpRequestMethod.POST,
+      auth: KinveyHttpAuth.Session,
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.User, '/_logout'),
+      timeout: options.timeout,
+    });
+    return this._cleanup(request, 'Logout request');
+  }
+
+  async invalidateTokens() {
+    const request = new KinveyHttpRequest({
+      method: HttpRequestMethod.DELETE,
+      auth: KinveyHttpAuth.Session,
+      url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${this._id}/tokens`),
+    });
+
+    return this._cleanup(request, 'Tokens invalidation');
   }
 }
