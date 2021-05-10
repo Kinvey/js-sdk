@@ -61,23 +61,20 @@ async function completeMFALoginRetryable(
 ): Promise<any> {
   const errMsgNoCode = 'MFA code is missing.';
   const errMsgTrustDevice = 'trustDevice should be boolean.';
-  try {
-    const mfaCompleteResult = await mfaComplete(context.authenticator.id, context);
-    if (!isObjectLike(mfaCompleteResult) || mfaCompleteResult.code == null) {
-      throw new KinveyError(errMsgNoCode);
-    }
+  const mfaCompleteResult = await mfaComplete(context.authenticator.id, context);
+  if (!isObjectLike(mfaCompleteResult) || mfaCompleteResult.code == null) {
+    throw new KinveyError(errMsgNoCode);
+  }
 
-    if (mfaCompleteResult.trustDevice != null && !isBoolean(mfaCompleteResult.trustDevice)) {
-      throw new KinveyError(errMsgTrustDevice);
-    }
+  if (mfaCompleteResult.trustDevice != null && !isBoolean(mfaCompleteResult.trustDevice)) {
+    throw new KinveyError(errMsgTrustDevice);
+  }
+
+  try {
     const trustDevice = mfaCompleteResult.trustDevice || false;
     const mfaData = await executeCompleteRequest(mfaCompleteResult.code, trustDevice);
     return mfaData;
   } catch (err) {
-    if (err.message === errMsgNoCode || err.message === errMsgTrustDevice || !(err instanceof KinveyError)) {
-      throw err;
-    }
-
     context.retries += 1; // eslint-disable-line no-param-reassign
     context.error = err; // eslint-disable-line no-param-reassign
     return completeMFALoginRetryable(mfaComplete, context);
