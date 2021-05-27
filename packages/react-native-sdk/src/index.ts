@@ -16,13 +16,14 @@ import {
   AuthorizationGrant
 } from 'kinvey-js-sdk';
 import { init, initialize } from './init';
+import { StorageProvider } from './storage';
 
 // SDK
 export {
   // Init
   init,
   initialize,
-  // StorageProvider,
+  StorageProvider,
 
   // App Version
   getAppVersion,

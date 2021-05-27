@@ -3,7 +3,7 @@ jest.mock('kinvey-js-sdk/lib/http');
 
 import PushNotification from 'react-native-push-notification';
 import { KinveyHttpRequest } from 'kinvey-js-sdk/lib/http';
-import { register, unregister } from '../push';
+import { register, unregister } from '../src/push';
 
 describe('register()', () => {
   test('should configure react native push notification module', async () => {
