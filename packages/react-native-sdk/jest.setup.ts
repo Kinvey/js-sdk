@@ -2,6 +2,17 @@ import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/asy
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
+const TEST_DEVICE_INFO = {
+  os: 'macos',
+  token: 'push_test_token'
+};
+
+jest.mock('react-native-push-notification', () => ({
+  TEST_DEVICE_INFO,
+  configure: jest.fn((options) => options.onRegister(TEST_DEVICE_INFO)),
+  unregister: jest.fn()
+}));
+
 jest.mock('@react-native-community/push-notification-ios', () => {
   return {
     addEventListener: jest.fn(),

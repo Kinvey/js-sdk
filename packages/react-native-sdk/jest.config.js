@@ -13,7 +13,7 @@ const config = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testRegex: '(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
-  setupFiles: ['<rootDir>/jest/setup.ts'],
+  setupFiles: ['<rootDir>/jest.setup.ts'],
   transformIgnorePatterns: ['node_modules/(?!(jest-)?react-native|@react-native)'],
   coveragePathIgnorePatterns: ['/node_modules/', '/jest', '/demo'],
   testPathIgnorePatterns: ['/node_modules/', '/demo']
