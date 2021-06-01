@@ -85,7 +85,7 @@ describe('User tests', () => {
       .catch(done);
   });
 
-  describe.only('login', () => {
+  describe('login', () => {
     before((done) => {
       Kinvey.User.logout()
         .then(() => done());
