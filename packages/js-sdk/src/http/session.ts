@@ -53,7 +53,7 @@ export function removeMFASessionToken(): boolean {
 }
 
 function getDeviceTokenKey(username: string): string {
-  return `${getAppKey()}.${username}`;
+  return `${getAppKey()}.${username}.device_token`;
 }
 
 export function getDeviceToken(username: string): string | undefined {
