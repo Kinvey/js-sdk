@@ -111,10 +111,10 @@ export class User {
       method: HttpRequestMethod.GET,
       auth: KinveyHttpAuth.Session,
       url: formatKinveyBaasUrl(KinveyBaasNamespace.User, '/_me'),
-      timeout: options.timeout
+      timeout: options.timeout,
     });
     const response = await request.execute();
-    const data = response.data;
+    const { data } = response;
 
     // Remove sensitive data
     delete data.password;
@@ -126,6 +126,7 @@ export class User {
 
     // Update the active session
     if (this.isActive()) {
+      data._kmd.authtoken = this.authtoken;
       setSession(data);
     }
 
