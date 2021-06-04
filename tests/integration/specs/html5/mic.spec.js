@@ -177,7 +177,7 @@ describe.skip('MIC Integration', () => {
   it('should login the user, using the default Auth service, which allows refresh tokens', (done) => {
     addLoginFacebookHandler();
     Kinvey.User.loginWithRedirectUri(redirectUrl)
-      .then((user) => {
+      .then(async (user) => {
         await validateMICUser(user, true);
         return Kinvey.User.exists(user.username);
       })
@@ -191,7 +191,7 @@ describe.skip('MIC Integration', () => {
   it('should login the user, using loginWithMIC()', (done) => {
     addLoginFacebookHandler();
     Kinvey.User.loginWithMIC(redirectUrl)
-      .then((user) => {
+      .then(async (user) => {
         await validateMICUser(user, true);
         return Kinvey.User.exists(user.username);
       })
@@ -205,7 +205,7 @@ describe.skip('MIC Integration', () => {
   it('should login the user, using the specified Auth service, which does not allow refresh tokens', (done) => {
     addLoginFacebookHandler();
     Kinvey.User.loginWithRedirectUri(redirectUrl, { micId: noRefreshAuthServiceId })
-      .then((user) => {
+      .then(async (user) => {
         await validateMICUser(user, false, true);
         return validateSuccessfulDataRead(done);
       })
