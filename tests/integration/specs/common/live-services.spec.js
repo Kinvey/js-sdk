@@ -72,9 +72,9 @@ describe('Live-services', function() {
       });
   });
 
-  xit('should subscribe user and receive messages for created items', async () => {
-    const activeUser = await Kinvey.User.getActiveUser();
-    return activeUser.registerForLiveService()
+  xit('should subscribe user and receive messages for created items', (done) => {
+    Kinvey.User.getActiveUser()
+      .then(activeUser => activeUser.registerForLiveService())
       .then((res) => {
         expect(res).to.equal(true);
         if (Kinvey.StorageProvider.Memory === undefined && Kinvey.StorageProvider.SQLite === undefined){
@@ -96,18 +96,22 @@ describe('Live-services', function() {
               .then((res) => {
                 setTimeout(()=>{
                   expect(utilities.deleteEntityMetadata(messageCreated)).to.deep.equal(entity3);
+                  done();
                 }, 4000)
-              });
-          });
-      });
+              })
+              .catch(done);
+          })
+          .catch(done);
+      })
+      .catch(done);
   });
 
-  it('should subscribe user and receive messages for updated items', async () => {
+  it('should subscribe user and receive messages for updated items', (done) => {
     const updatedEntity = Object.assign({}, entity1)
     updatedEntity.textField = 'updatedField';
 
-    const activeUser = await Kinvey.User.getActiveUser();
-    return activeUser.registerForLiveService()
+    Kinvey.User.getActiveUser()
+      .then(activeUser => activeUser.registerForLiveService())
       .then((res) => {
         expect(res).to.equal(true);
         if (Kinvey.StorageProvider.Memory === undefined && Kinvey.StorageProvider.SQLite === undefined){
@@ -129,9 +133,13 @@ describe('Live-services', function() {
               .then(() => {
                 setTimeout(()=>{
                   expect(utilities.deleteEntityMetadata(messageUpdated)).to.deep.equal(updatedEntity);
+                  done();
                 }, 4000)
-              });
-          });
-      });
+              })
+              .catch(done);
+          })
+          .catch(done);
+      })
+      .catch(done);
   });
 });
