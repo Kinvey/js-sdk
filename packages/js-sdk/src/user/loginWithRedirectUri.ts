@@ -15,7 +15,7 @@ export interface MICOptions {
 }
 
 export async function loginWithRedirectUri(redirectUri: string, options: MICOptions = {}) {
-  const activeUser = getActiveUser();
+  const activeUser = await getActiveUser();
   const { micId, version } = options;
   let clientId = getAppKey();
 

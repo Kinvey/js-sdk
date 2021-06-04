@@ -10,7 +10,7 @@ export async function loginWithRecoveryCode(
   recoveryCode: string,
   options: LoginOptions = {}
 ): Promise<User> {
-  validateNoActiveUser();
+  await validateNoActiveUser();
 
   const credentials = validateCredentials(username, password);
   const trimmedCode = trim(recoveryCode);
@@ -20,6 +20,6 @@ export async function loginWithRecoveryCode(
 
   credentials.recoveryCode = trimmedCode;
   const loginResult = await executeLoginRequest(credentials, options.timeout);
-  setSession(loginResult.user);
+  await setSession(loginResult.user);
   return new User(loginResult.user);
 }

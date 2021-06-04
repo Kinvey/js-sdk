@@ -54,8 +54,8 @@ const expireFBCookie = (fbWindow, cookieName, cookieValue, expiredDays) => {
   fbWindow.document.cookie = newValue;
 };
 
-const validateMICUser = (user, allowRefreshTokens, explicitAuthServiceId) => {
-  expect(user).to.deep.equal(Kinvey.User.getActiveUser());
+const validateMICUser = async (user, allowRefreshTokens, explicitAuthServiceId) => {
+  expect(user).to.deep.equal(await Kinvey.User.getActiveUser());
 
   const userData = user.data;
   const kinveyAuth = userData._socialIdentity.kinveyAuth;
@@ -178,7 +178,7 @@ describe.skip('MIC Integration', () => {
     addLoginFacebookHandler();
     Kinvey.User.loginWithRedirectUri(redirectUrl)
       .then((user) => {
-        validateMICUser(user, true);
+        await validateMICUser(user, true);
         return Kinvey.User.exists(user.username);
       })
       .then((existsOnServer) => {
@@ -192,7 +192,7 @@ describe.skip('MIC Integration', () => {
     addLoginFacebookHandler();
     Kinvey.User.loginWithMIC(redirectUrl)
       .then((user) => {
-        validateMICUser(user, true);
+        await validateMICUser(user, true);
         return Kinvey.User.exists(user.username);
       })
       .then((existsOnServer) => {
@@ -206,7 +206,7 @@ describe.skip('MIC Integration', () => {
     addLoginFacebookHandler();
     Kinvey.User.loginWithRedirectUri(redirectUrl, { micId: noRefreshAuthServiceId })
       .then((user) => {
-        validateMICUser(user, false, true);
+        await validateMICUser(user, false, true);
         return validateSuccessfulDataRead(done);
       })
       .catch(done);
