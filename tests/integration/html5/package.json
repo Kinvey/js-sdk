@@ -23,7 +23,6 @@
     "chai": "~4.2.0",
     "core-js": "^3.0.1",
     "dotenv": "~7.0.0",
-    "glob-promise": "~3.4.0",
     "idb": "~4.0.4",
     "karma": "~4.0.1",
     "karma-chrome-launcher": "~2.2.0",
