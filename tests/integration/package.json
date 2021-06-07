@@ -8,7 +8,7 @@
     "chai-as-promised": "7.1.1",
     "dotenv": "~7.0.0",
     "glob-promise": "3.4.0",
-    "otp.js": "1.2.0",
+    "otplib": "12.0.1",
     "yargs": "^15.3.1"
   }
 }

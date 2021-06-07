@@ -1,5 +1,4 @@
 const argv = require('yargs').argv;
-const isArray = require('lodash/isArray');
 const fs = require('fs-extra');
 const path = require('path');
 const glob = require('glob-promise');
@@ -17,7 +16,7 @@ function build(file) {
   let singular = false;
   let files = file;
 
-  if (!isArray(file)) {
+  if (!Array.isArray(file)) {
     singular = true;
     files = [file];
   }
