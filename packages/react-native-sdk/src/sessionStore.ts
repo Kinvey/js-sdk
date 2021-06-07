@@ -1,14 +1,14 @@
 const store = new Map();
 
-export async function get(key: string): Promise<string> {
+export function get(key: string): string {
   return store.get(key);
 }
 
-export async function set(key: string, session: string): Promise<boolean> {
+export function set(key: string, session: string): boolean {
   store.set(key, session);
   return true;
 }
 
-export async function remove(key: string): Promise<boolean> {
+export function remove(key: string): boolean {
   return store.delete(key);
 }

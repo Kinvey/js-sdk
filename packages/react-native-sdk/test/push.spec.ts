@@ -45,7 +45,7 @@ describe('register()', () => {
         platform: 'macos',
         framework: 'react-native',
         // @ts-ignore
-        deviceId: PushNotification.TEST_DEVICE_INFO.token,
+        deviceId: 'push_test_token',
         service: 'firebase'
       }
     });
@@ -54,14 +54,17 @@ describe('register()', () => {
   test('should return device token', async () => {
     const token = await register();
     // @ts-ignore
-    expect(token).toEqual(PushNotification.TEST_DEVICE_INFO.token);
+    expect(token).toEqual('push_test_token');
   });
 
   test('should call onRegister callback', async () => {
     const onRegister = jest.fn();
     await register({ onRegister });
     // @ts-ignore
-    expect(onRegister).toBeCalledWith(PushNotification.TEST_DEVICE_INFO);
+    expect(onRegister).toBeCalledWith({
+      os: 'macos',
+      token: 'push_test_token'
+    });
   });
 });
 
@@ -76,7 +79,7 @@ describe('unregister()', () => {
         platform: 'macos',
         framework: 'react-native',
         // @ts-ignore
-        deviceId: PushNotification.TEST_DEVICE_INFO.token,
+        deviceId: 'push_test_token',
         service: 'firebase'
       }
     });
