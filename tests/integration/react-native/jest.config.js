@@ -126,7 +126,6 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
-    '<rootDir>/node_modules/kinvey-react-native-sdk/jest.setup.ts',
     '<rootDir>/jest.setup.ts'
   ],
 

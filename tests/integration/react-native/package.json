@@ -3,25 +3,28 @@
   "description": "Integration tests for kinvey-react-native-sdk.",
   "version": "0.0.1",
   "scripts": {
-    "pretest": "node ../setup.js --target=react-native && node ../copy-specs.js --target=react-native --runner=jest",
+    "symlink-js-sdk": "symlink-dir ../../../packages/js-sdk ../../../packages/node_modules/kinvey-js-sdk",
+    "build-js-sdk": "cd ../../../packages/js-sdk && npm run build",
+    "build": "cd ../../../packages/react-native-sdk/ && npm i --no-audit && rimraf node_modules/kinvey-js-sdk && npm run build",
+    "pretest": "npm run symlink-js-sdk && npm run build-js-sdk && npm run build && node ../setup.js --target=react-native && node ../copy-specs.js --target=react-native --runner=jest",
     "test": "jest -i",
     "posttest": "node ../clean.js --target=react-native"
   },
-  "dependencies": {
-    "kinvey-react-native-sdk": "file:../../../packages/react-native-sdk"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "7.14.3",
     "@babel/runtime": "7.14.0",
     "@react-native-async-storage/async-storage": "1.15.4",
     "@react-native-community/push-notification-ios": "1.8.0",
-    "babel-jest": "26.6.3",
+    "babel-jest": "27.0.2",
     "chai": "4.3.4",
     "dotenv": "7.0.0",
+    "jest": "26.6.3",
     "metro-react-native-babel-preset": "0.66.0",
     "react": "17.0.1",
     "react-native": "0.64.1",
     "react-native-push-notification": "7.3.1",
-    "sinon": "10.0.0"
+    "sinon": "10.0.0",
+    "symlink-dir": "~4.0.3"
   }
 }
