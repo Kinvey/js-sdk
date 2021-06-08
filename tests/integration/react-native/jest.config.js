@@ -126,6 +126,7 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
+    '<rootDir>/../../../packages/react-native-sdk/jest.setup.ts',
     '<rootDir>/jest.setup.ts'
   ],
 
