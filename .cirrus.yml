@@ -28,5 +28,5 @@ task:
       js_install_script: cd packages/js-sdk && npm ci
       html5_install_script: cd packages/html5-sdk && npm ci
       chrome_install_script: npm i chromium
-      chrome_deps_install_script: apt-get update && apt-get install -y libnss3 libatk-bridge2.0-0 libx11-xcb1 libxcb-dri3-0 libdrm2 libgbm-dev libasound2 libxss1 libgtk-3-0
+      chrome_deps_install_script: apt-get update && apt-get install -y libnss3 libatk-bridge2.0-0 libx11-xcb1 libxcb-dri3-0 libdrm2 libgbm-dev libasound2 libxss1 libgtk-3-0 libxshmfence1
       html5int_script: npm run test-integration:html5
