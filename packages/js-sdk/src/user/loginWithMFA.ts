@@ -147,6 +147,7 @@ async function _loginWithMFA(
   if (mfaResult.deviceToken) {
     setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
   }
+  removeMFASessionToken();
   setSession(mfaResult.user);
   return new User(mfaResult.user);
 }
