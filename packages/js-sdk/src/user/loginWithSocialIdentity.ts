@@ -6,6 +6,6 @@ import { executeLoginRequest } from './login';
 export async function loginWithSocialIdentity(socialIdentity: any): Promise<User> {
   const { user } = await executeLoginRequest({ _socialIdentity: socialIdentity });
   user._socialIdentity = mergeSocialIdentity(socialIdentity, user._socialIdentity);
-  setSession(user);
+  await setSession(user);
   return new User(user);
 }

@@ -13,8 +13,8 @@ export interface LoginOptions {
   timeout?: number;
 }
 
-export function validateNoActiveUser() {
-  const activeUser = getActiveUser();
+export async function validateNoActiveUser() {
+  const activeUser = await getActiveUser();
   if (activeUser) {
     throw new ActiveUserError('An active user already exists. Please logout the active user before you login.');
   }
@@ -77,7 +77,7 @@ export function validateCredentials(username: string, password: string): any {
 }
 
 export async function login(username: string, password: string, options: LoginOptions = {}) {
-  validateNoActiveUser();
+  await validateNoActiveUser();
 
   const credentials = validateCredentials(username, password);
   const result = await executeLoginRequest(credentials, options.timeout);
@@ -86,6 +86,6 @@ export async function login(username: string, password: string, options: LoginOp
   }
 
   const { user } = result;
-  setSession(user);
+  await setSession(user);
   return new User(user);
 }

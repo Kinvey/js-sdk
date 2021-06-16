@@ -98,7 +98,7 @@ async function _loginWithMFA(
   mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
   options: LoginOptions = {}
 ): Promise<User> {
-  validateNoActiveUser();
+  await validateNoActiveUser();
 
   const credentials = validateCredentials(username, password);
   if (!selectAuthenticator) {
@@ -109,23 +109,23 @@ async function _loginWithMFA(
     throw new KinveyError('Function to complete MFA is missing.');
   }
 
-  const userHasDeviceToken = hasDeviceToken(credentials.username);
+  const userHasDeviceToken = await hasDeviceToken(credentials.username);
   if (userHasDeviceToken) {
-    credentials.deviceToken = getDeviceToken(credentials.username);
+    credentials.deviceToken = await getDeviceToken(credentials.username);
   }
 
   const loginResult = await executeLoginRequest(credentials, options.timeout);
   if (!loginResult.mfaRequired) {
-    setSession(loginResult.user);
+    await setSession(loginResult.user);
     return new User(loginResult.user);
   }
 
   if (userHasDeviceToken) {
     // MFA is still required which means that the device token has expired
-    removeDeviceToken(credentials.username);
+    await removeDeviceToken(credentials.username);
   }
 
-  setMFASessionToken(loginResult.mfaSessionToken);
+  await setMFASessionToken(loginResult.mfaSessionToken);
   if (loginResult.authenticators.length === 0) {
     throw new KinveyError(errMsgNoAuthenticators);
   }
@@ -145,9 +145,9 @@ async function _loginWithMFA(
 
   const mfaResult = await completeMFALoginRetryable(mfaComplete, context, 10);
   if (mfaResult.deviceToken) {
-    setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
+    await setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
   }
-  setSession(mfaResult.user);
+  await setSession(mfaResult.user);
   return new User(mfaResult.user);
 }
 
@@ -162,7 +162,7 @@ export async function loginWithMFA(
     return _loginWithMFA(username, password, selectAuthenticator, mfaComplete, options);
   } catch (err) {
     if (err.message !== errMsgNoAuthenticators) {
-      removeMFASessionToken();
+      await removeMFASessionToken();
     }
 
     throw err;

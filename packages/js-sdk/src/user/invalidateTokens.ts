@@ -1,7 +1,7 @@
 import { getActiveUser } from './getActiveUser';
 
 export async function invalidateTokens() {
-  const activeUser = getActiveUser();
+  const activeUser = await getActiveUser();
 
   if (!activeUser) {
     return null;

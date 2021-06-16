@@ -70,7 +70,7 @@ export class UserService {
     return User.update(data, options);
   }
 
-  getActiveUser(): User {
+  getActiveUser(): Promise<User> {
     return User.getActiveUser();
   }
 
