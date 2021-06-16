@@ -6,6 +6,8 @@ import {
   getSession,
   setSession,
   removeSession,
+  removeMFASessionToken,
+  removeDeviceToken,
   formatKinveyBaasUrl,
   HttpRequestMethod,
   KinveyHttpRequest,
@@ -86,8 +88,8 @@ export class User {
     return undefined;
   }
 
-  isActive() {
-    const activeUser = getSession();
+  async isActive(): Promise<boolean> {
+    const activeUser = await getSession();
     if (activeUser && activeUser._id === this._id) {
       return true;
     }
@@ -125,9 +127,9 @@ export class User {
     }
 
     // Update the active session
-    if (this.isActive()) {
+    if (await this.isActive()) {
       data._kmd.authtoken = this.authtoken;
-      setSession(data);
+      await setSession(data);
     }
 
     this.data = data;
@@ -168,8 +170,8 @@ export class User {
     }
 
     // Update the active session
-    if (this.isActive()) {
-      setSession(updatedData);
+    if (await this.isActive()) {
+      await setSession(updatedData);
     }
 
     this.data = updatedData;
@@ -216,8 +218,8 @@ export class User {
     return true;
   }
 
-  async _cleanup(kinveyRequest, operationName) {
-    if (!this.isActive()) {
+  async _cleanup(kinveyRequest, operationName, cleanEntireSessionStore = false) {
+    if (!(await this.isActive())) {
       return this;
     }
 
@@ -230,7 +232,12 @@ export class User {
       logger.error(error.message);
     }
 
-    removeSession();
+    await removeSession();
+    if (cleanEntireSessionStore) {
+      await removeMFASessionToken();
+      await removeDeviceToken(this.data.username);
+    }
+
     await QueryCache.clear();
     await SyncCache.clear();
     await DataStoreCache.clear();
@@ -254,6 +261,6 @@ export class User {
       url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${this._id}/tokens`),
     });
 
-    return this._cleanup(request, 'Tokens invalidation');
+    return this._cleanup(request, 'Tokens invalidation', true);
   }
 }

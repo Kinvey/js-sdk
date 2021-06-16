@@ -7,9 +7,9 @@ export interface SessionObject extends Entity {
 }
 
 export interface SessionStore {
-  get(key: string): string | null;
-  set(key: string, session: string): boolean;
-  remove(key: string): boolean;
+  get(key: string): Promise<string>;
+  set(key: string, session: string): Promise<boolean>;
+  remove(key: string): Promise<boolean>;
 }
 
 function getStore() {
@@ -20,19 +20,19 @@ export function getKey() {
   return `${getAppKey()}.active_user`;
 }
 
-export function getSession(): SessionObject | null {
-  const session = getStore().get(getKey());
+export async function getSession(): Promise<SessionObject> {
+  const session = await getStore().get(getKey());
   if (session) {
     return JSON.parse(session);
   }
   return null;
 }
 
-export function setSession(session: SessionObject): boolean {
+export async function setSession(session: SessionObject): Promise<boolean> {
   return getStore().set(getKey(), JSON.stringify(session));
 }
 
-export function removeSession(): boolean {
+export async function removeSession(): Promise<boolean> {
   return getStore().remove(getKey());
 }
 
@@ -40,15 +40,15 @@ function getMFAKey(): string {
   return `${getAppKey()}.mfa_session_token`;
 }
 
-export function getMFASessionToken(): string | undefined {
+export async function getMFASessionToken(): Promise<string> {
   return getStore().get(getMFAKey());
 }
 
-export function setMFASessionToken(token: string): boolean {
+export async function setMFASessionToken(token: string): Promise<boolean> {
   return getStore().set(getMFAKey(), token);
 }
 
-export function removeMFASessionToken(): boolean {
+export async function removeMFASessionToken(): Promise<boolean> {
   return getStore().remove(getMFAKey());
 }
 
@@ -56,18 +56,19 @@ function getDeviceTokenKey(username: string): string {
   return `${getAppKey()}.${username}.device_token`;
 }
 
-export function getDeviceToken(username: string): string | undefined {
+export async function getDeviceToken(username: string): Promise<string> {
   return getStore().get(getDeviceTokenKey(username));
 }
 
-export function hasDeviceToken(username: string): boolean {
-  return getDeviceToken(username) != null;
+export async function hasDeviceToken(username: string): Promise<boolean> {
+  const deviceToken = await getDeviceToken(username);
+  return deviceToken != null;
 }
 
-export function setDeviceToken(username: string, deviceToken: string): boolean {
+export async function setDeviceToken(username: string, deviceToken: string): Promise<boolean> {
   return getStore().set(getDeviceTokenKey(username), deviceToken);
 }
 
-export function removeDeviceToken(username: string): boolean {
+export async function removeDeviceToken(username: string): Promise<boolean> {
   return getStore().remove(getDeviceTokenKey(username));
 }
