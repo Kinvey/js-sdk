@@ -1,3 +1,4 @@
+import { parse, UrlWithParsedQuery } from 'url';
 import { EventEmitter } from 'events';
 import { Linking } from 'react-native'
 import { InAppBrowser } from 'react-native-inappbrowser-reborn'
@@ -7,7 +8,9 @@ const CLOSED_EVENT = 'closed';
 const ERROR_EVENT = 'error';
 
 class PopupBrowser extends EventEmitter {
+  private authUrl: UrlWithParsedQuery;
   private isOpen: boolean;
+  private isRedirected: boolean;
   private authPromise: Promise<any>;
 
   isClosed() {
@@ -26,19 +29,37 @@ class PopupBrowser extends EventEmitter {
     return this.on(ERROR_EVENT, listener);
   }
 
+  handleDeeplinkCallback({ url }) {
+    if (this.isRedirected) {
+      return;
+    }
+
+    // Check if this is the expected callback
+    if (url && url.indexOf(this.authUrl.query.redirect_uri) === 0) {
+      this.isRedirected = true;
+      this.emit(LOADED_EVENT, { url });
+    }
+  }
+
   async open(url: string): Promise<PopupBrowser> {
     if (await InAppBrowser.isAvailable() == false) {
       throw new Error('In-app browser not available.');
     }
 
+    this.authUrl = parse(url, true);;
+    Linking.addEventListener('url', this.handleDeeplinkCallback.bind(this));
+
     this.isOpen = true;
     this.authPromise = InAppBrowser.openAuth(url, null)
       .then((authResult) => {
         const loadedArgs = { url };
+
+        // If result is not successful, just wait for handleDeeplinkCallback to be called
         if (authResult.type === 'success' && authResult.url) {
           loadedArgs.url = authResult.url; // Provide the full url containing the auth code
+          this.isRedirected = true;
+          this.emit(LOADED_EVENT, loadedArgs);
         }
-        this.emit(LOADED_EVENT, loadedArgs);
       })
       .catch((err) => {
         this.emit(ERROR_EVENT, err);
@@ -48,7 +69,10 @@ class PopupBrowser extends EventEmitter {
   }
 
   async close(): Promise<void> {
+    Linking.removeEventListener('url', this.handleDeeplinkCallback);
+
     this.isOpen = false;
+    this.isRedirected = false;
     this.authPromise = null;
     this.emit(CLOSED_EVENT);
   }
