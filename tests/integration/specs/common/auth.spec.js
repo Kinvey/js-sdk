@@ -30,7 +30,7 @@ describe('Auth', function() {
       const user = await User.signup({ username, password });
       await User.logout();
       expect(await User.getActiveUser()).to.be.null;
-      await User.login({ username, password });
+      await User.login(username, password);
       await User.remove(user._id, { hard: true });
     });
 
@@ -64,7 +64,7 @@ describe('Auth', function() {
       const password = randomString();
       const user = await User.signup({ username, password }, { state: false });
       expect(await User.getActiveUser()).to.be.null;
-      await User.login({ username, password });
+      await User.login(username, password);
       await User.remove(user._id, { hard: true });
     });
 
