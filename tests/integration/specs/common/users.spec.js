@@ -218,6 +218,17 @@ describe('User tests', () => {
           await assertUserData(user, username);
         });
 
+        it('should call mfaComplete max 10 times when code is incorrect', async () => {
+          let actualAttemptsCount = 0;
+          const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
+          const mfaComplete = () => {
+            actualAttemptsCount +=1;
+            return { code: '111999' };
+          };
+          await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('Max retries count exceeded.');
+          expect(actualAttemptsCount).to.equal(10);
+        });
+
         it('should throw an error when selectAuthenticator returns null', async () => {
           const selectAuthenticator = () => null;
           const mfaComplete = () => { return { code: otpAuthenticator.generate(userAuthenticator.config.secret) }};

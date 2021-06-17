@@ -57,8 +57,13 @@ async function executeCompleteRequest(code, trustDevice = false): Promise<object
 
 async function completeMFALoginRetryable(
   mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
-  context: MFAContext
+  context: MFAContext,
+  maxRetriesCount: number
 ): Promise<any> {
+  if (context.retries >= maxRetriesCount) {
+    throw new KinveyError('Max retries count exceeded.');
+  }
+
   const errMsgNoCode = 'MFA code is missing.';
   const errMsgTrustDevice = 'trustDevice should be boolean.';
   const mfaCompleteResult = await mfaComplete(context.authenticator.id, context);
@@ -77,7 +82,7 @@ async function completeMFALoginRetryable(
   } catch (err) {
     context.retries += 1; // eslint-disable-line no-param-reassign
     context.error = err; // eslint-disable-line no-param-reassign
-    return completeMFALoginRetryable(mfaComplete, context);
+    return completeMFALoginRetryable(mfaComplete, context, maxRetriesCount);
   }
 }
 
@@ -138,10 +143,11 @@ async function _loginWithMFA(
   context.authenticator = loginResult.authenticators.find((a) => a.id === selectedAuthenticatorId);
   await executeChallengeRequest(selectedAuthenticatorId);
 
-  const mfaResult = await completeMFALoginRetryable(mfaComplete, context);
+  const mfaResult = await completeMFALoginRetryable(mfaComplete, context, 10);
   if (mfaResult.deviceToken) {
     await setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
   }
+  await removeMFASessionToken();
   await setSession(mfaResult.user);
   return new User(mfaResult.user);
 }
