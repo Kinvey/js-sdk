@@ -6,6 +6,8 @@ import {
   getSession,
   setSession,
   removeSession,
+  removeMFASessionToken,
+  removeDeviceToken,
   formatKinveyBaasUrl,
   HttpRequestMethod,
   KinveyHttpRequest,
@@ -216,7 +218,7 @@ export class User {
     return true;
   }
 
-  async _cleanup(kinveyRequest, operationName) {
+  async _cleanup(kinveyRequest, operationName, cleanEntireSessionStore = false) {
     if (!(await this.isActive())) {
       return this;
     }
@@ -231,6 +233,11 @@ export class User {
     }
 
     await removeSession();
+    if (cleanEntireSessionStore) {
+      await removeMFASessionToken();
+      await removeDeviceToken(this.data.username);
+    }
+
     await QueryCache.clear();
     await SyncCache.clear();
     await DataStoreCache.clear();
@@ -254,6 +261,6 @@ export class User {
       url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${this._id}/tokens`),
     });
 
-    return this._cleanup(request, 'Tokens invalidation');
+    return this._cleanup(request, 'Tokens invalidation', true);
   }
 }
