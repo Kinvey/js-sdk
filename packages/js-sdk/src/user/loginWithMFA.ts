@@ -57,8 +57,13 @@ async function executeCompleteRequest(code, trustDevice = false): Promise<object
 
 async function completeMFALoginRetryable(
   mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
-  context: MFAContext
+  context: MFAContext,
+  maxRetriesCount: number
 ): Promise<any> {
+  if (context.retries >= maxRetriesCount) {
+    throw new KinveyError('Max retries count exceeded.');
+  }
+
   const errMsgNoCode = 'MFA code is missing.';
   const errMsgTrustDevice = 'trustDevice should be boolean.';
   const mfaCompleteResult = await mfaComplete(context.authenticator.id, context);
@@ -77,7 +82,7 @@ async function completeMFALoginRetryable(
   } catch (err) {
     context.retries += 1; // eslint-disable-line no-param-reassign
     context.error = err; // eslint-disable-line no-param-reassign
-    return completeMFALoginRetryable(mfaComplete, context);
+    return completeMFALoginRetryable(mfaComplete, context, maxRetriesCount);
   }
 }
 
@@ -93,7 +98,7 @@ async function _loginWithMFA(
   mfaComplete: (authenticator: string, context: MFAContext) => Promise<MFACompleteResult>,
   options: LoginOptions = {}
 ): Promise<User> {
-  validateNoActiveUser();
+  await validateNoActiveUser();
 
   const credentials = validateCredentials(username, password);
   if (!selectAuthenticator) {
@@ -104,23 +109,23 @@ async function _loginWithMFA(
     throw new KinveyError('Function to complete MFA is missing.');
   }
 
-  const userHasDeviceToken = hasDeviceToken(credentials.username);
+  const userHasDeviceToken = await hasDeviceToken(credentials.username);
   if (userHasDeviceToken) {
-    credentials.deviceToken = getDeviceToken(credentials.username);
+    credentials.deviceToken = await getDeviceToken(credentials.username);
   }
 
   const loginResult = await executeLoginRequest(credentials, options.timeout);
   if (!loginResult.mfaRequired) {
-    setSession(loginResult.user);
+    await setSession(loginResult.user);
     return new User(loginResult.user);
   }
 
   if (userHasDeviceToken) {
     // MFA is still required which means that the device token has expired
-    removeDeviceToken(credentials.username);
+    await removeDeviceToken(credentials.username);
   }
 
-  setMFASessionToken(loginResult.mfaSessionToken);
+  await setMFASessionToken(loginResult.mfaSessionToken);
   if (loginResult.authenticators.length === 0) {
     throw new KinveyError(errMsgNoAuthenticators);
   }
@@ -138,11 +143,12 @@ async function _loginWithMFA(
   context.authenticator = loginResult.authenticators.find((a) => a.id === selectedAuthenticatorId);
   await executeChallengeRequest(selectedAuthenticatorId);
 
-  const mfaResult = await completeMFALoginRetryable(mfaComplete, context);
+  const mfaResult = await completeMFALoginRetryable(mfaComplete, context, 10);
   if (mfaResult.deviceToken) {
-    setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
+    await setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
   }
-  setSession(mfaResult.user);
+  await removeMFASessionToken();
+  await setSession(mfaResult.user);
   return new User(mfaResult.user);
 }
 
@@ -157,7 +163,7 @@ export async function loginWithMFA(
     return _loginWithMFA(username, password, selectAuthenticator, mfaComplete, options);
   } catch (err) {
     if (err.message !== errMsgNoAuthenticators) {
-      removeMFASessionToken();
+      await removeMFASessionToken();
     }
 
     throw err;

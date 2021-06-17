@@ -155,12 +155,12 @@ export class KinveyHttpHeaders extends HttpHeaders {
     return this.get('X-Kinvey-Request-Start');
   }
 
-  setAuthorization(auth: KinveyHttpAuth): void {
+  async setAuthorization(auth: KinveyHttpAuth): Promise<void> {
     const appKey = getAppKey();
     const appSecret = getAppSecret();
     const masterSecret = getMasterSecret();
-    const session = getSession();
-    const mfaSessionToken = getMFASessionToken();
+    const session = await getSession();
+    const mfaSessionToken = await getMFASessionToken();
     let value = '';
 
     if (auth === KinveyHttpAuth.App) {
@@ -187,25 +187,25 @@ export class KinveyHttpHeaders extends HttpHeaders {
       value = `KinveyMFA ${mfaSessionToken}`;
     } else if (auth === KinveyHttpAuth.All) {
       try {
-        return this.setAuthorization(KinveyHttpAuth.Session);
+        return await this.setAuthorization(KinveyHttpAuth.Session);
       } catch (error) {
         try {
-          return this.setAuthorization(KinveyHttpAuth.App);
+          return await this.setAuthorization(KinveyHttpAuth.App);
         } catch (error) {
-          return this.setAuthorization(KinveyHttpAuth.Master);
+          return await this.setAuthorization(KinveyHttpAuth.Master);
         }
       }
     } else if (auth === KinveyHttpAuth.SessionOrApp) {
       try {
-        return this.setAuthorization(KinveyHttpAuth.Session);
+        return await this.setAuthorization(KinveyHttpAuth.Session);
       } catch (error) {
-        return this.setAuthorization(KinveyHttpAuth.App);
+        return await this.setAuthorization(KinveyHttpAuth.App);
       }
     } else if (auth === KinveyHttpAuth.SessionOrMaster) {
       try {
-        return this.setAuthorization(KinveyHttpAuth.Session);
+        return await this.setAuthorization(KinveyHttpAuth.Session);
       } catch (error) {
-        return this.setAuthorization(KinveyHttpAuth.Master);
+        return await this.setAuthorization(KinveyHttpAuth.Master);
       }
     }
 
