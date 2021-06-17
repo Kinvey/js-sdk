@@ -3,7 +3,7 @@ import { CreateMFAAuthenticatorResult, MFAAuthenticator, NewMFAAuthenticator, Ve
 import { KinveyError } from '../errors/kinvey';
 
 async function callOnActiveUser(funcName, ...args): Promise<any> {
-  const activeUser = getActiveUser();
+  const activeUser = await getActiveUser();
   if (!activeUser) {
     throw new KinveyError('An active user does not exist. Please login one first.');
   }
@@ -40,7 +40,7 @@ async function isEnabled(): Promise<boolean> {
 
 async function disable(): Promise<any> {
   const authenticators = await Authenticators.list();
-  const activeUser = getActiveUser();
+  const activeUser = await getActiveUser();
   return Promise.all(authenticators.map((a) => activeUser.removeAuthenticator(a.id)));
 }
 
