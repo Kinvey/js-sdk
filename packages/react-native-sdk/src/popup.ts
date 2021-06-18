@@ -9,8 +9,8 @@ const ERROR_EVENT = 'error';
 
 class PopupBrowser extends EventEmitter {
   private authUrl: UrlWithParsedQuery;
-  private isOpen: boolean;
-  private isRedirected: boolean;
+  private isOpen: boolean = false;
+  private isRedirected: boolean = false;
   private authPromise: Promise<any>;
 
   isClosed() {
