@@ -222,6 +222,7 @@ describe('User tests', () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
           const mfaComplete = () => {
             actualAttemptsCount +=1;
+            expect(actualAttemptsCount).to.be.lessThan(11);
             return { code: '111999' };
           };
           await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('Max retries count exceeded.');
