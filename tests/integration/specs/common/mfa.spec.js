@@ -58,7 +58,7 @@ describe('MFA', () => {
     });
 
     it('user.listAuthenticators() should return authenticators', async () => {
-      const activeUser = Kinvey.User.getActiveUser();
+      const activeUser = await Kinvey.User.getActiveUser();
       expect(await activeUser.listAuthenticators()).to.deep.include.members(userAuthenticators);
     });
 
@@ -67,7 +67,7 @@ describe('MFA', () => {
     });
 
     it('user.listRecoveryCodes() should return recovery codes', async () => {
-      const activeUser = Kinvey.User.getActiveUser();
+      const activeUser = await Kinvey.User.getActiveUser();
       expect(await activeUser.listRecoveryCodes()).to.deep.equal(userRecoveryCodes);
     });
 
@@ -120,14 +120,14 @@ describe('MFA', () => {
           return otpAuthenticator.generate(authenticator.config.secret);
         };
         const expectedName = utilities.randomString(20, namePrefix);
-        const activeUser = Kinvey.User.getActiveUser();
+        const activeUser = await Kinvey.User.getActiveUser();
         const { authenticator: actualAuthenticator } = await activeUser.createAuthenticator({ name: expectedName, type: 'totp' }, verify);
         expect(actualAuthenticator).to.have.keys(['id', 'name', 'type', 'config']);
         expect(actualAuthenticator.name).to.equal(expectedName);
       });
 
       it('user.createAuthenticator() without verify should throw an error', async () => {
-        const activeUser = Kinvey.User.getActiveUser();
+        const activeUser = await Kinvey.User.getActiveUser();
         await expect(activeUser.createAuthenticator({ name: utilities.randomString(20, namePrefix) }))
           .to.be.rejectedWith('Function to verify authenticator is missing.');
       });
@@ -147,7 +147,7 @@ describe('MFA', () => {
       });
 
       it('user.removeAuthenticator() with non-existing ID should throw', async () => {
-        const activeUser = Kinvey.User.getActiveUser();
+        const activeUser = await Kinvey.User.getActiveUser();
         await expect(activeUser.removeAuthenticator('nonExistingId'))
           .to.be.rejectedWith('Could not find the specified authenticator.');
       });
@@ -176,7 +176,7 @@ describe('MFA', () => {
       });
 
       it('user.regenerateRecoveryCodes() should return new recovery codes', async () => {
-        const newCodes = await (Kinvey.User.getActiveUser()).regenerateRecoveryCodes();
+        const newCodes = await (await Kinvey.User.getActiveUser()).regenerateRecoveryCodes();
         expect(newCodes).to.be.an('array').that.is.not.empty;
         expect(newCodes).to.not.deep.equal(oldCodes);
       });
