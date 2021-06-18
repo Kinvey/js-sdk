@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "axios": "0.21.1",
-    "kinvey-js-sdk": "6.0.0-next.0",
+    "kinvey-js-sdk": "6.0.0-next.1",
     "lodash": "4.17.21",
     "pubnub": "4.32.1"
   },
