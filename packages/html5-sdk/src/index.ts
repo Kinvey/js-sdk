@@ -14,7 +14,10 @@ import {
   Query,
   User,
   AuthorizationGrant,
-  MFA
+  MFA,
+  LoginOptions,
+  MFAContext,
+  MFACompleteResult,
 } from 'kinvey-js-sdk';
 import { init, initialize } from './init';
 import { StorageProvider } from './storage';
@@ -65,6 +68,8 @@ export {
   // User
   User,
   AuthorizationGrant,
-
+  LoginOptions,
+  MFAContext,
+  MFACompleteResult,
   MFA
 };

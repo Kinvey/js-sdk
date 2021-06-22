@@ -1,8 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
-import { init, User, Query } from 'kinvey-html5-sdk';
+import { init, User, Query, LoginOptions, MFAContext, MFACompleteResult } from 'kinvey-html5-sdk';
 import { KinveyConfigToken } from './utils';
-import { LoginOptions } from "../../js-sdk/src/user/login";
-import { MFACompleteResult, MFAContext } from "../../js-sdk/src/user/loginWithMFA";
 
 @Injectable({
   providedIn: 'root'
