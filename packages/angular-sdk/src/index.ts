@@ -10,6 +10,9 @@ import {
   Kmd,
   Query,
   AuthorizationGrant,
+  LoginOptions,
+  MFAContext,
+  MFACompleteResult,
   MFA
 } from 'kinvey-html5-sdk';
 import { DataStoreService } from './datastore.service';
@@ -63,6 +66,8 @@ export {
   // User
   UserService,
   AuthorizationGrant,
-
+  LoginOptions,
+  MFAContext,
+  MFACompleteResult,
   MFA
 };

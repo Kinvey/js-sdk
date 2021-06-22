@@ -34,6 +34,10 @@ export class UserService {
     return User.loginWithMFA(username, password, selectAuthenticator, mfaComplete, options);
   }
 
+  loginWithRecoveryCode(username: string, password: string, recoveryCode: string, options: LoginOptions = {}): Promise<User> {
+    return User.loginWithRecoveryCode(username, password, recoveryCode, options);
+  }
+
   loginWithRedirectUri(redirectUri: string, options?: any): Promise<User> {
     return User.loginWithRedirectUri(redirectUri, options);
   }
