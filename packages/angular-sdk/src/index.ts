@@ -21,6 +21,7 @@ import { FilesService } from './files.service';
 import { KinveyModule } from './kinvey.module';
 import { PingService } from './ping.service';
 import { UserService } from './user.service';
+import { MFAService } from "./mfa.service";
 
 export {
   // Init
@@ -69,5 +70,6 @@ export {
   LoginOptions,
   MFAContext,
   MFACompleteResult,
-  MFA
+  MFA,
+  MFAService
 };
