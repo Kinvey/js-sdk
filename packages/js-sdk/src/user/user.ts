@@ -294,7 +294,7 @@ export class User {
     const verifyResult = await this._verifyAuthenticatorRetryable(verify, { authenticator, retries: 0 });
     return {
       authenticator: pick(authenticator, ['id', 'name', 'type', 'config']),
-      recoveryCodes: verifyResult.recoveryCodes,
+      recoveryCodes: verifyResult.recoveryCodes || null,
     };
   }
 

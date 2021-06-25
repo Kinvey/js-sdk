@@ -41,7 +41,8 @@ async function isEnabled(): Promise<boolean> {
 async function disable(): Promise<any> {
   const authenticators = await Authenticators.list();
   const activeUser = await getActiveUser();
-  return Promise.all(authenticators.map((a) => activeUser.removeAuthenticator(a.id)));
+  await Promise.all(authenticators.map((a) => activeUser.removeAuthenticator(a.id)));
+  return true;
 }
 
 export { Authenticators, listRecoveryCodes, regenerateRecoveryCodes, isEnabled, disable };
