@@ -126,6 +126,22 @@ describe('MFA', () => {
         expect(actualAuthenticator.name).to.equal(expectedName);
       });
 
+      it('user.createAuthenticator() tries to verify the authenticator max 10 times', async () => {
+        let actualRetriesCount = 0;
+        const verify = (authenticator, context) => {
+          actualRetriesCount += 1;
+          expect(context).to.exist.and.to.be.an('object');
+          expect(context.retries, 'Context.retries').to.be.a('number');
+          expect(actualRetriesCount).to.be.lessThan(11);
+          return '111999';
+        };
+
+        const activeUser = await Kinvey.User.getActiveUser();
+        await expect(activeUser.createAuthenticator({ name: utilities.randomString(20, namePrefix) }, verify))
+          .to.be.rejectedWith('Max retries count for authenticator verification exceeded.');
+        expect(actualRetriesCount).to.equal(10);
+      });
+
       it('user.createAuthenticator() without verify should throw an error', async () => {
         const activeUser = await Kinvey.User.getActiveUser();
         await expect(activeUser.createAuthenticator({ name: utilities.randomString(20, namePrefix) }))
