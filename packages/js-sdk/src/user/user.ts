@@ -249,8 +249,13 @@ export class User {
 
   async _verifyAuthenticatorRetryable(
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>,
-    context: VerifyContext
+    context: VerifyContext,
+    maxRetriesCount: number
   ): Promise<any> {
+    if (context.retries >= maxRetriesCount) {
+      throw new KinveyError('Max retries count for authenticator verification exceeded.');
+    }
+
     const code = await verify(context.authenticator, context);
     if (code == null) {
       throw new KinveyError('MFA code is missing.');
@@ -271,7 +276,7 @@ export class User {
     } catch (err) {
       context.retries += 1; // eslint-disable-line no-param-reassign
       context.error = err; // eslint-disable-line no-param-reassign
-      return this._verifyAuthenticatorRetryable(verify, context);
+      return this._verifyAuthenticatorRetryable(verify, context, maxRetriesCount);
     }
   }
 
@@ -291,7 +296,7 @@ export class User {
     });
 
     const { data: authenticator } = await request.execute();
-    const verifyResult = await this._verifyAuthenticatorRetryable(verify, { authenticator, retries: 0 });
+    const verifyResult = await this._verifyAuthenticatorRetryable(verify, { authenticator, retries: 0 }, 10);
     return {
       authenticator: pick(authenticator, ['id', 'name', 'type', 'config']),
       recoveryCodes: verifyResult.recoveryCodes || null,
