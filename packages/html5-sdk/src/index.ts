@@ -14,6 +14,7 @@ import {
   Query,
   User,
   AuthorizationGrant,
+  MFA,
   LoginOptions,
   MFAContext,
   MFACompleteResult,
@@ -70,4 +71,5 @@ export {
   LoginOptions,
   MFAContext,
   MFACompleteResult,
+  MFA
 };

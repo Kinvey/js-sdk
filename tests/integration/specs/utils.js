@@ -375,6 +375,7 @@ export async function cleanUpCollection(config, collectionName, requestLib) {
 
 // Create a user with MFA enabled (with verified authenticator).
 export async function setupUserWithMFA(appCredentials, shouldLogoutUser = true) {
+  await Kinvey.User.logout();
   const username = randomString();
   const password = randomString();
   const createdUser = await Kinvey.User.signup({ username: username, password: password });

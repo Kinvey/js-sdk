@@ -4,6 +4,7 @@ import { collection, getInstance, clearCache, DataStoreType } from './datastore'
 import { endpoint } from './endpoint';
 import * as Errors from './errors';
 import * as Files from './files';
+import * as MFA from './mfa';
 import { init, initialize } from './init';
 import { Kmd } from './kmd';
 import { logger } from './log';
@@ -64,4 +65,6 @@ export {
   LoginOptions,
   MFAContext,
   MFACompleteResult,
+
+  MFA
 };
