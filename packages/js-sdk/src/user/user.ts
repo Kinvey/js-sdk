@@ -324,6 +324,7 @@ export class User {
     });
 
     await request.execute();
+    return null;
   }
 
   async listRecoveryCodes(): Promise<string[]> {
