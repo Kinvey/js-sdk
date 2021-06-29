@@ -3,7 +3,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import * as Kinvey from '__SDK__';
 import * as Constants from './constants';
-import { authenticator as otpAuthenticator } from 'otplib';
+import totp from 'totp.js';
 
 export function ensureArray(entities) {
   return [].concat(entities);
@@ -423,7 +423,7 @@ export async function createVerifiedAuthenticator(userId, sdkConfig, requestLib)
   const response = await makeRequest(reqOpts, true, requestLib);
   const authenticator = response.data;
   reqOpts.url = buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticator.id}/verify`);
-  reqOpts.data = { code: otpAuthenticator.generate(authenticator.config.secret) };
+  reqOpts.data = { code: new totp(authenticator.config.secret).genOTP() };
   const verifyRes = await makeRequest(reqOpts, true, requestLib);
   authenticator.recoveryCodes = verifyRes.data.recoveryCodes || [];
   return authenticator;
