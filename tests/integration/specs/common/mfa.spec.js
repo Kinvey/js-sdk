@@ -47,7 +47,7 @@ describe('MFA', () => {
       createdUserIds.push(user.data._id);
       userRecoveryCodes = result.userAuthenticator.recoveryCodes;
       userAuthenticators.push(_.pick(result.userAuthenticator, ['id', 'name', 'type']));
-      const oneMoreAuthenticator = await utilities.createVerifiedAuthenticator(user.data._id, appCredentials);
+      const oneMoreAuthenticator = await utilities.createVerifiedAuthenticator();
       userAuthenticators.push(_.pick(oneMoreAuthenticator, ['id', 'name', 'type']));
     });
 
@@ -152,8 +152,8 @@ describe('MFA', () => {
     describe('delete', () => {
       let authenticatorIdToRemove;
       beforeEach('setup authenticators', async () => {
-        ({ id: authenticatorIdToRemove } = await utilities.createVerifiedAuthenticator(user.data._id, appCredentials));
-        await utilities.createVerifiedAuthenticator(user.data._id, appCredentials);
+        ({ id: authenticatorIdToRemove } = await utilities.createVerifiedAuthenticator());
+        await utilities.createVerifiedAuthenticator();
       });
 
       it('Kinvey.MFA.Authenticators.remove() with existing ID should remove authenticator', async () => {
@@ -181,7 +181,7 @@ describe('MFA', () => {
     describe('regenerate recovery codes', () => {
       let oldCodes;
       beforeEach('setup', async () => {
-        await utilities.createVerifiedAuthenticator(user.data._id, appCredentials);
+        await utilities.createVerifiedAuthenticator();
         oldCodes = Kinvey.MFA.listRecoveryCodes();
       });
 
