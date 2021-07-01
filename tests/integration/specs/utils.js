@@ -4,6 +4,7 @@ import _ from 'lodash';
 import * as Kinvey from '__SDK__';
 import * as Constants from './constants';
 import totp from 'totp.js';
+global.Buffer = require('buffer/').Buffer;
 
 export function ensureArray(entities) {
   return [].concat(entities);

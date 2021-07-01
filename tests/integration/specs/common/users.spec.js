@@ -3,6 +3,7 @@ import totp from 'totp.js';
 import * as Kinvey from '__SDK__';
 import * as config from '../config';
 import * as utilities from '../utils';
+global.Buffer = require('buffer/').Buffer;
 
 const expect = chai.expect;
 chai.use(require('chai-as-promised'));
