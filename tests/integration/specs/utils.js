@@ -4,7 +4,6 @@ import _ from 'lodash';
 import * as Kinvey from '__SDK__';
 import * as Constants from './constants';
 import totp from 'totp.js';
-global.Buffer = require('buffer/').Buffer;
 
 export function ensureArray(entities) {
   return [].concat(entities);
@@ -471,5 +470,15 @@ function toBase64(textString) {
     return base64String;
   } else {
     throw new Error("Missing base64 conversion.");
+  }
+}
+
+// The 'buffer' module require hack is needed only for totp.js to work for {N} tests
+export function tryRequireBuffer() {
+  try {
+    global.Buffer = require('buffer/').Buffer;
+  }
+  catch (e) {
+    console.log('tryRequireBuffer(): Buffer could not be loaded.');
   }
 }
