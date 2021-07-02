@@ -6,6 +6,7 @@ import * as utilities from '../utils';
 
 const expect = chai.expect;
 chai.use(require('chai-as-promised'));
+utilities.tryRequireBuffer();
 
 var appCredentials;
 const collectionName = config.collectionName;
@@ -179,7 +180,7 @@ describe('User tests', () => {
         createdUserIds.push(createdUser.data._id);
       });
 
-      after('cleanup authenticator', async () => utilities.removeAuthenticator(createdUser.data._id, userAuthenticator.id, appCredentials));
+      after('cleanup authenticator', async () => utilities.removeAuthenticator(createdUser, userAuthenticator.id));
 
       describe('login()', () => {
         it('should throw an error', async () => {
@@ -295,7 +296,7 @@ describe('User tests', () => {
             createdUserIds.push(gullibleUser.data._id);
           });
 
-          after('cleanup authenticator', async () => utilities.removeAuthenticator(gullibleUser.data._id, gullibleUserAuthenticator.id, appCredentials));
+          after('cleanup authenticator', async () => utilities.removeAuthenticator(gullibleUser, gullibleUserAuthenticator.id));
 
           it('should not ask the same user for MFA code on second login', async () => {
             const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === gullibleUserAuthenticator.id).id);

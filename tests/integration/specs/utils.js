@@ -379,7 +379,7 @@ export async function setupUserWithMFA(appCredentials, shouldLogoutUser = true) 
   const username = randomString();
   const password = randomString();
   const createdUser = await Kinvey.User.signup({ username: username, password: password });
-  const userAuthenticator = await createVerifiedAuthenticator(createdUser.data._id, appCredentials);
+  const userAuthenticator = await createVerifiedAuthenticator();
   if (shouldLogoutUser) {
     await Kinvey.User.logout();
   }
@@ -408,39 +408,19 @@ function buildBaasUrl(path) {
   return `${protocol}://${domain}${path}`;
 }
 
-export async function createVerifiedAuthenticator(userId, sdkConfig, requestLib) {
-  const reqOpts = {
-    headers: {
-      Authorization: `Basic ${getToken(sdkConfig)}`,
-      'Content-Type': 'application/json',
-      'X-Kinvey-API-Version': 6
-    },
-    method: 'POST',
-    url: buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators`),
-    data: { type: 'totp', name: 'js-sdk-test' }
-  };
+export function generateMFACode(authenticator) {
+  return new totp(authenticator.config.secret).genOTP();
+}
 
-  const response = await makeRequest(reqOpts, true, requestLib);
-  const authenticator = response.data;
-  reqOpts.url = buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticator.id}/verify`);
-  reqOpts.data = { code: new totp(authenticator.config.secret).genOTP() };
-  const verifyRes = await makeRequest(reqOpts, true, requestLib);
-  authenticator.recoveryCodes = verifyRes.data.recoveryCodes || [];
+export async function createVerifiedAuthenticator() {
+  const result = await Kinvey.MFA.Authenticators.create({ name: 'js-sdk-tests', type: "totp" }, generateMFACode)
+  const authenticator = result.authenticator;
+  authenticator.recoveryCodes = result.recoveryCodes || [];
   return authenticator;
 }
 
-export async function removeAuthenticator(userId, authenticatorId, sdkConfig, requestLib) {
-  const reqOpts = {
-    headers: {
-      Authorization: `Basic ${getToken(sdkConfig)}`,
-      'Content-Type': 'application/json',
-      'X-Kinvey-API-Version': 6
-    },
-    method: 'DELETE',
-    url: buildBaasUrl(`/user/${sdkConfig.appKey}/${userId}/authenticators/${authenticatorId}`)
-  };
-
-  return makeRequest(reqOpts, true, requestLib);
+export async function removeAuthenticator(user, authenticatorId) {
+  return user.removeAuthenticator(authenticatorId)
 }
 
 async function makeRequest(reqOpts, expectSuccess, requestLib) {
@@ -490,5 +470,15 @@ function toBase64(textString) {
     return base64String;
   } else {
     throw new Error("Missing base64 conversion.");
+  }
+}
+
+// The 'buffer' module require hack is needed only for totp.js to work for {N} tests
+export function tryRequireBuffer() {
+  try {
+    global.Buffer = require('buffer/').Buffer;
+  }
+  catch (e) {
+    console.log('tryRequireBuffer(): Buffer could not be loaded.');
   }
 }
