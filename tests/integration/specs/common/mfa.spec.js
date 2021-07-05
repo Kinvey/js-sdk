@@ -36,7 +36,7 @@ describe('MFA', () => {
     appCredentials = Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
   });
 
-  after(async () => utilities.deleteUsers(createdUserIds));
+  after(() => utilities.deleteUsers(createdUserIds));
 
   describe('read', () => {
     let userAuthenticators = [];
@@ -53,7 +53,7 @@ describe('MFA', () => {
       userAuthenticators.push(_.pick(oneMoreAuthenticator, ['id', 'name', 'type']));
     });
 
-    after('clean authenticators', async () => Kinvey.MFA.disable());
+    after(() => Kinvey.MFA.disable()); // clean authenticators
 
     it('Kinvey.MFA.Authenticators.list() should return authenticators', async () => {
       expect(await Kinvey.MFA.Authenticators.list()).to.deep.include.members(userAuthenticators);
