@@ -29,7 +29,6 @@ async function registerDeviceWithKinvey(os: string, token: string): Promise<void
 export async function register(options: PushNotificationOptions = {}): Promise<string> {
   const promise = new Promise<string>((resolve, reject): void => {
     RNPushNotification.configure({
-      // senderID: options.senderID,
       permissions: options.permissions,
       popInitialNotification: options.popInitialNotification,
       onNotification: options.onNotification,
