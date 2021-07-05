@@ -1,11 +1,12 @@
 import chai from 'chai';
-import { authenticator as otpAuthenticator } from 'otplib';
+import totp from 'totp.js';
 import * as Kinvey from '__SDK__';
 import * as config from '../config';
 import * as utilities from '../utils';
 
 const expect = chai.expect;
 chai.use(require('chai-as-promised'));
+utilities.tryRequireBuffer();
 
 var appCredentials;
 const collectionName = config.collectionName;
@@ -180,7 +181,7 @@ describe('User tests', () => {
         createdUserIds.push(createdUser.data._id);
       });
 
-      after(async () => utilities.removeAuthenticator(createdUser.data._id, userAuthenticator.id, appCredentials));
+      after(async () => utilities.removeAuthenticator(createdUser, userAuthenticator.id));
 
       describe('login()', () => {
         it('should throw an error', async () => {
@@ -191,7 +192,7 @@ describe('User tests', () => {
       describe('loginWithMFA()', () => {
         it('should login a user with correct credentials and code', async () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
-          const mfaComplete = () => { return { code: otpAuthenticator.generate(userAuthenticator.config.secret) }};
+          const mfaComplete = () => { return { code: new totp(userAuthenticator.config.secret).genOTP() }};
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
           await assertUserData(user, username);
           const activeUser = await Kinvey.User.getActiveUser();
@@ -212,7 +213,7 @@ describe('User tests', () => {
             expect(context.error).to.exist;
             expect(context.error.message).to.contain('Your request body contained invalid or incorrectly formatted data.');
 
-            return { code: otpAuthenticator.generate(userAuthenticator.config.secret) };
+            return { code: new totp(userAuthenticator.config.secret).genOTP() };
           };
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
           await assertUserData(user, username);
@@ -223,6 +224,7 @@ describe('User tests', () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
           const mfaComplete = () => {
             actualAttemptsCount +=1;
+            expect(actualAttemptsCount).to.be.lessThan(11);
             return { code: '111999' };
           };
           await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('Max retries count exceeded.');
@@ -231,7 +233,7 @@ describe('User tests', () => {
 
         it('should throw an error when selectAuthenticator returns null', async () => {
           const selectAuthenticator = () => null;
-          const mfaComplete = () => { return { code: otpAuthenticator.generate(userAuthenticator.config.secret) }};
+          const mfaComplete = () => { return { code: new totp(userAuthenticator.config.secret).genOTP() }};
           await expect(Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete)).to.be.rejectedWith('MFA authenticator ID is missing.');
         });
 
@@ -296,13 +298,13 @@ describe('User tests', () => {
             createdUserIds.push(gullibleUser.data._id);
           });
 
-          after(async () => utilities.removeAuthenticator(gullibleUser.data._id, gullibleUserAuthenticator.id, appCredentials));
+          after(async () => utilities.removeAuthenticator(gullibleUser, gullibleUserAuthenticator.id));
 
           it('should not ask the same user for MFA code on second login', async () => {
             const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === gullibleUserAuthenticator.id).id);
             const mfaComplete = () => {
               return {
-                code: otpAuthenticator.generate(gullibleUserAuthenticator.config.secret),
+                code: new totp(gullibleUserAuthenticator.config.secret).genOTP(),
                 trustDevice: true
               }
             };
@@ -324,7 +326,7 @@ describe('User tests', () => {
             const mfaComplete = (authenticator, context) => {
               expect(context).to.exist;
               return {
-                code: otpAuthenticator.generate(gullibleUserAuthenticator.config.secret),
+                code: new totp(gullibleUserAuthenticator.config.secret).genOTP(),
                 trustDevice: true
               }
             };
@@ -338,7 +340,7 @@ describe('User tests', () => {
             const mfaCompleteAnotherUser = () => {
               mfaCompleteIsCalled = true;
               return {
-                code: otpAuthenticator.generate(userAuthenticator.config.secret)
+                code: new totp(userAuthenticator.config.secret).genOTP(),
               }
             };
             const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticatorAnotherUser, mfaCompleteAnotherUser);
