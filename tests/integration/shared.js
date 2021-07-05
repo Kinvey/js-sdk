@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const otplib = require('otplib');
+const totp = require('totp.js');
 
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
@@ -12,7 +12,7 @@ axios.defaults.baseURL = 'https://console.kinvey.com/_api/v4/';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 function login(retries=3) {
-  const twoFactorToken = process.env.ACCOUNT_SECRET ? otplib.authenticator.generate(process.env.ACCOUNT_SECRET) : undefined;
+  const twoFactorToken = process.env.ACCOUNT_SECRET ? new totp(process.env.ACCOUNT_SECRET).genOTP() : undefined;
   return axios({
     method: 'POST',
     url: '/session',
