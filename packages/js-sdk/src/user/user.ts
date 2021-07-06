@@ -6,7 +6,7 @@ import {
   getSession,
   setSession,
   removeSession,
-  removeMFASessionToken,
+  removeMFASession,
   removeDeviceToken,
   formatKinveyBaasUrl,
   HttpRequestMethod,
@@ -294,7 +294,7 @@ export class User {
 
     await removeSession();
     if (cleanEntireSessionStore) {
-      await removeMFASessionToken();
+      await removeMFASession();
       await removeDeviceToken(this.data.username);
     }
 
