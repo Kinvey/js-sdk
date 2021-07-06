@@ -1,5 +1,11 @@
 import { getActiveUser } from '../user/getActiveUser';
-import { CreateMFAAuthenticatorResult, MFAAuthenticator, NewMFAAuthenticator, VerifyContext } from '../user/user';
+import {
+  createMFAAuthenticator,
+  CreateMFAAuthenticatorResult,
+  MFAAuthenticator,
+  NewMFAAuthenticator,
+  VerifyContext,
+} from '../user/createMFAAuthenticator';
 import { KinveyError } from '../errors/kinvey';
 
 async function callOnActiveUser(funcName, ...args): Promise<any> {
@@ -12,10 +18,11 @@ async function callOnActiveUser(funcName, ...args): Promise<any> {
 }
 
 const Authenticators = {
-  create: function create(
+  create: async function create(
     newAuthenticator: NewMFAAuthenticator,
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>
   ): Promise<CreateMFAAuthenticatorResult> {
+    // TODO: kdev-1796
     return callOnActiveUser('createAuthenticator', newAuthenticator, verify);
   },
   list: function list(): Promise<MFAAuthenticator[]> {
