@@ -113,7 +113,7 @@ export enum KinveyHttpAuth {
   SessionOrApp = 'SessionOrApp',
   SessionOrMaster = 'SessionOrMaster',
   MFASessionToken = 'MFASessionToken',
-  SessionOrMasterOrMFASessionToken = 'SessionOrMasterOrMFASessionToken'
+  SessionOrMFASessionTokenOrMaster = 'SessionOrMFASessionTokenOrMaster'
 }
 
 const globalHeaders = new HttpHeaders();
@@ -208,14 +208,14 @@ export class KinveyHttpHeaders extends HttpHeaders {
       } catch (error) {
         return await this.setAuthorization(KinveyHttpAuth.Master);
       }
-    } else if (auth === KinveyHttpAuth.SessionOrMasterOrMFASessionToken) {
+    } else if (auth === KinveyHttpAuth.SessionOrMFASessionTokenOrMaster) {
       try {
         return await this.setAuthorization(KinveyHttpAuth.Session);
       } catch (error) {
         try {
-          return await this.setAuthorization(KinveyHttpAuth.Master);
-        } catch (error) {
           return await this.setAuthorization(KinveyHttpAuth.MFASessionToken);
+        } catch (error) {
+          return await this.setAuthorization(KinveyHttpAuth.Master);
         }
       }
     }

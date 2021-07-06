@@ -55,7 +55,7 @@ async function _verifyAuthenticatorRetryable(
   try {
     const request = new KinveyHttpRequest({
       method: HttpRequestMethod.POST,
-      auth: KinveyHttpAuth.SessionOrMaster,
+      auth: KinveyHttpAuth.SessionOrMFASessionTokenOrMaster,
       url: formatKinveyBaasUrl(
         KinveyBaasNamespace.User,
         `/${userId}/authenticators/${context.authenticator.id}/verify`
@@ -82,7 +82,7 @@ export async function createMFAAuthenticator(
 
   const request = new KinveyHttpRequest({
     method: HttpRequestMethod.POST,
-    auth: KinveyHttpAuth.SessionOrMaster,
+    auth: KinveyHttpAuth.SessionOrMFASessionTokenOrMaster,
     url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${userId}/authenticators`),
     body: defaults(newAuthenticator, { type: MFAAuthenticatorType.TOTP }),
   });

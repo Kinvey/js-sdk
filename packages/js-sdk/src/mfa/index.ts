@@ -7,6 +7,7 @@ import {
   VerifyContext,
 } from '../user/createMFAAuthenticator';
 import { KinveyError } from '../errors/kinvey';
+import { getMFASession } from '../http';
 
 async function callOnActiveUser(funcName, ...args): Promise<any> {
   const activeUser = await getActiveUser();
@@ -22,8 +23,17 @@ const Authenticators = {
     newAuthenticator: NewMFAAuthenticator,
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>
   ): Promise<CreateMFAAuthenticatorResult> {
-    // TODO: kdev-1796
-    return callOnActiveUser('createAuthenticator', newAuthenticator, verify);
+    const activeUser = await getActiveUser();
+    if (activeUser) {
+      return createMFAAuthenticator(activeUser.data._id, newAuthenticator, verify);
+    }
+
+    const mfaUser = await getMFASession();
+    if (!mfaUser) {
+      throw new KinveyError('An active user, nor an MFA user exists. Please login one first.');
+    }
+
+    return createMFAAuthenticator(mfaUser.userId, newAuthenticator, verify);
   },
   list: function list(): Promise<MFAAuthenticator[]> {
     return callOnActiveUser('listAuthenticators');
