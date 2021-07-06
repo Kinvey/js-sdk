@@ -52,14 +52,11 @@ function regenerateRecoveryCodes(): Promise<string[]> {
 }
 
 async function isEnabled(): Promise<boolean> {
-  return (await Authenticators.list()).length > 0;
+  return callOnActiveUser('isMFAEnabled');
 }
 
 async function disable(): Promise<any> {
-  const authenticators = await Authenticators.list();
-  const activeUser = await getActiveUser();
-  await Promise.all(authenticators.map((a) => activeUser.removeAuthenticator(a.id)));
-  return true;
+  return callOnActiveUser('disableMFA');
 }
 
 export { Authenticators, listRecoveryCodes, regenerateRecoveryCodes, isEnabled, disable };

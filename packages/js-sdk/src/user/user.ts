@@ -25,8 +25,9 @@ import {
   createMFAAuthenticator,
   CreateMFAAuthenticatorResult,
   MFAAuthenticator,
-  NewMFAAuthenticator, VerifyContext
-} from "./createMFAAuthenticator";
+  NewMFAAuthenticator,
+  VerifyContext,
+} from './createMFAAuthenticator';
 
 export interface UserData extends Entity {
   _socialIdentity?: object;
@@ -275,6 +276,16 @@ export class User {
 
     const { data } = await request.execute();
     return data.recoveryCodes;
+  }
+
+  async isMFAEnabled(): Promise<boolean> {
+    return (await this.listAuthenticators()).length > 0;
+  }
+
+  async disableMFA(): Promise<any> {
+    const authenticators = await this.listAuthenticators();
+    await Promise.all(authenticators.map((a) => this.removeAuthenticator(a.id)));
+    return true;
   }
 
   async _cleanup(kinveyRequest, operationName, cleanEntireSessionStore = false) {
