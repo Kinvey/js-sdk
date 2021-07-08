@@ -413,7 +413,7 @@ export function generateMFACode(authenticator) {
 }
 
 export async function createVerifiedAuthenticator() {
-  const result = await Kinvey.MFA.Authenticators.create({ name: 'js-sdk-tests', type: "totp" }, generateMFACode)
+  const result = await Kinvey.MFA.Authenticators.create({ name: 'js-sdk-tests', type: "totp" }, generateMFACode);
   const authenticator = result.authenticator;
   authenticator.recoveryCodes = result.recoveryCodes || [];
   return authenticator;

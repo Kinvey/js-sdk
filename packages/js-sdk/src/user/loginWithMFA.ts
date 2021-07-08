@@ -3,8 +3,8 @@ import isBoolean from 'lodash/isBoolean';
 import { KinveyError } from '../errors/kinvey';
 import {
   setSession,
-  setMFASessionToken,
-  removeMFASessionToken,
+  setMFASession,
+  removeMFASession,
   formatKinveyBaasUrl,
   HttpRequestMethod,
   KinveyHttpRequest,
@@ -125,7 +125,7 @@ async function _loginWithMFA(
     await removeDeviceToken(credentials.username);
   }
 
-  await setMFASessionToken(loginResult.mfaSessionToken);
+  await setMFASession({ mfaSessionToken: loginResult.mfaSessionToken, userId: loginResult.userId });
   if (loginResult.authenticators.length === 0) {
     throw new KinveyError(errMsgNoAuthenticators);
   }
@@ -147,7 +147,7 @@ async function _loginWithMFA(
   if (mfaResult.deviceToken) {
     await setDeviceToken(mfaResult.user.username, mfaResult.deviceToken);
   }
-  await removeMFASessionToken();
+  await removeMFASession();
   await setSession(mfaResult.user);
   return new User(mfaResult.user);
 }
@@ -163,7 +163,7 @@ export async function loginWithMFA(
     return _loginWithMFA(username, password, selectAuthenticator, mfaComplete, options);
   } catch (err) {
     if (err.message !== errMsgNoAuthenticators) {
-      await removeMFASessionToken();
+      await removeMFASession();
     }
 
     throw err;
