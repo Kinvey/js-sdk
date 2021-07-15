@@ -12,6 +12,11 @@ export interface SessionStore {
   remove(key: string): Promise<boolean>;
 }
 
+export interface MFASessionObject {
+  userId: string;
+  mfaSessionToken: string;
+}
+
 function getStore() {
   return getConfig<SessionStore>(ConfigKey.SessionStore);
 }
@@ -20,16 +25,25 @@ export function getKey() {
   return `${getAppKey()}.active_user`;
 }
 
-export async function getSession(): Promise<SessionObject> {
-  const session = await getStore().get(getKey());
-  if (session) {
-    return JSON.parse(session);
+async function _getObjectFromStore(key) {
+  const obj = await getStore().get(key);
+  if (!obj) {
+    return null;
   }
-  return null;
+
+  return JSON.parse(obj);
+}
+
+export async function getSession(): Promise<SessionObject> {
+  return _getObjectFromStore(getKey());
+}
+
+async function _setObjectInStore(key, obj) {
+  return getStore().set(key, JSON.stringify(obj));
 }
 
 export async function setSession(session: SessionObject): Promise<boolean> {
-  return getStore().set(getKey(), JSON.stringify(session));
+  return _setObjectInStore(getKey(), session);
 }
 
 export async function removeSession(): Promise<boolean> {
@@ -37,18 +51,27 @@ export async function removeSession(): Promise<boolean> {
 }
 
 function getMFAKey(): string {
-  return `${getAppKey()}.mfa_session_token`;
+  return `${getAppKey()}.mfa_user`;
+}
+
+export async function getMFASession(): Promise<MFASessionObject> {
+  return _getObjectFromStore(getMFAKey());
 }
 
 export async function getMFASessionToken(): Promise<string> {
-  return getStore().get(getMFAKey());
+  const mfaUser = await getMFASession();
+  if (!mfaUser) {
+    return null;
+  }
+
+  return mfaUser.mfaSessionToken;
 }
 
-export async function setMFASessionToken(token: string): Promise<boolean> {
-  return getStore().set(getMFAKey(), token);
+export async function setMFASession(mfaSession: MFASessionObject): Promise<boolean> {
+  return _setObjectInStore(getMFAKey(), mfaSession);
 }
 
-export async function removeMFASessionToken(): Promise<boolean> {
+export async function removeMFASession(): Promise<boolean> {
   return getStore().remove(getMFAKey());
 }
 
