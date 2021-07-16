@@ -1,6 +1,13 @@
 import { getActiveUser } from '../user/getActiveUser';
-import { CreateMFAAuthenticatorResult, MFAAuthenticator, NewMFAAuthenticator, VerifyContext } from '../user/user';
+import {
+  createMFAAuthenticator,
+  CreateMFAAuthenticatorResult,
+  MFAAuthenticator,
+  NewMFAAuthenticator,
+  VerifyContext,
+} from '../user/createMFAAuthenticator';
 import { KinveyError } from '../errors/kinvey';
+import { getMFASession } from '../http';
 
 async function callOnActiveUser(funcName, ...args): Promise<any> {
   const activeUser = await getActiveUser();
@@ -12,11 +19,21 @@ async function callOnActiveUser(funcName, ...args): Promise<any> {
 }
 
 const Authenticators = {
-  create: function create(
+  create: async function create(
     newAuthenticator: NewMFAAuthenticator,
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>
   ): Promise<CreateMFAAuthenticatorResult> {
-    return callOnActiveUser('createAuthenticator', newAuthenticator, verify);
+    const activeUser = await getActiveUser();
+    if (activeUser) {
+      return createMFAAuthenticator(activeUser.data._id, newAuthenticator, verify);
+    }
+
+    const mfaUser = await getMFASession();
+    if (!mfaUser) {
+      throw new KinveyError('An active user, nor an MFA user exists. Please login one first.');
+    }
+
+    return createMFAAuthenticator(mfaUser.userId, newAuthenticator, verify);
   },
   list: function list(): Promise<MFAAuthenticator[]> {
     return callOnActiveUser('listAuthenticators');
@@ -35,14 +52,11 @@ function regenerateRecoveryCodes(): Promise<string[]> {
 }
 
 async function isEnabled(): Promise<boolean> {
-  return (await Authenticators.list()).length > 0;
+  return callOnActiveUser('isMFAEnabled');
 }
 
 async function disable(): Promise<any> {
-  const authenticators = await Authenticators.list();
-  const activeUser = await getActiveUser();
-  await Promise.all(authenticators.map((a) => activeUser.removeAuthenticator(a.id)));
-  return true;
+  return callOnActiveUser('disableMFA');
 }
 
 export { Authenticators, listRecoveryCodes, regenerateRecoveryCodes, isEnabled, disable };

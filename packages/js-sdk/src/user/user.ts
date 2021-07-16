@@ -1,6 +1,4 @@
 import isArray from 'lodash/isArray';
-import pick from 'lodash/pick';
-import defaults from 'lodash/defaults';
 import { Acl } from '../acl';
 import { Kmd } from '../kmd';
 import { getDeviceId } from '../device';
@@ -8,7 +6,7 @@ import {
   getSession,
   setSession,
   removeSession,
-  removeMFASessionToken,
+  removeMFASession,
   removeDeviceToken,
   formatKinveyBaasUrl,
   HttpRequestMethod,
@@ -23,38 +21,18 @@ import { subscribe, unsubscribe, isSubscribed } from '../live';
 import { logger } from '../log';
 import { mergeSocialIdentity } from './utils';
 import { signup } from './signup';
+import {
+  createMFAAuthenticator,
+  CreateMFAAuthenticatorResult,
+  MFAAuthenticator,
+  NewMFAAuthenticator,
+  VerifyContext,
+} from './createMFAAuthenticator';
 
 export interface UserData extends Entity {
   _socialIdentity?: object;
   username?: string;
   email?: string;
-}
-
-export interface MFAAuthenticator {
-  id: string;
-  name: string;
-  type: string;
-  config?: object;
-}
-
-export interface CreateMFAAuthenticatorResult {
-  authenticator: MFAAuthenticator;
-  recoveryCodes?: string[];
-}
-
-export enum MFAAuthenticatorType {
-  TOTP = 'totp',
-}
-
-export interface NewMFAAuthenticator {
-  name: string;
-  type?: MFAAuthenticatorType;
-}
-
-export interface VerifyContext {
-  retries: number;
-  authenticator: MFAAuthenticator;
-  error?: any;
 }
 
 export class User {
@@ -247,60 +225,11 @@ export class User {
     return true;
   }
 
-  async _verifyAuthenticatorRetryable(
-    verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>,
-    context: VerifyContext,
-    maxRetriesCount: number
-  ): Promise<any> {
-    if (context.retries >= maxRetriesCount) {
-      throw new KinveyError('Max retries count for authenticator verification exceeded.');
-    }
-
-    const code = await verify(context.authenticator, context);
-    if (code == null) {
-      throw new KinveyError('MFA code is missing.');
-    }
-
-    try {
-      const request = new KinveyHttpRequest({
-        method: HttpRequestMethod.POST,
-        auth: KinveyHttpAuth.SessionOrMaster,
-        url: formatKinveyBaasUrl(
-          KinveyBaasNamespace.User,
-          `/${this._id}/authenticators/${context.authenticator.id}/verify`
-        ),
-        body: { code },
-      });
-      const { data } = await request.execute();
-      return data;
-    } catch (err) {
-      context.retries += 1; // eslint-disable-line no-param-reassign
-      context.error = err; // eslint-disable-line no-param-reassign
-      return this._verifyAuthenticatorRetryable(verify, context, maxRetriesCount);
-    }
-  }
-
   async createAuthenticator(
     newAuthenticator: NewMFAAuthenticator,
     verify: (authenticator: MFAAuthenticator, context: VerifyContext) => Promise<string>
   ): Promise<CreateMFAAuthenticatorResult> {
-    if (!verify) {
-      throw new KinveyError('Function to verify authenticator is missing.');
-    }
-
-    const request = new KinveyHttpRequest({
-      method: HttpRequestMethod.POST,
-      auth: KinveyHttpAuth.SessionOrMaster,
-      url: formatKinveyBaasUrl(KinveyBaasNamespace.User, `/${this._id}/authenticators`),
-      body: defaults(newAuthenticator, { type: MFAAuthenticatorType.TOTP }),
-    });
-
-    const { data: authenticator } = await request.execute();
-    const verifyResult = await this._verifyAuthenticatorRetryable(verify, { authenticator, retries: 0 }, 10);
-    return {
-      authenticator: pick(authenticator, ['id', 'name', 'type', 'config']),
-      recoveryCodes: verifyResult.recoveryCodes || null,
-    };
+    return createMFAAuthenticator(this._id, newAuthenticator, verify);
   }
 
   async listAuthenticators(): Promise<MFAAuthenticator[]> {
@@ -349,6 +278,16 @@ export class User {
     return data.recoveryCodes;
   }
 
+  async isMFAEnabled(): Promise<boolean> {
+    return (await this.listAuthenticators()).length > 0;
+  }
+
+  async disableMFA(): Promise<any> {
+    const authenticators = await this.listAuthenticators();
+    await Promise.all(authenticators.map((a) => this.removeAuthenticator(a.id)));
+    return true;
+  }
+
   async _cleanup(kinveyRequest, operationName, cleanEntireSessionStore = false) {
     if (!(await this.isActive())) {
       return this;
@@ -366,7 +305,7 @@ export class User {
 
     await removeSession();
     if (cleanEntireSessionStore) {
-      await removeMFASessionToken();
+      await removeMFASession();
       await removeDeviceToken(this.data.username);
     }
 
