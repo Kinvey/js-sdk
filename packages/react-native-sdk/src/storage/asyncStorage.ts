@@ -50,7 +50,9 @@ export async function clear(dbName: string, tableName: string) {
   return true;
 }
 
-export async function clearDatabase() {
-  await AsyncStorage.clear();
+export async function clearDatabase(dbName: string, exclude: string[] = []) {
+  const allKeys = await AsyncStorage.getAllKeys();
+  const keysToRemove = allKeys.filter(key => key.indexOf(`${dbName}.`) === 0 && !exclude.includes(key));
+  await AsyncStorage.multiRemove(keysToRemove);
   return true;
 }
