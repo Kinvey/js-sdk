@@ -204,8 +204,13 @@ describe('MFA', () => {
   describe('without an active user', () => {
     before(() => Kinvey.User.logout()); // ensure no active user
 
-    [Kinvey.MFA.isEnabled, Kinvey.MFA.disable, Kinvey.MFA.Authenticators.create, Kinvey.MFA.Authenticators.list,Kinvey.MFA.Authenticators.remove, Kinvey.MFA.listRecoveryCodes].forEach((func) => {
+    [Kinvey.MFA.isEnabled, Kinvey.MFA.disable, Kinvey.MFA.Authenticators.list,Kinvey.MFA.Authenticators.remove, Kinvey.MFA.listRecoveryCodes].forEach((func) => {
       it(`${func.name} should throw`, async () => assertActiveUserError(() => func()));
+    });
+
+    it('Kinvey.MFA.Authenticators.create() should throw', async () => {
+      await expect(Kinvey.MFA.Authenticators.create())
+        .to.be.rejectedWith('An active user, nor an MFA user exists. Please login one first.');
     });
   });
 });
