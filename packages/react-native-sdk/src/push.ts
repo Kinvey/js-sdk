@@ -11,7 +11,7 @@ import isFunction from 'lodash/isFunction';
 export { PushNotificationOptions };
 
 async function registerDeviceWithKinvey(os: string, token: string): Promise<void> {
-  const requestOptions = {
+  const request = new KinveyHttpRequest({
     method: HttpRequestMethod.POST,
     auth: KinveyHttpAuth.Session,
     url: formatKinveyBaasUrl(KinveyBaasNamespace.Push, '/register-device'),
@@ -21,14 +21,14 @@ async function registerDeviceWithKinvey(os: string, token: string): Promise<void
       deviceId: token,
       service: 'firebase'
     }
-  };
-
-  await new KinveyHttpRequest(requestOptions).execute();
+  });
+  await request.execute();
 }
 
 export async function register(options: PushNotificationOptions = {}): Promise<string> {
   const promise = new Promise<string>((resolve, reject): void => {
     RNPushNotification.configure({
+      senderID: options.senderID,
       permissions: options.permissions,
       popInitialNotification: options.popInitialNotification,
       onNotification: options.onNotification,
@@ -36,10 +36,7 @@ export async function register(options: PushNotificationOptions = {}): Promise<s
       async onRegister(info) {
         try {
           await registerDeviceWithKinvey(info.os, info.token);
-          if (isFunction(options.onRegister)) {
-            options.onRegister(info);
-          }
-
+          if (isFunction(options.onRegister)) options.onRegister(info);
           resolve(info.token);
         } catch (error) {
           reject(error);

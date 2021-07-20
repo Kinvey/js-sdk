@@ -19,7 +19,7 @@ const checkLocalStorageForSubscriptionKey = () => {
 };
 
 describe('Live-services', function() {
-  // this.retries(4);
+  this.retries(4);
   networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
 
   var messageCreated;
@@ -134,7 +134,7 @@ describe('Live-services', function() {
                 setTimeout(()=>{
                   expect(utilities.deleteEntityMetadata(messageUpdated)).to.deep.equal(updatedEntity);
                   done();
-                }, 10000)
+                }, 4000)
               })
               .catch(done);
           })

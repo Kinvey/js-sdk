@@ -12,14 +12,13 @@ axios.defaults.baseURL = 'https://console.kinvey.com/_api/v4/';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 function login(retries=3) {
-  const twoFactorToken = process.env.ACCOUNT_SECRET ? new totp(process.env.ACCOUNT_SECRET).genOTP() : undefined;
   return axios({
     method: 'POST',
     url: '/session',
     data: {
       email: process.env.ACCOUNT_EMAIL,
       password: process.env.ACCOUNT_PASSWORD,
-      twoFactorToken
+      twoFactorToken: new totp(process.env.ACCOUNT_SECRET).genOTP()
     },
   }).then(({ data }) => {
     axios.defaults.headers.common['Authorization'] = `Kinvey ${data.token}`;

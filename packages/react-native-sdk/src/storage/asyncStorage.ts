@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-community/async-storage';
 
 async function getTable(dbName: string, tableName: string): Promise<Map<string, any>> {
   const data = await AsyncStorage.getItem(`${dbName}.${tableName}`);
@@ -50,9 +50,7 @@ export async function clear(dbName: string, tableName: string) {
   return true;
 }
 
-export async function clearDatabase(dbName: string, exclude: string[] = []) {
-  const allKeys = await AsyncStorage.getAllKeys();
-  const keysToRemove = allKeys.filter(key => key.indexOf(`${dbName}.`) === 0 && !exclude.includes(key));
-  await AsyncStorage.multiRemove(keysToRemove);
+export async function clearDatabase() {
+  await AsyncStorage.clear();
   return true;
 }

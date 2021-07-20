@@ -1,22 +1,18 @@
-const argv = require('yargs').argv;
+const isArray = require('lodash/isArray');
 const fs = require('fs-extra');
 const path = require('path');
 const glob = require('glob-promise');
 const babel = require('@babel/core');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-if (!argv.target) {
-  throw new Error('Required parameter "--target" missing.');
-}
-
-const SPECS_DIR = path.join(__dirname, './specs');
-const TEST_DIR = path.join(__dirname, `./${argv.target}/test`);
+const SPECS_DIR = path.join(__dirname, '../../specs');
+const TEST_DIR = path.join(__dirname, '../test');
 
 function build(file) {
   let singular = false;
   let files = file;
 
-  if (!Array.isArray(file)) {
+  if (!isArray(file)) {
     singular = true;
     files = [file];
   }
@@ -35,14 +31,7 @@ function copy(files) {
     .then(function (results) {
       return Promise.all(results
         .map(function (result) {
-          result.code = result.code.replace('__SDK__', `kinvey-${argv.target}-sdk`);
-
-          if (argv.runner === 'jest') {
-            // Adjust mocha-style `before`s to jest syntax
-            result.code = result.code.replace(/before\(/g, 'beforeAll(');
-            result.code = result.code.replace(/after\(/g, 'afterAll(');
-          }
-
+          result.code = result.code.replace('__SDK__', 'kinvey-node-sdk');
           return result;
         })
         .map(function (result) {
@@ -57,7 +46,7 @@ fs.remove(TEST_DIR)
     return []
       .concat(glob.sync(path.join(SPECS_DIR, '*.js')))
       .concat(glob.sync(path.join(SPECS_DIR, 'common/**/*.js')))
-      .concat(glob.sync(path.join(SPECS_DIR, `${argv.target}/**/*.js`)));
+      .concat(glob.sync(path.join(SPECS_DIR, 'node/**/*.js')));
   })
   .then((files) => copy(files))
   .catch(function (error) {
