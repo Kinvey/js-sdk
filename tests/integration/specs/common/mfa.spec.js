@@ -36,14 +36,13 @@ describe('MFA', () => {
     appCredentials = Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
   });
 
-  after(() => utilities.deleteUsers(createdUserIds));
+  after(async () => utilities.deleteUsers(createdUserIds));
 
   describe('read', () => {
     let userAuthenticators = [];
     let userRecoveryCodes;
 
-    // setup user and authenticators
-    before(async () => {
+    before('setup user and authenticators', async () => {
       const result = await utilities.setupUserWithMFA(appCredentials, false);
       user = result.createdUser;
       createdUserIds.push(user.data._id);
@@ -53,7 +52,7 @@ describe('MFA', () => {
       userAuthenticators.push(_.pick(oneMoreAuthenticator, ['id', 'name', 'type']));
     });
 
-    after(() => Kinvey.MFA.disable()); // clean authenticators
+    after('clean authenticators', async () => Kinvey.MFA.disable());
 
     it('Kinvey.MFA.Authenticators.list() should return authenticators', async () => {
       expect(await Kinvey.MFA.Authenticators.list()).to.deep.include.members(userAuthenticators);
@@ -79,16 +78,16 @@ describe('MFA', () => {
   });
 
   describe('modify', () => {
-    before(async () => {
+    before('setup user', async () => {
       ({createdUser: user} = await utilities.setupUserWithMFA(appCredentials, false));
       createdUserIds.push(user.data._id);
     });
 
-    after(() => Kinvey.MFA.disable()); // clean authenticators
+    after('clean authenticators', async () => Kinvey.MFA.disable());
 
     describe('create', () => {
       describe('when user has no other authenticators', () => {
-        before(() => Kinvey.MFA.disable());
+        before('clean authenticators', async () => Kinvey.MFA.disable());
 
         it('Kinvey.MFA.Authenticators.create() should return new authenticator and recovery codes', async () => {
           const verify = (authenticator) => {
@@ -153,7 +152,7 @@ describe('MFA', () => {
 
     describe('delete', () => {
       let authenticatorIdToRemove;
-      beforeEach(async () => {
+      beforeEach('setup authenticators', async () => {
         ({ id: authenticatorIdToRemove } = await utilities.createVerifiedAuthenticator());
         await utilities.createVerifiedAuthenticator();
       });
@@ -182,7 +181,7 @@ describe('MFA', () => {
 
     describe('regenerate recovery codes', () => {
       let oldCodes;
-      beforeEach(async () => {
+      beforeEach('setup', async () => {
         await utilities.createVerifiedAuthenticator();
         oldCodes = Kinvey.MFA.listRecoveryCodes();
       });
@@ -202,7 +201,7 @@ describe('MFA', () => {
   });
 
   describe('without an active user', () => {
-    before(() => Kinvey.User.logout()); // ensure no active user
+    before('ensure no active user', async () => Kinvey.User.logout());
 
     [Kinvey.MFA.isEnabled, Kinvey.MFA.disable, Kinvey.MFA.Authenticators.list,Kinvey.MFA.Authenticators.remove, Kinvey.MFA.listRecoveryCodes].forEach((func) => {
       it(`${func.name} should throw`, async () => assertActiveUserError(() => func()));

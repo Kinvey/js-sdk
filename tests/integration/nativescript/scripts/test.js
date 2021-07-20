@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const chalk = require('chalk');
+const isArray = require('lodash/isArray');
 const spawn = require('cross-spawn');
 const del = require('del');
 const fs = require('fs-extra');
@@ -35,7 +36,7 @@ function build(file) {
   let singular = false;
   let files = file;
 
-  if (!Array.isArray(file)) {
+  if (!isArray(file)) {
     singular = true;
     files = [file];
   }

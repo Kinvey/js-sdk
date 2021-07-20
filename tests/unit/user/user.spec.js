@@ -929,8 +929,7 @@ describe('User', () => {
   });
 
   describe('me()', () => {
-    // login a user
-    beforeEach(async () => {
+    beforeEach('login a user', async () => {
       const username = randomString();
       const password = randomString();
       return UserMock.login(username, password, client.appKey)
