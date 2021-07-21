@@ -799,36 +799,18 @@ describe('User', () => {
       return UserMock.logout(client.appKey);
     });
 
-    it('should signup and set the user as the active user', async () => {
-      return UserMock.signup({ username: randomString(), password: randomString() }, {}, client.appKey)
-        .then((user) => {
-          expect(user.isActive()).to.eventually.equal(true);
-          expect(user).toEqual(await getActiveUser());
-        });
-    });
-
-    it('should signup with a user and set the user as the active user', async () => {
-      const user = new UserMock({ username: randomString(), password: randomString() });
-      return UserMock.signup(user, {}, client.appKey)
-        .then((user) => {
-          expect(user.isActive()).to.eventually.equal(true);
-          expect(user).toEqual(await getActiveUser());
-        });
-    });
-
     it('should signup user and not set the user as the active user', async () => {
-      return UserMock.signup({ username: randomString(), password: randomString() }, { state: false }, client.appKey)
+      return UserMock.signup({ username: randomString(), password: randomString() }, {}, client.appKey)
         .then((user) => {
           expect(user.isActive()).to.eventually.equal(false);
           expect(await getActiveUser()).toEqual(null);
         });
     });
 
-    it('should signup an implicit user and set the user as the active user', async () => {
+    it('should signup an implicit user', async () => {
       return UserMock.signup(null, {}, client.appKey)
         .then((user) => {
-          expect(user.isActive()).to.eventually.equal(true);
-          expect(user).toEqual(await getActiveUser());
+          expect(user.isActive()).to.eventually.equal(false);
         });
     });
 
@@ -843,20 +825,10 @@ describe('User', () => {
         });
     });
 
-    it('should throw an error if an active user already exists', () => {
+    it('should not throw an error with an active user', async () => {
       return UserMock.login(randomString(), randomString(), client.appKey)
         .then(() => {
           return UserMock.signup({ username: randomString(), password: randomString() }, {}, client.appKey);
-        })
-        .catch((error) => {
-          expect(error).toBeA(ActiveUserError);
-        });
-    });
-
-    it('should not throw an error with an active user and options.state set to false', async () => {
-      return UserMock.login(randomString(), randomString(), client.appKey)
-        .then(() => {
-          return UserMock.signup({ username: randomString(), password: randomString() }, { state: false }, client.appKey);
         })
         .then((user) => {
           expect(user.isActive()).to.eventually.equal(false);

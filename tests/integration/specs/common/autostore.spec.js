@@ -3,7 +3,7 @@ import times from 'lodash/times';
 import omit from 'lodash/omit';
 import { init, DataStore, DataStoreType, User, Query, Errors } from '__SDK__';
 import { collectionName, deltaCollectionName } from '../config';
-import { randomString, createSampleCollectionData, cleanUpAppData, createDocsOnServer } from '../utils';
+import { randomString, createSampleCollectionData, cleanUpAppData, createDocsOnServer, safelySignUpUser } from '../utils';
 
 const multiSaveErrorMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.';
 const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
@@ -21,7 +21,7 @@ describe('AutoStore', function() {
 
   beforeEach(function() {
     // Signup an anonymous user
-    return User.signup();
+    return safelySignUpUser(randomString(), null, true);
   });
 
   // afterEach(function () {

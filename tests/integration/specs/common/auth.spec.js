@@ -16,7 +16,7 @@ describe('Auth', function() {
     it('should login', async function() {
       const username = randomString();
       const password = randomString();
-      await User.signup({ username, password }, { state: false });
+      await User.signup({ username, password });
       const user = await User.login(username, password);
       expect(user.username).to.equal(username);
       await User.remove(user._id, { hard: true });
@@ -42,11 +42,10 @@ describe('Auth', function() {
   });
 
   describe('signup()', () => {
-    it('should signup and set the user as the active user', async function() {
+    it('should signup', async function() {
       const username = randomString();
       const password = randomString();
       const user = await User.signup({ username, password });
-      expect(await User.getActiveUser()).to.deep.equal(user);
       await User.remove(user._id, { hard: true });
     });
 
@@ -56,21 +55,6 @@ describe('Auth', function() {
       const name = randomString();
       const user = await User.signup({ username, password, name });
       expect(user.data).to.have.property('name', name);
-      await User.remove(user._id, { hard: true });
-    });
-
-    it('should signup and not set the user as the active user if options.state is false', async function() {
-      const username = randomString();
-      const password = randomString();
-      const user = await User.signup({ username, password }, { state: false });
-      expect(await User.getActiveUser()).to.be.null;
-      await User.login(username, password);
-      await User.remove(user._id, { hard: true });
-    });
-
-    it('should signup and not set the user as the active user if options.state is false', async function() {
-      const user = await User.signup();
-      expect(await User.getActiveUser()).to.deep.equal(user);
       await User.remove(user._id, { hard: true });
     });
   });

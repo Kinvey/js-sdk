@@ -45,26 +45,6 @@ const getNotAStringErrorMessage = (parameter) => {
   return `The provided ${parameter} is not a string.`;
 };
 
-const safelySignUpUser = async (username, password, setAsActive, createdUserIds) => {
-  if (setAsActive) {
-    await Kinvey.User.logout();
-  }
-
-  const newUser = await Kinvey.User.signup({
-    username: username,
-    password: password,
-    email: utilities.randomEmailAddress()
-  });
-
-  createdUserIds.push(newUser.data._id);
-
-  if (setAsActive) {
-    await Kinvey.User.login(newUser.data.username, newUser.data.password);
-  }
-
-  return newUser;
-};
-
 before(() => {
   const initProperties = {
     appKey: process.env.APP_KEY,
@@ -113,7 +93,7 @@ describe('User tests', () => {
 
     describe('login()', () => {
       describe('when an active user exists', () => {
-        beforeEach('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+        beforeEach('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
         afterEach('remove active user', async () => Kinvey.User.logout());
 
@@ -290,7 +270,7 @@ describe('User tests', () => {
         });
 
         describe('when an active user already exists', () => {
-          before('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+          before('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithMFA(username, password, () => null, () => null)).to.be.rejectedWith('An active user already exists.');
@@ -395,7 +375,7 @@ describe('User tests', () => {
         });
 
         describe('when an active user already exists', () => {
-          before('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+          before('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithRecoveryCode(username, password, userAuthenticator.recoveryCodes[5]))
@@ -413,7 +393,7 @@ describe('User tests', () => {
 
     before((done) => {
       syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
-      safelySignUpUser(username, password, true, createdUserIds)
+      utilities.safelySignUpUser(username, password, true, createdUserIds)
         .then(() => syncDataStore.save({ field: 'value' }))
         .then(() => done())
         .catch(done);
@@ -453,7 +433,7 @@ describe('User tests', () => {
 
     before('setup data store and user', async () => {
       syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
-      await safelySignUpUser(username, password, true, createdUserIds);
+      await utilities.safelySignUpUser(username, password, true, createdUserIds);
       if (!(await Kinvey.User.getActiveUser())) {
         throw new Error('No active user found.');
       }
@@ -510,7 +490,7 @@ describe('User tests', () => {
     });
 
     describe('when an active user exists', () => {
-      beforeEach('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), false, createdUserIds));
+      beforeEach('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), false, createdUserIds));
 
       afterEach('remove active user', async () => Kinvey.User.logout());
 
@@ -528,7 +508,7 @@ describe('User tests', () => {
     let initialActiveUser;
 
     before(async () => {
-      await safelySignUpUser(utilities.randomString(), null, true, createdUserIds);
+      await utilities.safelySignUpUser(utilities.randomString(), null, true, createdUserIds);
       initialActiveUser = await Kinvey.User.getActiveUser();
       delete initialActiveUser.data.password;
     });
@@ -544,7 +524,7 @@ describe('User tests', () => {
   describe('update()', () => {
     const username = utilities.randomString();
 
-    before(() => safelySignUpUser(username, null, true, createdUserIds));
+    before(() => utilities.safelySignUpUser(username, null, true, createdUserIds));
 
     it('should update the active user', () => {
       const newEmail = `${utilities.randomString()}@example.com`;
@@ -586,7 +566,7 @@ describe('User tests', () => {
     const username = utilities.randomString();
 
     before((done) => {
-      safelySignUpUser(username, null, true, createdUserIds)
+      utilities.safelySignUpUser(username, null, true, createdUserIds)
         .then(() => done())
         .catch(done);
     });
@@ -625,7 +605,7 @@ describe('User tests', () => {
     const username2 = utilities.randomString();
 
     before((done) => {
-      safelySignUpUser(username1, null, false, createdUserIds)
+      utilities.safelySignUpUser(username1, null, false, createdUserIds)
         .then((user) => {
           userToRemoveId1 = user.data._id;
         })
@@ -707,7 +687,7 @@ describe('User tests', () => {
     const username = utilities.randomString();
 
     before((done) => {
-      safelySignUpUser(username, null, true, createdUserIds)
+      utilities.safelySignUpUser(username, null, true, createdUserIds)
         .then(() => done())
         .catch(done);
     });
@@ -736,7 +716,7 @@ describe('User tests', () => {
     let email;
 
     before((done) => {
-      safelySignUpUser(username, null, true, createdUserIds)
+      utilities.safelySignUpUser(username, null, true, createdUserIds)
         .then((user) => {
           email = user.data.email;
           done();
