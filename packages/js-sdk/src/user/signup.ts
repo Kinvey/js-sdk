@@ -6,16 +6,9 @@ import { setSession, formatKinveyBaasUrl, HttpRequestMethod, KinveyHttpRequest, 
 import { getActiveUser } from './getActiveUser';
 import { User } from './user';
 
-export async function signup(data?: object | User, options: { timeout?: number, state?: boolean } = {}) {
-  const activeUser = await getActiveUser();
-  const { state = true } = options;
-
+export async function signup(data?: object | User, options: { timeout?: number } = {}) {
   if (data && !isPlainObject(data)) {
     throw new KinveyError('The provided data must be an object.');
-  }
-
-  if (state === true && activeUser) {
-    throw new ActiveUserError('An active user already exists. Please logout the active user before you signup.');
   }
 
   const request = new KinveyHttpRequest({
@@ -33,10 +26,6 @@ export async function signup(data?: object | User, options: { timeout?: number, 
 
   const response = await request.execute();
   const session = response.data;
-
-  if (state === true) {
-    await setSession(session);
-  }
 
   return new User(session);
 }

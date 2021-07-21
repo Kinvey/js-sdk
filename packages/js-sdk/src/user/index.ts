@@ -93,7 +93,7 @@ export class User extends KinveyUser {
     return restore();
   }
 
-  static signup(data: object | User, options?: { timeout?: number, state?: boolean }) {
+  static signup(data: object | User, options?: { timeout?: number }) {
     return signup(data, options);
   }
 

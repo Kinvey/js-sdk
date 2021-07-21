@@ -10,11 +10,10 @@ utilities.tryRequireBuffer();
 
 var appCredentials;
 const collectionName = config.collectionName;
-const assertUserData = async (user, expectedUsername, shouldReturnPassword) => {
+const assertUserData = async (user, expectedUsername, shouldReturnPassword, shouldBeActive = true) => {
   expect(user.data._id).to.exist;
   expect(user.metadata.authtoken).to.exist;
   expect(user.metadata.lmt).to.exist;
-  expect(user.metadata.llt).to.exist;
   expect(user.metadata.ect).to.exist;
   expect(user._acl.creator).to.exist;
   if (expectedUsername) {
@@ -25,9 +24,19 @@ const assertUserData = async (user, expectedUsername, shouldReturnPassword) => {
   if (shouldReturnPassword) {
     expect(user.data.password).to.exist;
   }
-  expect(user.isActive()).to.eventually.equal(true);
-  expect(user).to.deep.equal(await Kinvey.User.getActiveUser());
+  expect(await user.isActive()).to.equal(shouldBeActive);
+  if (shouldBeActive) {
+    expect(user).to.deep.equal(await Kinvey.User.getActiveUser());
+  }
 };
+
+const assertUserDataOnLogin = (actualUser, expectedUsername) => {
+  expect(actualUser.metadata).to.exist;
+  expect(actualUser.metadata.llt).to.exist;
+  return assertUserData(actualUser, expectedUsername, false, true);
+};
+
+const assertUserDataOnCreate = (actualUser, expectedUsername) => assertUserData(actualUser, expectedUsername, true, false);
 
 const getMissingUsernameErrorMessage = 'A username was not provided.';
 const getMissingEmailErrorMessage = 'An email was not provided.';
@@ -36,19 +45,24 @@ const getNotAStringErrorMessage = (parameter) => {
   return `The provided ${parameter} is not a string.`;
 };
 
-const safelySignUpUser = (username, password, state, createdUserIds) => {
-  return Kinvey.User.logout()
-    .then(() => {
-      return Kinvey.User.signup({
-        username: username,
-        password: password,
-        email: utilities.randomEmailAddress()
-      }, { state: state })
-    })
-    .then((user) => {
-      createdUserIds.push(user.data._id);
-      return user;
-    });
+const safelySignUpUser = async (username, password, setAsActive, createdUserIds) => {
+  if (setAsActive) {
+    await Kinvey.User.logout();
+  }
+
+  const newUser = await Kinvey.User.signup({
+    username: username,
+    password: password,
+    email: utilities.randomEmailAddress()
+  });
+
+  createdUserIds.push(newUser.data._id);
+
+  if (setAsActive) {
+    await Kinvey.User.login(newUser.data.username, newUser.data.password);
+  }
+
+  return newUser;
 };
 
 before(() => {
@@ -98,17 +112,19 @@ describe('User tests', () => {
     });
 
     describe('login()', () => {
-      it('should throw an error if an active user already exists', (done) => {
-        Kinvey.User.signup()
-          .then((user) => {
-            createdUserIds.push(user.data._id);
-            return Kinvey.User.login(utilities.randomString(), utilities.randomString());
-          })
-          .catch((error) => {
-            expect(error.message).to.contain('An active user already exists.');
-            done();
-          })
-          .catch(done);
+      describe('when an active user exists', () => {
+        beforeEach('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+
+        afterEach('remove active user', async () => Kinvey.User.logout());
+
+        it('should throw an error', (done) => {
+          Kinvey.User.login(utilities.randomString(), utilities.randomString())
+            .then(() => done(new Error('Expected to throw')))
+            .catch((error) => {
+              expect(error.message).to.contain('An active user already exists.');
+              done();
+            });
+        });
       });
 
       it('should throw an error if a username is not provided', (done) => {
@@ -165,7 +181,7 @@ describe('User tests', () => {
             return Kinvey.User.logout();
           })
           .then(() => Kinvey.User.login(username, password))
-          .then((user) => assertUserData(user, username));
+          .then((user) => assertUserDataOnLogin(user, username));
       });
     });
 
@@ -193,7 +209,7 @@ describe('User tests', () => {
           const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === userAuthenticator.id).id);
           const mfaComplete = () => { return { code: new totp(userAuthenticator.config.secret).genOTP() }};
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
-          await assertUserData(user, username);
+          await assertUserDataOnLogin(user, username);
           const activeUser = await Kinvey.User.getActiveUser();
           expect(user).to.deep.equal(activeUser);
         });
@@ -215,7 +231,7 @@ describe('User tests', () => {
             return { code: new totp(userAuthenticator.config.secret).genOTP() };
           };
           const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticator, mfaComplete);
-          await assertUserData(user, username);
+          await assertUserDataOnLogin(user, username);
         });
 
         it('should call mfaComplete max 10 times when code is incorrect', async () => {
@@ -274,10 +290,7 @@ describe('User tests', () => {
         });
 
         describe('when an active user already exists', () => {
-          before('setup active user', async () => {
-            const existingActiveUser = await Kinvey.User.signup();
-            createdUserIds.push(existingActiveUser.data._id);
-          });
+          before('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithMFA(username, password, () => null, () => null)).to.be.rejectedWith('An active user already exists.');
@@ -307,7 +320,7 @@ describe('User tests', () => {
               }
             };
             const user = await Kinvey.User.loginWithMFA(gullibleUserName, gullibleUserPassword, selectAuthenticator, mfaComplete);
-            await assertUserData(user, gullibleUserName);
+            await assertUserDataOnLogin(user, gullibleUserName);
             const activeUser = await Kinvey.User.getActiveUser();
             expect(user).to.deep.equal(activeUser);
 
@@ -329,7 +342,7 @@ describe('User tests', () => {
               }
             };
             const firstUser = await Kinvey.User.loginWithMFA(gullibleUserName, gullibleUserPassword, selectAuthenticator, mfaComplete);
-            await assertUserData(firstUser, gullibleUserName);
+            await assertUserDataOnLogin(firstUser, gullibleUserName);
             await Kinvey.User.logout();
 
             // login a completely different user from the first one and expect mfaComplete to be called
@@ -342,7 +355,7 @@ describe('User tests', () => {
               }
             };
             const user = await Kinvey.User.loginWithMFA(username, password, selectAuthenticatorAnotherUser, mfaCompleteAnotherUser);
-            await assertUserData(user, username);
+            await assertUserDataOnLogin(user, username);
             expect(mfaCompleteIsCalled).to.equal(true);
           });
         });
@@ -351,7 +364,7 @@ describe('User tests', () => {
       describe('loginWithRecoveryCode()', () => {
         it('should login a user with correct credentials and code', async () => {
           const user = await Kinvey.User.loginWithRecoveryCode(username, password, userAuthenticator.recoveryCodes[0]);
-          await assertUserData(user, username);
+          await assertUserDataOnLogin(user, username);
           const activeUser = await Kinvey.User.getActiveUser();
           expect(user).to.deep.equal(activeUser);
         });
@@ -382,10 +395,7 @@ describe('User tests', () => {
         });
 
         describe('when an active user already exists', () => {
-          before('setup active user', async () => {
-            const existingActiveUser = await Kinvey.User.signup();
-            createdUserIds.push(existingActiveUser.data._id);
-          });
+          before('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithRecoveryCode(username, password, userAuthenticator.recoveryCodes[5]))
@@ -463,26 +473,14 @@ describe('User tests', () => {
   });
 
   describe('signup', () => {
-    beforeEach((done) => {
-      Kinvey.User.logout()
-        .then(() => done());
-    });
+    before(async () => Kinvey.User.logout());
 
-    it('should signup and set the user as the active user', () => {
+    it('should signup and not set the user as the active user', () => {
       const username = utilities.randomString();
       return Kinvey.User.signup({ username: username, password: utilities.randomString() })
         .then((user) => {
           createdUserIds.push(user.data._id);
-          return assertUserData(user, username, true);
-        });
-    });
-
-    it('should signup with a user and set the user as the active user', () => {
-      const username = utilities.randomString();
-      return Kinvey.User.signup({ username: username, password: utilities.randomString() })
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return assertUserData(user, username, true);
+          return assertUserDataOnCreate(user, username);
         });
     });
 
@@ -497,74 +495,32 @@ describe('User tests', () => {
       return Kinvey.User.signup(data)
         .then(async (user) => {
           createdUserIds.push(user.data._id);
-          await assertUserData(user, data.username, true);
+          await assertUserDataOnCreate(user, data.username);
           expect(user.data.email).to.equal(data.email);
           expect(user.data.additionalField).to.equal(data.additionalField);
         });
     });
 
-    it('should signup user and not set the user as the active user if options.state = false', () => {
-      return Kinvey.User.signup({ username: utilities.randomString(), password: utilities.randomString() }, { state: false })
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          expect(user.isActive()).to.eventually.equal(false);
-        });
-    });
-
-    it('should signup an implicit user and set the user as the active user', () => {
+    it('should signup an implicit user', () => {
       return Kinvey.User.signup()
         .then((user) => {
           createdUserIds.push(user.data._id);
-          return assertUserData(user, null, true);
+          return assertUserDataOnCreate(user, null);
         });
     });
 
-    it.skip('should merge the signup data and set the user as the active user', async () => {
-      const username = utilities.randomString();
-      const password = utilities.randomString();
+    describe('when an active user exists', () => {
+      beforeEach('setup active user', async () => safelySignUpUser(utilities.randomString(), utilities.randomString(), false, createdUserIds));
 
-      const newUser = new Kinvey.User({
-        username: utilities.randomString(),
-        password
+      afterEach('remove active user', async () => Kinvey.User.logout());
+
+      it('should not throw an error and create the user', async () => {
+        return Kinvey.User.signup()
+          .then((user) => {
+            createdUserIds.push(user.data._id);
+            return assertUserDataOnCreate(user);
+          });
       });
-
-      return newUser.signup({ username })
-        .then(async (user) => {
-          createdUserIds.push(user.data._id);
-          expect(user.isActive()).to.eventually.equal(true);
-          expect(user.data.username).to.equal(username);
-          expect(user.data.password).to.equal(password);
-          expect(user).to.deep.equal(await Kinvey.User.getActiveUser());
-        });
-    });
-
-    it('should throw an error if an active user already exists', (done) => {
-      Kinvey.User.signup()
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return Kinvey.User.signup();
-        })
-        .catch((error) => {
-          expect(error.message).to.contain('An active user already exists.');
-          done();
-        })
-        .catch(done);
-    });
-
-    it('should not throw an error with an active user and options.state set to false', async () => {
-      return Kinvey.User.signup()
-        .then((user) => {
-          createdUserIds.push(user.data._id);
-          return Kinvey.User.signup({
-            username: utilities.randomString(),
-            password: utilities.randomString()
-          }, { state: false });
-        })
-        .then(async (user) => {
-          createdUserIds.push(user.data._id);
-          expect(user.isActive()).to.eventually.equal(false);
-          expect(user).to.not.equal(await Kinvey.User.getActiveUser());
-        });
     });
   });
 

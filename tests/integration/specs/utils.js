@@ -379,6 +379,7 @@ export async function setupUserWithMFA(appCredentials, shouldLogoutUser = true) 
   const username = randomString();
   const password = randomString();
   const createdUser = await Kinvey.User.signup({ username: username, password: password });
+  await Kinvey.User.login(createdUser.data.username, createdUser.data.password);
   const userAuthenticator = await createVerifiedAuthenticator();
   if (shouldLogoutUser) {
     await Kinvey.User.logout();
