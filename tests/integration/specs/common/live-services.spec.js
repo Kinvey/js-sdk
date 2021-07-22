@@ -45,8 +45,7 @@ describe('Live-services', function() {
 
   before(() => {
     return utilities.cleanUpAppData(collectionName, createdUserIds)
-      .then(() => Kinvey.User.signup())
-      .then((user) => createdUserIds.push(user.data._id));
+      .then(() => utilities.safelySignUpUser(utilities.randomString(), null, true, createdUserIds));
   });
 
   before(() => {

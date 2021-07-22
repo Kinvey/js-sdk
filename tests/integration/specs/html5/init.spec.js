@@ -26,6 +26,7 @@ const setupOfflineProvider = (offlineProvider) => {
   const init = Kinvey.init({
     appKey: process.env.APP_KEY,
     appSecret: process.env.APP_SECRET,
+    masterSecret: process.env.MASTER_SECRET,
     storage: offlineProvider
   });
   expect(init.storage).to.equal(offlineProvider);
