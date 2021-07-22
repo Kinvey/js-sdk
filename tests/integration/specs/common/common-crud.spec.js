@@ -39,9 +39,8 @@ dataStoreTypes.forEach((currentDataStoreType) => {
 
     before((done) => {
       utilities.cleanUpAppData(collectionName, createdUserIds)
-        .then(() => Kinvey.User.signup())
-        .then((user) => {
-          createdUserIds.push(user.data._id);
+        .then(() => utilities.safelySignUpUser(utilities.randomString(), null, true, createdUserIds))
+        .then(() => {
           // store for setup
           networkStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Network);
           // store to test

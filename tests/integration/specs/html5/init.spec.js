@@ -29,8 +29,7 @@ const setupOfflineProvider = (offlineProvider) => {
     storage: offlineProvider
   });
   expect(init.storage).to.equal(offlineProvider);
-  return Kinvey.User.signup()
-    .then((user) => { createdUserIds.push(user.data._id) })
+  return utilities.safelySignUpUser(utilities.randomString(), null, true, createdUserIds)
     .catch((err) => { Promise.reject(err) });
 }
 
