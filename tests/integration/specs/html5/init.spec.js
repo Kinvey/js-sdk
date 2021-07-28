@@ -26,11 +26,11 @@ const setupOfflineProvider = (offlineProvider) => {
   const init = Kinvey.init({
     appKey: process.env.APP_KEY,
     appSecret: process.env.APP_SECRET,
+    masterSecret: process.env.MASTER_SECRET,
     storage: offlineProvider
   });
   expect(init.storage).to.equal(offlineProvider);
-  return Kinvey.User.signup()
-    .then((user) => { createdUserIds.push(user.data._id) })
+  return utilities.safelySignUpUser(utilities.randomString(), null, true, createdUserIds)
     .catch((err) => { Promise.reject(err) });
 }
 

@@ -74,7 +74,7 @@ export class UserService {
     return User.restore();
   }
 
-  signup(data: object | User, options?: { timeout?: number, state?: boolean }): Promise<User> {
+  signup(data: object | User, options?: { timeout?: number }): Promise<User> {
     return User.signup(data, options);
   }
 

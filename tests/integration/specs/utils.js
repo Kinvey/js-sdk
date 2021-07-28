@@ -379,6 +379,7 @@ export async function setupUserWithMFA(appCredentials, shouldLogoutUser = true) 
   const username = randomString();
   const password = randomString();
   const createdUser = await Kinvey.User.signup({ username: username, password: password });
+  await Kinvey.User.login(createdUser.data.username, createdUser.data.password);
   const userAuthenticator = await createVerifiedAuthenticator();
   if (shouldLogoutUser) {
     await Kinvey.User.logout();
@@ -390,6 +391,28 @@ export async function setupUserWithMFA(appCredentials, shouldLogoutUser = true) 
     createdUser,
     userAuthenticator
   };
+}
+
+export async function safelySignUpUser(username, password, setAsActive, createdUserIds) {
+  if (setAsActive) {
+    await Kinvey.User.logout();
+  }
+
+  const newUser = await Kinvey.User.signup({
+    username: username,
+    password: password,
+    email: randomEmailAddress()
+  });
+
+  if (Array.isArray(createdUserIds)) {
+    createdUserIds.push(newUser.data._id);
+  }
+
+  if (setAsActive) {
+    await Kinvey.User.login(newUser.data.username, newUser.data.password);
+  }
+
+  return newUser;
 }
 
 function buildBaasUrl(path) {
