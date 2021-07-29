@@ -12,7 +12,6 @@ var appCredentials;
 const collectionName = config.collectionName;
 const assertUserData = async (user, expectedUsername, shouldReturnPassword, shouldBeActive = true) => {
   expect(user.data._id).to.exist;
-  expect(user.metadata.authtoken).to.exist;
   expect(user.metadata.lmt).to.exist;
   expect(user.metadata.ect).to.exist;
   expect(user._acl.creator).to.exist;
@@ -27,6 +26,7 @@ const assertUserData = async (user, expectedUsername, shouldReturnPassword, shou
   expect(await user.isActive()).to.equal(shouldBeActive);
   if (shouldBeActive) {
     expect(user).to.deep.equal(await Kinvey.User.getActiveUser());
+    expect(user.metadata.authtoken).to.exist;
   }
 };
 
