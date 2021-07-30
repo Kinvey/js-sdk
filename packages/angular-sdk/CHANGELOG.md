@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.1.1...kinvey-angular-sdk@6.0.0) (2021-07-30)
+
+**Note:** Version bump only for package kinvey-js-sdk
+
+
+
+
+
 ## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.1.0...kinvey-angular-sdk@5.1.1) (2021-04-12)
 
 **Note:** Version bump only for package kinvey-js-sdk
