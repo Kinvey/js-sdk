@@ -32,7 +32,7 @@
     "@nativescript/background-http": "~5.0.0",
     "@nativescript/secure-storage": "~3.0.0",
     "events": "3.0.0",
-    "kinvey-js-sdk": "^5.1.1",
+    "kinvey-js-sdk": "6.0.0",
     "lodash": "4.17.20",
     "nativescript-hook": "0.2.5",
     "nativescript-sqlite": "~2.6.4",
