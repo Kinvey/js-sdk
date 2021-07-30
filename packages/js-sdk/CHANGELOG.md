@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.1...kinvey-js-sdk@6.0.0) (2021-07-30)
+
+- Introduce MFA functionality. [#593](https://github.com/Kinvey/js-sdk/pull/593)
+- Improve the login process. [#592](https://github.com/Kinvey/js-sdk/pull/592)
+- Change the default API version to 6. [#602](https://github.com/Kinvey/js-sdk/pull/602)
+- Implement async SessionStore API. [#598](https://github.com/Kinvey/js-sdk/pull/598)
+- Do not use the authToken in `me()` method. [#596](https://github.com/Kinvey/js-sdk/pull/596)
+- Remove the option to set active user on signup. [#616](https://github.com/Kinvey/js-sdk/pull/616)
+
+
+
+
+
 ## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1) (2021-04-12)
 
 
