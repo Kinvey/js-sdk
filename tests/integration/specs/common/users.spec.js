@@ -171,12 +171,13 @@ describe('User tests', () => {
       let username;
       let password;
 
-      before('setup user with MFA', async () => {
+      // setup user with MFA
+      before(async () => {
         ({ createdUser, userAuthenticator, username, password } = await utilities.setupUserWithMFA(appCredentials, true));
         createdUserIds.push(createdUser.data._id);
       });
 
-      after('cleanup authenticator', async () => utilities.removeAuthenticator(createdUser, userAuthenticator.id));
+      after(async () => utilities.removeAuthenticator(createdUser, userAuthenticator.id));
 
       describe('login()', () => {
         it('should throw an error', async () => {
@@ -270,7 +271,7 @@ describe('User tests', () => {
         });
 
         describe('when an active user already exists', () => {
-          before('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+          before(() => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithMFA(username, password, () => null, () => null)).to.be.rejectedWith('An active user already exists.');
@@ -283,13 +284,14 @@ describe('User tests', () => {
           let gullibleUserAuthenticator;
           let gullibleUser;
 
-          before('setup new user with MFA', async () => {
+          // setup new user with MFA
+          before(async () => {
             ({ createdUser: gullibleUser, userAuthenticator: gullibleUserAuthenticator, username: gullibleUserName, password: gullibleUserPassword } =
               await utilities.setupUserWithMFA(appCredentials, true));
             createdUserIds.push(gullibleUser.data._id);
           });
 
-          after('cleanup authenticator', async () => utilities.removeAuthenticator(gullibleUser, gullibleUserAuthenticator.id));
+          after(async () => utilities.removeAuthenticator(gullibleUser, gullibleUserAuthenticator.id));
 
           it('should not ask the same user for MFA code on second login', async () => {
             const selectAuthenticator = (authenticators) => (authenticators.find((a) => a.id === gullibleUserAuthenticator.id).id);
@@ -375,7 +377,7 @@ describe('User tests', () => {
         });
 
         describe('when an active user already exists', () => {
-          before('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+          before(() => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
           it('should throw an error when an active user already exists', async () => {
             await expect(Kinvey.User.loginWithRecoveryCode(username, password, userAuthenticator.recoveryCodes[5]))
@@ -431,7 +433,8 @@ describe('User tests', () => {
     const username = utilities.randomString();
     const password = utilities.randomString();
 
-    before('setup data store and user', async () => {
+    // setup data store and user
+    before(async () => {
       syncDataStore = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Sync);
       await utilities.safelySignUpUser(username, password, true, createdUserIds);
       if (!(await Kinvey.User.getActiveUser())) {

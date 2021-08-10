@@ -78,7 +78,7 @@ describe('Delta set', () => {
       });
 
       describe('pull', function() {
-        this.retries(4);
+        // this.retries(4);
         const entity1 = utilities.getEntity(utilities.randomString());
         const entity2 = utilities.getEntity(utilities.randomString());
         const entity3 = utilities.getEntity(utilities.randomString());
