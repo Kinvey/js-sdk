@@ -93,9 +93,9 @@ describe('User tests', () => {
 
     describe('login()', () => {
       describe('when an active user exists', () => {
-        beforeEach('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
+        beforeEach(() => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), true, createdUserIds));
 
-        afterEach('remove active user', async () => Kinvey.User.logout());
+        afterEach(() => Kinvey.User.logout());
 
         it('should throw an error', (done) => {
           Kinvey.User.login(utilities.randomString(), utilities.randomString())
@@ -493,9 +493,9 @@ describe('User tests', () => {
     });
 
     describe('when an active user exists', () => {
-      beforeEach('setup active user', async () => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), false, createdUserIds));
+      beforeEach(() => utilities.safelySignUpUser(utilities.randomString(), utilities.randomString(), false, createdUserIds));
 
-      afterEach('remove active user', async () => Kinvey.User.logout());
+      afterEach(() => Kinvey.User.logout());
 
       it('should not throw an error and create the user', async () => {
         return Kinvey.User.signup()
