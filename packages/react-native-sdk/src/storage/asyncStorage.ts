@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const SEPARATOR = ':';
+
 function getKey(dbName: string, tableName: string, id: string) {
-  return `${dbName}.${tableName}.${id}`;
+  return `${dbName}${SEPARATOR}${tableName}${SEPARATOR}${id}`;
 }
 
 async function getTableKeys(dbName: string, tableName: string) {
   const allKeys = await AsyncStorage.getAllKeys();
-  return allKeys.filter(key => key.indexOf(`${dbName}.${tableName}.`) === 0);
+  return allKeys.filter(key => key.indexOf(`${dbName}${SEPARATOR}${tableName}${SEPARATOR}`) === 0);
 }
 
 export async function find(dbName: string, tableName: string) {
@@ -47,7 +49,7 @@ export async function clear(dbName: string, tableName: string) {
 
 export async function clearDatabase(dbName: string, exclude: string[] = []) {
   const allKeys = await AsyncStorage.getAllKeys();
-  const keysToRemove = allKeys.filter(key => key.indexOf(`${dbName}.`) === 0 && !exclude.includes(key));
+  const keysToRemove = allKeys.filter(key => key.indexOf(`${dbName}${SEPARATOR}`) === 0 && !exclude.includes(key));
   await AsyncStorage.multiRemove(keysToRemove);
   return true;
 }
