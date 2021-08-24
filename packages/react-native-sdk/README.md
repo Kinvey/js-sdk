@@ -61,7 +61,3 @@ Make sure your project in Xcode has the Push Notifications capability on.
 ##### For Android
 
 Follow [this guide](https://github.com/zo0r/react-native-push-notification#android-manual-installation) to complete setting up Android.
-
-## Demo App
-
-You can use the [demo app](./demo) as a starting template for your app. You will need to change the `appKey` and `appSecret` in [demo/index.js](./demo/index.js) with your applications credentials.
