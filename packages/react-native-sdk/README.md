@@ -1,5 +1,3 @@
-:warning: **The Kinvey React Native SDK is currently in beta and might contain bugs and/or missing features.** :warning:
-
 # Kinvey React Native SDK
 
 The Kinvey React Native SDK is used to develop an React Native application that connects to Kinvey.
@@ -14,13 +12,21 @@ npm i --save kinvey-react-native-sdk
 
 #### Install Async Storage
 
-You will need to install the peer dependency `@react-native-community/async-storage`.
+You will need to install the peer dependencies `@react-native-async-storage/async-storage`, `react-native-keychain` and `react-native-inappbrowser-reborn`
 
 ```bash
-npm i --save @react-native-community/async-storage
+npm i --save @react-native-async-storage/async-storage
 ```
 
-After installing `async-storage` make sure you install the cocoapods for iOS.
+```bash
+npm i --save react-native-keychain
+```
+
+```bash
+npm i --save react-native-inappbrowser-reborn
+```
+
+After installing them, make sure you install the cocoapods for iOS.
 
 ```bash
 cd ios && pod install && cd ..
@@ -48,7 +54,7 @@ After installing `@react-native-community/push-notification-ios` make sure you i
 cd ios && pod install && cd ..
 ```
 
-Refer to the [this guide](https://github.com/react-native-community/react-native-push-notification-ios#appdelegatem) to update your `AppDelete.m`.
+Refer to the [this guide](https://github.com/react-native-community/react-native-push-notification-ios#appdelegatem) to update your `AppDelegate.m`.
 
 Make sure your project in Xcode has the Push Notifications capability on.
 
@@ -59,8 +65,3 @@ Follow [this guide](https://github.com/zo0r/react-native-push-notification#andro
 ## Demo App
 
 You can use the [demo app](./demo) as a starting template for your app. You will need to change the `appKey` and `appSecret` in [demo/index.js](./demo/index.js) with your applications credentials.
-
-## Not yet implemented
-
-- User credential storage
-- User login with MIC
