@@ -10,7 +10,7 @@ Using npm install the sdk:
 npm i --save kinvey-react-native-sdk
 ```
 
-#### Install Async Storage
+#### Install Peer Dependencies
 
 You will need to install the peer dependencies `@react-native-async-storage/async-storage`, `react-native-keychain` and `react-native-inappbrowser-reborn`
 
