@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@6.0.0...kinvey-react-native-sdk@5.1.1) (2021-08-24)
+
+- User login with MIC, using the in-app browser [#604](https://github.com/Kinvey/js-sdk/pull/604)
+- Secure session store implementation for user credentials [#615](https://github.com/Kinvey/js-sdk/pull/615)
+- Storage performance optimization [#622](https://github.com/Kinvey/js-sdk/pull/622)
+- Integration tests setup [#615](https://github.com/Kinvey/js-sdk/pull/615)
+
+
+
+
+
 ## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-eact-native-sdk@5.1.0...kinvey-eact-native-sdk@5.1.1) (2021-04-12)
 
 **Note:** Version bump only for package kinvey-js-sdk
