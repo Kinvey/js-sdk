@@ -54,10 +54,8 @@ After installing `@react-native-community/push-notification-ios` make sure you i
 cd ios && pod install && cd ..
 ```
 
-Refer to the [this guide](https://github.com/react-native-community/react-native-push-notification-ios#appdelegatem) to update your `AppDelegate.m`.
-
-Make sure your project in Xcode has the Push Notifications capability on.
+Follow [this guide](https://github.com/react-native-community/react-native-push-notification-ios) to add the needed Push Notification capabilities in Xcode and also to update your `AppDelegate.m` and `AppDelegate.h`.
 
 ##### For Android
-
-Follow [this guide](https://github.com/zo0r/react-native-push-notification#android-manual-installation) to complete setting up Android.
+Setup a Firebase project and download the `google-services.json` file in your `android/app` folder as explained [here](https://firebase.google.com/docs/cloud-messaging/android/client).
+Then follow [this guide](https://github.com/zo0r/react-native-push-notification#android-manual-installation) to complete the setup for Android.
