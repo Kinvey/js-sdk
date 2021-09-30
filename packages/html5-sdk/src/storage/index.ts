@@ -13,7 +13,7 @@ export enum StorageProvider {
   WebSQL = 'WebSQL'
 };
 
-export function getStorageAdapter(storageProvider = StorageProvider.WebSQL) {
+export function getStorageAdapter(storageProvider) {
   if (storageProvider === StorageProvider.IndexedDB) {
     return IndexedDB;
   } else if (storageProvider === StorageProvider.LocalStorage) {
@@ -26,5 +26,5 @@ export function getStorageAdapter(storageProvider = StorageProvider.WebSQL) {
     return WebSQL;
   }
 
-  throw new Errors.KinveyError('You must override the default cache store.');
+  throw new Errors.KinveyError(`Please specify cache storage. Allowed values are: ${Object.values(StorageProvider)}`);
 }
