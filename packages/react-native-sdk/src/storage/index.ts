@@ -15,5 +15,5 @@ export function getStorageAdapter(storageProvider = StorageProvider.AsyncStorage
     return AsyncStorage;
   }
 
-  throw new Errors.KinveyError('You must override the default cache store.');
+  throw new Errors.KinveyError(`Please specify 'storage' option. Supported values are: ${Object.values(StorageProvider)}.`);
 }

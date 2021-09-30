@@ -103,7 +103,7 @@ describe('Init tests', () => {
         const init = Kinvey.init({
           appKey: process.env.APP_KEY
         });
-      }).to.throw("Please specify 'storage' option. Allowed values are: IndexedDB,LocalStorage,Memory,SessionStorage,WebSQL.");
+      }).to.throw("Please specify 'storage' option. Supported values are: IndexedDB,LocalStorage,Memory,SessionStorage,WebSQL.");
       done();
     });
 

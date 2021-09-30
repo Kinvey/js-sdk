@@ -10,5 +10,5 @@ export function getStorageAdapter(storageProvider = StorageProvider.SQLite) {
     return SQLite;
   }
 
-  throw new Errors.KinveyError('You must override the default cache store.');
+  throw new Errors.KinveyError(`Please specify 'storage' option. Supported values are: ${Object.values(StorageProvider)}.`);
 }
