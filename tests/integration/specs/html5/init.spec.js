@@ -37,7 +37,7 @@ const setupOfflineProvider = (offlineProvider) => {
 const checkIndexedDB = async () => {
   const collection = Kinvey.DataStore.collection(collectionName, Kinvey.DataStoreType.Cache);
   const insertedItem = await collection.save(testItem);
-  const dbPromise = idb.openDB(process.env.APP_KEY, 4);
+  const dbPromise = idb.openDB(process.env.APP_KEY, 5);
   return dbPromise.then(db => {
     const tx = db.transaction(collectionName)
     const store = tx.objectStore(collectionName);
@@ -81,7 +81,8 @@ describe('Init tests', () => {
     it('should throw error for missing appKey', (done) => {
       expect(() => {
         const init = Kinvey.init({
-          appSecret: process.env.APP_SECRET
+          appSecret: process.env.APP_SECRET,
+          storage: defaultStorage
         });
       }).to.throw('No app key was provided to initialize the Kinvey JavaScript SDK.');
       done();
@@ -90,21 +91,32 @@ describe('Init tests', () => {
     it('should throw error for missing appSecret or masterSecret', (done) => {
       expect(() => {
         const init = Kinvey.init({
-          appKey: process.env.APP_KEY
+          appKey: process.env.APP_KEY,
+          storage: defaultStorage
         });
       }).to.throw('No app secret was provided to initialize the Kinvey JavaScript SDK.');
+      done();
+    });
+
+    it('should throw error for missing storage', (done) => {
+      expect(() => {
+        const init = Kinvey.init({
+          appKey: process.env.APP_KEY
+        });
+      }).to.throw("Please specify 'storage' option. Allowed values are: IndexedDB,LocalStorage,Memory,SessionStorage,WebSQL.");
       done();
     });
 
     it('should initialize the SDK with the default properties', (done) => {
       const init = Kinvey.init({
         appKey: process.env.APP_KEY,
-        appSecret: process.env.APP_SECRET
+        appSecret: process.env.APP_SECRET,
+        storage: defaultStorage
       });
       expect(init.appKey).to.equal(process.env.APP_KEY);
       expect(init.appSecret).to.equal(process.env.APP_SECRET);
       expect(init.defaultTimeout).to.equal(defaultTimeout);
-      //expect(init.storage).to.equal(defaultStorage);
+      expect(init.storage).to.equal(defaultStorage);
       expect(init.apiProtocol).to.equal(defaultApiProtocol);
       expect(init.apiHost).to.equal(defaultApiHost);
       expect(init.apiHostname).to.equal(defaultApiHostname);
@@ -150,7 +162,8 @@ describe('Init tests', () => {
     it('should return kinvey response', (done) => {
       const init = Kinvey.init({
         appKey: process.env.APP_KEY,
-        appSecret: process.env.APP_SECRET
+        appSecret: process.env.APP_SECRET,
+        storage: defaultStorage
       });
       Kinvey.ping()
         .then((res) => {

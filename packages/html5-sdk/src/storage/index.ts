@@ -26,5 +26,5 @@ export function getStorageAdapter(storageProvider) {
     return WebSQL;
   }
 
-  throw new Errors.KinveyError(`Please specify cache storage. Allowed values are: ${Object.values(StorageProvider)}`);
+  throw new Errors.KinveyError(`Please specify 'storage' option. Allowed values are: ${Object.values(StorageProvider)}.`);
 }

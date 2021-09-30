@@ -3,7 +3,7 @@ import times from 'lodash/times';
 import omit from 'lodash/omit';
 import { init, DataStore, DataStoreType, User, Query, Errors } from '__SDK__';
 import { collectionName, deltaCollectionName } from '../config';
-import { randomString, createSampleCollectionData, cleanUpAppData, createDocsOnServer, safelySignUpUser } from '../utils';
+import { randomString, createSampleCollectionData, cleanUpAppData, createDocsOnServer, safelySignUpUser, setOfflineProvider } from '../utils';
 
 const multiSaveErrorMessage = 'Unable to save an array of entities. Use "create" method to insert multiple entities.';
 const multiInsertErrorMessage = 'Unable to create an array of entities. Please create entities one by one or use API version 5 or newer.';
@@ -12,11 +12,12 @@ describe('AutoStore', function() {
   // this.retries(4);
   before(function() {
     // Initialize the SDK
-    return init({
+    const initProperties = {
       appKey: process.env.APP_KEY,
       appSecret: process.env.APP_SECRET,
       masterSecret: process.env.MASTER_SECRET
-    });
+    };
+    return init(setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
   });
 
   beforeEach(function() {
@@ -1188,12 +1189,13 @@ describe('AutoStore', function() {
   describe('with API version 4', function() {
     before(function() {
       // Initialize the SDK
-      return init({
+      const initProperties = {
         appKey: process.env.APP_KEY,
         appSecret: process.env.APP_SECRET,
         masterSecret: process.env.MASTER_SECRET,
         apiVersion: 4
-      });
+      };
+      return init(setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
     });
 
     describe('Save', function() {
@@ -1226,12 +1228,13 @@ describe('AutoStore', function() {
   describe('with API version 5', function() {
     before(function() {
       // Initialize the SDK
-      return init({
+      const initProperties = {
         appKey: process.env.APP_KEY,
         appSecret: process.env.APP_SECRET,
         masterSecret: process.env.MASTER_SECRET,
         apiVersion: 5
-      });
+      };
+      return init(setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
     });
 
     describe('Save', function() {
