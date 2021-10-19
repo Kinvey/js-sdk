@@ -36,7 +36,7 @@
     "lodash": "4.17.20",
     "nativescript-hook": "0.2.5",
     "nativescript-sqlite": "~2.6.4",
-    "nativescript-urlhandler": "~1.3.0",
+    "@bradmartin/nativescript-urlhandler": "~2.0.0",
     "pubnub": "https://github.com/kinvey/pubnub-javascript/tarball/67b7944366453a87226389d483ac1ad861e0e129"
   },
   "peerDependencies": {
