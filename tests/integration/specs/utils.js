@@ -16,6 +16,7 @@ export function setOfflineProvider(initObject, provider) {
     case 'LocalStorage': return Object.assign(initObject, {storage: Kinvey.StorageProvider.LocalStorage});
     case 'SessionStorage': return Object.assign(initObject, {storage: Kinvey.StorageProvider.SessionStorage});
     case 'Memory': return Object.assign(initObject, {storage: Kinvey.StorageProvider.Memory});
+    case 'WebSQL': return Object.assign(initObject, {storage: Kinvey.StorageProvider.WebSQL});
     default: return initObject;
   }
 }

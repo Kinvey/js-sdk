@@ -30,6 +30,7 @@ function updateDotEnv() {
   envLines.push(`AUTH_SERVICE_ID=${process.env.AUTH_SERVICE_ID}`);
   envLines.push(`NO_REFRESH_AUTH_SERVICE_ID=${process.env.NO_REFRESH_AUTH_SERVICE_ID}`);
   envLines.push(`WRONG_AUTH_SERVICE_ID=${process.env.WRONG_AUTH_SERVICE_ID}`);
+  envLines.push(`OFFLINE_STORAGE=${process.env.OFFLINE_STORAGE}`);
   envLines.push('');
 
   fs.writeFileSync(dotenvPath, envLines.join('\n'));

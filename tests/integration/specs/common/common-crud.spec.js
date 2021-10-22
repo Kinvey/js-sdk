@@ -1270,12 +1270,13 @@ dataStoreTypes.forEach((currentDataStoreType) => {
 
   describe('with API version 4', function() {
     before(function() {
-      return Kinvey.init({
+      const initProperties = {
         appKey: process.env.APP_KEY,
         appSecret: process.env.APP_SECRET,
         masterSecret: process.env.MASTER_SECRET,
         apiVersion: 4
-      });
+      };
+      return Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
     });
 
     describe('Save', function() {
