@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [7.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@6.0.0...kinvey-html5-sdk@7.0.0) (2021-10-25)
 
-* Unset WebSQL as default cache storage. [#627](https://github.com/Kinvey/js-sdk/pull/627)
+* Unset WebSQL as a default cache storage, because it is deprecated and some browsers no longer support it. [#627](https://github.com/Kinvey/js-sdk/pull/627)
 
 
 
