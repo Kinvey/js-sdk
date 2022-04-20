@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@6.0.0...kinvey-js-sdk@6.0.1) (2022-04-20)
+
+- Version bump for package kinvey-js-sdk
+
+
 ## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.1...kinvey-js-sdk@6.0.0) (2021-07-30)
 
 - Introduce MFA functionality. [#593](https://github.com/Kinvey/js-sdk/pull/593)
@@ -36,13 +41,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-
-
 ## [5.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.0...kinvey-js-sdk@5.0.1) (2020-07-22)
 
 - Multi Insert validations [#569](https://github.com/Kinvey/js-sdk/pull/569)
-
-
 
 
 
