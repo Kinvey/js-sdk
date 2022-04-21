@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@7.0.0...kinvey-html5-sdk@7.0.1) (2021-10-25)
+
+* Update dependencies to fix known vulnerabilities
+
 ## [7.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@6.0.0...kinvey-html5-sdk@7.0.0) (2021-10-25)
 
 * Unset WebSQL as a default cache storage, because it is deprecated and some browsers no longer support it. [#627](https://github.com/Kinvey/js-sdk/pull/627)
