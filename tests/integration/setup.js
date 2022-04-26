@@ -43,7 +43,7 @@ function createApp() {
     data: {
       name: `JSSDK-${target}-${new Date().getTime()}`,
       organizationId: process.env.TEST_ORG_ID,
-      realtime: { enabled: true }
+      realtime: { enabled: false}
     }
   }).then(({ data }) => {
     const { id, appSecret, masterSecret } = data.environments[0];
