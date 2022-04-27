@@ -1,7 +1,7 @@
 {
   "name": "kinvey-react-native-sdk",
   "description": "Kinvey JavaScript SDK for React Native applications.",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/react-native-sdk",
   "repository": {
@@ -29,10 +29,10 @@
     "test": "jest"
   },
   "dependencies": {
-    "axios": "0.21.1",
-    "kinvey-js-sdk": "6.0.0",
+    "axios": "0.26.1",
+    "kinvey-js-sdk": "6.0.1",
     "lodash": "4.17.21",
-    "pubnub": "4.32.1"
+    "pubnub": "5.0.1"
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "^1.15.4",
