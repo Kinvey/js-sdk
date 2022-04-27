@@ -197,7 +197,7 @@ export class User {
         timeout: options.timeout
       });
       const response = await request.execute();
-      const config = Object.assign({}, { authKey: this.authtoken }, response.data);
+      const config = Object.assign({}, { authKey: this.authtoken, uuid: deviceId }, response.data);
 
       // Subscribe to PubNub
       subscribe(config);
