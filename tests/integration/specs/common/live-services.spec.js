@@ -39,7 +39,7 @@ describe('Live-services', function() {
   before(() => {
     const initProperties = {
       appKey: process.env.LIVE_SERVICE_TESTS_APP_KEY,
-      appSecret: process.env.LIVE_SERVICE_TEST_APP_SECRET,
+      appSecret: process.env.LIVE_SERVICE_TESTS_APP_SECRET,
       masterSecret: process.env.LIVE_SERVICE_TESTS_MASTER_SECRET
     };
     appCredentials = Kinvey.init(utilities.setOfflineProvider(initProperties, process.env.OFFLINE_STORAGE));
