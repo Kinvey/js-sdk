@@ -1,7 +1,7 @@
 {
   "name": "kinvey-node-sdk",
   "description": "Kinvey JavaScript SDK for NodeJS applications.",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/node-sdk",
   "repository": {
@@ -27,11 +27,11 @@
     "postbuild": "node scripts/postbuild.js"
   },
   "dependencies": {
-    "axios": "0.19.0",
+    "axios": "0.26.1",
     "events": "3.0.0",
-    "kinvey-js-sdk": "6.0.0",
-    "lodash": "4.17.15",
-    "pubnub": "4.25.0",
+    "kinvey-js-sdk": "6.0.1",
+    "lodash": "4.17.21",
+    "pubnub": "5.0.1",
     "tslib": "1.10.0"
   },
   "devDependencies": {
