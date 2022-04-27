@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@6.0.0...kinvey-react-native-sdk@6.0.1) (2022-04-27)
+
+* Update dependencies to fix known vulnerabilities
+
 ## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@5.1.1...kinvey-react-native-sdk@6.0.0) (2021-08-24)
 
 - User login with MIC, using the in-app browser [#604](https://github.com/Kinvey/js-sdk/pull/604)
