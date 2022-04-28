@@ -1,7 +1,7 @@
 {
   "name": "kinvey-react-native-sdk",
   "description": "Kinvey JavaScript SDK for React Native applications.",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/react-native-sdk",
   "repository": {
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "axios": "0.26.1",
-    "kinvey-js-sdk": "6.0.1",
+    "kinvey-js-sdk": "6.0.2",
     "lodash": "4.17.21",
     "pubnub": "5.0.1"
   },
