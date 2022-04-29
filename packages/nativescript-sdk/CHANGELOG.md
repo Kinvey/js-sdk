@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [7.0.2](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@7.0.1...kinvey-nativescript-sdk@7.0.2) (2022-04-28)
+
+* Version bump only for package kinvey-js-sdk
+
 # [7.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@7.0.0...kinvey-nativescript-sdk@7.0.1) (2022-04-27)
 
 * Update dependencies to fix known vulnerabilities
