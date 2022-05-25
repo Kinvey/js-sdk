@@ -1,5 +1,5 @@
 container:
-  image: node:latest
+  image: node:14
 
 env:
   ACCOUNT_EMAIL: ENCRYPTED[4ab35d635298b4c70ee3454220d23c1ec49931c557e2dae81cc7f49dad3d388b52345ffd79df8047544b623792b51bd7]
