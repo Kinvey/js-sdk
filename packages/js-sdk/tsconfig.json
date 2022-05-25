@@ -4,6 +4,7 @@
     "esModuleInterop": true,
     "outDir": "lib",
     "sourceMap": true,
+    "skipLibCheck": true,
     "target": "es5"
   },
   "exclude": ["node_modules", "src/**/*.test.ts", "test", "tests"]

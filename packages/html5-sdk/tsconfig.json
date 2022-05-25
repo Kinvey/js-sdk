@@ -11,6 +11,7 @@
     "declaration": true,
     "removeComments": false,
     "noEmitOnError": true,
+    "skipLibCheck": true,
     "noImplicitAny": false,
     "importHelpers": true,
     "lib": [
