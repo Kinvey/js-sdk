@@ -1,7 +1,7 @@
 {
   "name": "kinvey-node-sdk",
   "description": "Kinvey JavaScript SDK for NodeJS applications.",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/node-sdk",
   "repository": {
@@ -29,7 +29,7 @@
   "dependencies": {
     "axios": "0.19.0",
     "events": "3.0.0",
-    "kinvey-js-sdk": "^5.1.1",
+    "kinvey-js-sdk": "5.1.2",
     "lodash": "4.17.15",
     "pubnub": "4.25.0",
     "tslib": "1.10.0"
