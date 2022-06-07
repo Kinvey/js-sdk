@@ -7,7 +7,8 @@ import { logger } from '../log';
 import { HttpHeaders, KinveyHttpHeaders, KinveyHttpAuth } from './headers';
 import { HttpResponse } from './response';
 import { send } from './http';
-import { getSession, setSession } from './session';
+import { getSession, setSession, removeSession } from './session';
+import { DataStoreCache, QueryCache, SyncCache } from '../datastore/cache';
 import { formatKinveyAuthUrl, formatKinveyBaasUrl, KinveyBaasNamespace } from './utils';
 
 const REQUEST_QUEUE = new PQueue();
@@ -207,6 +208,20 @@ export class KinveyHttpRequest extends HttpRequest {
               } catch (error) {
                 logger.error(error.message);
               }
+            }
+          } else {
+            try {
+              // TODO: Unregister from live service
+
+              // Remove the session
+              await removeSession();
+
+              // Clear cache's
+              await QueryCache.clear();
+              await SyncCache.clear();
+              await DataStoreCache.clear();
+            } catch (error) {
+              logger.error(error.message);
             }
           }
         }

@@ -524,6 +524,44 @@ describe('User tests', () => {
     });
   });
 
+  describe('session clearance scenario', () => {
+    let initialActiveUser;
+
+    before(async () => Kinvey.User.logout());
+
+    before('setup for InvalidCredentials', async () => {
+      await utilities.safelySignUpUser(utilities.randomString(), null, true, null);
+      initialActiveUser = await Kinvey.User.getActiveUser();
+      delete initialActiveUser.data.password;
+
+      const url = utilities.buildBaasUrl(`/user/${process.env.APP_KEY}/_logout`);
+      const headers = {
+        Authorization: `Kinvey ${initialActiveUser.authtoken}`
+      };
+      await utilities.makeRequest({ url, headers, method: 'POST' });
+    });
+
+    after(async () => Kinvey.User.logout());
+
+    it('should clear the active user when an InvalidCredentials error occurs', async () => {
+      const actualActiveUser = await Kinvey.User.getActiveUser();
+      expect(actualActiveUser).to.exist;
+      let actualErr;
+      try {
+        // we call the me endpoint for the test but this applies to every authenticated request
+        await Kinvey.User.me();
+      } catch(err) {
+        actualErr = err;
+      }
+
+      expect(actualErr).to.exist;
+      expect(actualErr.name).to.equal('InvalidCredentialsError');
+
+      const actualActiveUserAfterMe = await Kinvey.User.getActiveUser();
+      expect(actualActiveUserAfterMe).to.not.exist;
+    });
+  });
+
   describe('update()', () => {
     const username = utilities.randomString();
 
