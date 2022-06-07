@@ -529,7 +529,7 @@ describe('User tests', () => {
 
     before(async () => Kinvey.User.logout());
 
-    before('setup for InvalidCredentials', async () => {
+    before(async () => {
       await utilities.safelySignUpUser(utilities.randomString(), null, true, null);
       initialActiveUser = await Kinvey.User.getActiveUser();
       delete initialActiveUser.data.password;
