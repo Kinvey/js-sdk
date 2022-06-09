@@ -544,21 +544,10 @@ describe('User tests', () => {
     after(async () => Kinvey.User.logout());
 
     it('should clear the active user when an InvalidCredentials error occurs', async () => {
-      const actualActiveUser = await Kinvey.User.getActiveUser();
-      expect(actualActiveUser).to.exist;
-      let actualErr;
-      try {
-        // we call the me endpoint for the test but this applies to every authenticated request
-        await Kinvey.User.me();
-      } catch(err) {
-        actualErr = err;
-      }
-
-      expect(actualErr).to.exist;
-      expect(actualErr.name).to.equal('InvalidCredentialsError');
-
-      const actualActiveUserAfterMe = await Kinvey.User.getActiveUser();
-      expect(actualActiveUserAfterMe).to.not.exist;
+      expect(Kinvey.User.getActiveUser()).to.eventually.exist;
+      // we call the me endpoint for the test but this applies to every authenticated request
+      await expect(Kinvey.User.me()).to.be.rejectedWith('Invalid credentials. Please retry your request with correct credentials.');
+      expect(Kinvey.User.getActiveUser()).to.eventually.not.exist;
     });
   });
 
