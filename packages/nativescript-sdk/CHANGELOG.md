@@ -27,7 +27,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-# [6.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@6.1.1...kinvey-nativescript-sdk@6.1.2) (2021-05-26)
+# [6.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@6.1.1...kinvey-nativescript-sdk@6.1.2) (2022-05-26)
 
 **Note:** Update package kinvey-js-sdk to fix an issue with sporadic logouts
 
