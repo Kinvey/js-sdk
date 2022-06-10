@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Do not use the authToken in `me()` method. [#596](https://github.com/Kinvey/js-sdk/pull/596)
 - Remove the option to set active user on signup. [#616](https://github.com/Kinvey/js-sdk/pull/616)
 
+## [5.1.2](https://github.com/Kinvey/js-sdk/tree/kinvey-js-sdk@5.1.2) (2022-05-26)
+[Full Changelog](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.1...kinvey-js-sdk@5.1.2)<br/>
+
+#### Bugs
+- Fixed an issue with sporadic logouts
+
 ## [5.1.1](https://github.com/Kinvey/js-sdk/tree/kinvey-js-sdk@5.1.1) (2021-04-12)
 [Full Changelog](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1)<br/>
 

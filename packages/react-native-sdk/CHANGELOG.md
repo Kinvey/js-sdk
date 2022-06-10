@@ -7,9 +7,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * Update package knvey-js-sdk to fix bug when registering for Live service
 
+
+
+
+
 ## [6.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@6.0.0...kinvey-react-native-sdk@6.0.1) (2022-04-27)
 
 * Update dependencies to fix known vulnerabilities
+
+
+
+
 
 ## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@5.1.1...kinvey-react-native-sdk@6.0.0) (2021-08-24)
 
@@ -22,7 +30,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-eact-native-sdk@5.1.0...kinvey-eact-native-sdk@5.1.1) (2021-04-12)
+## [5.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@5.1.1...kinvey-react-native-sdk@5.1.2) (2021-05-26)
+
+**Note:** Update package kinvey-js-sdk to fix an issue with sporadic logouts
+
+
+
+
+
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-react-native-sdk@5.1.0...kinvey-react-native-sdk@5.1.1) (2021-04-12)
 
 **Note:** Version bump only for package kinvey-js-sdk
 

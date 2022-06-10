@@ -7,9 +7,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * Update package knvey-js-sdk to fix bug when registering for Live service
 
+
+
+
+
 ## [7.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@7.0.0...kinvey-html5-sdk@7.0.1) (2022-04-27)
 
 * Update dependencies to fix known vulnerabilities
+
+
+
+
 
 ## [7.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@6.0.0...kinvey-html5-sdk@7.0.0) (2021-10-25)
 
@@ -22,6 +30,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@5.1.1...kinvey-html5-sdk@6.0.0) (2021-07-30)
 
 **Note:** Version bump only for package kinvey-js-sdk
+
+
+
+
+
+## [5.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-html5-sdk@5.1.1...kinvey-html5-sdk@5.1.2) (2021-05-26)
+
+**Note:** Update package kinvey-js-sdk to fix an issue with sporadic logouts
 
 
 
