@@ -34,7 +34,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [5.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.1.1...kinvey-angular-sdk@5.1.2) (2021-05-26)
+## [5.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@5.1.1...kinvey-angular-sdk@5.1.2) (2022-05-26)
 
 **Note:** Update package kinvey-html-sdk to fix an issue with sporadic logouts
 
