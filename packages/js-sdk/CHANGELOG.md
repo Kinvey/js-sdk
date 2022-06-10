@@ -3,12 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+
 ## [6.0.2](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@6.0.1...kinvey-js-sdk@6.0.2) (2022-04-28)
 
 - Version bump for package kinvey-js-sdk
+
+
+
+
+
 ## [6.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@6.0.0...kinvey-js-sdk@6.0.1) (2022-04-20)
 
 - Version bump for package kinvey-js-sdk
+
+
+
 
 
 ## [6.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.1...kinvey-js-sdk@6.0.0) (2021-07-30)
@@ -24,8 +33,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1) (2021-04-12)
+## [5.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.1...kinvey-js-sdk@5.1.2) (2022-05-26)
 
+### Bug Fixes
+
+* Fixed an issue with sporadic logouts
+
+
+
+
+
+## [5.1.1](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.0...kinvey-js-sdk@5.1.1) (2021-04-12)
 
 ### Bug Fixes
 
@@ -37,10 +55,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [5.1.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.0.1...kinvey-js-sdk@5.1.0) (2021-04-08)
 
-
 ### Bug Fixes
 
 * Auto DataStore disregards "skip" and "limit" and fetches up to 10000 items per call. [#581](https://github.com/Kinvey/js-sdk/pull/581)
+
+
 
 
 
@@ -50,13 +69,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-# [5.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@4.2.5...kinvey-js-sdk@5.0.0) (2020-07-10)
 
+
+# [5.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@4.2.5...kinvey-js-sdk@5.0.0) (2020-07-10)
 
 ### Bug Fixes
 
 * llt using wrong field ([b53a666](https://github.com/Kinvey/js-sdk/commit/b53a666))
-
 
 ### Features
 
