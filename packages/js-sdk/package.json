@@ -1,7 +1,7 @@
 {
   "name": "kinvey-js-sdk",
   "description": "Kinvey JavaScript SDK for JavaScript applications.",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "license": "Apache-2.0",
   "keywords": [
     "Kinvey",
