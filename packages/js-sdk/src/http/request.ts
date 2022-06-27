@@ -2,7 +2,7 @@ import isString from 'lodash/isString';
 import PQueue from 'p-queue';
 import { Base64 } from 'js-base64';
 import { InvalidCredentialsError } from '../errors/invalidCredentials';
-import { getAppSecret} from '../kinvey';
+import { getAppSecret, getAppKey } from '../kinvey';
 import { logger } from '../log';
 import { HttpHeaders, KinveyHttpHeaders, KinveyHttpAuth } from './headers';
 import { HttpResponse } from './response';
@@ -186,7 +186,13 @@ export class KinveyHttpRequest extends HttpRequest {
       // Login with the new MIC session
       const loginRequest = new KinveyHttpRequest({
         method: HttpRequestMethod.POST,
-        auth: KinveyHttpAuth.App,
+        headers: new KinveyHttpHeaders({
+          'Content-Type': () => 'application/json',
+          Authorization: () => {
+            const credentials = Base64.encode(`${getAppKey()}:${getAppSecret()}`);
+            return `Basic ${credentials}`;
+          }
+        }),
         url: formatKinveyBaasUrl(KinveyBaasNamespace.User, '/login'),
         body: {
           _socialIdentity: {

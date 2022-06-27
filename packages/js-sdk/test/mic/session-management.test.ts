@@ -1,7 +1,8 @@
 import nock from 'nock';
 import { expect } from 'chai';
+import { Base64 } from 'js-base64';
 
-import * as Kinvey from '../../lib'
+import * as Kinvey from '../../lib';
 import * as httpAdapter from '../http';
 import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
@@ -21,6 +22,8 @@ const invalidGrantResponseBody = {
 };
 
 describe('Session management', () => {
+  let appSecret;
+
   beforeAll(() => {
     this.appKey = getRandomStr('appKey');
     this.collectionName = getRandomStr('collection');
@@ -31,10 +34,11 @@ describe('Session management', () => {
   });
 
   beforeAll(() => {
+    appSecret = getRandomStr('appSecret');
     Kinvey.init({
       kinveyConfig: {
         appKey: this.appKey,
-        appSecret: getRandomStr('appSecret'),
+        appSecret,
         instanceId: this.instanceId
 
       },
@@ -86,13 +90,18 @@ describe('Session management', () => {
     it('should refresh tokens', async () => {
       const successfulDataResponse = [{ _id: getRandomStr('entityId') }];
       const newAuthToken = getRandomStr('newAuthtoken')
+      const appKeyAndSecret = Base64.encode(`${this.appKey}:${appSecret}`);
 
       nock(this.kcsURL)
         .get(getCollectionURI(this.appKey, this.collectionName))
         .times(1)
         .reply(200, successfulDataResponse);
 
-      nock(this.kcsURL)
+      nock(this.kcsURL, {
+        reqheaders: {
+          Authorization: `Basic ${appKeyAndSecret}`
+        },
+      })
         .post(`/user/${this.appKey}/login`)
         .times(1)
         .reply(200, {
