@@ -130,6 +130,10 @@ export class User {
 
     // Merge _socialIdentity
     if (data._socialIdentity) {
+      this.data = await getSession();
+      if (data._socialIdentity.kinveyAuth) {
+        delete data._socialIdentity.kinveyAuth.refresh_token;
+      }
       data._socialIdentity = mergeSocialIdentity(this._socialIdentity, data._socialIdentity);
     }
 
