@@ -8,7 +8,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-* behaviour when refreshing KCS tokens ([a49b215](https://github.com/Kinvey/js-sdk/commit/a49b2151b0730ac0705f2c7a7ae666181935465b))
+* fixed behaviour when refreshing KCS tokens ([a49b215](https://github.com/Kinvey/js-sdk/commit/a49b2151b0730ac0705f2c7a7ae666181935465b))
 * do not save refresh_token returned from _me endpoint ([3201bfa](https://github.com/Kinvey/js-sdk/commit/3201bfae329588f2c59180490defad1a89d7e804))
 
 
