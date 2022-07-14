@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [6.0.3](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@6.0.2...kinvey-js-sdk@6.0.3) (2022-07-14)
+
+
+### Bug Fixes
+
+* behaviour when refreshing KCS tokens ([a49b215](https://github.com/Kinvey/js-sdk/commit/a49b2151b0730ac0705f2c7a7ae666181935465b))
+* do not save refresh_token returned from _me endpoint ([3201bfa](https://github.com/Kinvey/js-sdk/commit/3201bfae329588f2c59180490defad1a89d7e804))
+
+
+
+
+
 
 ## [6.0.2](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@6.0.1...kinvey-js-sdk@6.0.2) (2022-04-28)
 
