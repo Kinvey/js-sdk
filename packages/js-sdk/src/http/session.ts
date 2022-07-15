@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 import { ConfigKey, getConfig } from '../config';
 import { getAppKey } from '../kinvey';
 import { Entity } from '../storage';
@@ -94,4 +95,21 @@ export async function setDeviceToken(username: string, deviceToken: string): Pro
 
 export async function removeDeviceToken(username: string): Promise<boolean> {
   return getStore().remove(getDeviceTokenKey(username));
+}
+
+export async function getKinveyMICSession(): Promise<any> {
+  const session = await getSession();
+  return get(session, '_socialIdentity.kinveyAuth', null);
+}
+
+export async function setKinveyMICSession(newKinveyMICSession): Promise<boolean> {
+  const existingKinveyMICSession = await getKinveyMICSession();
+  if (!existingKinveyMICSession) {
+    return false;
+  }
+
+  const existingSession = await getSession();
+  const mergedMICSession = Object.assign({}, existingSession._socialIdentity.kinveyAuth, newKinveyMICSession);
+  existingSession._socialIdentity.kinveyAuth = mergedMICSession;
+  return setSession(existingSession);
 }

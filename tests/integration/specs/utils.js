@@ -416,7 +416,7 @@ export async function safelySignUpUser(username, password, setAsActive, createdU
   return newUser;
 }
 
-function buildBaasUrl(path) {
+export function buildBaasUrl(path) {
   const instanceId = process.env.INSTANCE_ID;
   const isLocalhost = instanceId && instanceId.includes('localhost');
   let protocol;
@@ -447,7 +447,7 @@ export async function removeAuthenticator(user, authenticatorId) {
   return user.removeAuthenticator(authenticatorId)
 }
 
-async function makeRequest(reqOpts, expectSuccess, requestLib) {
+export async function makeRequest(reqOpts, expectSuccess, requestLib) {
   let response;
 
   if (!requestLib) {
