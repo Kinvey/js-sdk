@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-node-sdk@6.0.3...kinvey-node-sdk@7.0.0) (2022-07-15)
+
+**Note:** Version bump only for package kinvey-node-sdk
+
+
+
+
+
 ## [6.0.3](https://github.com/Kinvey/js-sdk/compare/kinvey-node-sdk@6.0.2...kinvey-node-sdk@6.0.3) (2022-07-14)
 
 **Note:** Version bump only for package kinvey-node-sdk
