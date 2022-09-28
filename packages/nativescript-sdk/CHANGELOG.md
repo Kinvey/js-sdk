@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [8.0.1](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@8.0.0...kinvey-nativescript-sdk@8.0.1) (2022-09-28)
+
+
+### Bug Fixes
+
+* Update nativescript-sqlite to fix the sdk crash for newer versions of iOS. [#643](https://github.com/Kinvey/js-sdk/pull/643)
+* Update minimist to 1.2.6 to address a security issue [#642](https://github.com/Kinvey/js-sdk/pull/642)
+
+
+
+
+
 ## [8.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-nativescript-sdk@7.0.3...kinvey-nativescript-sdk@8.0.0) (2022-07-15)
 
 **Note:** Version bump only for package kinvey-nativescript-sdk
