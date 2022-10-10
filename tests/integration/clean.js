@@ -12,6 +12,21 @@ if (process.env.CIRRUS_BRANCH) {
   target += `-${os.hostname()}`;
 }
 
+
+function deleteEntitiesOneByOne(entityPath, items) {
+  return Promise.all(items.map(item => {
+    return new Promise(resolve => 
+      setTimeout(() =>  {
+        return axios({
+          method: 'DELETE',
+          url: `/${entityPath}/${item.id}`,
+        })
+        .then(resolve)
+        .catch((err) => console.error(err.message));
+      }, 500 * items.indexOf(item)));
+  }));
+}
+
 function getApps() {
   return axios({
     method: 'GET',
@@ -21,17 +36,6 @@ function getApps() {
   }).catch((err) => {
     console.error(err.response.data);
   });
-}
-
-function cleanTestApps(items) {
-  return Promise.all(items.map(item => {
-    return axios({
-      method: 'DELETE',
-      url: `/apps/${item.id}`,
-    }).catch((err) => {
-      console.error(err.response.data);
-    });
-  }));
 }
 
 function getAuthServices() {
@@ -45,17 +49,6 @@ function getAuthServices() {
   });
 }
 
-function cleanAuthServices(items) {
-  return Promise.all(items.map(item => {
-    return axios({
-      method: 'DELETE',
-      url: `/auth-services/${item.id}`,
-    }).catch((err) => {
-      console.error(err.response.data);
-    });
-  }));
-}
-
 function getIdentityStores() {
   return axios({
     method: 'GET',
@@ -67,23 +60,13 @@ function getIdentityStores() {
   });
 }
 
-function cleanIdentityStores(items) {
-  return Promise.all(items.map(item => {
-    return axios({
-      method: 'DELETE',
-      url: `/identity-stores/${item.id}`,
-    }).catch((err) => {
-      console.error(err.response.data);
-    });
-  }));
-}
 
 async.waterfall([
   callbackify(login),
   callbackify(getApps),
-  callbackify(cleanTestApps),
+  callbackify(async.apply(deleteEntitiesOneByOne, 'apps')),
   callbackify(getAuthServices),
-  callbackify(cleanAuthServices),
+  callbackify(async.apply(deleteEntitiesOneByOne, 'auth-services')),
   callbackify(getIdentityStores),
-  callbackify(cleanIdentityStores)
+  callbackify(async.apply(deleteEntitiesOneByOne, 'identity-stores'))
 ]);

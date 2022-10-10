@@ -12,7 +12,7 @@
     "test-android": "npm run pretest && npm run test:android && npm run posttest",
     "test-ios": "npm run pretest && npm run test:ios && npm run posttest",
     "test:android": "cd TestApp && tns test android && cd ... || (npm run posttest && exit 1)",
-    "test:ios": "cd TestApp && tns test ios && cd .. || (npm run posttest && exit 1)",
+    "test:ios": "cd TestApp && tns platform add ios@8.2.2 && npm i nativescript@8.3.3 && node_modules/nativescript/bin/tns test ios && cd .. || (npm run posttest && exit 1)",
     "test:android-with-test-script": "node scripts/test.js && npm run test:android",
     "test:ios-with-test-script": "node scripts/test.js && npm run test:ios",
     "posttest": "node ../clean.js --target=nativescript"
