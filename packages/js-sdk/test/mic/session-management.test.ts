@@ -1,7 +1,8 @@
 import nock from 'nock';
 import { expect } from 'chai';
+import { Base64 } from 'js-base64';
 
-import * as Kinvey from '../../lib'
+import * as Kinvey from '../../lib';
 import * as httpAdapter from '../http';
 import * as memoryStorageAdapter from '../memory';
 import * as sessionStore from '../sessionStore';
@@ -14,7 +15,15 @@ function getCollectionURI(appKey: string, collectionName: string): string {
   return `/appdata/${appKey}/${collectionName}`;
 }
 
+const invalidGrantResponseBody = {
+  debug: 'Invalid grant: refresh token is invalid',
+  error: 'invalid_grant',
+  error_description: 'The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.'
+};
+
 describe('Session management', () => {
+  let appSecret;
+
   beforeAll(() => {
     this.appKey = getRandomStr('appKey');
     this.collectionName = getRandomStr('collection');
@@ -25,10 +34,11 @@ describe('Session management', () => {
   });
 
   beforeAll(() => {
+    appSecret = getRandomStr('appSecret');
     Kinvey.init({
       kinveyConfig: {
         appKey: this.appKey,
-        appSecret: getRandomStr('appSecret'),
+        appSecret,
         instanceId: this.instanceId
 
       },
@@ -40,7 +50,7 @@ describe('Session management', () => {
     });
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     this.session = {
       _kmd: {
         authtoken: getRandomStr('authtoken')
@@ -56,7 +66,7 @@ describe('Session management', () => {
       }
     };
 
-    sessionStore.set(`${this.appKey}.active_user`, JSON.stringify(this.session));
+    await sessionStore.set(`${this.appKey}.active_user`, JSON.stringify(this.session));
     this.store = Kinvey.DataStore.collection(this.collectionName, Kinvey.DataStoreType.Network);
   });
 
@@ -80,13 +90,18 @@ describe('Session management', () => {
     it('should refresh tokens', async () => {
       const successfulDataResponse = [{ _id: getRandomStr('entityId') }];
       const newAuthToken = getRandomStr('newAuthtoken')
+      const appKeyAndSecret = Base64.encode(`${this.appKey}:${appSecret}`);
 
       nock(this.kcsURL)
         .get(getCollectionURI(this.appKey, this.collectionName))
         .times(1)
         .reply(200, successfulDataResponse);
 
-      nock(this.kcsURL)
+      nock(this.kcsURL, {
+        reqheaders: {
+          Authorization: `Basic ${appKeyAndSecret}`
+        },
+      })
         .post(`/user/${this.appKey}/login`)
         .times(1)
         .reply(200, {
@@ -113,7 +128,7 @@ describe('Session management', () => {
       const response = await this.store.find().toPromise();
       expect(response).to.deep.equal(successfulDataResponse);
 
-      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.exist;
 
       const session = JSON.parse(sessionStr);
@@ -122,11 +137,11 @@ describe('Session management', () => {
       expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.refresh_token', this.newRefreshToken)
     });
 
-    it('should reuse refresh token if refresh request fails', async () => {
+    it('should reuse refresh token if refresh request fails with 5xx', async () => {
       nock(this.kasURL)
         .post('/oauth/token')
         .times(1)
-        .reply(400);
+        .reply(500);
 
       try {
         await this.store.find().toPromise();
@@ -135,15 +150,41 @@ describe('Session management', () => {
         expect(err.name).to.equal('InvalidCredentialsError');
       }
 
-      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.exist;
 
       const session = JSON.parse(sessionStr);
-      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.access_token', this.session._socialIdentity.kinveyAuth.access_token)
-      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.refresh_token', this.session._socialIdentity.kinveyAuth.refresh_token)
+      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.access_token', this.session._socialIdentity.kinveyAuth.access_token);
+      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.refresh_token', this.session._socialIdentity.kinveyAuth.refresh_token);
     });
 
-    it('should persist refreshed tokens before making a login request to KCS', async () => {
+    it('should persist refreshed tokens before making a login request to KCS and keep the active user if KCS responds with 5xx', async () => {
+      nock(this.kasURL)
+        .post('/oauth/token')
+        .times(1)
+        .reply(200, { access_token: this.newAccessToken, refresh_token: this.newRefreshToken });
+
+      nock(this.kcsURL)
+        .post(`/user/${this.appKey}/login`)
+        .times(1)
+        .reply(500, { name: 'InternalServerError' });
+
+      try {
+        await this.store.find().toPromise();
+        throw new Error('should not happen');
+      } catch (err) {
+        expect(err.name).to.equal('InvalidCredentialsError');
+      }
+
+      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      expect(sessionStr).to.exist;
+
+      const session = JSON.parse(sessionStr);
+      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.access_token', this.newAccessToken);
+      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.refresh_token', this.newRefreshToken);
+    });
+
+    it('should clear the active user if refresh token is issued but KCS login fails with 4xx', async () => {
       nock(this.kasURL)
         .post('/oauth/token')
         .times(1)
@@ -161,12 +202,51 @@ describe('Session management', () => {
         expect(err.name).to.equal('InvalidCredentialsError');
       }
 
-      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
-      expect(sessionStr).to.exist;
+      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      expect(sessionStr).to.not.exist;
+    });
 
-      const session = JSON.parse(sessionStr);
-      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.access_token', this.newAccessToken)
-      expect(session).to.have.nested.property('_socialIdentity.kinveyAuth.refresh_token', this.newRefreshToken)
+    it('should clear the active user if refresh token request fails with 4xx', async () => {
+      nock(this.kasURL)
+        .post('/oauth/token')
+        .times(1)
+        .reply(400, invalidGrantResponseBody);
+
+      let actualErr;
+
+      try {
+        await this.store.find().toPromise();
+      } catch (err) {
+        actualErr = err;
+      }
+
+      expect(actualErr).to.exist;
+      expect(actualErr.name).to.equal('InvalidCredentialsError');
+
+      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      expect(sessionStr).to.not.exist;
+    });
+
+    it('should not clear the active user if refresh token is issued but KCS login fails with 5xx', async () => {
+      nock(this.kasURL)
+        .post('/oauth/token')
+        .times(1)
+        .reply(200, { access_token: this.newAccessToken, refresh_token: this.newRefreshToken });
+
+      nock(this.kcsURL)
+        .post(`/user/${this.appKey}/login`)
+        .times(1)
+        .reply(500, { name: 'InternalServerError' });
+
+      try {
+        await this.store.find().toPromise();
+        throw new Error('should not happen');
+      } catch (err) {
+        expect(err.name).to.equal('InvalidCredentialsError');
+      }
+
+      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      expect(sessionStr).to.exist;
     });
   });
 });

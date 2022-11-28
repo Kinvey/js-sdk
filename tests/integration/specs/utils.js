@@ -389,3 +389,69 @@ function toBase64(textString) {
     throw new Error("Missing base64 conversion.");
   }
 }
+
+export async function makeRequest(reqOpts, expectSuccess, requestLib) {
+  let response;
+
+  if (!requestLib) {
+    requestLib = axios;
+  }
+
+  try {
+    response = await requestLib(reqOpts);
+  } catch (error) {
+    if (error.response) {
+      response = error.response;
+    }
+
+    throw error;
+  }
+
+  if (!response.status) {
+    response.status = response.statusCode;
+  }
+
+  if (expectSuccess && (response.status < 200 || response.status > 299)) {
+    throw new Error(`Status code is not 2xx (${reqOpts.url}): ${JSON.stringify(response)}`);
+  }
+
+  return response;
+}
+
+export function buildBaasUrl(path) {
+  const instanceId = process.env.INSTANCE_ID;
+  const isLocalhost = instanceId && instanceId.includes('localhost');
+  let protocol;
+  let domain;
+  if (isLocalhost) {
+    protocol = 'http';
+    domain = instanceId;
+  } else {
+    protocol = 'https';
+    domain = instanceId ? `${instanceId}-baas.kinvey.com` : 'baas.kinvey.com';
+  }
+
+  return `${protocol}://${domain}${path}`;
+}
+
+export async function safelySignUpUser(username, password, setAsActive, createdUserIds) {
+  if (setAsActive) {
+    await Kinvey.User.logout();
+  }
+
+  const newUser = await Kinvey.User.signup({
+    username: username,
+    password: password,
+    email: randomEmailAddress()
+  });
+
+  if (Array.isArray(createdUserIds)) {
+    createdUserIds.push(newUser.data._id);
+  }
+
+  if (setAsActive) {
+    await Kinvey.User.login(newUser.data.username, newUser.data.password);
+  }
+
+  return newUser;
+}
