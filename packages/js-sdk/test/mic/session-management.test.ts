@@ -66,7 +66,7 @@ describe('Session management', () => {
       }
     };
 
-    await sessionStore.set(`${this.appKey}.active_user`, JSON.stringify(this.session));
+    sessionStore.set(`${this.appKey}.active_user`, JSON.stringify(this.session));
     this.store = Kinvey.DataStore.collection(this.collectionName, Kinvey.DataStoreType.Network);
   });
 
@@ -128,7 +128,7 @@ describe('Session management', () => {
       const response = await this.store.find().toPromise();
       expect(response).to.deep.equal(successfulDataResponse);
 
-      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.exist;
 
       const session = JSON.parse(sessionStr);
@@ -150,7 +150,7 @@ describe('Session management', () => {
         expect(err.name).to.equal('InvalidCredentialsError');
       }
 
-      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.exist;
 
       const session = JSON.parse(sessionStr);
@@ -176,7 +176,7 @@ describe('Session management', () => {
         expect(err.name).to.equal('InvalidCredentialsError');
       }
 
-      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.exist;
 
       const session = JSON.parse(sessionStr);
@@ -202,7 +202,7 @@ describe('Session management', () => {
         expect(err.name).to.equal('InvalidCredentialsError');
       }
 
-      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.not.exist;
     });
 
@@ -223,7 +223,7 @@ describe('Session management', () => {
       expect(actualErr).to.exist;
       expect(actualErr.name).to.equal('InvalidCredentialsError');
 
-      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.not.exist;
     });
 
@@ -245,7 +245,7 @@ describe('Session management', () => {
         expect(err.name).to.equal('InvalidCredentialsError');
       }
 
-      const sessionStr = await sessionStore.get(`${this.appKey}.active_user`);
+      const sessionStr = sessionStore.get(`${this.appKey}.active_user`);
       expect(sessionStr).to.exist;
     });
   });
