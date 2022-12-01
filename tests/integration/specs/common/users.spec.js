@@ -1,7 +1,10 @@
-import { expect } from 'chai';
+import chai from 'chai';
 import * as Kinvey from '__SDK__';
 import * as config from '../config';
 import * as utilities from '../utils';
+
+const expect = chai.expect;
+chai.use(require('chai-as-promised'));
 
 var appCredentials;
 const collectionName = config.collectionName;
@@ -41,7 +44,10 @@ const safelySignUpUser = (username, password, state, createdUserIds) => {
       }, { state: state })
     })
     .then((user) => {
-      createdUserIds.push(user.data._id);
+      if (Array.isArray(createdUserIds)) {
+        createdUserIds.push(user.data._id);
+      }
+
       return user;
     });
 };
@@ -59,7 +65,7 @@ describe('User tests', () => {
   before(() => {
     utilities.cleanUpCollection(appCredentials, 'user');
   });
-  
+
   const missingCredentialsError = 'Username and/or password missing';
   const createdUserIds = [];
 
@@ -333,6 +339,35 @@ describe('User tests', () => {
           done();
         })
         .catch(done);
+    });
+  });
+
+  describe('session clearance scenario', () => {
+    let initialActiveUser;
+
+    before(async () => Kinvey.User.logout());
+
+    before(async () => {
+      await safelySignUpUser(utilities.randomString(), null, true, null);
+      initialActiveUser = await Kinvey.User.getActiveUser();
+      delete initialActiveUser.data.password;
+
+      const url = utilities.buildBaasUrl(`/user/${process.env.APP_KEY}/_logout`);
+      const headers = {
+        Authorization: `Kinvey ${initialActiveUser.authtoken}`
+      };
+      await utilities.makeRequest({ url, headers, method: 'POST' });
+    });
+
+    after(async () => Kinvey.User.logout());
+
+    it('should clear the active user when an InvalidCredentials error occurs', async () => {
+      const activeUserBeforeError = Kinvey.User.getActiveUser();
+      expect(activeUserBeforeError).to.exist;
+      // we call the me endpoint for the test but this applies to every authenticated request
+      await expect(Kinvey.User.me()).to.be.rejectedWith('Invalid credentials. Please retry your request with correct credentials.');
+      const activeUserAfterError = Kinvey.User.getActiveUser();
+      expect(activeUserAfterError).to.not.exist;
     });
   });
 
