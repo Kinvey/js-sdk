@@ -52,6 +52,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [5.1.5](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.4...kinvey-js-sdk@5.1.5) (2022-12-02)
+
+- Clear the active user and data if no valid token available
+
+
+
+
 
 ## [5.1.2](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@5.1.1...kinvey-js-sdk@5.1.2) (2022-05-26)
 
