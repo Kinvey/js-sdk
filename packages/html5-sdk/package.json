@@ -1,7 +1,7 @@
 {
   "name": "kinvey-html5-sdk",
   "description": "Kinvey JavaScript SDK for HTML5 applications.",
-  "version": "5.1.4",
+  "version": "5.1.5",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/html5-sdk",
   "repository": {
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "axios": "0.19.0",
-    "kinvey-js-sdk": "5.1.4",
+    "kinvey-js-sdk": "5.1.5",
     "lodash": "4.17.19",
     "pubnub": "4.25.0",
     "tslib": "1.10.0"
