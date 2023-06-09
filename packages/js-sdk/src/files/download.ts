@@ -1,4 +1,4 @@
-import isNumber from 'lodash/isNumber';
+import { isNumber } from 'lodash-es';
 import { downloadByUrl } from './downloadByUrl';
 import { KinveyHttpRequest, HttpRequestMethod, KinveyHttpAuth, formatKinveyBaasUrl, KinveyBaasNamespace } from '../http';
 

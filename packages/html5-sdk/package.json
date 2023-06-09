@@ -1,7 +1,7 @@
 {
   "name": "kinvey-html5-sdk",
   "description": "Kinvey JavaScript SDK for HTML5 applications.",
-  "version": "8.0.0",
+  "version": "8.0.0-angular-12-7",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/html5-sdk",
   "repository": {
@@ -30,18 +30,18 @@
   },
   "dependencies": {
     "axios": "0.26.1",
-    "kinvey-js-sdk": "^7.0.0",
-    "lodash": "4.17.21",
+    "kinvey-js-sdk": "file:kinvey-js-sdk-7.0.0-angular-12-5.tgz",
+    "lodash-es": "4.17.21",
     "pubnub": "5.0.1",
-    "tslib": "1.10.0"
+    "tslib": "2.5.3"
   },
   "devDependencies": {
     "@types/events": "^3.0.0",
-    "@types/lodash": "4.14.137",
+    "@types/lodash-es": "4.14.7",
     "clean-webpack-plugin": "~3.0.0",
     "del-cli": "2.0.0",
     "fs-extra": "~8.1.0",
-    "typescript": "~3.5.3",
+    "typescript": "4.2.3",
     "webpack": "~4.39.1",
     "webpack-cli": "^3.3.0"
   },

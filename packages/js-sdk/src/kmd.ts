@@ -1,4 +1,4 @@
-import isPlainObject from 'lodash/isPlainObject';
+import { isPlainObject } from 'lodash-es';
 import { KinveyError } from './errors/kinvey';
 import { Entity } from './storage';
 

@@ -1,4 +1,4 @@
-import get from 'lodash/get';
+import { get } from 'lodash-es';
 import { Query } from '../query';
 import { NetworkError } from '../errors/network';
 import { KinveyError } from '../errors/kinvey';

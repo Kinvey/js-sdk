@@ -12,6 +12,10 @@ before(() => {
 });
 
 describe('Auth', function() {
+  beforeEach('ensure no logged-in user', async function() {
+    await User.logout();
+  });
+
   describe('login()', function() {
     it('should login', async function() {
       const username = randomString();

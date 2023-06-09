@@ -1,4 +1,4 @@
-import get from 'lodash/get';
+import { get } from 'lodash-es';
 import { ConfigKey, getConfig } from '../config';
 import { getAppKey } from '../kinvey';
 import { Entity } from '../storage';

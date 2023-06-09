@@ -1,6 +1,4 @@
-import isFunction from 'lodash/isFunction';
-import isEmpty from 'lodash/isEmpty';
-import isArray from 'lodash/isArray';
+import { isFunction, isEmpty, isArray } from 'lodash-es';
 import { Base64 } from 'js-base64';
 import { KinveyError } from '../errors/kinvey';
 import { getAppKey, getAppSecret, getMasterSecret, getApiVersion } from '../kinvey';

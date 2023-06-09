@@ -59,4 +59,13 @@ async function disable(): Promise<any> {
   return callOnActiveUser('disableMFA');
 }
 
-export { Authenticators, listRecoveryCodes, regenerateRecoveryCodes, isEnabled, disable };
+export {
+  Authenticators,
+  listRecoveryCodes,
+  regenerateRecoveryCodes,
+  isEnabled,
+  disable,
+  CreateMFAAuthenticatorResult,
+  MFAAuthenticator,
+  NewMFAAuthenticator
+};

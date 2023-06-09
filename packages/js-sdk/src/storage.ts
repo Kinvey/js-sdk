@@ -1,5 +1,4 @@
-import isArray from 'lodash/isArray';
-import sum from 'lodash/sum';
+import { isArray, sum } from 'lodash-es';
 import PQueue from 'p-queue';
 import { ConfigKey, getConfig } from './config';
 import { Query } from './query';

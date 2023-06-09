@@ -1,5 +1,4 @@
-import isObjectLike from 'lodash/isObjectLike';
-import isBoolean from 'lodash/isBoolean';
+import { isObjectLike, isBoolean } from 'lodash-es';
 import { KinveyError } from '../errors/kinvey';
 import {
   setSession,

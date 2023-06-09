@@ -1,9 +1,6 @@
-import isEmpty from 'lodash/isEmpty';
-import isPlainObject from 'lodash/isPlainObject';
-import { ActiveUserError } from '../errors/activeUser';
+import { isEmpty, isPlainObject } from 'lodash-es';
 import { KinveyError } from '../errors/kinvey';
-import { setSession, formatKinveyBaasUrl, HttpRequestMethod, KinveyHttpRequest, KinveyBaasNamespace, KinveyHttpAuth } from '../http';
-import { getActiveUser } from './getActiveUser';
+import { formatKinveyBaasUrl, HttpRequestMethod, KinveyHttpRequest, KinveyBaasNamespace, KinveyHttpAuth } from '../http';
 import { User } from './user';
 
 export async function signup(data?: object | User, options: { timeout?: number } = {}) {

@@ -1,4 +1,4 @@
-import isNumber = require('lodash/isNumber');
+import { isNumber } from 'lodash-es';
 import { getConfig, ConfigKey } from './config';
 
 export interface KinveyConfig {

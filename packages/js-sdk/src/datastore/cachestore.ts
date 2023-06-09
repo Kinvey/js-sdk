@@ -1,5 +1,4 @@
-import isArray from 'lodash/isArray';
-import times from 'lodash/times';
+import { isArray, times } from 'lodash-es';
 import { Observable } from 'rxjs';
 import { Query } from '../query';
 import { KinveyError } from '../errors/kinvey';

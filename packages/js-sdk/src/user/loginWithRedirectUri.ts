@@ -1,4 +1,4 @@
-import isString from 'lodash/isString';
+import { isString } from 'lodash-es';
 import { ActiveUserError } from '../errors/activeUser';
 import { NotFoundError } from '../errors/notFound';
 import { KinveyError } from '../errors/kinvey';

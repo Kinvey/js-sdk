@@ -1,6 +1,6 @@
 import { format } from 'url';
 import urlJoin from 'url-join';
-import isPlainObject from 'lodash/isPlainObject';
+import { isPlainObject } from 'lodash-es';
 import { getBaasProtocol, getBaasHost, getAuthProtocol, getAuthHost, getAppKey } from '../kinvey'
 
 function clean(value: { [key: string]: any }) {

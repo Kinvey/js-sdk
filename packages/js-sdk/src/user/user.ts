@@ -1,4 +1,4 @@
-import isArray from 'lodash/isArray';
+import { isArray } from 'lodash-es';
 import { Acl } from '../acl';
 import { Kmd } from '../kmd';
 import { getDeviceId } from '../device';

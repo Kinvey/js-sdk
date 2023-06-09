@@ -1,4 +1,4 @@
-import isString from 'lodash/isString';
+import { isString } from 'lodash-es';
 import PQueue from 'p-queue';
 import { Base64 } from 'js-base64';
 import { InvalidCredentialsError } from '../errors/invalidCredentials';

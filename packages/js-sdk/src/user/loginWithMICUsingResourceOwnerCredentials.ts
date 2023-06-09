@@ -1,4 +1,4 @@
-import isString from 'lodash/isString';
+import { isString } from 'lodash-es';
 import { ActiveUserError } from '../errors/activeUser';
 import { NotFoundError } from '../errors/notFound';
 import { KinveyError } from '../errors/kinvey';
@@ -7,7 +7,7 @@ import { login } from './login';
 import { getTokenWithUsernamePassword, GetTokenWithUsernamePasswordOptions } from './mic';
 import { signup } from './signup';
 import { getActiveUser } from './getActiveUser';
-import {loginWithSocialIdentity} from "./loginWithSocialIdentity";
+import { loginWithSocialIdentity } from "./loginWithSocialIdentity";
 
 export interface MICOptions extends GetTokenWithUsernamePasswordOptions {
   micId?: string;

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { NetworkError } from 'kinvey-js-sdk/lib/errors/network';
 import { TimeoutError } from 'kinvey-js-sdk/lib/errors/timeout';
-import { name, version } from '../package.json';
+import packageInfo from '../package.json';
 
 // Helper function to detect the browser name and version.
 function browserDetect(ua: string) {
@@ -26,7 +26,7 @@ function deviceInformation() {
   const manufacturer = window.navigator.platform;
 
   // Return the device information string.
-  const parts = [`js-${name}/${version}`];
+  const parts = [`js-${packageInfo.name}/${packageInfo.version}`];
 
   return parts.concat([platform, browserVersion, manufacturer]).map((part) => {
     if (part) {
@@ -43,8 +43,8 @@ export function deviceInfo() {
     os: window.navigator.appVersion,
     ov: window.navigator.appVersion,
     sdk: {
-      name,
-      version
+      name: packageInfo.name,
+      version: packageInfo.version
     },
     pv: window.navigator.userAgent
   };
