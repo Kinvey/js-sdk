@@ -1,7 +1,7 @@
 {
   "name": "kinvey-html5-sdk",
   "description": "Kinvey JavaScript SDK for HTML5 applications.",
-  "version": "8.0.0-angular-12-7",
+  "version": "9.0.0-angular-12",
   "license": "Apache-2.0",
   "homepage": "https://github.com/Kinvey/js-sdk/tree/master/packages/html5-sdk",
   "repository": {
