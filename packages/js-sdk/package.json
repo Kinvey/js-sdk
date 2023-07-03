@@ -29,6 +29,7 @@
     "url-join": "4.0.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "7.22.5",
     "@types/events": "3.0.0",
     "@types/jest": "24.0.18",
     "@types/js-base64": "2.3.1",
