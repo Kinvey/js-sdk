@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [9.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@8.0.0...kinvey-angular-sdk@9.0.0) (2023-07-25)
+
+* Node.js 12 or newer is required now [#650](https://github.com/Kinvey/js-sdk/pull/650)
+* The package becomes an ES6 module [#650](https://github.com/Kinvey/js-sdk/pull/650)
+* Updated `tslib` [#650](https://github.com/Kinvey/js-sdk/pull/650)
+
+
+
+
+
 ## [8.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-angular-sdk@7.0.3...kinvey-angular-sdk@8.0.0) (2022-07-15)
 
 **Note:** Version bump only for package kinvey-angular-sdk
