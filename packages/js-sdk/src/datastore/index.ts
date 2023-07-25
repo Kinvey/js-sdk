@@ -1,4 +1,4 @@
-import isString from 'lodash/isString';
+import { isString } from 'lodash-es';
 import { KinveyError } from '../errors/kinvey';
 import { logger } from '../log';
 import { isValidTag } from './cache';

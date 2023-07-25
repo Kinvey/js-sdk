@@ -1,11 +1,4 @@
-import isNumber from 'lodash/isNumber';
-import isString from 'lodash/isString';
-import isPlainObject from 'lodash/isPlainObject';
-import isObject from 'lodash/isObject';
-import isEmpty from 'lodash/isEmpty';
-import isArray from 'lodash/isArray';
-import cloneDeep from 'lodash/cloneDeep';
-import pick from 'lodash/pick';
+import { isString, isNumber, isPlainObject, isObject, isEmpty, isArray, cloneDeep, pick } from 'lodash-es';
 import sift from 'sift';
 import { QueryError } from './errors/query';
 

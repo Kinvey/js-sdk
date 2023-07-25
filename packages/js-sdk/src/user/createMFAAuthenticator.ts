@@ -1,5 +1,4 @@
-import pick from 'lodash/pick';
-import defaults from 'lodash/defaults';
+import { pick, defaults } from 'lodash-es';
 
 import { KinveyError } from '../errors';
 import {

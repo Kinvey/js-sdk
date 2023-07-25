@@ -1,5 +1,4 @@
-import isString from 'lodash/isString';
-import sum from 'lodash/sum';
+import { isString, sum } from 'lodash-es';
 import { Errors } from 'kinvey-js-sdk';
 
 const MASTER_TABLE_NAME = 'sqlite_master';
@@ -15,7 +14,7 @@ function execute(dbName: string, tableName: string, sqlQueries: any, write = fal
       const writeTxn = write || typeof db.readTransaction !== 'function';
 
       db[writeTxn ? 'transaction' : 'readTransaction']((tx: any) => {
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           if (write && !isMaster) {
             tx.executeSql(`CREATE TABLE IF NOT EXISTS ${escapedTableName} (key BLOB PRIMARY KEY NOT NULL, value BLOB NOT NULL)`, [], () => {
               resolve();

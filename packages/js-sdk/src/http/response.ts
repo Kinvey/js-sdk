@@ -1,4 +1,4 @@
-import isString from 'lodash/isString';
+import { isString, isPlainObject } from 'lodash-es';
 import { APIVersionNotAvailableError } from '../errors/apiVersionNotAvailable';
 import { APIVersionNotImplementedError } from '../errors/apiVersionNotImplemented';
 import { AppProblemError } from '../errors/appProblem';
@@ -29,7 +29,6 @@ import { StaleRequestError } from '../errors/staleRequest';
 import { UserAlreadyExistsError } from '../errors/userAlreadyExists';
 import { WritesToCollectionDisallowedError } from '../errors/writesToCollectionDisallowed';
 import { HttpHeaders } from './headers';
-import isPlainObject = require('lodash/isPlainObject');
 
 export enum HttpStatusCode {
   Ok = 200,

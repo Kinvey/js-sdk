@@ -1,4 +1,4 @@
-import isFunction from 'lodash/isFunction';
+import { isFunction } from 'lodash-es';
 import { EventEmitter } from 'events';
 import { getConfig, ConfigKey } from './config';
 import { KinveyError } from './errors';

@@ -1,4 +1,4 @@
-import trim from 'lodash/trim';
+import { trim } from 'lodash-es';
 import { KinveyError } from '../errors/kinvey';
 import { setSession } from '../http';
 import { User } from './user';

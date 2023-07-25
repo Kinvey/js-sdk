@@ -8,7 +8,7 @@ import { UserService } from './user.service';
 
 @NgModule()
 export class KinveyModule {
-  static init(config: any): ModuleWithProviders {
+  static init(config: any): ModuleWithProviders<KinveyModule> {
     return {
       ngModule: KinveyModule,
       providers: [
@@ -22,3 +22,4 @@ export class KinveyModule {
     };
   }
 }
+

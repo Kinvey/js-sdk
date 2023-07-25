@@ -1,5 +1,4 @@
-import isString from 'lodash/isString';
-import isEmpty from 'lodash/isEmpty';
+import { isString } from 'lodash-es';
 import { Storage, Entity } from '../storage';
 import { Query } from '../query';
 import { getAppKey } from '../kinvey';

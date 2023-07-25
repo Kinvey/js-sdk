@@ -1,5 +1,4 @@
-import isArray from 'lodash/isArray';
-import cloneDeep from 'lodash/cloneDeep';
+import { isArray, cloneDeep } from 'lodash-es';
 import { Observable } from 'rxjs';
 import { getDeviceId } from '../device';
 import { Aggregation } from '../aggregation';

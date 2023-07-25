@@ -1,7 +1,4 @@
-import has from 'lodash/has';
-import isString from 'lodash/isString';
-import isPlainObject from 'lodash/isPlainObject';
-import unset from 'lodash/unset';
+import { has, unset } from 'lodash-es';
 import { ActiveUserError } from '../errors/activeUser';
 import { KinveyError } from '../errors/kinvey';
 import { setSession, formatKinveyBaasUrl, HttpRequestMethod, KinveyHttpRequest, KinveyBaasNamespace, KinveyHttpAuth } from '../http';
