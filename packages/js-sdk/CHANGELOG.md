@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [8.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@7.0.0...kinvey-js-sdk@8.0.0) (2023-07-25)
+
+- Node.js 12 or newer is required now [#650](https://github.com/Kinvey/js-sdk/pull/650)
+- The package becomes an ES6 module [#650](https://github.com/Kinvey/js-sdk/pull/650)
+- Updated `lodash` to `lodash-es` [#650](https://github.com/Kinvey/js-sdk/pull/650)
+- Updated `rxjs` and `p-queue` [#650](https://github.com/Kinvey/js-sdk/pull/650)
+
+
+
+
+
 ## [7.0.0](https://github.com/Kinvey/js-sdk/compare/kinvey-js-sdk@6.0.3...kinvey-js-sdk@7.0.0) (2022-07-15)
 
 - Clear session on InvalidCredentials error or MIC token refresh failure. [#638](https://github.com/Kinvey/js-sdk/pull/638)
